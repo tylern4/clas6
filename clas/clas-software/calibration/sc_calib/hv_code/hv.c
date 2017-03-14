@@ -19,7 +19,7 @@ FROM ANALYSED AND FITTED COSMIC RAY DATA
 #include <clas_cern.h>
 #include <kinematics.h>
 #include <map_manager.h>
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include <utility.h>
 #include <particleType.h>
 #include <printBOS.h> 

@@ -26,7 +26,7 @@ int maxRunSource=0;
 int verbosity=1;  /* print all the stuff by default */
 
 /* define dbase stuff */
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include "calib_envir.h"
 MYSQL *mysql;
 char *host=NULL;

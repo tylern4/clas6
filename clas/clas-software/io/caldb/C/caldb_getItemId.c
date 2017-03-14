@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include "calib_connect.h"
 int caldb_getItemId(MYSQL *conn, char *systemname,char *subsystemname,char *itemname,
 int *length,char **type, char **itemid) {

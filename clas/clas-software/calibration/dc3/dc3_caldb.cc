@@ -3,7 +3,7 @@
 #include "dc3.h"
 
 #include <map_manager.h>
-#include <mysql/mysql.h>
+#include <mysql.h>
 extern "C" {
 #include <calib_connect.h> // for caldb
 #undef CALDB_HOST

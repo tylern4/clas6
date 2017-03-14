@@ -1,5 +1,5 @@
 
-#include <mysql/mysql.h>
+#include <mysql.h>
 
 #include "trk_mon_lite.h"
 

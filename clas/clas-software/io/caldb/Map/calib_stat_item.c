@@ -7,7 +7,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
-#include "mysql/mysql.h"
+#include "mysql.h"
 #include "calib_manager.h"
 
 MYSQL mysql;

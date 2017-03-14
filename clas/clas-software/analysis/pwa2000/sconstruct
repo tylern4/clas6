@@ -6,9 +6,12 @@ from build_system import environment
 gampenv = environment.env(deps='clas6')
 gampenv.load_dependency({'clas6':['clasEvent_libs', 'default_libs']})
 
-gampenv.program(source="gamp.cc keyfile.cc keyParse.cc wave.cc keyScan.cc".split())
+gampenv.program(target="gamp",source="gamp.cc keyfile.cc keyParse.cc wave.cc keyScan.cc".split())
+
+gampenv.program(target="hgamp",source="gamp.cc keyfile.cc keyParse.cc waveH.cc keyScan.cc".split())
 
 gampenv.program(source="int.cc integral.cc".split())
+
 gampenv.program(source="vamp.cc".split())
 gampenv.program(source="logview.cc fitlog.cc integral.cc symbol.cc code.cc parseutils.cc init.cc math.cc fitparse.cc lex.cc".split())
 

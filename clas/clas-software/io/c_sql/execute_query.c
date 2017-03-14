@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/types.h>
-#include <mysql/mysql.h>
+#include <mysql.h>
 
 MYSQL_RES  *execute_query(const char *query_str)
 {

@@ -158,7 +158,7 @@ c
 c     alternate HBID - hit based id do seb or this
 c 
       IF (LHBID_DO) THEN
-         call bdrop(iw,'HBIDTBIDPARTMVRTVERTCC01')
+         call bdrop(iw,'HBIDTBIDMVRTVERTCC01')
          call make_CC01_banks()
          call make_hbid_bank()
          if(lpid_make_trks)then

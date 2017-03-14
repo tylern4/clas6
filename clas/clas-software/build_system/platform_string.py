@@ -41,7 +41,7 @@ def msvc_version():
     return ''
 
 def platform_string(env):
-    python_version = string.split(string.split(sys.version)[0].replace('+',"") , '.')
+    python_version = string.split(string.split(sys.version)[0], '.')
     if map(int, python_version) < [2, 3, 0]:
         system = os.uname()[0].lower()
         release = str('').join( \

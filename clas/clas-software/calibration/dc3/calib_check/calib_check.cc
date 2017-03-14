@@ -6,7 +6,7 @@ int ConnectToDatabase(int disconnect_after_check);
 #include <iostream>
 using namespace std;
 
-#include <mysql/mysql.h>
+#include <mysql.h>
 //#include <calib_manager.h>
 //#include <calib_envir.h>
 extern "C" {

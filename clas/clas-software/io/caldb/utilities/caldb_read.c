@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 /* define dbase stuff */
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include "calib_envir.h"
 MYSQL *mysql;
 char *host=NULL;

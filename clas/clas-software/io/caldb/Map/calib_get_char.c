@@ -8,7 +8,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
-#include "mysql/mysql.h"
+#include "mysql.h"
 #include "calib_manager.h"
 #include "calib_manager_tcl.h"
 

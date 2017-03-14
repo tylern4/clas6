@@ -9,7 +9,7 @@
 // %%%%%%%%%%%%
 extern "C"
 {
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include <map_manager.h>
 #include <calib_manager.h>
 #include <map_manager.h>

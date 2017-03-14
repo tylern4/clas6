@@ -30,7 +30,7 @@ extern "C"
 #include <ec.h>
 #include <vertex.h>
 #include <itape.h>
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include <makebanks.h>
 }
 

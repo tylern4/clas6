@@ -23,7 +23,7 @@ extern "C"
 {
 #include <ntypes.h>
 #include <bostypes.h>
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include <map_manager.h>
 }
 

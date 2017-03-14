@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include "calib_connect.h"
 MYSQL *mysql;
 char *host=NULL;

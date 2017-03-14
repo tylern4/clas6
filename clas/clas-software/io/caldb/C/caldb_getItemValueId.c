@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include "calib_connect.h"
 int caldb_getItemValueId(MYSQL *conn, char *tablename, itemvalue *itemvalueid ,commentstruc *runcomm) {
 	MYSQL_ROW rows_in_query;

@@ -15,7 +15,7 @@
 #ifndef __CSQLINCLUDE__
 #define __CSQLINCLUDE__
 
-#include "mysql/mysql.h"
+#include "mysql.h"
 
 #define MAX_GROUPS   20
 #define MAX_COLUMNS  400

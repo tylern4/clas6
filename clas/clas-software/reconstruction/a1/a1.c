@@ -36,7 +36,7 @@ USE(crcsid);   /* make sure it is not optimized away */
 #include <unistd.h>
 #include <pid.h>
 
-#include <mysql/mysql.h>
+#include <mysql.h>
 
 typedef struct {
   int nsyst;
