@@ -1,0 +1,35 @@
+macro utilGetSliceStats id slice num sigwin
+
+  global/cre cen 
+  global/cre rms 
+  global/cre cnt
+  
+  hi/copy [id].sli[slice].[num] 10000
+  
+  rmean = $hinfo(10000,'mean')
+  cnt   = $hinfo(10000,'sum')
+  sig   = $eval(2*$hinfo(10000,'rms'))
+  
+  converge = 100
+  
+  while [converge]>0.05 do 
+    xlo = $eval(int([rmean]-[sig]))
+    xhi = $eval(int([rmean]+[sig]))
+  
+    hi/copy 10000([xlo].:[xhi].) 10001
+  
+    cen = $hinfo(10001,'mean')
+    rms = $hinfo(10001,'rms')
+    
+    converge = $eval(abs([cen]-[rmean])/[rmean])
+    rmean = [cen]
+    hi/del 10001   
+  endwhile 
+   
+*  message utilGetSliceStats: [id].[slice].[num] = [cen] +- [rms]
+    
+  hi/del 10000
+  
+return
+
+  

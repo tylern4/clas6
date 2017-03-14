@@ -1,0 +1,45 @@
+
+zon 1 3
+opt logz
+hi/pl 210 colz
+opt linz
+hi/pl 710 colz
+hi/pl 310 colz
+
+wait 'sector 2 next' 0
+opt logz
+hi/pl 220 colz
+opt linz
+hi/pl 720 colz
+hi/pl 320 colz
+
+wait 'sector 3 next' 0
+opt logz
+hi/pl 230 colz
+opt linz
+hi/pl 730 colz
+hi/pl 330 colz
+
+wait 'sector 4 next' 0
+opt logz
+hi/pl 240 colz
+opt linz
+hi/pl 740 colz
+hi/pl 340 colz
+
+wait 'sector 5 next' 0
+opt logz
+hi/pl 250 colz
+opt linz
+hi/pl 750 colz
+hi/pl 350 colz
+
+wait 'sector 6 next' 0
+opt logz
+hi/pl 260 colz
+opt linz
+hi/pl 760 colz
+hi/pl 360 colz
+
+
+   

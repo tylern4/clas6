@@ -1,0 +1,8 @@
+from build_system import environment
+
+maputilsEnv = environment.env(deps=['root', 'mysql'])
+maputilsEnv.load_dependency(['root', 'mysql'])
+
+maputil_lib = maputilsEnv.library('MapUtils')
+
+

@@ -1,0 +1,14 @@
+junk.dat		/ output filename
+200000                  / max calls (approx) before ending
+100000.                 / tolerance on minimization 0.001*this(10)*UP
+1.0                     / UP on function value for parameter error definition
+37		        / Number of fit parameters
+5			/ 1,2,3(pi0,pi+,both)+4,8,12(sig,ltp,both)
+1.515		 	/ incident electron energy
+1.22,1.24,0.01		/ W -> min, max, step  
+0.0,0.0,0.5		/ Q2->min,max,step
+-1.1,1.1,0.2		/ cos(th*) -> min, max, step
+0.0,0.0,0.0		/ phi* -> min, max, step
+par.out			/ parameter output filename
+2,c1_1.dat		/ Datatype, data filename
+200000.			/ Max Chi2 for acceptable first iteration

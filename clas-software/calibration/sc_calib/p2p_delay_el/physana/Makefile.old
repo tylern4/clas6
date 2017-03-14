@@ -1,0 +1,234 @@
+#
+#
+#
+OBJDIR   = $(PHY_DIR)/obj/$(OSNAME)/
+LIBDIR   = $(PHY_DIR)/lib/$(OSNAME)/
+EXEDIR   = $(PHY_DIR)/bin/$(OSNAME)/
+#==========================================
+#============ Packages ====================
+ADPACK      = ../procid/
+PACKINCLUDE = -I../pinclude 
+#
+#======== Compilers =====
+CPP_SunOS = CC -g
+CPP_AIX   = xlC  
+### CPP_AIX   = f77  -bnoquiet 
+###
+###
+###
+CPP_HP-UX = CC +a1
+CPP_Linux = g++ 
+CPP:= $(CPP_$(OSNAME))
+###
+###
+###
+F77_SunOS = f77
+F77_AIX   = f77 
+F77_HP-UX = fort77
+F77_Linux = g77 -v
+F77 = $(F77_$(OSNAME))
+
+CC_SunOS  = cc
+CC_HP-UX  = cc
+CC_Linux  = gcc 
+CC = $(CC_$(OSNAME))
+# ===========================
+#  Fortran Compiler Flags ===
+FPLAT_FLAGS_SunOS = -O2 -e -DSunOS
+FPLAT_FLAGS_HP-UX = -O2 -cpp +es +ppu -K -DHPUX
+FPLAT_FLAGS_Linux = -DLinux -m486 -fno-automatic -finit-local-zero \
+                    -ffixed-line-length-none -fno-second-underscore
+
+
+FPLAT_FLAGS = $(FPLAT_FLAGS_$(OSNAME))
+#
+#
+#ROOTLIBS_SunOS =  -L$(ROOTSYS)/lib  -lNew -lBase -lCint -lClib -lCont \
+#				 -lFunc -lGraf -lGraf3d -lHist -lHtml -lMatrix \
+#				-lMeta -lMinuit -lNet -lPostscript -lProof -lTree \
+#                                 -lUnix -lZip  
+
+
+#                -lFunc  -lGraf -lGraf3d \
+#                -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet -lNew \
+#                -lPostscript -lProof -lRint -lTree -lUnix   \
+#                -lZip 
+
+ROOTLIBS_SunOS = -L$(ROOTSYS)/lib -lCint   -lGui  \
+                                  -lMinuit    -lTreePlayer \
+                                  -lCore   -lGX11    -lHist   -lNew \
+                                  -lTreeViewer -lEG   -lGpad \
+                                  -lHistPainter  -lPhysics     -lRint \
+                                  -lX3d   -lGraf   -lHtml \
+                                  -lPostscript    -lXpm \
+                                    -lGraf3d   -lMatrix  \
+                                  -lProof       -lTree  
+
+
+ROOTLIBS_HP-UX = $(ROOTLIBS_SunOS)
+ROOTLIBS_Linux = -L$(ROOTSYS)/lib -lCint   -lGui  \
+                                  -lMinuit     -lTreePlayer \
+                                  -lCore   -lGX11    -lHist   -lNew \
+                                  -lTreeViewer -lEG   -lGpad \
+       	                          -lHistPainter  -lPhysics     -lRint \
+        	                  -lX3d   -lGraf   -lHtml \
+                	          -lPostscript  -lThread  -lXpm \
+                        	  -lGraf3d   -lMatrix  \
+                                  -lProof       -lTree  
+ROOTLIBS_AIX   = -L$(ROOTSYS)/lib -lRoot -lNew -lCint
+ROOTLIBS = $(ROOTLIBS_$(OSNAME))
+
+
+
+
+
+#
+#=========== Misc Libs
+MISCLIBS_SunOS = -R/opt/SUNWspro/lib -L/opt/SUNWspro/lib -lV77 -lF77 -lM77 \
+				-lm -lsocket -lgen -lsunmath 
+MISCLIBS_HP-UX = -lm    
+MISCLIBS_AIX = -L/usr/local/lib -L/usr/lib/Motif1.2 -L/usr/lib/X11R5 -lm \
+   -lg -lxlf90 -lxlf -lc
+MISCLIBS_Linux =  -L/usr/X11R6/lib -lm -lg2c -ldl -lXpm -lX11 -lm -ldl -rdynamic
+MISCLIBS = $(MISCLIBS_$(OSNAME))
+#
+#
+SUPLIBS_SunOS = -L/lib -L/usr/lib -lrpcsvc -lc -lnsl
+
+SUPLIBS = $(SUPLIBS_$(OSNAME))
+#
+#
+CERNLIB_SunOS = -L/site/cernlib/sun4_solaris2/97a/lib -lpacklib -lkernlib -lmathlib
+CERNLIB_HP-UX = -L/site/cernlib/hp_ux102/97a/lib -lpacklib -lkernlib -lmathlib
+CERNLIB_AIX =  -L$(CERN_ROOT)/lib -lpacklib -lkernlib -lmathlib
+CERNLIB_Linux = -L$(CERN_ROOT)/lib -lmathlib -lpacklib -lkernlib 
+
+CERNLIBS = $(CERNLIB_$(OSNAME))
+#
+#
+ADD_DEBUG = 
+BOSLIBS_SunOS = -L$(CLAS_LIB) -lc_bos_io$(ADD_DEBUG) -lrecutl \
+	      -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG) -lbos \
+	       -lbosio -lst -lcc -lseb -lsc -ltrk -ldc 
+#
+#
+#================
+#Work with CalDB|
+#================
+#
+#
+INCLUDE += -I$(MYSQL_INCLUDE_PATH)
+
+ifndef MAP
+BOSLIBS_SunOS += -lcaldbMap$(ADD_DEBUG) -lclasutil$(ADD_DEBUG) -L$(MYSQL_LIB_PATH) -lmysqlclient -ldl
+else
+BOSLIBS_SunOS += -lmapmanager$(ADD_DEBUG)	
+endif
+
+ifeq "$(OS_NAME)" "LinuxRH6"
+BOSLIBS_SunOS +=  -lz -lnsl -ltcl$(ADD_DEBUG)
+endif
+
+ifeq "$(OS_NAME)" "LinuxRH7"
+BOSLIBS_SunOS +=  -lz -lnsl -ltcl$(ADD_DEBUG)
+endif
+
+ifeq "$(OS_NAME)" "LinuxRH8"
+BOSLIBS_SunOS +=  -lz -lnsl -ltcl$(ADD_DEBUG)
+endif
+
+ifeq "$(OS_NAME)" "LinuxRH9"
+BOSLIBS_SunOS +=  -lz -lnsl -ltcl$(ADD_DEBUG)
+endif
+
+ifeq "$(OS_NAME)" "SunOS"
+OTHER = /usr/local/lib
+BOSLIBS_SunOS += -lsocket -lnsl -L$(OTHER)/ -ltcl 
+endif	
+#
+#=============================================================
+#
+
+BOSLIBS_HP-UX = $(BOSLIBS_SunOS)
+BOSLIBS_AIX = $(BOSLIBS_SunOS)
+BOSLIBS_Linux = $(BOSLIBS_SunOS)
+
+BOSLIBS = $(BOSLIBS_$(OSNAME))
+#
+
+#BOSLIBS  = -L$(CLAS_LIB)  -lrecutl$(ADD_DEBUG) \
+#                -lfpack -lfputil -lclasutil \
+#         -lbos$(ADD_DEBUG) -lc_bos_io$(ADD_DEBUG) -lmapmanager$(ADD_DEBUG)
+
+#
+#
+include Make_rule
+
+LIBRARY    = ./
+
+#
+MAIN_SOURCE       = $(wildcard *.cxx) $(wildcard *.c) $(wildcard *.F) 
+PACK_SOURCE       = $(wildcard $(ADPACK)/*.cxx) $(wildcard $(ADPACK)/*.F) $(wildcard $(ADPACK)/*.c)
+#
+PACK_OBJS1         = $(PACK_SOURCE:.cxx=.o) 
+PACK_OBJS2         = $(PACK_OBJS1:.c=.o) 
+PACK_OBJ           = $(PACK_OBJS2:.F=.o) 
+#
+MAIN_OBJS1         = $(MAIN_SOURCE:.cxx=.o)
+MAIN_OBJS2         = $(MAIN_OBJS1:.c=.o)
+MAIN_OBJ           = $(MAIN_OBJS2:.F=.o)
+#
+# 
+MAIN_OBJECTS      = $(addprefix $(OBJDIR)/,$(MAIN_OBJ))
+PACK_OBJECTS      = $(addprefix $(OBJDIR)/,$(notdir $(PACK_OBJ)))
+#
+
+LIBRARYS = $(ROOTLIBS)  $(BOSLIBS) $(MISCLIBS) $(SUPLIBS) $(CERNLIBS)
+#
+#=========== Help Section ====
+
+mydict.cxx:  ../pinclude/TShowCalib.h 
+	@echo ---------------------------------------
+	@echo "Generating dictionary ..."
+	@rootcint -f mydict.cxx -c  ../pinclude/TShowCalib.h 
+	@echo ---------------------------------------
+
+
+ 
+help:
+	@echo ---------------------------------------
+	@echo Makefile for PHYSICS ANALYSIS PROGRAM
+	@echo Type "make phyana" to Compile code
+	@echo Type "make show" to see enviroments
+	@echo ---------------------------------------
+
+#
+phyana:  $(MAIN_OBJECTS) $(PACK_OBJECTS) $(DICT_OBJ)
+	@test -d $(EXEDIR) || mkdir -p $(EXEDIR) ;
+	@echo -------------------------------------------------
+	@echo -- Linking code...
+	@echo -------------------------------------------------
+	$(CPP) -o $(EXEDIR)/$@ -g $(MAIN_OBJECTS)  $(LIBRARYS) $(PACK_OBJECTS) 
+	@mv $(EXEDIR)/$@ $(EXEDIR)/p2p_delay_el
+	@echo -------------------------------------
+	@echo Compilation done..
+
+
+show:
+	@echo _______________________________________
+	@echo   $(OSNAME) platform..
+	@echo _______________________________________
+	@echo MAIN SOURCE FILES = $(MAIN_SOURCE)
+	@echo _______________________________________
+	@echo PACK SOURCE FILES = $(PACK_SOURCE)
+	@echo _______________________________________
+	@echo MAIN OBJ = $(MAIN_OBJ)
+	@echo _______________________________________
+	@echo PACK OBJ = $(PACK_OBJ)	
+	@echo _______________________________________
+	@echo PACK OBJECTS = $(PACK_OBJECTS)	
+	@echo _______________________________________
+	@echo MAIN OBJECTS = $(MAIN_OBJECTS)	
+	@echo _______________________________________
+	@echo COMPILERS: CPP = $(CPP), ACPP = $(ACP)
+

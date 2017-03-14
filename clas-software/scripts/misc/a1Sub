@@ -1,0 +1,10 @@
+#! /bin/csh -f
+setenv run $argv[1]
+shift
+df -k /scratch
+a1c -st -D0x1 $argv[*]
+#fixhtml.pl $run
+df -k /scratch
+date
+
+

@@ -1,0 +1,48 @@
+#!/bin/csh -f
+
+
+# Run with the run numbers below
+# Need to make a loop from the shell (change this?)
+#
+set run = $1
+echo
+echo Submitting runs from $run
+echo
+
+# dvcs2:     57516 57773 57905 58020 58175 58292 58374 58490
+# eg1-dvcs:  58665 58823 59156 59407 59895 60082 60192
+# eg6:       61926 61927 61929
+# tpe:       66356 66381 66651 66778 66944 67043 67155 67285 67343 
+
+
+set RI   = (`grep $run runs.txt | awk '{print $2}' `)
+set DATA = (`grep $run runs.txt | awk '{print $3}' `)
+set DEST = /work/clas/disk1/ungaro/cc
+if($RI == "") then
+	echo no run $run found in runs.txt. Exiting.
+	exit
+endif
+
+
+echo Run Index: $RI
+echo Destination Directory: $DEST
+echo
+
+rm -rf list_files 
+echo COMMAND: go_COOK $RI $DATA $DEST $run >  list_files
+echo " "                                  >> list_files
+
+foreach f (`\ls /mss/clas/$DATA/data/*clas*_0$run.A*`)
+	echo "INPUT_FILES:" >> list_files
+	echo $f             >> list_files
+end
+
+
+rm -rf jsub.cc
+cat cc.jsub     > jsub.cc
+cat list_files >> jsub.cc
+
+#cat jsub.cc
+/site/bin/jsub jsub.cc
+
+

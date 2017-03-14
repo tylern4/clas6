@@ -1,0 +1,13 @@
+from build_system import environment
+from glob import glob
+
+user_align_deps = {'clas6': 'default_libs'.split()}
+user_align_src = glob("*.F")
+
+user_align_env = environment.env(deps=user_align_deps.keys())
+user_align_env.load_dependency(deps=user_align_deps)
+
+user_align_env.AppendUnique(FORTRANPATH = '../../reconstruction/trk/')
+
+
+user_align_prog = user_align_env.program(target='user_align', source=user_align_src)

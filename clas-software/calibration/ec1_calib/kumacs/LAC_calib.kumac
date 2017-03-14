@@ -1,0 +1,29 @@
+****
+* Parameters:
+* [filename] - name of HBOOK file produced by EC1_calib
+* [runno]    - run number used for current calibration
+****
+runno=12651
+filename='../g6a/ec1_calib.hbook'
+****
+* Define enviroment
+****
+/KUIP/SET_SHOW/FILECASE 'KEEP'
+/KUIP/SET_SHOW/HOST_SHELL /bin/tcsh
+****
+* step 1: get calibration constants used to produce Ntupla 200
+****
+exec make_calib_prev [runno]
+****
+* step 2: calculate energy calibration constatnts
+****
+exec fit_mips.kumac 1 [filename]
+****
+* step 3: calculate timing calibration constatnts
+****
+exec Timing.kumac
+****
+* step 4: put results to the Maps
+****
+shell add_a1_to_map calib_e.dat [runno]
+shell add_t2_to_map calib_t.dat [runno]

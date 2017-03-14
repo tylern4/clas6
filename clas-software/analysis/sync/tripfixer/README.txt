@@ -1,0 +1,4 @@
+ - Compile with "make all"
+ - run with tripfixer -h for execution instructions
+ - see http://clasweb.jlab.org/rungroups/g13/wiki_secure/index.php/TripFixer for more details
+ - Tested for g13, NOT for other experiments!!

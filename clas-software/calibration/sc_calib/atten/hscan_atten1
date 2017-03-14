@@ -1,0 +1,22 @@
+#
+# Example shell script to execute hscan_atten.exe
+# 
+# hscan
+#
+# Files used:
+# 
+# Histogram input file:		hscan_input
+# ASCII output file:		hscan_data
+# 
+# delete, then define new input and output data links
+#
+rm hscan_input
+rm hscan_data
+ln -s ~costy/offline/utilities/sc_mon/r6603_adc_sec1.hbk hscan_input
+ln -s /work/clas/disk1/hist/atten/r6603_adc_sec1.dat hscan_data
+#
+ls -lgF hscan_input
+ls -lgF hscan_data
+#
+hscan_atten.exe
+#

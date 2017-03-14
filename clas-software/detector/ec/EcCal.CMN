@@ -1,0 +1,46 @@
+***************** begin: EcCal.CMN *************************************
+*
+*      Ec calibrations
+*
+      real speed_of_light
+      parameter (speed_of_light= 29.9792458)   !cm/nS
+*
+      real index_of_refraction
+      parameter (index_of_refraction= 1.581)   !plastic scint. n
+*
+      real speed_in_plastic
+*      parameter (speed_in_plastic= speed_of_light/index_of_refraction)
+
+*	Change to effective value
+      parameter (speed_in_plastic=18.0)
+
+      real eff_sampling_fraction
+      parameter (eff_sampling_fraction= 0.275) !light/total fraction
+
+      real default_Ech,default_atten,default_Tch,default_Trms
+      parameter (default_Ech= .0001)  !GeV
+      parameter (default_Tch= 0.050  )     ! nsec. per channel
+      parameter (default_Trms= 1.  )       ! nsec.
+      parameter (default_atten= 376.)      !cm, infinity for no attenuation
+c
+      real EcCal_Ech( MAXstrips, Ec_u: Ec_w,
+     &                  whole: cover, MAXsectors) !GeV/ch
+      real EcCal_Eo( MAXstrips, Ec_u: Ec_w,
+     &                  whole: cover, MAXsectors) !GeV ped.
+      real EcCal_atten( MAXstrips,
+     &                 Ec_u: Ec_w, whole: cover, MAXsectors) !attenuations
+
+C.... Timing calibration constants
+      real EcCal_Tch(MAXstrips, Ec_u: Ec_w, inner:cover, MAXsectors)    !nS/ch
+      real EcCal_To(MAXstrips, Ec_u:Ec_w, inner:cover, MAXsectors)      !nS offset
+      real EcCal_Tadc(MAXstrips, Ec_u:Ec_w, inner:cover, MAXsectors)    !ADC dependent term
+      real EcCal_dT1(MAXstrips, Ec_u:Ec_w, inner:cover, MAXsectors)     !Time Walk term 1
+      real EcCal_dT2(MAXstrips, Ec_u:Ec_w, inner:cover, MAXsectors)     !Time Walk term 2
+      real EcCal_Trms(MAXstrips, Ec_u:Ec_w, inner:cover, MAXsectors)    !RMS
+      real EcCal_TDCstat(MAXstrips, Ec_u:Ec_w, inner:cover, MAXsectors) !TDC status	
+
+      common /EcCal/ EcCal_Atten, EcCal_Ech, EcCal_Eo,
+     &  EcCal_Tch, EcCal_To, EcCal_Tadc, EcCal_dT1, EcCal_dT2,
+     &  EcCal_Trms, EcCal_TDCstat
+*
+******************* end: EcCal.CMN *************************************

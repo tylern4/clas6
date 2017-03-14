@@ -1,0 +1,132 @@
+#!/usr/bin/env perl
+#
+# $Id: bos_param,v 1.9 2002/01/11 22:30:17 marki Exp $
+##########################################################################
+#   Brief Discription:  Reads in a ddl file and creates a FORTRAN include
+#                       which contains the offsets for each variable
+#                       defined in the ddl file.  This provides a 
+#                       convenient why to access the data without 
+#                       having to code in offset...
+#     
+#                       x_mom = IW(HBTR_IND + HBTR_P)                        
+#
+#   execution:  bos_param.pl
+#
+#   required input parameters: name of ddl file.
+#      example: $CLAS_PARMS/clasbanks.ddl
+#
+#   required output parameters: clas_offsets.inc clas_index.inc
+#      in that order.
+#
+#   examples:
+#      bos_param.pl clasbanks.ddl clas_offsets.inc clas_index.inc
+#
+#   created:  Sat Oct 25 10:35:11 EDT 1997
+#
+#   author of the script: arne 
+#   edited: Feb 2008 by Johann Goetz to allow for
+#      easy integration into SCons
+#   
+##########################################################################
+
+$ddlfile = $ARGV[0]; # clasbanks.ddl
+$paramfile = $ARGV[1]; # clas_offsets.inc
+$indexfile = $ARGV[2]; # clas_index.inc
+
+open( DDL, "<$ddlfile") || die "Could not open input ddl file: $ddlfile\n";
+
+open( OUT, ">$paramfile") || die "Could not open output file:$paramfile\n";
+open( INDEX, ">$indexfile") || die "Could not open output file:$index file\n";
+
+$nbank=0;
+while (<DDL>) {
+    if (/^\s*TABLE/i) {
+	($f1, $bank, $format ) = split;
+	print OUT "\nC    Offsets for the $bank bank follow \n\n";
+	$index = "$bank\_ind";
+	push (common, $index);
+	push (wbank, "$bank\_array");
+	$bos_bank = "\U$bank   ";
+	$bos_bank = substr($bos_bank, 0, 4);
+	push (banks, $bos_bank);
+	$nbank++;
+	$mult = 1;
+	if ($format eq "B16") {
+	    $mult=2;
+	}
+	push (mults, $mult);
+    }
+    if (/^\s*\d/) {
+	($index, $name, $format, $min, $max) = split;
+	($f1, $comment) = split(/!/);
+	chomp($comment);
+	$bank = "\U$bank";
+	$name = "\U$name";
+	print OUT "          integer $bank\_$name               ! $comment\n";
+	print OUT "          parameter ( \U$bank\_\U$name = $index ) \n";
+    }
+
+}
+
+print INDEX "\n          integer N_DDL_BANKS \n";
+print INDEX "          parameter ( N_DDL_BANKS = $nbank ) \n\n";
+print INDEX "          integer INDEX_TO_BANKS( N_DDL_BANKS ), INDEX16_TO_BANKS( N_DDL_BANKS ) \n\n";
+print INDEX "          integer WHICH_ARRAY( N_DDL_BANKS ) \n\n";
+print INDEX "          character*4 ddl_bank_names( N_DDL_BANKS ) \n\n";
+
+close (DDL);
+close (OUT);
+
+$end = @common;
+for ($i4=0; $i4<$end; $i4=$i4+4) {
+    $line = "        integer  $common[$i4], $common[$i4+1], $common[$i4+2], $common[$i4+3]\n"; 
+    $line =~ s/(,\s*)+$//g;
+    print INDEX $line;
+}
+print INDEX "\n";
+for ($i4=0; $i4<$end; $i4=$i4+4) {
+    $line = "        integer  $common[$i4]16, $common[$i4+1]16, $common[$i4+2]16, $common[$i4+3]16\n"; 
+    $line =~ s/(, 16\s*)+$//g;
+    print INDEX $line;
+}
+print INDEX "\n";
+for ($i4=0; $i4<$end; $i4=$i4+4) {
+    $line = "        integer  $wbank[$i4], $wbank[$i4+1], $wbank[$i4+2], $wbank[$i4+3]\n"; 
+    $line =~ s/(, \s*)+$//g;
+    print INDEX $line;
+}
+print INDEX "\n\nC define the COMMON BLOCK \n";
+print INDEX "\n\n          common /clas_index/\n";
+print INDEX "     +        index_to_banks, index16_to_banks, which_array \n";
+
+print INDEX "\nC  Now equivalance the array to the individual names\n";
+
+for ($i4=1; $i4<=$end; $i4++) {
+    print INDEX "        EQUIVALENCE (INDEX_TO_BANKS($i4) , $common[$i4-1]) \n";
+}
+
+print INDEX "\nC  Now equivalance the array to the individual names for the 16 bit banks\n";
+
+
+for ($i4=1; $i4<=$end; $i4++) {
+    print INDEX "        EQUIVALENCE (INDEX16_TO_BANKS($i4) , $common[$i4-1]16) \n";
+}
+
+print INDEX "\nC  Now equivalance the array which_bank which is a flag to which
+     \nC  IW or JW array \n";
+
+for ($i4=1; $i4<=$end; $i4++) {
+    print INDEX "        EQUIVALENCE (WHICH_ARRAY($i4) , $wbank[$i4-1]) \n";
+}
+
+print INDEX "\nC  Define the DDL bank names \n";
+
+for ($i4=1; $i4<=$end; $i4++) {
+    print INDEX "         data  DDL_BANK_NAMES($i4)/'$banks[$i4-1]'/ \n";
+}
+
+
+close (INDEX);
+
+
+  

@@ -1,0 +1,31 @@
+macro unixtime 
+
+  if ($vexist(month_days).eq.0) then
+    vec/cre month_days(12) i 31 28 31 30 31 30 31 31 30 31 30 31
+  endif
+  
+  date  = $date
+  day   = $word([date],1,1,'/')
+  month = $word([date],2,1,'/')
+  year  = $word([date],3,1,'/')
+  time  = $time
+  hour  = $word([time],1,1,'.')
+  min   = $word([time],2,1,'.')
+  sec   = $word([time],3,1,'.')
+    
+  seconds = 757382400 + ([year]-94)*365*24*3600
+  
+  do i = 1,[month]-1
+    seconds = $eval([seconds] + month_days([i])*24*3600)
+  enddo
+  
+  if ([year].ge.96).and.([month].ge.3) then
+    seconds = [seconds] + 24*3600
+  endif
+  
+  seconds = [seconds] + ([day]-1)*24*3600 + [hour]*3600 + [min]*60 + [sec] 
+
+return [seconds]
+  
+  
+   

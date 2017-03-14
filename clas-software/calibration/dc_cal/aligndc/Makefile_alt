@@ -1,0 +1,30 @@
+OS_NAME:=$(shell $(CLAS_CMS)/uname_clas)
+CREATED_C = aligndc.c
+LOCAL_INCLUDES = -I. -I../../include -I../../inc_derived
+LIBNAMES = aligndc dc clasutil recutl c_bos_io \
+	mapmanager bankdefs fputil fpack bos c_cern packlib kernlib
+
+include $(CLAS_CMS)/Makefile
+
+ifeq ($(OS_NAME),AIX)
+  SHARED_LIBS += -lC
+endif
+
+ifeq ($(OS_NAME),HP-UX)
+  MD_LIBS += -lm
+  SHARED_LIBS += -lC
+endif
+
+ifeq ($(OS_NAME),Linux)
+  MD_LIBS += -lstdc++
+endif
+
+ifeq ($(OS_NAME),LinuxRH6)
+  MD_LIBS += -lstdc++
+endif
+
+ifeq ($(OS_NAME),SunOS)
+  MD_LIBS += -lsocket -lnsl
+  SHARED_LIBS += -lC
+endif
+

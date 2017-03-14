@@ -1,0 +1,188 @@
+c	
+c      include file event.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: event.CMN,v 1.21 2005/09/19 17:17:59 pasyuk Exp $
+c
+c  Documentation for include file event
+c
+c  Purpose:  common used for storage of tagger event
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   T. Auger     Created:  Mon Jun 03 10:11:52 EST 1997
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file event:
+c  ----------------------------------
+c************* RECSIS compiling parameters ************
+c
+c   those parameters are here (mostly array size parameters) 
+c   because there is no reason
+c   they should be used in routines other than the ones that use 
+c   the corresponding arrays
+c   and therefore includes this file. E.A
+c
+c
+
+	integer Tag_max_hit	
+	integer MAXEC,MAXTC,MAXECTC,MAXTAGR,MAXHITS
+	
+	parameter (Tag_max_hit = 500)
+	parameter (MAXEC = 2000)
+	parameter (MAXTC = 2000)
+	parameter (MAXECTC = 500)
+        PARAMETER (MAXTAGR = 500)
+        parameter (MAXHITS = 2048)
+c
+c
+c_end_var
+c  -----------------------------------
+c
+	integer Tag_T_NbHits,tc_id,tc_val_left,tc_val_right,MOR_tdc
+        common/TagTCraw/Tag_T_NbHits,
+     +  	tc_id(MAXTC),
+     +  	tc_val_left(MAXTC),
+     +  	tc_val_right(MAXTC),
+     +  	MOR_tdc
+c-----------------------------------------------
+	integer Tgtl_NbHits,itc_id_left,itc_val_left,tcl_used
+        common/TgtLraw/Tgtl_NbHits, 
+     +		itc_id_left(maxhits), 
+     +		itc_val_left(maxhits),
+     +	        tcl_used(maxhits)
+	
+c-------------------------------------------------
+	integer Tgtr_NbHits,itc_id_right,itc_val_right,tcr_used
+        common/TgtRraw/Tgtr_NbHits, 
+     +		itc_id_right(maxhits), 
+     +		itc_val_right(maxhits),
+     +          tcr_used(maxhits)
+
+c----------------------------------
+	integer Tag_E_NbHits,ec_id,ec_val
+        common/TagECraw/Tag_E_NbHits,
+     +        	ec_id(MAXEC),
+     +		ec_val(MAXEC)
+c------------------------------------
+	integer Good_T_Id,NbGoodT
+	real 	Good_T_L_val,Good_T_R_val
+        common/TagTCfiltered/NbGoodT,
+     +		Good_T_Id(MAXTC),
+     +		Good_T_L_val(MAXTC),
+     +		Good_T_R_val(MAXTC)
+c------------------------------------
+	integer Good_TL_Id,Good_TR_Id,NbGoodTL,NbGoodTR
+	real 	Good_TL_val,Good_TR_val
+        common/TGTLRconverted/NbGoodTL,NbGoodTR,
+     +		Good_TL_Id(MAXTC),
+     +		Good_TL_val(MAXTC),
+     +		Good_TR_Id(MAXTC),
+     +		Good_TR_val(MAXTC)
+
+c---------------------------------------
+	integer NbGoodE,Good_E_Id
+	real	Good_E_val
+        common/TagECfiltered/NbGoodE,
+     +		Good_E_Id(MAXEC),
+     +		Good_E_val(MAXEC)
+c---------------------------------------
+	integer Nb_matched_Hits,NB_matched_Ts,NB_matched_Es,
+     +		Matched_T_Id,Matched_E_Id
+	real	Matched_T_L_val,Matched_T_R_Val,Matched_E_val
+        common/TagETmatch/Nb_matched_Hits,
+     +		NB_matched_Ts,NB_matched_Es(MAXTC),
+     +		Matched_T_Id(MAXTC),
+     +		Matched_T_L_val(MAXTC),
+     +		Matched_T_R_Val(MAXTC),
+     +		Matched_E_Id(MAXTC,MAXECTC),
+     +		Matched_E_val(MAXTC,MAXECTC)
+c---------------------------------------
+	integer Nb_coinc_Hits,NB_coinc_Ts,NB_coinc_Es,
+     +		coinc_T_Id,coinc_E_Id
+	real	coinc_T_L_val,coinc_T_R_Val,coinc_E_val
+        common/TagETcoinc/Nb_coinc_Hits,
+     +		NB_coinc_Ts,NB_coinc_Es(MAXTC),
+     +		coinc_T_Id(MAXTC),
+     +		coinc_T_L_val(MAXTC),
+     +		coinc_T_R_Val(MAXTC),
+     +		coinc_E_Id(MAXTC,MAXECTC),
+     +		coinc_E_val(MAXTC,MAXECTC)
+c-----------------------------------------	
+	integer Nb_bin_Hits,NB_bin_Ts,NB_bin_Es,
+     +		bin_T_Id,bin_E_Id
+	real	bin_T_L_val,bin_T_R_Val,bin_E_val
+        common/TagETbin/Nb_bin_Hits,
+     +		NB_bin_Ts,NB_bin_Es(MAXTC),
+     +		bin_T_Id(MAXTC),
+     +		bin_T_L_val(MAXTC,2),
+     +		bin_T_R_Val(MAXTC,2),
+     +		bin_E_Id(MAXTC,MAXECTC),
+     +		bin_E_val(MAXTC,MAXECTC,2)
+c------------------------------------------
+	real Mean_T_val,RF_T_diff,Diff_T_val,T_time
+        common/TagTcorr/Mean_T_val(MAXTC,2),
+     +		RF_T_diff(MAXTC,2),
+     +		Diff_T_val(MAXTC,2),
+     +          T_time(MAXTC,2)
+c----------------------------------------------	
+        real PhotonEnergy,TimeEventcor,TimeEvent
+	integer HitStatus,Nb_TAGR_hits,TAGR_TID,TAGR_EID
+        common/TagTagrBOS/PhotonEnergy(MAXTAGR),
+     +		TimeEvent(MAXTAGR),
+     +		TimeEventcor(MAXTAGR),
+     +          TAGR_TID(MAXTAGR),
+     +		TAGR_EID(MAXTAGR),
+     +		HitStatus(MAXTAGR),
+     +		Nb_TAGR_hits
+c------------------------------------------
+        integer rf1,rf2
+	real goodrf,timedrf1,timedrf2
+        common/TagRFsignal/rf1,rf2,goodrf,timedrf1,timedrf2
+        
+	integer tac_adc_lt,tac_adc_rt,tac_adc_lb,tac_adc_rb,
+     +	tac_adc_sum1,tac_adc_sum2,tac_adc_sum3,tac_tdc,tac_id,
+     +	pc_adc_ve,pc_adc_mn,pc_adc_lt,pc_adc_rb,pc_adc_lb,pc_adc_rt,pc_tdc,
+     +	ps_adc,ps_tdc,ps_id,Nb_Hits_PS
+        common/DSDraw/tac_adc_lt,tac_adc_rt,tac_adc_lb,tac_adc_rb,
+     +	tac_adc_sum1,tac_adc_sum2,tac_adc_sum3,tac_tdc,tac_id,
+     +	pc_adc_ve,pc_adc_mn,pc_adc_lt,pc_adc_rb,pc_adc_lb,pc_adc_rt,pc_tdc,
+     +	ps_adc(8),ps_tdc(8),ps_id(8),Nb_Hits_PS
+     
+        integer tacTid,pcTid,psTid,Nb_evnt_PS
+	real tac_ene_lt,tac_ene_rt,tac_ene_lb,tac_ene_rb,
+     +	tac_ene_sum1,tac_ene_sum2,tac_ene_sum3,tac_time,
+     +	pc_ene_ve,pc_ene_mn,pc_ene_lt,pc_ene_rb,pc_ene_lb,pc_ene_rt,pc_time,
+     +	ps_scint_time,ps_scint_ene,ps_time,ps_pattern
+        common/DSDproc/tac_ene_lt,tac_ene_rt,tac_ene_lb,tac_ene_rb,
+     +	tac_ene_sum1,tac_ene_sum2,tac_ene_sum3,tac_time,
+     +	pc_ene_ve,pc_ene_mn,pc_ene_lt,pc_ene_rb,pc_ene_lb,pc_ene_rt,pc_time,
+     +	ps_scint_time(8),ps_scint_ene(8),ps_time(8),ps_pattern(8),Nb_evnt_PS,
+     +  tacTid,pcTid,psTid(8)
+     		
+	integer Nb_bins_Tn
+	integer bin_Tn_ID(MAXTC)
+	real bin_Tn_l_val(MAXTC,2)
+	real bin_Tn_R_val(MAXTC,2)
+	real Mean_Tn_val(MAXTC,2)
+	real Diff_Tn_val(MAXTC,2)
+	real Tn_time(MAXTC,2)
+	common/TagTnorm/Nb_bins_Tn, bin_Tn_ID, bin_Tn_l_val, bin_Tn_R_val,
+     +  Mean_Tn_val, Diff_Tn_val, Tn_time
+
+
+
+c----6----------------------------------------------------------------72
+		
+

@@ -1,0 +1,47 @@
+#! /usr/local/bin/perl
+
+#                                              nextProcessRun
+
+require "ctime.pl";
+
+# First, get the current runs
+
+$off = "/net/fs2/group/clasdev/clas/dec97/database";
+open(C,"$off/list") || die "could not read the list \n";
+
+
+$more = 1;
+TAPE:
+while (<C>) {
+    if ($more) {
+  	chop;
+	$run = $_;
+
+   open(D,"$off/done") || die "could not read done \n";
+	while (<D>) {
+	    chop;
+	    $prun = $_;
+	    if ($run == $prun) {
+		print STDERR "Run $run has already been submitted\n";
+		next TAPE;
+	    }
+	}
+	close(D);
+
+   open(D,"$off/skip") || die "could not read skip \n";
+	while (<D>) {
+	    chop;
+	    $prun = $_;
+	    if ($run == $prun) {
+		print STDERR "Run $run should be skipped\n";
+		next TAPE;
+	    }
+	}
+	close(D);
+# This run needs to be processed     
+	print "$run\n";
+	$more = 0;
+    }
+ 
+
+}

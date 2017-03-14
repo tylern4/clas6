@@ -1,0 +1,6 @@
+from build_system import environment
+
+icfEnv = environment.env(deps=['clas6'])
+icfEnv.load_dependency('clas6')
+icfLib = icfEnv.library(target='icf')
+icfEnv.return_from_sconstruct(icfLib)

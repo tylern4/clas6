@@ -1,0 +1,26 @@
+macro calPedNoise sec run evno=0
+
+  vec/cre ecadc(36,6,6) r
+  vec/cre peddif(36,6,6) r
+
+  if [evno]=0 then
+    2d 100 '' 36 1. 37. 6 1. 7. 0.
+    exec calGetVec ec ped [run]
+    vec/cre ecped(36,6,6) r
+    vec/cop ecmean[run] ecped
+    evno=1
+  endif
+  
+  while [evno].ne.q do
+    hi/op/reset 100
+    nt/proj 100 2000.layerec%stripec adcec.and.secec=[sec] nevent=1 ifirst=[evno]
+    get_vect/contents 100 ecadc(:,:,5)
+    sigma peddif=ecadc-ecped    
+    title = EC Sector [sec] Pedestal Noise Event [evno]    
+    exec calPlotSlot norun ADC-PED -25. 25. peddif peddif 5 [title]      
+    evno = [evno] + 1    
+    read evno Next event (q=quit):    
+  endwhile
+    
+return
+    

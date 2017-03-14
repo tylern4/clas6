@@ -1,0 +1,47 @@
+macro gain_24
+*
+* macro gain_24
+*
+message ' plot gain fits 24 to a page'
+*
+*
+option date
+option stat
+*set stat 1111111
+*set fit 111
+set ytic .2
+set xtic .2
+set ymgl 1.
+set ymgu 1.
+set ywin 1.
+set xwin 1.
+set xmgl 0.5
+set xmgr 0.5
+set yhti 0.5
+set xsiz 20.
+set ysiz 20.
+set tsiz 0.2
+set asiz 0.2
+set csiz 0.3
+set chhe 0.2
+set lasi 0.2
+set vsiz 0.2
+set hcol 1107
+*set psiz 0.3
+*set gsiz 0.3
+*set ksiz 0.3
+*set 2siz 0.3
+message ' 2siz'
+*
+
+* open metafile
+*
+for/file 66 gain_24.ps
+meta 66 -111
+zone 4 6
+exec min_kumac
+*
+close 66
+*
+exitm
+return

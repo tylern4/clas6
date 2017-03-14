@@ -1,0 +1,11 @@
+macro utilSetup
+
+  global/import pawopt
+
+  message utilSetup: Setting up Utility Macros
+  exec utilSetupFunctions
+  if [pawopt].ne.-1 then; exec utilSetupGraphics; endif
+  exec utilSetupVectors
+  exec utilSetupGlobals
+  
+return

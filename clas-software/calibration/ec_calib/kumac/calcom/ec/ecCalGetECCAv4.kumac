@@ -1,0 +1,13 @@
+macro ecCalGetECCav4 run sec
+
+  message ecCalGetECCav4: Getting vector for run [run] sector [sec]
+  
+  global/import gainpath
+
+  vec/cre dum(ecvecdim) r
+  vec/read dum [gainpath]/ecadcgain.vec
+  vec/copy dum(:,:,[sec]) ECCav4(:,[sec])
+  vec/del dum
+  
+return
+  

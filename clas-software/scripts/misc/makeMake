@@ -1,0 +1,459 @@
+#!/usr/bin/env perl
+
+$root = 0;
+$g7 = "";
+$gsim = 0;
+
+if($#ARGV >= 0) {
+    for (@ARGV) {
+        if (/^-r/) {
+	  $root = 1;
+	}
+	elsif (/^-7/) {
+	  $g7 = "-lg7Event\$(ADD_DEBUG) ";
+	}
+	elsif (/^-g/) {
+	  $gsim = 1;
+	}
+      }
+  }
+
+
+$xdir = $ENV{"PWD"};
+
+@dirs = split(/\//,$xdir);
+
+$dir = @dirs[$#ARGV];
+
+$dir  =~ s/^lib//;
+
+
+# first identify main programs
+
+
+$mainscc = "";
+$mainsc = "";
+$mainf = "";
+$mainF = "";
+
+$cmd = "ls -1  *.h *.inc |";
+print STDERR "$cmd\n";
+open(A,$cmd);
+while (<A>) {
+  chop;
+  push(@inc,($_));
+  print STDERR "adding $_ \n";
+}
+
+
+$cmd = "mains *.c |";
+open(A,$cmd);
+while (<A>) {
+  chop;
+  $mainsc = $mainsc . " " . $_ ;
+}
+close(A);
+
+$cmd = "mains *.cc |";
+open(A,$cmd);
+while (<A>) {
+  chop;
+  $mainscc = $mainscc . " " . $_ ;
+}
+close(A);
+
+$cmd = "mains *.C |";
+open(A,$cmd);
+while (<A>) {
+  chop;
+  $mainsC = $mainsC . " " . $_ ;
+}
+close(A);
+
+
+
+$cmd = "mains -f *.f |";
+open(A,$cmd);
+while (<A>) {
+  chop;
+  $mainsf = $mainsf . " " . $_ ;
+}
+close(A);
+
+$cmd = "mains -f *.F |";
+open(A,$cmd);
+while (<A>) {
+  chop;
+  $mainsF = $mainsF . " " . $_ ;
+}
+close(A);
+
+
+
+print "#! gnumake\n\n";
+print "#---------------------------------------------------\n";
+print "# The D. P. Weygand Makefile\n";
+print "#---------------------------------------------------\n";
+
+print "include \$(CLAS_CMS)/Rules.make\n";
+
+print "\nifdef USEBOSIO\nBOSLIB= -lbosio\$(ADD_DEBUG)\nelse\nBOSLIB = -lfputil\$(ADD_DEBUG) -lbos\$(ADD_DEBUG) -lfpack\$(ADD_DEBUG)\nendif\n";
+
+
+if ($root) {
+  print "ROOTCFLAGS\t= \$(shell root-config --prefix=\$(ROOTSYS) --cflags)\n";   print "ROOTLIBS\t= \$(shell root-config  --libs)\n";
+  print "ROOTGLIBS\t= \$(shell root-config  --glibs)\n";
+  print "ROOTINCLUDE\t= \$(shell root-config  --incdir)\n";
+
+}
+
+print "MYSQL_LIB_PATH = \$(MYSQL_ROOT_PATH)/lib/mysql\n";
+print "MYSQL_INCLUDE_PATH = \$(MYSQL_ROOT_PATH)/include\n";
+
+print "ifndef MAP\n";
+print "\tMAPLIB = -lcaldbMap\$(ADD_DEBUG) -lclasutil\$(ADD_DEBUG) -L\$(MYSQL_LIB_PATH) -lmysqlclient -lz \$(TCLLIB) \n";
+print "INCLUDE += -I\$(MYSQL_INCLUDE_PATH)\n";
+print "else\n";
+print "\tMAPLIB = -lmapmanager\$(ADD_DEBUG)\n";
+print "endif\n";
+
+
+
+
+print "\nSTDLIBS= -L\$(LOCAL_LIB) -L\$(CLAS_LIB) $g7 -ltcl";
+if ($gsim) {
+  print " -lgsim\$(ADD_DEBUG) ";
+}
+print " -lclasEvent\$(ADD_DEBUG) -leloss\$(ADD_DEBUG) -lmomentum_correction\$(ADD_DEBUG) -lg10pcor\$(ADD_DEBUG) -lPcor\$(ADD_DEBUG) -lvkTAGR\$(ADD_DEBUG) -lplib\$(ADD_DEBUG) -lpid\$(ADD_DEBUG) -lec\$(ADD_DEBUG) -lcc\$(ADD_DEBUG) -lsc\$(ADD_DEBUG) -ltrk\$(ADD_DEBUG) -ldc\$(ADD_DEBUG) -llac\$(ADD_DEBUG) -lst\$(ADD_DEBUG)  -lpid\$(ADD_DEBUG) -ltag\$(ADD_DEBUG) -ltagM\$(ADD_DEBUG) -lscaler\$(ADD_DEBUG) -lvertex\$(ADD_DEBUG) -lbankdefs\$(ADD_DEBUG) -lclasutil\$(ADD_DEBUG)   -lc_bos_io\$(ADD_DEBUG) -lrecutl\$(ADD_DEBUG) -litape\$(ADD_DEBUG) \$(BOSLIB) -lc_bos_io\$(ADD_DEBUG) \$(MAPLIB)  -lonline_dummy\$(ADD_DEBUG) -lc_cern\$(ADD_DEBUG) -lpp\$(ADD_DEBUG) -lpwaUtil\$(ADD_DEBUG) ";
+
+if ($root) {
+  print "\$(ROOTLIBS) \$(ROOTGLIBS) ";
+}
+
+if ($gsim) {
+  print "-lpatches \$(XLIBS) ";
+}
+
+print "\n";
+
+print "\n#use the newest cern library\n";
+print "CERNPATH= \$(CERN_ROOT)/lib\nCERNLIB= -L\$(CERNPATH) ";
+if ($gsim) {
+  print "-lgeant321 -lpawlib -lgraflib -lgrafX11  ";
+}
+print " -lpacklib -lmathlib -lkernlib\nMATHLIB= -lm ";
+if ($gsim) {
+  print "-lnsl";
+}
+if ($root) {
+  print "\$(ROOTLIBS) \$(ROOTGLIBS) ";
+}
+print "\n";
+
+
+
+print "\nFINCLUDE := \$(FINCLUDE) -I./include\n";
+print "INCLUDE := \$(INCLUDE) -I./include ";
+if ($root)  {
+  print "-I\$(ROOTINCLUDE) ";
+}
+print "\n";
+
+
+
+
+
+print "CCCSRCS:= ";
+
+$cmd = "mains -n `echo *.C` |";
+
+open(F,$cmd) || die "could not do ls\n";
+
+while (<F>) {
+  if (/\*/) {
+    print STDERR "Error\n";
+  }
+  else {
+	chop;
+	print;
+      }
+}
+print "\n\n";
+close(F);
+
+
+
+print "CCSRCS:= ";
+
+$cmd = "mains -n `echo *.cc` |";
+
+open(F,$cmd) || die "could not do ls\n";
+
+while (<F>) {
+  if (/\*/) {
+    print STDERR "Error\n";
+  }
+  else {
+	chop;
+	print;
+      }
+}
+print "\n\n";
+close(F);
+
+print "fSRCS:= ";
+
+$cmd = "mains -f -n  *.f  |";
+
+open(F,$cmd) || die "could not do ls\n";
+
+while (<F>) {
+	chop;
+	if (/\*.f/) {
+	  ;
+	}
+	else {
+	  print "$_ ";
+	  }
+}
+print "\n\n";
+close(F);
+
+
+
+
+
+
+print "FSRCS:= ";
+
+$cmd = "mains -f -n  *.F  |";
+
+open(F,$cmd) || die "could not do ls\n";
+
+while (<F>) {
+	chop;
+	if (/\*.F/) {
+	  ;
+	}
+	else {
+	  print "$_ ";
+	  }
+}
+print "\n\n";
+close(F);
+
+print "SRCS:= ";
+
+$cmd = "mains -n *.c |";
+
+open(F,$cmd) || die "could not do ls\n";
+
+while (<F>) {
+  if (/\*/) {
+    print STDERR "Error\n";
+  }
+  else {
+	chop;
+	print "$_ ";
+      }
+}
+print "\n\n";
+close(F);
+
+
+print "fOBJS= \$(patsubst %.f,\$(OBJDIR)/%.o,\$(fSRCS))\n";
+print "FOBJS= \$(patsubst %.F,\$(OBJDIR)/%.o,\$(FSRCS))\n";
+print "OBJS= \$(patsubst %.c,\$(OBJDIR)/%.o,\$(SRCS))\n\n";
+print "CCOBJS= \$(patsubst %.cc,\$(OBJDIR)/%.o,\$(CCSRCS))\n\n";
+print "CCCOBJS= \$(patsubst %.C,\$(OBJDIR)/%.o,\$(CCCSRCS))\n\n";
+
+# set up main program dependencies
+
+
+@m = split(' ',$mainsC);
+foreach $x (@m) {
+  $y = $x;
+  $x =~ s/\.cc//;
+  $exes = $exes . " " . $x;
+  $xsrc = $x . "SRCS";
+  $xobjs = $x . "OBJS";
+  print "$xsrc= $y\n";
+  print "$xobjs= \$(patsubst %.C,\$(OBJDIR)/%.o,\$($xsrc))\n\n";
+
+}
+
+
+
+@m = split(' ',$mainscc);
+foreach $x (@m) {
+  $y = $x;
+  $x =~ s/\.cc//;
+  $exes = $exes . " " . $x;
+  $xsrc = $x . "SRCS";
+  $xobjs = $x . "OBJS";
+  print "$xsrc= $y\n";
+  print "$xobjs= \$(patsubst %.cc,\$(OBJDIR)/%.o,\$($xsrc))\n\n";
+
+}
+
+@m = split(' ',$mainsc);
+foreach $x (@m) {
+
+  $y = $x;
+  $x =~ s/\.c//;
+  $exes = $exes . " " . $x;
+  $xsrc = $x . "SRCS";
+  $xobjs = $x . "OBJS";
+  print "$xsrc= $y\n";
+  print "$xobjs= \$(patsubst %.c,\$(OBJDIR)/%.o,\$($xsrc))\n\n";
+
+}
+
+
+@m = split(' ',$mainsf);
+foreach $x (@m) {
+  $y = $x;
+  $x =~ s/\.f//;
+  $exes = $exes . " " . $x;
+  $xsrc = $x . "SRCS";
+  $xobjs = $x . "OBJS";
+  print "$xsrc= $y\n";
+  print "$xobjs= \$(patsubst %.f,\$(OBJDIR)/%.o,\$($xsrc))\n\n";
+
+}
+
+@m = split(' ',$mainsF);
+foreach $x (@m) {
+  $y = $x;
+  $x =~ s/\.F//;
+  $exes = $exes . " " . $x;
+  $xsrc = $x . "SRCS";
+  $xobjs = $x . "OBJS";
+  print "$xsrc= $y\n";
+  print "$xobjs= \$(patsubst %.F,\$(OBJDIR)/%.o,\$($xsrc))\n\n";
+
+}
+
+
+
+# now do main programs
+$exes = "";
+
+@m = split(' ',$mainsC);
+foreach $x (@m) {
+  $y = $x;
+  $x =~ s/\.C//;  
+  $xobjs = $x . "OBJS";
+  $exes = $exes . " " . $x;
+  print "$x: \$($xobjs)\n";
+  print "\t\$(C++) \$(CDBG) \$(CFLAGS) \$(INCLUDE) -o \$@ \$^ \$(STDLIBS) \$(CERNLIB) \$(FLIB) \$(FLIB_NATIVE) \$(MATHLIB)\n\n"; 
+}
+
+
+
+
+@m = split(' ',$mainscc);
+foreach $x (@m) {
+  $y = $x;
+  $x =~ s/\.cc//;  
+  $xobjs = $x . "OBJS";
+  $exes = $exes . " " . $x;
+  print "$x: \$($xobjs)\n";
+  print "\t\$(C++) \$(CDBG) \$(CFLAGS) \$(INCLUDE) -o \$@ \$^ \$(STDLIBS) \$(CERNLIB) \$(FLIB) \$(FLIB_NATIVE) \$(MATHLIB)\n\n"; 
+}
+
+@m = split(' ',$mainsc);
+foreach $x (@m) {
+  $y = $x;
+  $x =~ s/\.c//;
+  $xobjs = $x . "OBJS";
+  $exes = $exes . " " . $x;
+  print "$x: \$($xobjs)\n";
+  print "\t\$(CC) \$(CDBG) \$(CFLAGS) \$(INCLUDE) -o \$@ \$^ \$(STDLIBS) \$(CERNLIB) \$(FLIB) \$(FLIB_NATIVE) \$(MATHLIB)\n\n"; 
+}
+
+@m = split(' ',$mainsF);
+foreach $x (@m) {
+  $y = $x;
+  $x =~ s/\.F//;
+  $xobjs = $x . "OBJS";
+  $exes = $exes . " " . $x;
+  print "$x: \$($xobjs)\n";
+  print "\t\$(FC) \$(CDBG) \$(FFLAGS) \$(INCLUDE) -o \$@ \$^ \$(STDLIBS) \$(CERNLIB)  \$(MATHLIB)\n\n"; 
+}
+
+@m = split(' ',$mainsf);
+foreach $x (@m) {
+  $y = $x;
+  $x =~ s/\.f//;
+  $xobjs = $x . "OBJS";
+  $exes = $exes . " " . $x;
+  print "$x: \$($xobjs)\n";
+  print "\t\$(FC) \$(CDBG) \$(FFLAGS) \$(INCLUDE) -o \$@ \$^ \$(STDLIBS) \$(CERNLIB)  \$(MATHLIB)\n\n"; 
+}
+
+
+
+
+print "all: lib $exes install\n\n";
+print "LIBS= \$(LOCAL_LIB)/lib$dir\$(ADD_DEBUG).a\n";
+print "lib: \$(LIBS)\n\n";
+
+print "\$(LIBS): \$(OBJS) \$(FOBJS) \$(fOBJS) \$(CCOBJS) \$(CCCOBJS)\n";
+print "\t\$(VDIR) \$(LOCAL_LIB)\n";
+print "\tar rv \$\@ \$?\n";
+
+print "install: $exes\n";
+print "\t\$(VDIR) \$(LOCAL_BIN)\n";
+@exe = split(' ',$exes);
+foreach $e (@exe) {
+#  print "\tmv \$(LOCAL_BIN)/$e \$(LOCAL_BIN)/$e.bak\n";
+  print "\t/usr/bin/install  $e \$(LOCAL_BIN)\n";
+}
+
+foreach $h (@inc) {
+  print "\t/usr/bin/install $h \$(LOCAL_INC)\n";
+}
+
+
+print "env:\n";
+print "\t\@echo EXE \$(EXE)\n";
+print "\t\@echo LIBS \$(LIBS)\n";
+print "\t\@echo CC \$(CC)\n";
+print "\t\@echo FC \$(FC)\n";
+print "\t\@echo OS_NAME \$(OS_NAME)\n";
+print "\t\@echo INCLUDE \$(INCLUDE)\n";
+print "\t\@echo BOSPATH \$(BOSPATH)\n";
+print "\t\@echo FLIB \$(FLIB)\n";
+print "\t\@echo OBJS \$(OBJS)\n";
+print "\t\@echo CFLAGS \$(CFLAGS)\n";
+print "\t\@echo FFLAGS \$(FFLAGS)\n";
+print "\t\@echo CCLAGS \$(CCFAGS)\n";
+print "\t\@echo INCLUDE \$(INCLUDE)\n";
+print "\t\@echo LOCAL_LIB \$(LOCAL_LIB)\n";
+print "\t\@echo LOCAL_BIN \$(LOCAL_BIN)\n";
+print "\t\@echo LOCAL_INCLUDE \$(LOCAL_INCLUDE)\n";
+print "\t\@echo OBJDIR \$(OBJDIR)\n";
+print "\t\@echo MYSQL_ROOT_PATH \$(MYSQL_ROOT_PATH)\n";
+print "\t\@echo MYSQL_LIB_PATH \$(MYSQL_LIB_PATH)\n";
+print "\t\@echo MYSQL_INCLUDE_PATH \$(MYSQL_INCLUDE_PATH)\n";
+print "\t\@echo MAPLIB \$(MAPLIB)\n";
+print "\t\@echo STDLIBS \$(STDLIBS)\n";
+if ($root) {
+  print "\t\@echo ROOTINCLUDE \$(ROOTINCLUDE)\n"; 
+  print "\t\@echo ROOTLIBS \$(ROOTLIBS)\n"; 
+  print "\t\@echo ROOTGLIBS \$(ROOTGLIBS)\n";
+}
+
+
+
+
+@m = split(' ',$mainsf);
+foreach $x (@m) {
+  $y = $x;
+  $x =~ s/\.f//;
+  $xobjs = $x . "OBJS";
+  $exes = $exes . " " . $x;
+  print "\t\@echo $xobjs \$($xobjs)\n";
+}
+

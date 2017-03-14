@@ -1,0 +1,56 @@
+#
+# Makefile for making BOSIO LIB
+#
+ACP = gcc -M
+#
+
+#OBJDIR = $(PHY_DIR)/$(OSNAME)/
+
+#@echo $(OBJDIR)
+
+ROOTINCLUDE = -I$(ROOTSYS)/include 
+PACKINCLUDE = -I../pinclude
+CLASINCLUDE = -I$(CLAS_PACK)/include
+
+ADLIBS = -L$(CLAS_LIB)/ -l c_bos_io 
+SINCS = $(PACKINCLUDE) $(ROOTINCLUDE) $(CLASINCLUDE)
+SLIBS = -lmath 
+DEBUGFLAG=
+ifdef DEBUG
+   DEBUGFLAG=-g
+endif
+
+.PHONY: all 
+
+$(OBJDIR)/%.o: %.cxx
+	@test -d $(OBJDIR) || mkdir -p $(OBJDIR) ;
+	$(ACP) $< > $(OBJDIR)/$*.o.depend $(SINCS)
+	$(CPP) $(DEBUGFLAG) -c -o $@ $< $(SINCS)
+#	mv $*.o $(OBJDIR)$*.o
+#	mv $*.o.depend $(OBJDIR)$*.o.depend
+
+$(OBJDIR)/%.o: $(ADPACK)/%.cxx
+	@test -d $(OBJDIR) || mkdir -p $(OBJDIR) ;
+	$(ACP) $< > $(OBJDIR)/$*.o.depend $(SINCS)
+	$(CPP) $(DEBUGFLAG) -c -o $@ $< $(SINCS)
+#	mv $*.o $(OBJDIR)$*.o
+#	mv $*.o.depend $(OBJDIR)$*.o.depend
+
+$(OBJDIR)/%.o: %.F
+	@test -d $(OBJDIR) || mkdir -p $(OBJDIR) ;
+	$(F77) $(DEBUGFLAG)  $(FPLAT_FLAGS) -c $< -o $(OBJDIR)/$@ $(SINCS)
+
+$(OBJDIR)/%.o: $(ADPACK)/%.F
+	@test -d $(OBJDIR) || mkdir -p $(OBJDIR) ;
+	$(F77) $(DEBUGFLAG)  $(FPLAT_FLAGS) -c $< -o $@ $(SINCS)
+
+$(OBJDIR)/%.o: %.c
+	@test -d $(OBJDIR) || mkdir -p $(OBJDIR) ;
+	$(CC) $(DEBUGFLAG)  -c $< -o $(OBJDIR)/$@ $(SINCS)
+
+$(OBJDIR)/%.o: $(ADPACK)/%.c
+	@test -d $(OBJDIR) || mkdir -p $(OBJDIR) ;
+	$(CC)  $(DEBUGFLAG)  -c $< -o $@ $(SINCS)
+
+.PRECIOUS: %
+

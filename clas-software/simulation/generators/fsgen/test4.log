@@ -1,0 +1,28 @@
+  Input File Specifications
+
+ Initializing BOS
+ There are no input data
+  gd_pkkn_4bps_240.evt 21
+  Output BOS File is 
+ gd_pkkn_4bps_                                                                   
+ 0  0.  0.300000012
+ 4
+ 2212 0 0 0 0 0  0.
+ 2212 0 -1
+  0.  0.938300014  0.939599991
+ 2112 0 0 0 0 0 -321.
+ 2112 0 -1
+  0.  0.938300014  0.939599991
+ 321 0 0 0 0 0  0.
+ 321 365 370
+  0.  0.938300014  0.939599991
+ 8 0 0 0 0 0  0.
+ 8 60 69
+  0.  0.938300014  0.939599991
+  Event Limit      =  100
+  Incident Electron Energy    =   3.75999999GeV
+  Photon Energy Range   =   1.5 -   3.5999999GeV
+
+  Reaction 
+                    g + Deu+ ==> p+ + n0 + K+ + h
+   !!=== Charge is not consrved: before =  1. after =   2.66666675 ===!!

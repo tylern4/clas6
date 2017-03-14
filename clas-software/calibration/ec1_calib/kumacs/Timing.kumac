@@ -1,0 +1,1128 @@
+********************************************************************************
+macro analyze lun=1 ntple=200
+*****
+* [lun]   logic unit
+* [ntple] ntple number
+*****
+exec ini_vect
+***** Get number of events in the Ntuple ****
+CD //LUN[lun]
+call Hnoent([ntple],Nevent)
+call readv.f
+setcorner = no
+for sector in 1 2
+   exec set_sector sector=[sector]
+   exec set_cuts tcut=notimecut
+   exec set_stack_cuts lun=[lun] ntple=[ntple]
+*****
+*  Begin of Delta t equalization
+*****
+   zone 1 2
+   MESSAGE 'Time difference analysis for sector' [sector] 'started'
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=diff calor=inner tcut=indifftimecut
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=diff calor=outer tcut=outdifftimecut
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=diff calor=inout tcut=inoutdifftimecut
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=diff calor=inner tcut=alldifftimecut
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=diff calor=outer tcut=alldifftimecut
+*****
+*  This section would permit to set to zero the Delta t value corresponding to a corner cell
+*****
+   case [setcorner] in
+   (yes)   exec set_cuts tcut=notimecut
+           zone 2 2
+           exec plot_pos_rec lun=[lun] ntple=[ntple] coord=xi dofit=yes
+           VECTOR/OPERATION/VBIAS corrdTxi parplane(3) corrdTxi
+           VECTOR/OPERATION/VBIAS corrdTyi parplane(3) corrdTyi
+           exec plot_pos_rec lun=[lun] ntple=[ntple] coord=xo dofit=yes
+           VECTOR/OPERATION/VBIAS corrdTxo parplane(3) corrdTxo
+           VECTOR/OPERATION/VBIAS corrdTyo parplane(3) corrdTyo
+           zone 2 2
+           exec plot_pos_rec lun=[lun] ntple=[ntple] coord=xi
+           exec plot_pos_rec lun=[lun] ntple=[ntple] coord=yi
+           exec plot_pos_rec lun=[lun] ntple=[ntple] coord=xo
+           exec plot_pos_rec lun=[lun] ntple=[ntple] coord=yo
+   endcase
+   exec set_cuts tcut=alldifftimecut
+   zone 2 2
+   exec plot_time_corr lun=[lun] ntple=[ntple] t1=dT_xi t2=dT_yi dofit=yes saveto=10[sector]1 htitle=DeltaT_(xi-yi)_(ns)
+   exec plot_time_corr lun=[lun] ntple=[ntple] t1=dT_xo t2=dT_yo dofit=yes saveto=10[sector]2 htitle=DeltaT_(xo-yo)_(ns)
+   exec plot_time_corr lun=[lun] ntple=[ntple] t1=dT_xi t2=dT_xo dofit=yes saveto=10[sector]3 htitle=DeltaT_(xi-xo)_(ns)
+   exec plot_time_corr lun=[lun] ntple=[ntple] t1=dT_yi t2=dT_yo dofit=yes saveto=10[sector]4 htitle=DeltaT_(yi-yo)_(ns)
+*****
+*  Save summary in picture
+*****
+   case [sector] in
+   (1)   PICTURE/DELETE Sect1DelT
+         PICTURE/COPY PICT00 Sect1DelT
+   (2)   PICTURE/DELETE Sect2DelT
+         PICTURE/COPY PICT00 Sect2DelT
+   endcase
+   MESSAGE 'Time difference analysis for sector' [sector] 'ended successfully'
+*****
+*  End of Delta t equalization
+*****
+*  Begin of Sigma t equalization
+*****
+   zone 1 2
+   MESSAGE 'Time sum analysis for sector' [sector] 'started'
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=sum calor=inner tcut=insumtimecut
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=sum calor=outer tcut=outsumtimecut
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=sum calor=inout tcut=inoutsumtimecut
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=sum calor=inner tcut=allsumtimecut
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=sum calor=outer tcut=allsumtimecut
+   exec minimize_T lun=[lun] ntple=[ntple] tvar=sum calor=inout tcut='allsumtimecut'
+   zone 2 2
+   exec plot_time_corr lun=[lun] ntple=[ntple] t1=T_xi t2=T_yi dofit=yes saveto=10[sector]5 htitle=SigmaT_(xi-yi)_(ns)
+   exec plot_time_corr lun=[lun] ntple=[ntple] t1=T_xo t2=T_yo dofit=yes saveto=10[sector]6 htitle=SigmaT_(xo-yo)_(ns)
+   exec plot_time_corr lun=[lun] ntple=[ntple] t1=T_xi t2=T_xo dofit=yes saveto=10[sector]7 htitle=SigmaT_(xi-xo)_(ns)
+   exec plot_time_corr lun=[lun] ntple=[ntple] t1=T_yi t2=T_yo dofit=yes saveto=10[sector]8 htitle=SigmaT_(yi-yo)_(ns)
+*****
+*  Save summary in picture
+*****
+   case [sector] in
+   (1)   PICTURE/DELETE Sect1SigT
+         PICTURE/COPY PICT00 Sect1SigT
+   (2)   PICTURE/DELETE Sect2SigT
+         PICTURE/COPY PICT00 Sect2SigT
+   endcase
+   MESSAGE 'Time sum analysis for sector' [sector] 'ended successfully'
+*****
+*  End of Sigma t equalization
+*****
+*  Storaging of correcting values
+*****
+   zone 1 1
+   case [sector] in
+   (1)   /VECTOR/COPY corrTxi sec1Txi
+         /VECTOR/COPY corrdTxi sec1dTxi
+         /VECTOR/COPY corrTyi sec1Tyi
+         /VECTOR/COPY corrdTyi sec1dTyi
+         /VECTOR/COPY corrTxo sec1Txo
+         /VECTOR/COPY corrdTxo sec1dTxo
+         /VECTOR/COPY corrTyo sec1Tyo
+         /VECTOR/COPY corrdTyo sec1dTyo
+   (2)   /VECTOR/COPY corrTxi sec2Txi
+         /VECTOR/COPY corrdTxi sec2dTxi
+         /VECTOR/COPY corrTyi sec2Tyi
+         /VECTOR/COPY corrdTyi sec2dTyi
+         /VECTOR/COPY corrTxo sec2Txo
+         /VECTOR/COPY corrdTxo sec2dTxo
+         /VECTOR/COPY corrTyo sec2Tyo
+         /VECTOR/COPY corrdTyo sec2dTyo
+   endcase
+endfor
+shell if( -f calib_t.dat) rm calib_t.dat
+call writev.f
+return
+********************************************************************************
+********************************************************************************
+macro ini_vect
+*****
+Option NSTA
+Option FIT
+
+/VECTOR/CREATE parplane(3) R 1.12 1.226 0.
+/VECTOR/CREATE par1gaus(3) R 100. 0. .3
+/VECTOR/CREATE par2gaus(6) R 100. -1. .3 100. 1. .3
+
+/VECTOR/CREATE sec1Txi(24) R
+/VECTOR/CREATE sec1Tyi(40) R
+/VECTOR/CREATE sec1Txo(24) R
+/VECTOR/CREATE sec1Tyo(40) R
+
+/VECTOR/CREATE sec2Txi(24) R
+/VECTOR/CREATE sec2Tyi(40) R
+/VECTOR/CREATE sec2Txo(24) R
+/VECTOR/CREATE sec2Tyo(40) R
+
+/VECTOR/CREATE sec1dTxi(24) R
+/VECTOR/CREATE sec1dTyi(40) R
+/VECTOR/CREATE sec1dTxo(24) R
+/VECTOR/CREATE sec1dTyo(40) R
+
+/VECTOR/CREATE sec2dTxi(24) R
+/VECTOR/CREATE sec2dTyi(40) R
+/VECTOR/CREATE sec2dTxo(24) R
+/VECTOR/CREATE sec2dTyo(40) R
+
+/VECTOR/CREATE corrTxi(24) R
+/VECTOR/CREATE corrTyi(40) R
+/VECTOR/CREATE corrTxo(24) R
+/VECTOR/CREATE corrTyo(40) R
+
+/VECTOR/CREATE corrdTxi(24) R
+/VECTOR/CREATE corrdTyi(40) R
+/VECTOR/CREATE corrdTxo(24) R
+/VECTOR/CREATE corrdTyo(40) R
+
+/VECTOR/CREATE DcorrTx(24) R
+/VECTOR/CREATE DcorrTy(40) R
+
+/VECTOR/CREATE Stackxi(24) R
+/VECTOR/CREATE Stackyi(40) R
+/VECTOR/CREATE Stackxo(24) R
+/VECTOR/CREATE Stackyo(40) R
+
+/VECTOR/CREATE Dmeans(4) R
+
+/VECTOR/CREATE Nevent I
+
+/HISTOGRAM/CREATE/1DHISTO 1000 'Timing temporary result' 60 -3. 3. 0.
+/HISTOGRAM/CREATE/1DHISTO 1001 ' ' 60 -3. 3. 0.
+/HISTOGRAM/CREATE/1DHISTO 1002 ' ' 60 -3. 3. 0.
+/HISTOGRAM/CREATE/1DHISTO 1003 ' ' 60 -3. 3. 0.
+/HISTOGRAM/CREATE/1DHISTO 1004 ' ' 60 -3. 3. 0.
+/HISTOGRAM/CREATE/1DHISTO 1005 ' ' 60 -3. 3. 0.
+/HISTOGRAM/CREATE/1DHISTO 1006 ' ' 60 -3. 3. 0.
+/HISTOGRAM/CREATE/1DHISTO 1007 ' ' 60 -3. 3. 0.
+/HISTOGRAM/CREATE/1DHISTO 1008 ' ' 60 -3. 3. 0.
+
+limit = 6.
+/HISTOGRAM/CREATE/2DHISTO 2011 'Timing equalization in progress' 24 1. 25. 10*[limit] -[limit] [limit]
+/HISTOGRAM/CREATE/2DHISTO 2012 'Timing equalization in progress' 40 1. 41. 10*[limit] -[limit] [limit]
+/HISTOGRAM/CREATE/PROX 2011
+/HISTOGRAM/CREATE/PROX 2012
+
+limit = 100.
+/HISTOGRAM/CREATE/PROFILE 1001 'Timing equalization in progress' 24 1. 25. -[limit] [limit]
+/HISTOGRAM/CREATE/PROFILE 1002 'Timing equalization in progress' 40 1. 41. -[limit] [limit]
+
+/HISTOGRAM/CREATE/2DHISTO 2001 'Timing equalization in progress' 24 1. 25. 40 1. 41.
+return
+********************************************************************************
+********************************************************************************
+macro set_sector sector=1
+*****
+* [sector] select sector
+*****
+Ntuple/Cuts $1 Sector=[sector]
+case [sector] in
+(1)   /VECTOR/COPY sec1Txi corrTxi
+      /VECTOR/COPY sec1dTxi corrdTxi
+      /VECTOR/COPY sec1Tyi corrTyi
+      /VECTOR/COPY sec1dTyi corrdTyi
+      /VECTOR/COPY sec1Txo corrTxo
+      /VECTOR/COPY sec1dTxo corrdTxo
+      /VECTOR/COPY sec1Tyo corrTyo
+      /VECTOR/COPY sec1dTyo corrdTyo
+(2)   /VECTOR/COPY sec2Txi corrTxi
+      /VECTOR/COPY sec2dTxi corrdTxi
+      /VECTOR/COPY sec2Tyi corrTyi
+      /VECTOR/COPY sec2dTyi corrdTyi
+      /VECTOR/COPY sec2Txo corrTxo
+      /VECTOR/COPY sec2dTxo corrdTxo
+      /VECTOR/COPY sec2Tyo corrTyo
+      /VECTOR/COPY sec2dTyo corrdTyo
+endcase
+return
+********************************************************************************
+********************************************************************************
+macro set_cuts tcut=alltimecut
+*****
+* [tcut] select time cuts
+*****
+* Default cuts
+*****
+tmax = 300
+Ntuple/Cuts $70 -
+Ntuple/Cuts $80 -
+Ntuple/Cuts $70 id_xi.NE.0
+Ntuple/Cuts $80 $1.and.T_xi<[tmax].and.T_yi<[tmax].and.T_xo<[tmax].and.T_yo<[tmax].and.dT_xi<[tmax].and.dT_yi<[tmax].and.dT_xo<[tmax].and.dT_yo<[tmax].and.id_xi=id_xo.and.id_yo=id_yi.and.Nhit=4.and.$70
+*****
+* Energy cuts
+*****
+exec set_energy_cut part=pion
+*****
+* Time cuts
+*****
+tcut1 = 5.
+tcut2 = 2.
+Ntuple/Cuts $10 -
+Ntuple/Cuts $11 -
+Ntuple/Cuts $12 -
+Ntuple/Cuts $13 -
+Ntuple/Cuts $14 -
+Ntuple/Cuts $15 -
+Ntuple/Cuts $16 -
+Ntuple/Cuts $17 -
+Ntuple/Cuts $10 abs((dT_xi-corrdTxi(int(id_xi)))-(dT_yi-corrdTyi(int(id_yi))))<[tcut1]
+Ntuple/Cuts $11 abs((dT_xo-corrdTxo(int(id_xi)))-(dT_yo-corrdTyo(int(id_yi))))<[tcut1]
+Ntuple/Cuts $12 abs((dT_xi-corrdTxi(int(id_xi)))-(dT_xo-corrdTxo(int(id_xi))))<2.*[tcut1]
+Ntuple/Cuts $13 abs((dT_yi-corrdTyi(int(id_yi)))-(dT_yo-corrdTyo(int(id_yi))))<2.*[tcut1]
+Ntuple/Cuts $14 abs((T_xi-corrTxi(int(id_xi)))-(T_yi-corrTyi(int(id_yi))))<[tcut2]
+Ntuple/Cuts $15 abs((T_xo-corrTxo(int(id_xo)))-(T_yo-corrTyo(int(id_yo))))<[tcut2]
+Ntuple/Cuts $16 abs((T_xi-corrTxi(int(id_xi)))-(T_xo-corrTxo(int(id_xo))))<[tcut1]
+Ntuple/Cuts $17 abs((T_yi-corrTyi(int(id_yi)))-(T_yo-corrTyo(int(id_yo))))<[tcut1]
+exec set_time_cut tcut=[tcut]
+return
+********************************************************************************
+********************************************************************************
+macro set_stack_cuts lun=1 ntple=200
+zone 1 2
+exec find_no_zero_stacks lun=[lun] ntple=[ntple] tvar=diff
+SIGMA compin = array(1,1.)
+SIGMA compout = array(1,1.)
+SIGMA compin = vmax(Stackxi)
+SIGMA compout = vmax(Stackxo)
+limiti = compin(1)/10
+limito = compout(1)/10
+SIGMA count = array(1,1.)
+stack_cut = id_xi.ne.0
+while count(1).le.24 do 
+   index = count(1)
+   if Stackxi([index])<[limiti].or.Stackxo([index])<[limito] then
+        stack_cut = [stack_cut]//.and.id_xi.ne.//[index]
+   endif
+   /VECTOR/OPERATION/VBIAS count 1 count
+endwhile
+SIGMA count = array(1,1.)
+while count(1).le.40 do 
+   index = count(1)
+   if Stackyi([index])<[limiti].or.Stackyo([index])<[limito] then
+        stack_cut = [stack_cut]//.and.id_yi.ne.//[index]
+   endif
+   /VECTOR/OPERATION/VBIAS count 1 count
+endwhile
+Ntuple/Cuts $70 -
+Ntuple/Cuts $70 [stack_cut]
+return
+********************************************************************************
+********************************************************************************
+macro set_energy_cut  part=pion
+*****
+* [part] selected particle to analyze
+*****
+case [part] in
+(pion)   Ntuple/Cuts $82 tot_in>50.and.tot_out>50.and.(tot_out+tot_in)<130.
+(proton) Ntuple/Cuts $82 tot_in>80.and.tot_out>80
+endcase
+return
+********************************************************************************
+********************************************************************************
+macro set_time_cut tcut=alltimecut 
+*****
+* [tcut] select time cuts
+*****
+* Time cuts
+*****
+Ntuple/Cuts $90 -
+*****
+case [tcut] in
+(notimecut)          Ntuple/Cuts $90 $80.AND.$82
+(indifftimecut)      Ntuple/Cuts $90 $80.AND.$82.AND.$10
+(outdifftimecut)     Ntuple/Cuts $90 $80.AND.$82.AND.$11
+(inoutdifftimecut)   Ntuple/Cuts $90 $80.AND.$82.AND.$10.AND.$11
+(alldifftimecut)     Ntuple/Cuts $90 $80.AND.$82.AND.$10.AND.$11.AND.$12.AND.$13
+(insumtimecut)       Ntuple/Cuts $90 $80.AND.$82.AND.$14
+(outsumtimecut)      Ntuple/Cuts $90 $80.AND.$82.AND.$15
+(inoutsumtimecut)    Ntuple/Cuts $90 $80.AND.$82.AND.$14.AND.$15
+(allsumtimecut)      Ntuple/Cuts $90 $80.AND.$82.AND.$14.AND.$15.AND.$16.AND.$17
+(alltimecut)         Ntuple/Cuts $90 $80.AND.$82.AND.$10.AND.$11.AND.$12.AND.$13.AND.$14.AND.$15.AND.$16.AND.$17
+(*)                  Ntuple/Cuts $90 $80.AND.$82
+endcase
+return
+********************************************************************************
+********************************************************************************
+macro find_no_zero_stacks lun=1 ntple=200 tvar=time_error tcut=cut_error calor=calor_error
+*****
+* find all stacks giving signals
+* example: exec Timing# find_no_zero_stackslun=1 ntple=200 tvar=diff calor=inner tcut=notimecut
+*****
+* [lun] logic unit
+* [ntple] ntple number
+* [tvar] analyzes time sum/diff 
+* [calor] analizes inner or outer or inner-outer
+* [tcut] select time cut
+*****
+* plot of starting T data set
+*****
+Ntuple/Cuts $90 -
+Ntuple/Cuts $90 $80.AND.$82
+exec plot_diff_id_dependence lun=[lun] ntple=[ntple] tvar=[tvar] calor=inner xvar=y
+exec plot_diff_id_dependence lun=[lun] ntple=[ntple] tvar=[tvar] calor=inner xvar=x
+/HISTOGRAM/PROJ 2011
+/HISTOGRAM/COPY 2011.prox 1031
+/HISTOGRAM/PROJ 2012
+/HISTOGRAM/COPY 2012.prox 1032
+/HISTOGRAM/GET_VECT/CONTENTS 1031 Stackxi
+/HISTOGRAM/GET_VECT/CONTENTS 1032 Stackyi
+exec plot_diff_id_dependence lun=[lun] ntple=[ntple] tvar=[tvar] calor=outer xvar=y
+exec plot_diff_id_dependence lun=[lun] ntple=[ntple] tvar=[tvar] calor=outer xvar=x
+/HISTOGRAM/PROJ 2011
+/HISTOGRAM/DELETE 1031
+/HISTOGRAM/COPY 2011.prox 1031
+/HISTOGRAM/PROJ 2012
+/HISTOGRAM/DELETE 1032
+/HISTOGRAM/COPY 2012.prox 1032
+/HISTOGRAM/GET_VECT/CONTENTS 1031 Stackxo
+/HISTOGRAM/GET_VECT/CONTENTS 1032 Stackyo
+return
+********************************************************************************
+********************************************************************************
+macro minimize_T lun=1 ntple=200 tvar=time_error tcut=cut_error calor=calor_error
+*****
+* minimize the difference among two time variables
+* example: exec Timing#minimize_T lun=1 ntple=200 tvar=diff calor=inner tcut=notimecut
+*****
+* [lun] logic unit
+* [ntple] ntple number
+* [tvar] analyzes time sum/diff 
+* [calor] analizes inner or outer or inner-outer
+* [tcut] select time cut
+*****
+* plot of starting T data set
+*****
+case [tcut] in
+(alldifftimecut)     exec set_time_cut tcut=[tcut]
+(allsumtimecut)      exec set_time_cut tcut=[tcut]
+(*)                  Ntuple/Cuts $90 -
+                     Ntuple/Cuts $90 $80.AND.$82
+endcase
+exec plot_diff_id_dependence lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] xvar=y
+exec plot_diff_id_dependence lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] xvar=x
+*****
+* minimization of T
+*****
+/HISTOGRAM/DELETE 1000
+/HISTOGRAM/CREATE/1DHISTO 1000 ' ' 100 -10. 10. 0.
+exec eval_correction lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] stacks=allstacks tcut=[tcut]
+/HISTOGRAM/DELETE 1000
+/HISTOGRAM/CREATE/1DHISTO 1000 ' ' 60 -3. 3. 0.
+case [tcut] in
+(alldifftimecut)     SIGMA compare = array(1,1.)
+                     SIGMA count = array(1,1.)
+                     while compare(1).gt.0.01.and.count(1).lt.20 do 
+                        exec eval_correction lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] stacks=allstacks tcut=[tcut]
+                        SIGMA compare = vmax(Dmeans)
+                        /VECTOR/OPERATION/VBIAS count 1 count
+                     endwhile	
+(allsumtimecut)      SIGMA compare = array(1,1.)
+                     SIGMA count = array(1,1.)
+                     while compare(1).gt.0.01.and.count(1).lt.20 do 
+                        exec eval_correction lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] stacks=allstacks tcut=[tcut]
+                        SIGMA compare = vmax(Dmeans)
+                        /VECTOR/OPERATION/VBIAS count 1 count
+                     endwhile	
+(alltimecut)         SIGMA compare = array(1,1.)
+                     SIGMA count = array(1,1.)
+                     while compare(1).gt.0.01.and.count(1).lt.20 do 
+                        exec eval_correction lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] stacks=allstacks tcut=[tcut]
+                        SIGMA compare = vmax(Dmeans)
+                        /VECTOR/OPERATION/VBIAS count 1 count
+                     endwhile	
+(*)                  exec eval_correction lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] stacks=singlestack tcut=notimecut
+                     SIGMA compare = array(1,1.)
+                     SIGMA count = array(1,1.)
+                     while compare(1).gt.0.5.and.count(1).lt.20 do 
+                        exec eval_correction lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] stacks=allstacks tcut=notimecut
+                        SIGMA compare = vmax(Dmeans)
+                        /VECTOR/OPERATION/VBIAS count 1 count
+                     endwhile
+                     SIGMA compare = array(1,1.)
+                     SIGMA count = array(1,1.)
+                     while compare(1).gt.0.01.and.count(1).lt.20 do 
+                        exec eval_correction lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] stacks=allstacks tcut=[tcut]
+                        SIGMA compare = vmax(Dmeans)
+                        /VECTOR/OPERATION/VBIAS count 1 count
+                     endwhile	
+endcase
+*****
+* plot of final T data set
+*****
+case [tcut] in
+(notimecut)          exec set_time_cut tcut=[tcut]
+(indifftimecut)      exec set_time_cut tcut=[tcut]
+(outdifftimecut)     exec set_time_cut tcut=[tcut]
+(inoutdifftimecut)   exec set_time_cut tcut=[tcut]
+(alldifftimecut)     exec set_time_cut tcut=[tcut]
+(insumtimecut)       exec set_time_cut tcut=[tcut]
+(outsumtimecut)      exec set_time_cut tcut=[tcut]
+(inoutsumtimecut)    exec set_time_cut tcut=[tcut]
+(allsumtimecut)      exec set_time_cut tcut=[tcut]
+(alltimecut)         exec set_time_cut tcut=[tcut]
+(*)                  exec err_mess Minimize_T [tcut]
+endcase
+exec plot_diff_id_dependence lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] xvar=y
+exec plot_diff_id_dependence lun=[lun] ntple=[ntple] tvar=[tvar] calor=[calor] xvar=x
+return
+********************************************************************************
+********************************************************************************
+macro eval_correction lun=1 ntple=200 tcut=cut_error tvar=time_error calor=calor_error stack=stack_error
+*****
+* evaluate the correction to apply to time variables
+* example: exec Timing#eval_correction lun=1 ntple=200 tcut=notimecut tvar=diff calor=inner stack=allstacks
+*****
+* [lun] logic unit
+* [ntple] ntple number
+* [tvar] analyzes time sum/diff 
+* [calor] analizes inner/outer
+* [stack] analizes only one stack/all stacks together
+* [tcut] select time cut
+*****
+* select inner/outer variables
+*****
+case [calor] in
+(inner)   case [tvar] in
+          (diff)   T1 = dT_yi
+                   T2 = dT_xi
+                   T3 = dT_xi
+                   T4 = dT_yi
+                   corrT1 = corrdTyi
+                   corrT2 = corrdTxi
+                   corrT3 = corrdTxi
+                   corrT4 = corrdTyi
+                   case [tcut] in
+                   (notimecut)          exec set_time_cut tcut=[tcut]
+                   (indifftimecut)      exec set_time_cut tcut=[tcut]
+                   (outdifftimecut)     exec set_time_cut tcut=[tcut]
+                   (inoutdifftimecut)   exec set_time_cut tcut=[tcut]
+                   (alldifftimecut)	exec set_time_cut tcut=[tcut]
+                   (*)                  exec err_mess eval_correction [tcut]
+                   endcase
+          (sum)    T1 = T_yi
+                   T2 = T_xi
+                   T3 = T_xi
+                   T4 = T_yi
+                   corrT1 = corrTyi
+                   corrT2 = corrTxi
+                   corrT3 = corrTxi
+                   corrT4 = corrTyi
+                   case [tcut] in
+                   (notimecut)          exec set_time_cut tcut=[tcut]
+                   (insumtimecut)       exec set_time_cut tcut=[tcut]
+                   (outsumtimecut)      exec set_time_cut tcut=[tcut]
+                   (inoutsumtimecut)    exec set_time_cut tcut=[tcut]
+                   (allsumtimecut)      exec set_time_cut tcut=[tcut]
+                   (*)                  exec err_mess eval_correction [tcut]
+                   endcase
+          (*)      exec err_mess eval_correction [tvar]
+          endcase
+          id1 = (int(id_yi))
+          id2 = (int(id_xi))
+          id3 = (int(id_xi))
+          id4 = (int(id_yi))
+(outer)   case [tvar] in
+          (diff)   T1 = dT_yo
+                   T2 = dT_xo
+                   T3 = dT_xo
+                   T4 = dT_yo
+                   corrT1 = corrdTyo
+                   corrT2 = corrdTxo
+                   corrT3 = corrdTxo
+                   corrT4 = corrdTyo
+                   case [tcut] in
+                   (notimecut)          exec set_time_cut tcut=[tcut]
+                   (indifftimecut)      exec set_time_cut tcut=[tcut]
+                   (outdifftimecut)     exec set_time_cut tcut=[tcut]
+                   (inoutdifftimecut)   exec set_time_cut tcut=[tcut]
+                   (alldifftimecut)     exec set_time_cut tcut=[tcut]
+                   (*)                  exec err_mess eval_correction [tcut]
+                   endcase
+          (sum)    T1 = T_yo
+                   T2 = T_xo
+                   T3 = T_xo
+                   T4 = T_yo
+                   corrT1 = corrTyo
+                   corrT2 = corrTxo
+                   corrT3 = corrTxo
+                   corrT4 = corrTyo
+                   case [tcut] in
+                   (notimecut)          exec set_time_cut tcut=[tcut]
+                   (insumtimecut)       exec set_time_cut tcut=[tcut]
+                   (outsumtimecut)      exec set_time_cut tcut=[tcut]
+                   (inoutsumtimecut)    exec set_time_cut tcut=[tcut]
+                   (allsumtimecut)      exec set_time_cut tcut=[tcut]
+                   (*)                  exec err_mess eval_correction [tcut]
+                   endcase
+          (*)      exec err_mess eval_correction [tvar]
+          endcase	
+          id1 = (int(id_yo))
+          id2 = (int(id_xo))
+          id3 = (int(id_xo))
+          id4 = (int(id_yo))
+(inout)   case [tvar] in
+          (diff)   T1 = dT_xi
+                   T2 = dT_xo
+                   T3 = dT_yi
+                   T4 = dT_yo
+                   corrT1 = corrdTxi
+                   corrT2 = corrdTxo
+                   corrT3 = corrdTyi
+                   corrT4 = corrdTyo
+                   case [tcut] in
+                   (notimecut)          exec set_time_cut tcut=[tcut]
+                   (indifftimecut)      exec set_time_cut tcut=[tcut]
+                   (outdifftimecut)     exec set_time_cut tcut=[tcut]
+                   (inoutdifftimecut)   exec set_time_cut tcut=[tcut]
+                   (alldifftimecut)     exec set_time_cut tcut=[tcut]
+                   (*)                  exec err_mess eval_correction [tcut]
+                   endcase
+          (sum)    T1 = T_xi
+                   T2 = T_xo
+                   T3 = T_yi
+                   T4 = T_yo
+                   corrT1 = corrTxi
+                   corrT2 = corrTxo
+                   corrT3 = corrTyi
+                   corrT4 = corrTyo
+                   case [tcut] in
+                   (notimecut)          exec set_time_cut tcut=[tcut]
+                   (insumtimecut)       exec set_time_cut tcut=[tcut]
+                   (outsumtimecut)      exec set_time_cut tcut=[tcut]
+                   (inoutsumtimecut)    exec set_time_cut tcut=[tcut]
+                   (allsumtimecut)      exec set_time_cut tcut=[tcut]
+                   (*)                  exec err_mess eval_correction [tcut]
+                   endcase
+          (*)      exec err_mess eval_correction [tvar]
+          endcase	
+          id1 = (int(id_xi))
+          id2 = (int(id_xo))
+          id3 = (int(id_yi))
+          id4 = (int(id_yo))
+(*)       exec err_mess eval_correction [calor]
+endcase
+*****
+case [calor] in
+(inout)   exec plot_time_corr lun=[lun] ntple=[ntple] t1=[T1] t2=[T2] dofit=yes
+          /VECTOR/OPERATIONS/VBIAS [corrT2] -par1gaus(2) [corrT2]
+          /VECTOR/OPERATIONS/VBIAS [corrT4] -par1gaus(2) [corrT4]
+(*)       option UTIT
+          title_global ([T1]-[T2])%id_yi U
+          case [stacks] in
+          (singlestack)  Ntuple/Plot //lun[lun]/[ntple].([T1]-[corrT1][id1])-([T2]-[corrT2][id2])%id_yi $90.AND.abs(id_xi-10)<2 Nevent 1 1 PROF 1002
+                        atitle 'stack' 'nsec'
+          (allstacks)   Ntuple/Plot //lun[lun]/[ntple].([T1]-[corrT1][id1])-([T2]-[corrT2][id2])%id_yi $90 Nevent 1 1 PROF 1002
+                        atitle 'stack' 'nsec'
+          (*)           exec err_mess eval_correction [stacks]
+          endcase
+          option HTIT
+          /HISTOGRAM/GET_VECT/CONTENTS 1002 DcorrTy
+          /VECTOR/OPERATIONS/VADD [corrT1] DcorrTy [corrT1]
+
+          option UTIT
+          title_global ([T3]-[T4])%id_xi U
+          case [stacks] in
+          (singlestack)  Ntuple/Plot //lun[lun]/[ntple].([T3]-[corrT3][id3])-([T4]-[corrT4][id4])%id_xi $90.AND.abs(id_yi-21)<2 Nevent 1 1 PROF 1001
+                        atitle 'stack' 'nsec '
+          (allstacks)   Ntuple/Plot //lun[lun]/[ntple].([T3]-[corrT3][id3])-([T4]-[corrT4][id4])%id_xi $90 Nevent 1 1 PROF 1001
+                        atitle 'stack' 'nsec '
+          (*)           exec err_mess eval_correction [stacks]
+          endcase
+          option HTIT
+          /HISTOGRAM/GET_VECT/CONTENTS 1001 DcorrTx
+          /VECTOR/OPERATIONS/VADD [corrT3] DcorrTx [corrT3]
+endcase
+SIGMA temp1=abs(vmax(DcorrTy))
+SIGMA temp2=abs(vmin(DcorrTy))
+SIGMA temp3=abs(vmax(DcorrTx))
+SIGMA temp4=abs(vmin(DcorrTx))
+SIGMA Dmeans=array(4,temp1&temp2&temp3&temp4)
+return
+********************************************************************************
+********************************************************************************
+macro plot_diff_id_dependence lun=1 ntple=200 tvar=time_error calor=calor_error xvar=x_error
+*****
+* plot a 2-d histogram of a time difference as a function of x or y
+* example: exec Timing#plot_diff_id_dependence lun=1 ntple=200 tvar=diff calor=inner xvar=x
+*****
+* [lun]   logic unit
+* [ntple] ntple number
+* [tvar]  analyzes time sum/diff 
+* [calor] analizes inner/outer
+* [xvar]  plot vs. x/y
+*****
+doplot = 1
+case [tvar] in
+(diff)	case [calor] in
+	(inner)	T1 = dT_xi
+		T2 = dT_yi
+		corrT1 = corrdTxi(int(id_xi))
+		corrT2 = corrdTyi(int(id_yi))
+	(outer)	T1 = dT_xo
+		T2 = dT_yo
+		corrT1 = corrdTxo(int(id_xo))
+		corrT2 = corrdTyo(int(id_yo))
+	(inout)	case [xvar] in
+		(x)	T1 = dT_yi
+			T2 = dT_yo
+			corrT1 = corrdTyi(int(id_yi))
+			corrT2 = corrdTyo(int(id_yo))
+		(y)	T1 = dT_xi
+			T2 = dT_xo
+			corrT1 = corrdTxi(int(id_xi))
+			corrT2 = corrdTxo(int(id_xo))
+		(*)	exec err_mess plot_diff_id_dependence [xvar]
+			doplot = 0
+		endcase
+	(*)	exec err_mess plot_diff_id_dependence [tvar]
+		doplot = 0
+	endcase
+(sum)	case [calor] in
+	(inner)	T1 = T_xi
+		T2 = T_yi
+		corrT1 = corrTxi(int(id_xi))
+		corrT2 = corrTyi(int(id_yi))
+	(outer)	T1 = T_xo
+		T2 = T_yo
+		corrT1 = corrTxo(int(id_xo))
+		corrT2 = corrTyo(int(id_yo))
+	(inout)	case [xvar] in
+		(x)	T1 = T_yi
+			T2 = T_yo
+			corrT1 = corrTyi(int(id_yi))
+			corrT2 = corrTyo(int(id_yo))
+		(y)	T1 = T_xi
+			T2 = T_xo
+			corrT1 = corrTxi(int(id_xi))
+			corrT2 = corrTxo(int(id_xo))
+		(*)	exec err_mess plot_diff_id_dependence [xvar]
+			doplot = 0
+		endcase
+	(*)	exec err_mess plot_diff_id_dependence [tvar]
+		doplot = 0
+	endcase
+endcase
+case [xvar] in
+(x)	var = id_xi
+	hprof = 1001
+	hbox = 2011
+(y)	var = id_yi
+	hprof = 1002
+	hbox = 2012
+(*)	exec err_mess plot_diff_id_dependence [xvar]
+	doplot = 0
+endcase
+*****
+if [doplot] then
+	set hcol 1
+        igset pmci 1
+	set hwid 1
+	igset mtyp 1
+	option UTIT
+	title_global ([T1]-[T2])%[var] U
+	Ntuple/Plot //lun[lun]/[ntple].([T1]-[corrT1])-([T2]-[corrT2])%[var] $90 Nevent 1 1 BOX [hbox]
+	atitle 'stack' 'nsec'
+	option HTIT
+	set hcol 1002
+        igset pmci 2
+	set hwid 3
+	igset mtyp 29
+	Ntuple/Plot //lun[lun]/[ntple].([T1]-[corrT1])-([T2]-[corrT2])%[var] $90 Nevent 1 1 'SPROF' [hprof]
+	set hcol 1
+        igset pmci 1
+	set hwid 1
+	igset mtyp 1
+endif
+return
+********************************************************************************
+********************************************************************************
+macro plot_id_dependence lun=1 ntple=200 tvar=time_error xvar=x_error
+*****
+* plot a 2-d histogram of a time variable as a function of x or y
+* example: exec Timing#plot_id_dependence lun=1 ntple=200 tvar=dT_xi xvar=x
+*****
+* [lun]   logic unit
+* [ntple] ntple number
+* [tvar]  time variable
+* [xvar]  plot vs. x/y
+*****
+doplot = 1
+case [tvar] in
+(dT_xi) corrT1 = corrdTxi(int(id_xi))
+(dT_yi) corrT1 = corrdTyi(int(id_yi))
+(dT_xo) corrT1 = corrdTxo(int(id_xo))
+(dT_yo) corrT1 = corrdTyo(int(id_yo))
+(T_xi)  corrT1 = corrTxi(int(id_xi))
+(T_yi)  corrT1 = corrTyi(int(id_yi))
+(T_xo)  corrT1 = corrTxo(int(id_xo))
+(T_yo)  corrT1 = corrTyo(int(id_yo))
+(*)	exec err_mess plot_id_dependence [tvar]
+	doplot = 0
+endcase	
+case [xvar] in
+(x)	var = id_xi
+	hbox = 2011
+(y)	var = id_yi
+	hbox = 2012
+(*)	exec err_mess plot_id_dependence [xvar]
+	doplot = 0
+endcase
+*****
+if [doplot] then
+	option UTIT
+	title_global [tvar]%[var] U
+	Ntuple/Plot //lun[lun]/[ntple].([tvar]-[corrT1])%[var] $90 Nevent 1 1 BOX [hbox]
+	atitle 'stack' 'nsec'
+	option HTIT
+endif
+return
+********************************************************************************
+********************************************************************************
+macro plot_2id_dependence lun=1 ntple=200 tvar=time_error calor=calor_error xvar=x_error
+*****
+* plot a 2-d histogram of a single time variable as a function of x and y
+* example: exec Timing#plot_2id_dependence lun=1 ntple=200 tvar=diff calor=inner xvar=x
+*****
+* [lun]   logic unit
+* [ntple] ntple number
+* [tvar]  analyzes time sum/diff 
+* [calor] analizes inner/outer
+* [xvar]  plot time x or y or difference
+*****
+doplot = 1
+case [tvar] in
+(diff)	case [calor] in
+	(inner)	case [xvar] in
+		(x)	T1 = dT_xi
+			corrT1 = corrdTxi(int(id_xi))
+		(y)	T1 = dT_yi
+			corrT1 = corrdTyi(int(id_yi))
+		(d)	T1 = dT_xi-dT_yi
+			corrT1 = corrdTxi(int(id_xi))+corrdTyi(int(id_yi))
+		(s)	T1 = dT_xi+dT_yi
+			corrT1 = corrdTxi(int(id_xi))-corrdTyi(int(id_yi))
+		(*)	exec err_mess plot_diff_id_dependence [xvar]
+			doplot = 0
+		endcase
+	(outer)	case [xvar] in
+		(x)	T1 = dT_xo
+			corrT1 = corrdTxo(int(id_xo))
+		(y)	T1 = dT_yo
+			corrT1 = corrdTyo(int(id_yo))
+		(d)	T1 = dT_xo-dT_yo
+			corrT1 = corrdTxo(int(id_xo))+corrdTyo(int(id_yo))
+		(s)	T1 = dT_xo+dT_yo
+			corrT1 = corrdTxo(int(id_xo))-corrdTyo(int(id_yo))
+		(*)	exec err_mess plot_diff_id_dependence [xvar]
+			doplot = 0
+		endcase
+	(*)	exec err_mess plot_2id_dependence [calor]
+		doplot = 0
+	endcase
+(sum)	case [calor] in
+	(inner)	case [xvar] in
+		(x)	T1 = T_xi
+			corrT1 = corrTxi(int(id_xi))
+		(y)	T1 = T_yi
+			corrT1 = corrTyi(int(id_yi))
+		(d)	T1 = T_xi-T_yi
+			corrT1 = corrTxi(int(id_xi))+corrTyi(int(id_yi))
+		(s)	T1 = T_xi+T_yi
+			corrT1 = corrTxi(int(id_xi))-corrTyi(int(id_yi))
+		(*)	exec err_mess plot_diff_id_dependence [xvar]
+			doplot = 0
+		endcase
+	(outer)	case [xvar] in
+		(x)	T1 = T_xo
+			corrT1 = corrTxo(int(id_xo))
+		(y)	T1 = T_yo
+			corrT1 = corrTyo(int(id_yo))
+		(d)	T1 = T_xo-T_yo
+			corrT1 = corrTxo(int(id_xo))+corrTyo(int(id_yo))
+		(s)	T1 = T_xo+T_yo
+			corrT1 = corrTxo(int(id_xo))-corrTyo(int(id_yo))
+		(*)	exec err_mess plot_diff_id_dependence [xvar]
+			doplot = 0
+		endcase
+	(*)	exec err_mess plot_2id_dependence [calor]
+		doplot = 0
+	endcase
+	(*)	exec err_mess plot_2id_dependence [tvar]
+		doplot = 0
+endcase
+*****
+if [doplot] then
+	plane=((parplane(1)*(id_xi-0.5)+parplane(2)*(id_yi-0.5)+parplane(3)))/8.
+	option UTIT
+	title_global [T1]%id_xi%id_yi U
+	Ntuple/Plot //lun[lun]/[ntple].([T1]-[corrT1])-[plane]%id_xi%id_yi $90 Nevent 1 1 | 2001
+	option HTIT
+endif
+return
+********************************************************************************
+********************************************************************************
+macro plot_time_corr lun=1 ntple=200 t1=time_error t2=time_error dofit=no extracut=' ' saveto=none htitle=notitle
+*****
+* plot a 1-d histogram of the time difference [t1]-[t2]
+* example: exec Timing#plot_time_corr lun=1 ntple=200 t1=dT_xi t2=dT_xo dofit=yes extracut=id_xi>10
+*****
+* [lun]      logic unit
+* [ntple]    ntple number
+* [t1]       first time variable
+* [t2]       second time variable
+* [dofit]    fit option
+* [extracut] extra cut
+*****
+doplot = 1
+case [t1] in
+(dT_xi) corrT1 = corrdTxi(int(id_xi))
+(dT_yi) corrT1 = corrdTyi(int(id_yi))
+(dT_xo) corrT1 = corrdTxo(int(id_xo))
+(dT_yo) corrT1 = corrdTyo(int(id_yo))
+(T_xi)  corrT1 = corrTxi(int(id_xi))
+(T_yi)  corrT1 = corrTyi(int(id_yi))
+(T_xo)  corrT1 = corrTxo(int(id_xo))
+(T_yo)  corrT1 = corrTyo(int(id_yo))
+(*)	exec err_mess plot_time_corr [t1]
+	doplot = 0
+endcase	
+case [t2] in
+(dT_xi) corrT2 = corrdTxi(int(id_xi))
+(dT_yi) corrT2 = corrdTyi(int(id_yi))
+(dT_xo) corrT2 = corrdTxo(int(id_xo))
+(dT_yo) corrT2 = corrdTyo(int(id_yo))
+(T_xi)  corrT2 = corrTxi(int(id_xi))
+(T_yi)  corrT2 = corrTyi(int(id_yi))
+(T_xo)  corrT2 = corrTxo(int(id_xo))
+(T_yo)  corrT2 = corrTyo(int(id_yo))
+(*)	exec err_mess plot_time_corr [t2]
+	doplot = 0
+endcase	
+if [extracut].EQ.' ' then
+	cut = $90
+else
+	cut = $90.AND.[extracut]
+endif
+if [doplot] then
+	case [dofit] in
+	(yes)	/HISTOGRAM/DELETE 1000
+	        /HISTOGRAM/CREATE/1DHISTO 1000 ' ' 100 -50. 50. 0.
+		Ntuple/Plot //lun[lun]/[ntple].([t1]-[corrT1])-([t2]-[corrT2]) [cut] Nevent 1 1 ' ' 1000
+		MEAN1000= $HINFO(1000,MEAN)
+		/HISTOGRAM/DELETE 1000
+		/HISTOGRAM/CREATE/1DHISTO 1000 ' ' 60 [MEAN1000]-3. [MEAN1000]+3. 0.
+                case [saveto] in
+                (none)
+                (*)      /HISTOGRAM/DELETE [saveto]
+                         /HISTOGRAM/CREATE/1DHISTO [saveto] [htitle] 60 [MEAN1000]-3. [MEAN1000]+3. 0.
+                endcase
+	endcase
+	option UTIT
+	title_global [t1]-[t2] U
+	Ntuple/Plot //lun[lun]/[ntple].([t1]-[corrT1])-([t2]-[corrT2]) [cut] Nevent 1 1 ' ' 1000
+        case [saveto] in
+        (none)
+        (*)      Ntuple/Plot //lun[lun]/[ntple].([t1]-[corrT1])-([t2]-[corrT2]) [cut] Nevent 1 1 ' ' [saveto]
+        endcase
+	option HTIT
+        HISTOGRAM/SET/IDOPT 1000 ERRO
+	case [dofit] in
+	(yes)	/VECTOR/DELETE par1gaus
+		/VECTOR/CREATE par1gaus(3) R 100. $HINFO(1000,MEAN) $HINFO(1000,RMS)
+		Histo/Fit 1000 G Q 3 par1gaus
+        (*)     Histo/Plot 1000 E
+	endcase
+	atitle 'nsec'
+        HISTOGRAM/SET/IDOPT 1000 NERR
+endif
+return
+********************************************************************************
+********************************************************************************
+macro plot_pos_rec lun=1 ntple=200 coord=coord_error dofit=no extracut=' '
+*****
+* plot a 1-d histogram of the overall position reconstruction
+* example: exec Timing#plot_pos_rec lun=1 ntple=200 coord=xi dofit=yes extracut=id_xi>10
+*****
+* [lun]      logic unit
+* [ntple]    ntple number
+* [t1]       first time variable
+* [t2]       second time variable
+* [dofit]    fit option
+* [extracut] extra cut
+*****
+doplot = 1
+/VECTOR/DELETE parplane
+case [coord] in
+(xi) var = (dT_xi-corrdTxi(int(id_xi)))*8.
+     /VECTOR/CREATE parplane(3) R 9. 9.808 0.
+(yi) var = (dT_yi-corrdTyi(int(id_yi)))*8.
+     /VECTOR/CREATE parplane(3) R 9. 9.808 0.
+(xo) var = (dT_xo-corrdTxo(int(id_xo)))*8.
+     /VECTOR/CREATE parplane(3) R 9.68 10.56 0.
+(yo) var = (dT_yo-corrdTyo(int(id_yo)))*8.
+     /VECTOR/CREATE parplane(3) R 9.68 10.56 0.
+(*)	exec err_mess plot_time_corr [t1]
+	doplot = 0
+endcase	
+if [extracut].EQ.' ' then
+	cut = $90
+else
+	cut = $90.AND.[extracut]
+endif
+	plane=(parplane(1)*(id_xi-0.5)+parplane(2)*(id_yi-0.5)+parplane(3))
+if [doplot] then
+        /HISTOGRAM/DELETE 1000
+	/HISTOGRAM/CREATE/1DHISTO 1000 ' ' 200 -700. 700. 0.
+	Ntuple/Plot //lun[lun]/[ntple].([var]-[plane]) [cut] Nevent 1 1 ' ' 1000
+	center = $HINFO(1000,MEAN)
+	/HISTOGRAM/DELETE 1000
+	/HISTOGRAM/CREATE/1DHISTO 1000 ' ' 60 [center]-20. [center]+20. 0.
+	option UTIT
+	title_global 'Position reconstruction' U
+	Ntuple/Plot //lun[lun]/[ntple].([var]-[plane]) [cut] Nevent 1 1 ' ' 1000
+	option HTIT
+        HISTOGRAM/SET/IDOPT 1000 ERRO
+	case [dofit] in
+	(yes)	/VECTOR/DELETE par1gaus
+	        /VECTOR/CREATE par1gaus(3) R 100. $HINFO(1000,MEAN) $HINFO(1000,RMS)
+		Histo/Fit 1000 G Q 3 par1gaus
+		/VECTOR/OPERATION/VBIAS parplane(3) [center]/8. parplane(3)
+        (*)     Histo/Plot 1000 E
+	endcase
+	atitle 'cm'
+        HISTOGRAM/SET/IDOPT 1000 NERR
+endif
+return
+********************************************************************************
+********************************************************************************
+macro plot_RF_corr lun=1 ntple=200 tvar=time_error dofit=no xvar=x_error
+*****
+* plot a 1-d histogram of the correlation between time and RF
+* example: exec Timing#plot_RF_corr lun=1 ntple=200 tvar=T_xi+T_yi dofit=no xvar=x
+*****
+* [lun]    logic unit
+* [ntple]  ntple number
+* [tvar]   time variable
+* [dofit]  fit option
+* [tshift] time shift
+* [xvar]   plot vs. x y p
+*****
+doplot = 1
+case [tvar] in
+(T_xi)			Time = ([tvar]-corrTxi(int(id_xi))) 
+(T_yi)			Time = ([tvar]-corrTyi(int(id_yi)))
+(T_xo)			Time = ([tvar]-corrTxo(int(id_xo)))
+(T_yo)			Time = ([tvar]-corrTyo(int(id_yo)))
+(T_xi+T_yi)		Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi)))/2. 
+(T_yi+T_xi)		Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi)))/2. 
+(T_xi+T_xo)		Time = ([tvar]-corrTxi(int(id_xi))-corrTxo(int(id_xo)))/2. 
+(T_xo+T_xi)		Time = ([tvar]-corrTxi(int(id_xi))-corrTxo(int(id_xo)))/2. 
+(T_xi+T_yo)		Time = ([tvar]-corrTxi(int(id_xi))-corrTyo(int(id_yo)))/2. 
+(T_yo+T_xi)		Time = ([tvar]-corrTxi(int(id_xi))-corrTyo(int(id_yo)))/2. 
+(T_yi+T_xo)		Time = ([tvar]-corrTyi(int(id_yi))-corrTxo(int(id_xo)))/2. 
+(T_xo+T_yi)		Time = ([tvar]-corrTyi(int(id_yi))-corrTxo(int(id_xo)))/2.
+(T_yi+T_yo)		Time = ([tvar]-corrTyi(int(id_yi))-corrTyo(int(id_yo)))/2. 
+(T_yo+T_yi)		Time = ([tvar]-corrTyi(int(id_yi))-corrTyo(int(id_yo)))/2 
+(T_xo+T_yo)		Time = ([tvar]-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/2. 
+(T_yo+T_xo)		Time = ([tvar]-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/2. 
+(T_xi+T_yi+T_xo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo)))/3. 
+(T_xi+T_xo+T_yi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo)))/3. 
+(T_yi+T_xi+T_xo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo)))/3. 
+(T_yi+T_xo+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo)))/3. 
+(T_xo+T_yi+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo)))/3. 
+(T_xo+T_xi+T_yi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo)))/3. 
+(T_xi+T_yi+T_yo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTyo(int(id_yo)))/3. 
+(T_xi+T_yo+T_yi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTyo(int(id_yo)))/3. 
+(T_yi+T_xi+T_yo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTyo(int(id_yo)))/3. 
+(T_yi+T_yo+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTyo(int(id_yo)))/3. 
+(T_yo+T_yi+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTyo(int(id_yo)))/3. 
+(T_yo+T_xi+T_yi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTyo(int(id_yo)))/3. 
+(T_xi+T_xo+T_yo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_xi+T_yo+T_xo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_xo+T_xi+T_yo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_xo+T_yo+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_yo+T_xo+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_yo+T_xi+T_xo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_yi+T_xo+T_yo)	Time = ([tvar]-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_yi+T_yo+T_xo)	Time = ([tvar]-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_xo+T_yi+T_yo)	Time = ([tvar]-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_xo+T_yo+T_yi)	Time = ([tvar]-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_yo+T_xo+T_yi)	Time = ([tvar]-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_yo+T_yi+T_xo)	Time = ([tvar]-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/3. 
+(T_xi+T_yi+T_xo+T_yo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xi+T_yi+T_yo+T_xo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xi+T_xo+T_yi+T_yo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xi+T_xo+T_yo+T_yi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xi+T_yo+T_xo+T_yi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xi+T_yo+T_yi+T_xo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yi+T_xi+T_xo+T_yo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yi+T_xi+T_yo+T_xo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yi+T_xo+T_xi+T_yo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yi+T_xo+T_yo+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yi+T_yo+T_xo+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yi+T_yo+T_xi+T_xo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xo+T_yi+T_xi+T_yo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xo+T_yi+T_yo+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xo+T_xi+T_yi+T_yo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xo+T_xi+T_yo+T_yi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xo+T_yo+T_xi+T_yi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_xo+T_yo+T_yi+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yo+T_xi+T_xo+T_yi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yo+T_xi+T_yi+T_xo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yo+T_xo+T_xi+T_yi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yo+T_xo+T_yi+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yo+T_yi+T_xo+T_xi)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(T_yo+T_yi+T_xi+T_xo)	Time = ([tvar]-corrTxi(int(id_xi))-corrTyi(int(id_yi))-corrTxo(int(id_xo))-corrTyo(int(id_yo)))/4.
+(*)			exec err_mess plot_time_corr [tvar]
+			doplot = 0
+endcase	
+if [doplot] then
+*	TOF = (trk_len+5.)/30.*sqrt(1.+.938**2/P_trk**2)
+	TOF = sqrt(4.8**2+(id_xi*.1)**2+((id_yi-20)*.1)**2)/.3
+	Ntuple/Cuts $70 -
+	case [xvar] in
+	(x)	option UTIT
+		title_global ' ' U
+*		title_global mod([Time]-[TOF]-RF_1*.049+[tshift],2.004)%id_xi U
+*		Ntuple/Cuts $70 abs(mod([Time]-[TOF]-RF_1*.049+[tshift],2.004))<1.7
+		Ntuple/Plot //lun[lun]/[ntple].mod([Time]-[TOF]-RF_1*.049+[tshift],2.004)%id_xi $90.AND.$81 Nevent 1 1 BOX  1000000
+		atitle 'x stack' 'nsec'
+		option HTIT
+	(y)	option UTIT
+		title_global ' ' U
+*		title_global mod([Time]-[TOF]-RF_1*.049+[tshift],2.004)%id_yi U
+*		Ntuple/Cuts $70 abs(mod([Time]-[TOF]-RF_1*.049+[tshift],2.004))<1.7
+		Ntuple/Plot //lun[lun]/[ntple].mod([Time]-[TOF]-RF_1*.049+[tshift],2.004)%id_yi $90.AND.$81 Nevent 1 1 BOX  1000000
+		atitle 'y stack' 'nsec'
+		option HTIT
+	(p)	option UTIT
+		title_global ' ' U
+*		title_global mod([Time]-[TOF]-RF_1*.049+[tshift],2.004)%P_trk U
+*		Ntuple/Cuts $70 abs(mod([Time]-[TOF]-RF_1*.049+[tshift],2.004))<1.7
+		Ntuple/Plot //lun[lun]/[ntple].mod([Time]-[TOF]-RF_1*.049+[tshift],2.004)%P_trk $90.AND.$81 Nevent 1 1 BOX  1000000
+		atitle 'GeV/c' 'nsec'
+		option HTIT
+	(*)	option UTIT
+		title_global ' ' U
+		title_global mod([Time]-[TOF]-RF_1*.049+[tshift],2.004) U
+*		Ntuple/Cuts $70 abs(mod([Time]-[TOF]-RF_1*.049+[tshift],2.004))<1.7
+*		Ntuple/Plot //lun[lun]/[ntple].mod([Time]-[TOF]-RF_1*.049+[tshift],2.004) $90.AND.$81 Nevent 1 1 ' ' 1000
+		Ntuple/Plot //lun[lun]/[ntple].mod([Time]-[TOF]-RF_1*.049+[tshift],2.004) $90 Nevent 1 1 ' ' 1000
+*		Ntuple/Plot //lun[lun]/[ntple].mod([Time]-[TOF]-RF_1*.049+[tshift],1.002) $90 Nevent 1 1 ' ' 1000
+		option HTIT
+		case [dofit] in
+		(yes)	Histo/Fit 1000(13:45) G+G QE 6 par2gaus
+		endcase
+		atitle 'nsec'
+	endcase
+endif	
+return
+********************************************************************************
+********************************************************************************
+macro plot_RF_summary lun=1 ntple=200 tvar=time_error tshift=0
+*****
+* plot a 1-d histogram of the correlation between time and RF
+* example: exec Timing#plot_RF_corr lun=1 ntple=200 tvar=T_xi+T_yi tshift=0.3
+*****
+* [lun]    logic unit
+* [ntple]  ntple number
+* [tvar]   time variable
+* [tshift] time shift
+*****
+zone 2 2
+exec plot_RF_corr lun=[lun] ntple=[ntple] tvar=[tvar] dofit=no tshift=[tshift] xvar=x
+exec plot_RF_corr lun=[lun] ntple=[ntple] tvar=[tvar] dofit=no tshift=[tshift] xvar=y
+zone 1 2 2 s
+exec plot_RF_corr lun=[lun] ntple=[ntple] tvar=[tvar] dofit=no tshift=[tshift] xvar=p
+zone 1 1
+return
+********************************************************************************
+********************************************************************************
+macro err_mess
+*****
+* [1] macro name
+* [2] missing command
+*****
+MESSAGE Warning MACRO [1]: option [2] not yet implemented
+pause
+return

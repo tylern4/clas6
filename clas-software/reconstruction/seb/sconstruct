@@ -1,0 +1,6 @@
+from build_system import environment
+
+sebEnv = environment.env(deps=['clas6'])
+sebEnv.load_dependency('clas6')
+sebLib = sebEnv.library(target='seb')
+sebEnv.return_from_sconstruct(sebLib)

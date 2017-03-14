@@ -1,0 +1,18 @@
+A, A:link, A:visited { background-color: transparent; color: white }
+A:link:hover, A:hover, A:visited:hover { text-decoration: underline; background-color: transparent; color: #f9f9f9 }
+A.ind, A.ind:visited { text-decoration: none; font-weight: bold; color: white }
+A.ind:hover, A.ind:visited:hover { text-decoration: none; color: #999999; font-weight: bold;}
+A.us,A.us:visited {text-decoration: none; font-weight: bold; color: #9E0B0E}
+A.us:hover,A.us:visited:hover {text-decoration: none; font-weight: bold; color: #999999}
+A.files, A.files:visited { text-decoration: none; font-weight: bold; color: maroon }
+A.files:hover, A.files:visited:hover { text-decoration: none; font-weight: bold; color: #999999 }
+A.blue,A.blue:visited {text-decoration: none; font-weight: bold; color: blue }
+A.blue:hover,A.blue:visited:hover {text-decoration: none; font-weight: bold; color: #02027E }
+
+div.command {
+	width: 98%;
+	border: 1px solid #000000;
+	background-color: #ffffff;
+	padding-left: 4px;
+	margin: 4px;
+}

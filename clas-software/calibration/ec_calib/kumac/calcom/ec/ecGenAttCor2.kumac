@@ -1,0 +1,50 @@
+macro ecGenAttCor2 file 
+
+  global/import vecpath
+
+  vec/cre att(36,6,6) r
+  vec/cre alc(1296,6,6) r
+  vec/cre alcdb(1296,6,6) r
+  vec/cre pixmap(1296,3) 
+  vec/cre pixwidth(6) r
+  vec/cre attdb(36,39,6) r
+  vec/cre attedb(36,39,6) r
+  vec/cre weight(39) r 39*1.
+  vec/cre in1(1296,6,6) r
+  vec/cre in2(1296,6) r
+  vec/cre out(36,6,6) r
+  
+  close 0
+  cd //pawc
+  hi/del *
+  hi/file 1 hist/[file].rzh
+  cd //lun1/ec
+  
+  vec/read pixwidth   [vecpath]/ec_pixwidth.vec
+  vec/copy attadbmean att
+  
+  call kumac/calcom/ec/fun/eccallib.f77
+  call ecattcor
+  vec/copy alc in1
+
+  do i = 2,[#]  
+    sec = [%i]
+    do io = 1,2
+      get_vec/contents $eval([sec]*1000+[io]) cnts[io]
+    enddo
+    sigma cnts=0.5*(cnts1+cnts2)
+    vec/copy cnts in2(:,[sec])
+  enddo
+  
+  call kumac/calcom/ec/fun/genstripmean.f77(1,7)
+  
+  do i = 2,[#]
+    sec = [%i]
+    s1 = new[sec]
+    call genstripmean([s1],[sec])
+  enddo
+      
+return
+    
+    
+  

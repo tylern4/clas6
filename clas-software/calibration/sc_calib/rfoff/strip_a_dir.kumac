@@ -1,0 +1,107 @@
+  
+* 
+****************************************
+*
+macro master runno=27272 first=0 last=4
+
+	dir1=sc
+	dir2=dc
+	dir3=tbtel
+	dir4=tbtpr
+	dir5=ec
+	dir6=ec1
+	dir7=seb
+	do j=[first],[last]
+	  if ([j]<10) then
+            less_than_10='0'
+	  else 
+            less_than_10=''
+          endif
+	  source_file=histo/hst[runno]_$unquote([less_than_10])[j].hbook
+	  if ($Fexist([source_file])=1) then
+	   mess now processing file [source_file]
+    	   do i=1,7
+	     exec strip_a_dir#strip_a_dir filein=[source_file] dir=[dir[i]]
+	   enddo
+          else
+	    mess file [source_file] does not exist. Skipping...
+	  endif
+        enddo
+    	do i=1,7
+	  hi/del *
+          exec strip_a_dir#merge_and_move filein=histo/hst[runno] dir=[dir[i]] _
+            delete_source=0
+        enddo
+return
+*
+
+*
+***********************************************************************
+*
+
+
+
+macro strip_a_dir filein=test dir=test buf_size=1024
+*
+* 
+*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+
+*       Author: Gabriel Niculescu 2002   |
+*                                        |
+*       e-mail: gabriel@jlab.org         |
+*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+
+
+*
+* save only a given directory out of a (large) histogram file
+*
+	cdir //pawc
+	hi/del *
+	hi/fil 1 [filein] 
+	hi/fil 2 [filein]_[dir] [buf_size] N
+
+	cdir //lun1/[dir]
+	hrin *
+	cdir //lun2
+	mdir [dir]
+	cdir [dir]
+	hrout *
+	close 1
+	close 2
+return
+**********************************************************
+*
+* 
+* ******************************************************
+* 
+ macro merge_and_move filein=hst_27831 dir=seb delete_source=0
+* 
+* try to clear up memory of old stuff
+* (Very important, otherwise one ends up with old histograms messing up the new ones!!)
+   hi/del *
+   ve/del *
+
+* 
+* Merge hbook files according to the given names/keys. Remove old hbook files
+* 
+   sh rm tmp_[dir].kumac
+   tmp_name=[filein]//'_*.hbook_'//[dir]
+   fileout=[filein]//'_sum_'//[dir]//'.hbook'
+   sh rm [fileout]
+   fmess 'hmerge '//[fileout]//' _' tmp_[dir].kumac
+   sh 'ls '//[tmp_name]//'|sed ''s/'//[dir]//'/'//[dir]//'\ _/''>> tmp_'//[dir]//'.kumac'
+   mess now merging files from the [dir] directory
+   exec tmp_[dir].kumac
+   if ([delete_source]=1) then
+     sh 'rm '//[tmp_name]
+   else
+   endif
+ return
+* 
+
+
+
+
+
+
+
+
+

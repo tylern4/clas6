@@ -1,0 +1,25 @@
+from build_system import environment
+
+# import the environment from the sconstruct in above directories
+# or create a new environment to emulate it.
+try:
+    Import('aaoEnv')
+    aao_radEnv = environment.init_clone(aaoEnv, inc_dirs=['.', 'include'])
+except:
+    aaoEnv = environment.new(modules=['cern', 'clas'])
+    Export('aaoEnv')
+    aaoEnv.SConscript(
+        'sconstruct',
+        variant_dir = aaoEnv['buildObjDir'],
+        src_dir = '.',
+        duplicate  = 0)
+    Return()
+
+aao_radEnv.load_dependency(['cern'])
+aao_radEnv.load_dependency({'clas':['io','io_bosio']})
+
+ignore_list = ['aaosig1.F', 'ekine.F']
+
+aao_radEnv.program(
+    target = 'aao_rad',
+    ignore = ignore_list)

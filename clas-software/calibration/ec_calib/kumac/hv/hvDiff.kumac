@@ -1,0 +1,33 @@
+macro hvDiff det=0 sec opt date=25nov97
+
+  if [det].eq.0 then
+    message 'Purpose: Find difference in current and previous HV values'
+    message '  Usage: hvDiff det sec opt'
+    message '    det: Detector packages (EC,SC,CC)'
+    message '    sec: Sector number (1,2,3,4,5,6)'
+    message '    opt: 1=compare current HV to previous HV'
+    message '         2=compare hardware HV to software HV'
+    exitm
+  endif
+
+  vec/cre dum(12,16,10)
+  vec/cre hv1([det]vecdim)
+  vec/cre hv2([det]vecdim)
+  
+  exec hvReadConfig [det][sec]
+  case [opt] in
+    (1) exec hvReadSnap [det][sec] DVO dum hv1
+        exec hvReadSnap [det][sec]_[date] DVO dum hv2
+        title = Sector [sec]: HV Ratio now/[date]
+    (2) exec hvGet [det] [sec] DVI
+        exec hvReadSnap [det][sec] DVO dum hv2
+        vec/copy DVI hv1
+        title = Sector [sec]: HV Ratio hardware/software 
+  endcase
+  
+  exec [det]PlotSecVec ratio ratio off 0.9 1.1 [sec] [title] hv1 hv2
+  
+  vec/del dum,hv1,hv2
+    
+  
+return

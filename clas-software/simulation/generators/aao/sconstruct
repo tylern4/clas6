@@ -1,0 +1,16 @@
+from build_system import environment
+
+# import the base environment created in
+# the sconstruct file
+Import('simulationEnv')
+
+# we don't need to add any include directories
+# for the aao programs in general (hence inc_dirs=[])
+aaoEnv = environment.init_clone(simulationEnv, inc_dirs = [])
+
+# no changes are needed for aaoEnv so merely pass it along.
+Export('aaoEnv')
+
+# calls sconscript file inside each directory listed
+dir_list = Split('aao_rad aao_norad')
+aaoEnv.sconstruct(dir_list)

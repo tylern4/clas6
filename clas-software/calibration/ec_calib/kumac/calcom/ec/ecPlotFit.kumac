@@ -1,0 +1,78 @@
+macro ecPlotFit var=adc view=1 strip=1 er=1 
+
+  message ecPlotFit: Plotting [var] of view [view] strip [strip]
+  
+  global/import filename
+  global/import sector
+
+  case [view] in
+    (1) chview=UI
+    (2) chview=VI
+    (3) chview=WI
+    (4) chview=UO
+    (5) chview=VO
+    (6) chview=WO
+  endcase
+  
+  case [var] in
+    (adc) ymin=30;ymax=220;tity=ADC channel 
+    (pe)  ymin=0.5;ymax=5.0;tity=P.E. / MeV
+  endcase
+  
+*  exec ecSetupGraphics
+  
+  title = Sector [sector]: Light Attenuation Cosmic Pixel Cut 
+  title_gl [title]
+  opt logy 
+
+  if [er].eq.1 then 
+    zone 1 2 2 s 
+    null 0. 440. [ymin] [ymax]
+*    pavexmin = 0.1
+*    paveymax = 0.3
+    pavexmin = 0.62
+    paveymax = 0.43
+    igset mtyp 21
+  else
+    pavexmin = 0.5
+    paveymax = 0.3
+    igset mtyp 24    
+  endif
+  
+  sigma x=(array(71,1#71)+0.8)*$eval(pixwidth([view]))
+  exec ecGetPixels [view] [strip] [var][view]    y
+  exec ecGetPixels [view] [strip] [var]err[view] yerr
+  vec/cre ex(71)
+  hplot/errors x y ex yerr 71 $grafinfo('?mtyp') 0.15
+  atitle 'Distance from PMT (cm)' [tity] 
+  a = $eval(ecFit[var]_par([strip],[view],1))
+  b = $eval(ecFit[var]_par([strip],[view],2)/pixwidth([view]))
+  
+  if ([b].lt.0) then
+    m = abs([b])
+    fun/plot exp([a]-[m]*x) 0. 440. SL
+  else
+    fun/plot exp([a]+[b]*x) 0. 440. SL
+  endif
+  
+  opt liny 
+  
+  string1 = $format(ecFit[var]_par([strip],[view],2),f5.3)
+  string2 = $format(ecFit[var]_errpar([strip],[view],2),f5.3)
+  string3 = $format(ecFit[var]_par([strip],[view],1),f4.2)
+  string4 = $format(ecFit[var]_errpar([strip],[view],1),f4.2)
+  string5 = $format(ecFit[var]_atten([strip],[view],1),f4.1)
+  string6 = $format(ecFit[var]_atten([strip],[view],2),f4.1)
+  string7 = $format(ecFit[var]_ymaxfit([strip],[view],1),f4.1)
+  string8 = $format(ecFit[var]_ymaxfit([strip],[view],2),f4.1)
+
+  alias/cre text0 'Strip '//[chview][strip]
+  alias/cre text1 'm = '//[string1]//' +- '//[string2]
+  alias/cre text2 'b  = '//[string3]//' +- '//[string4]
+  alias/cre text3 'r='//$format(ecFit[var]_chi2([strip],[view]),f4.2)
+  alias/cre text4 'lambda = '//[string5]//' +-'//[string6]
+  alias/cre text5 'ADCmax = '//[string7]//' +-'//[string8]
+
+  exec xybox 0 [pavexmin] [paveymax] 5
+
+return

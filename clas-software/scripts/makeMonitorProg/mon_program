@@ -1,0 +1,217 @@
+#! /usr/local/bin/perl
+
+# This perl script will write a shell of an ntuple booking program as a monitor and the
+# makefile for it...
+
+# The first argument is the name of the monitor program (it AUTOMATICALLY appends "_mon.c")
+# It will create a directory under the utilities tree with the program name for identification
+
+$home = $ENV{"HOME"};
+$user = $ENV{"USER"};
+$CLAS_PACK = $ENV{"CLAS_PACK"};
+$prog_name = "$ARGV[0]_mon";
+$destination = "$CLAS_PACK/utilities";
+$orig_dir = $ENV{"PWD"};
+
+shift(@ARGV);
+
+$argc = @ARGV;
+
+if ($CLAS_PACK eq "") {
+    open (NF,">$orig_dir/$prog_name.c");
+} else {
+    if ( -e "$destination/$prog_name") {
+	chdir ("$destination/$prog_name");
+	if ( -e "$destination/$prog_name/$prog_name.c") {
+	    print STDERR "\nFile $prog_name.c already exists.  Terminating script WITHOUT clobbering...\n\n";
+	    exit;
+	} else {
+	    open (NF,">$prog_name.c");
+	}
+    } else {
+	$cmd = "mkdir $destination/$prog_name";
+	system($cmd);
+	print STDERR "\nAdding $prog_name directory to utilities tree structure\n\n";
+	chdir ("$destination/$prog_name");
+	open (NF,">$prog_name.c");
+    }
+}
+&make_intro;
+&make_std_headers;
+print NF "\n";
+for ($j=0; $j < $argc; $j++) {
+    
+    $bank_name = $ARGV[0];
+    print STDERR "Adding $bank_name.h to supplemental list of include files...\n";
+    
+    &make_headers;
+    shift (@ARGV);
+}
+print NF "\n";
+&setup_BOS;
+print NF "\n";
+&make_paw;
+print NF "\n";
+&make_functions;
+print NF "\n";
+&make_usage;
+print NF "\n";
+&make_main;
+print NF "\n";
+&make_support;
+print NF "\n";
+close (NF);
+chdir ("$orig_dir");
+
+if ($CLAS_PACK eq "") {
+    open (NF,">$orig_dir/Makefile");
+} else {
+    chdir ("$destination/$prog_name");
+    open (NF,">makefile");
+}
+&make_makefile;
+close(NF);
+chdir ("$orig_dir");
+
+sub make_intro {
+
+    open (DATE,"date +%c |");
+    while (<DATE>) {
+	chop($_);
+	$date = $_;
+    }
+    close (DATE);
+
+    print NF "/* This program was designed by the mon_program perl script on $date */\n\n";
+}
+
+sub make_std_headers {
+
+    print NF "#include \<stdio.h\>\n";
+    print NF "#include \<string.h\>\n";
+    print NF "#include \<math.h\>\n";
+    print NF "#include \<signal.h\>\n";
+    print NF "#include \<stdlib.h\>\n";
+    print NF "#include \<errno.\h>\n";
+    print NF "#include \<ntypes.h\>\n";
+    print NF "#include \<bostypes.h\>\n";
+    print NF "#include \<particleType.h\>\n";
+    print NF "#include \<clas_cern.h\>\n";
+    print NF "#include \<kinematics.h\>\n";
+    print NF "#include \<map_manager.h\>\n";
+    print NF "#include \<sc.h\>\n";
+    print NF "#include \<call.h\>\n";
+    print NF "#include \<ec.h\>\n";
+    print NF "#include \<pid.h\>\n";
+    print NF "#include \<utility.h\>\n";
+    print NF "#include \<PartUtil.h\>\n";
+    print NF "#include \<particleType.h\>\n";
+}
+
+sub make_headers {
+
+    print NF "#include <$bank_name.h>\n";
+}
+
+sub make_paw {
+
+    print NF "#define RAD2DEG (180.0/3.14159)\n";
+    print NF "\n/* ----------- PAW DEFINES ------------ */\n\n";
+    print NF "#define MEMH 10000000;\n";
+    print NF "#define LREC 1024;\n";
+    print NF "#define LUN 3;\n\n";
+    print NF "float pawc_[MEMH];\n";
+    print NF "float hcfitd_[25];\n";
+    print NF "int quest_[100];\n";
+
+}
+
+sub setup_BOS {
+
+    print NF "/*------------ BOS COMMONS -------------*/\n\n";
+    print NF "BOSbank bcs_;\n";
+    print NF "BOSbank wcs_;\n";
+}
+
+sub make_functions {
+
+    print NF "/* ------------ FUNCTION PROTOTYPES ------------*/\n\n";
+    print NF "int ProcessEvent();\n";
+    print NF "void ctrlCHandle(int);\n";
+    print NF "void book_histograms(int runno);\n";
+    print NF "void initialize_hbook(char *out,int runno);\n";
+    print NF "void PrintUsage(char *processName);\n";
+    print NF "int ConfigGeom(int runno);\n";
+    print NF "int clean_up();\n";
+}
+
+sub make_usage {
+
+    print NF "/*------------- HELP SCREEN -------------*/\n\n";
+    print NF "void PrintUsage(char *processName)\n";
+    print NF "{\n\tfprintf(stderr,\"Usage: \%s [-M] -o\<outfile\> file1 [file2] etc...\\n\\n\",processName);\n";
+    print NF "\tfprintf(stderr,\"\\tOptions:\\n\");\n";
+    print NF "\tfprintf(stderr,\"\\t-M[\#]\\t\\tProcess only \# number of events\\n\");\n";
+    print NF "\tfprintf(stderr,\"\\t-i\\t\\tProcess file in batch mode\\n\");\n";
+    print NF "\tfprintf(stderr,\"\\t-o\<outfile\>\\tOutput file name\\n\");\n";
+    print NF "\tfprintf(stderr,\"\\t-R\\t\\tRegenerate the TBID ans associated banks\\n\");\n";
+    print NF "\tfprintf(stderr,\"\\t-P\\t\\tRegenerate the PART bank\\n\");\n";
+    print NF "\tfprintf(stderr,\"\\t-h\\t\\tPrint this message.\\n\\n\");\n";
+    print NF "\texit(0);\n}\n\n";
+}
+
+sub make_main {
+
+    print NF "/* ------------- MAIN PROGRAM --------------- */\n\n";
+    print NF "main (int argc, char **argv)\n{\n";
+    print NF "\tFILE *fp = NULL;\n\tint i, Nevents=0, max=0, icycle, ret;\n";
+    print NF "\tchar *argptr, *outfile = NULL;\n";
+    print NF "\tint time_based=0, runno=0, regen=0, makepart=0;\n";
+    print NF "\tint batch_mode=0, sec, nmax=200;\n";
+    print NF "\tchar mess[100];\n";
+    print NF "\tclasHEAD_t *HEAD=NULL;\n\n";
+    print NF "\tsignal (SIGINT,ctrlCHandle);\n\tsignal(SIGHUP,ctrlCHandle);\n\n";
+    print NF "\tfor (i=1; i>argc; i++) {\n\t\targptr = argv[i];\n\t\tif (*argptr == '-') {\n\t\t\targptr++;\n\t\t\tswitch(*argptr) {\n";
+    print NF "\t\t\tcase 'h':\n\t\t\t\tPrintUsage(argv[0]);\n\t\t\t\tbreak;\n";
+    print NF "\t\t\tcase 'o':\n\t\t\t\toutfile = ++argptr;\n\t\t\t\tbreak;\n";
+    print NF "\t\t\tcase 'i':\n\t\t\t\tbatch_mode = 1;\n\t\t\t\tbreak;\n";
+    print NF "\t\t\tcase 'R':\n\t\t\t\tregen = 1;\n\t\t\t\tbreak;\n";
+    print NF "\t\t\tcase 'P':\n\t\t\t\tmakepart = 1;\n\t\t\t\tbreak;\n";
+    print NF "\t\t\tcase 'M':\n\t\t\t\tmax = atoi(++argptr);\n\t\t\t\tbreak;\n";
+    print NF "\t\t\tdefault:\n\t\t\t\tfprintf(stderr,\"Unrecognized argument: [-%s]\\n\\n\",argptr);\n";
+    print NF "\t\t\t\tPrintUsage(argv[0]);\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\t}\n\n";
+    print NF "\tbnames_(&nmax);\n\tinitbos();\n\n";
+    print NF "\tfor (i=1; i>argc; i++) {\n\t\targptr = argv[i];\n\t\tif (*argptr != '-') {\n\t\t\tsprintf(mess,\"OPEN BOSINPUT UNIT=1 FILE=\\\"%s\\\" READ\", argptr);\n";
+    print NF "\t\t\tif (!fparm_c(mess)) {\n\t\t\t\tfprintf(stderr,\"%s: Unable to open file \\'%s\\': %s\\n\\n\",argv[0],argptr,strerror(errno));\n";
+    print NF "\t\t\t} else {\n\t\t\t\twhile ((max ? Nevents < max : 1) && getBOS(&bcs_,1,\"E\")) {\n";
+    print NF "\t\t\t\t\tNevents++;\n\t\t\t\t\tHEAD = getBank(\&bcs_,\"HEAD\");\n\t\t\t\t\tif (HEAD) runno = HEAD->head[0].nrun;\n\t\t\t\t\tif (Nevents == 1) initialize_hbook(outfile,runno);\n";
+    print NF "\t\t\t\t\tif (regen) ConfigEvent(runno,regen);\n\t\t\t\t\telse ConfigGeom(runno);\n\t\t\t\t\tif (Nevents % 100 == 0 \&\& !batch_mode) {\n\t\t\t\t\t\tfprintf(stderr,\"%d\\r\",Nevents);\n";
+    print NF "\t\t\t\t\t\tfflush(stderr);\n\t\t\t\t\t}\n\t\t\t\t\tif (ProcessEvent(regen,makepart)) {\n\t\t\t\t\t\tdropAllBanks(&bcs_,\"E\");\n\t\t\t\t\t\tcleanBanks(&bcs_);\n\t\t\t\t\t\}\n";
+    print NF "\t\t\t\t}\n\t\t\t\tfprintf(stderr,\"# of events processed: %d\\n\",Nevents);\n\t\t\t}\n\t\t\tsprintf(mess,\"CLOSE BOSINPUT\", argptr);\n\t\t\tfparm_c(mess);\n\t\t}\n\t}\n\tclean_up();\n}\n\n";
+}
+
+sub make_support {
+
+    print NF "/*------------- SUPPORT ROUTINES -------------*/\n\n";
+    print NF "int ConfigGeom(int runno) {\n\tstatic int CurrentRun = -1;\n\tint sec;\n\n";
+    print NF "\tif (runno != CurrentRun) {\n\t\tdropAllBanks(\&wcs_,\"SCG SCP \");\n\t\tmake_SCG_banks(runno);\n\t\tfor(sec=1; sec \<=6; sec++) {\n\t\t\tmake_SCP_bank(sec);\n\t\t}\n\t\tCurrentRun = runno;\n\t}\n}\n\n";
+    print NF "int clean_up() {\n\tint i,icycle;\n\tchar chpath[100];\n\tchar chopt[1]=\" \";\n\n";
+    print NF "\tsprintf(chpath,\"//esr\");\n\thcdir_(chpath,chopt,strlen(chpath),1);\n\throut(0,icycle,\"T\");\n\thldir_(\" \",\" \", 1L, 1L);\n\thrend_(\"esr\", 3L);\n}\n\n";
+    print NF "void initialize_hbook(char *out,int runno)\n{\n\tint lun=LUN, lrec=LREC, memh=MEMH, istat, icycle;\n\tchar *def_out=\"$prog_name.hbook\";\n\n";
+    print NF "\tif(out == NULL) out = &def_out[0];\n\tquest_[9]=65000;\n\thlimit_(&memh);\n\thropen_(&lun,\"esr\",out,\"N\",&lrec,&istat,3L,strlen(out),1L);\n\tbook_histograms(runno);\n";
+    print NF "\treturn;\n}\n\n";
+    print NF "void book_histograms(int runno) {\n\tint i,bins;\n\tfloat min,max,v;\n\tchar title[100];\n\tchar runmes[50];\n\tint sec;\n\n\tsprintf(runmes,\"Run %d\",runno);\n\n\tint id;\n\n\thbnt_(&id,\"esr\",\" \",3L,1L);\n\thbname_(&id,\"event\",&\<your_ntuple_struct\>,\<your_ntuple_struct_name\>,5L,strlen(\<your_ntuple_struct_name\>));\n}\n\n";
+    print NF "int ProcessEvent(int regen, int makepart)\n{\n\tint id;\n\n\tmemset(&\<your_ntuple_struct\>,0,sizeof(\<your_ntuple_struct\>));\n\thbnt_(&id);\n\treturn(1);\n}\n\n";
+    print NF "void ctrlCHandle(int x)\n{\n\tsignal(SIGINT,ctrlCHandle);\n\tsignal(SIGHUP,ctrlCHandle);\n\tfprintf(stderr,\"\\n\\n\\t\\t\\t*** INTERRUPTED!!! ***\\n\\n\");\n";
+    print NF "\texit(1);\n}\n\n";
+    print NF "/* -------------- END OF FILE ------------- */\n";
+}
+
+sub make_makefile {
+
+    print NF "include \$(CLAS_CMS)/Rules.make\n\nMISCLIB_SunOS := -L/usr/lib -lm -lc -lnsl -lsocket\nMISCLIB_HP-UX := -L/usr/lib -lm -lc -lf\nMISCLIB_AIX := -L/usr/lib -lxlf90 -lm -lc\nMISCLIB_Linux := -L/usr/lib -lm -lc /usr/lib/libf2c.a\nMISCLIB_OSF1 := -L/usr/lib -lm -lc -lfor -lUfor\nMISCLIB := \$(MISCLIB_\$(OS_NAME))\n\n";
+    print NF "LIBPP = -L\$(CLAS_LIB) -lpp\$(ADD_DEBUG)\nRECLIB = -L\$(TOP_DIR)/lib/\$(OS_NAME) -L\$(CLAS_LIB) -lpid\$(ADD_DEBUG) \\ \n -ltag\$(ADD_DEBUG) -llac\$(ADD_DEBUG) -lseb\$(ADD_DEBUG) -lst\$(ADD_DEBUG) \\ \n-lclasutil\$(ADD_DEBUG) -lsc\$(ADD_DEBUG) -lc_cern\$(ADD_DEBUG) \\ \n-lc_bos_io\$(ADD_DEBUG) -ldc\$(ADD_DEBUG) -lec\$(ADD_DEBUG -lcc\$(ADD_DEBUG) \\ \n -ltrk\$(ADD_DEBUG) -ldc\$(ADD_DEBUG) -lc_bos_io\$(ADD_DEBUG) -lsc\$(ADD_DEBUG) \\ \n-lmapmanager\$(ADD_DEBUG) -lfputil\$(ADD_DEBUG) -lfpack\$(ADD_DEBUG) -lrecutl\$(ADD_DEBUG) \\ \n-lonline_dummy(\$ADD_DEBUG) -lclasutil\$(ADD_DEBUG) -lbos\$(ADD_DEBUG) -lfpack(\$ADD_DEBUG)\n\n";
+    print NF "LIBS = \$(STDLIBS) \$(RECLIB) \$(CERN) \$(CERNLIB) \$(FLIB) \$(MISCLIB)\n\n";
+    print NF "$prog_name\SRCS = $prog_name.c\n\n$prog_name\OBJS= \$(patsubst %.c,\$(OBJDIR)/%.o,\$($prog_name\SRCS))\n\n";
+    print NF "$prog_name: \$($prog_namOBJS)\n\t\$(CC) -o $prog_name \$(CFLAGS) \$(CDBG) \$($prog_name\OBJS) \$(LIBS)\n\nclean:\n\t\@rm $prog_name \$($prog_name\OBJS)\n";
+}

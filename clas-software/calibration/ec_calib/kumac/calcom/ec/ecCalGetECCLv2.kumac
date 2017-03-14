@@ -1,0 +1,18 @@
+macro ecCalGetECClv2 run=0 sector
+
+  case [sector] in
+   (1) newsec = 3
+   (2) newsec = 6
+   (3) newsec = 5
+   (4) newsec = 4
+   (5) newsec = 2
+   (6) newsec = 1
+  endcase
+
+  global/imp attpath
+
+  vec/read dum,dum,dum,ECClv2(:,[sector]) [attpath]/avatt_sec_[newsec].dbe 
+  
+return
+
+  

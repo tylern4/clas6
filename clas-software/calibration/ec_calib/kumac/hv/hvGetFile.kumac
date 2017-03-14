@@ -1,0 +1,29 @@
+macro hvGetFile det=0 sec dbvar clear=1 file
+
+  if [det].eq.0 then
+   message 'Purpose: Get hv values from file' 
+   message '         and put in KUIP vector named dbvar '
+   message '  Usage: hvGet det sec dbvar clear'
+   message '    det: Detector package (EC,SC,CC)'
+   message '    sec: Sector number (1,2,3,4,5,6)'
+   message '  dbvar: EPICS HV database variable (DVI,MVI,MCI)'
+   message '  clear: 1=clear vector dbvar between calls, 0=do not'
+   message '   file: Name of snap file'    
+   exitm
+  endif
+
+  dbvar = $upper([dbvar])
+  
+  if $vexist([dbvar]).eq.0 then
+    vec/cre [dbvar]mf(12,16,10)
+    vec/cre [dbvar]([det]vecdim)
+  endif
+
+  if [clear].eq.1 then
+    vec/cre [dbvar]([det]vecdim)
+  endif
+  
+  exec hvReadConfig [det][sec]
+  exec hvReadSnap   [file] [dbvar] [dbvar]mf [dbvar]
+  
+return

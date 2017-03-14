@@ -1,0 +1,4 @@
+from build_system import environment
+
+env = environment.env(deps=['clas6'])
+env.sconstruct(dirs = Split('g6pcor g10pcor Pcor g11photonenergy'))

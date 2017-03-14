@@ -1,0 +1,46 @@
+macro ecLaser
+
+* Author: Cole Smith
+* Purpose: Main macro for laser calibration
+
+  global/cre path
+  global/cre chan_per_MeV
+  global/cre pedrun
+  global/cre sector
+  
+  vec/cre chi2(1)
+  exec ecComisChi2
+  vec/cre filt(8) i  0.48 0.6 0.72 0.8 0.9 0.98 1.06 1.12
+    
+  read sector       'ecLaser: Enter sector number to process:'
+  read chan_per_MeV 'ecLaser: Enter ADC calibration, chan/MeV: '
+  
+  path = vec/laser/sector[sector]
+  case $fexist([path]) in
+    (0) shell mkdir [path];shell mkdir [path]/pe
+  endcase
+  
+  if [sector].eq.1 then
+    exec ecSetupChains sector1/laser_cal cr data
+  else
+    exec ecSetupChains sector[sector] cr data
+  endif
+  exec ecInputRuns
+  glob/import nruns
+  read pedrun 'ecLaser: Enter pedestal run number (or 0 if pedestals already subtracted): '
+  if [pedrun].ne.0 then
+    file = [path]/pe/ped[pedrun].vec
+    if $fexist([file]) then
+      message ecLaser: Reading pedestal file from [file]
+      vec/cre ped(216)
+      vec/read ped [file]
+    else
+      exec ecGetPed [pedrun]
+      message ecLaser: Writing pedestal file to [file]
+      vec/write ped [file]
+    endif
+  endif  
+  exec ecFillPmtArray1
+  exec ecFitLaser1 1 [nruns]
+  
+return

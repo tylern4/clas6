@@ -1,0 +1,79 @@
+macro calGainAnal det=0 runno type var infile nev opt
+
+  if [det].eq.0 then
+    message 'Purpose: Analyze detector hists or ntups for mean and sigma'
+    message '  Usage: calGainAnal det runno type var infile nev opt seclist'
+    message '    det: Detector packages (ec,sc,cc)'
+    message '  runno: Run number to associate with this analysis'
+    message '   type: Input type (hist,ntup,chain)'
+    message '    var: Variable to analyze (adc,tdc,lograt,gmean)'
+    message ' infile: Input file (no ext.)'
+    message '    nev: Number of ntuple events to analyze (0 for hist)'
+    message '    opt: Write results to vector file (y,n)'
+    exitm
+  else
+    read runno	'Run Number: '
+    read  type  'Input type (hist,ntup,chain):'
+    read   var  'Variable to analyze (adc,tdc,lograt,gmean):'
+    read infile 'Input file: '
+    read seclist 'Sectors to include: '
+    read   nev  'Number of events to analyze: '
+    read   opt  'Save results to disk? (y/n): '        
+  endif
+  
+  alias/cre seclist $quote([seclist])
+  exec calGainAnal#process [det] [runno] [type] [var] [infile] [nev] [opt] seclist
+  
+return  
+  
+macro process det runno type var infile nev opt   
+
+  message calGainAnal: Bank [det]
+  
+  do i = 1,7
+    shift
+  enddo
+
+  alias/cre seclist $quote([*])
+  
+  var1 = [var]
+  
+  case [var] in
+    (adc) case [det] in
+            (ec) min=20;max=3000;wid=50
+            (cc) min=20;max=1000;wid=200
+            (sc) min=10;max=7000;wid=200
+          endcase
+    (tdc) case [det] in
+            (ec) min=50;max=2000;wid=100         
+            (cc) min=50;max=2000;wid=200         
+            (sc) min=50;max=2000;wid=100
+          endcase
+   (gmean)       min=100;max=7000;wid=50;var1=gain
+  (lograt)       min=-200;max=200;wid=200;var1=gain         
+  endcase
+  
+  case [type] in
+    (ntup) hi/file 1 [type]/[infile].rzn; global/cre ntupid 2000
+    (hist) hi/file 1 [type]/[infile].rzh; cd //lun1/[det]
+    (chain) cd //[infile]; global/cre ntupid 2000
+    (*) exitm
+  endcase
+  
+  globa/cre runno [runno]
+  exec [det]GetPeakStats [type] [var] [wid] [min] [max] [det][var1]Mean [det][var1]Rms 1 [nev] seclist
+
+  close 1
+  
+  case [opt] in
+    (y) global/imp gainpath
+        if $fexist([gainpath]).eq.0 then
+          shell mkdir [gainpath]
+        endif
+        message Writing run [runno] [var] data to [gainpath]
+        vec/write [det][var1]Mean [gainpath]/[det][var1]mean[runno].vec
+        vec/write [det][var1]Rms  [gainpath]/[det][var1]rms[runno].vec
+    (n) exitm
+  endcase
+  
+return

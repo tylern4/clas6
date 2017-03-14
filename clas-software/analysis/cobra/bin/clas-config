@@ -1,0 +1,98 @@
+#!/usr/bin/perl
+# -----------------------------------------------------------------------------
+#
+# Usage: clas-config [options]
+# Options:
+#          --cflags   Includes and compiler flags for CLAS software
+#          --libs     Libs for CLAS software
+#          --libs_min Minimum set of CLAS libs (for non-BOS apps)
+#          --slibs    Shared libs for CLAS software
+#          --help     Prints help to screen
+#
+# -----------------------------------------------------------------------------
+#
+use Getopt::Long;
+$help = "";
+$cflags = "";
+$libs = "";
+$libs_min = "";
+$slibs = "";
+GetOptions ('help' => \$help, 'libs' => \$libs, 'libs_min' => \$libs_min, 'slibs' => \$slibs, 'cflags' => \$cflags);
+#
+# If -h option used, print options to the screen and quit
+#
+if($help ne ""){
+    &printopts;
+    exit(0);
+}
+#
+# Get CLAS_PACK location
+#
+$clas_build = `printenv CLAS_BUILD`;
+chop $clas_build;
+$clas_pack = `printenv CLAS_PACK`;
+chop $clas_pack;
+$clas_cms = `printenv CLAS_CMS`;
+chop $clas_cms;
+$include = " -I$clas_pack/include -I$clas_pack/inc_derived";
+$top_dir   = `printenv TOP_DIR`;
+chop $top_dir;
+$os_name = `printenv OS_NAME`;
+#if($os_name eq "") {
+  $os_name = `$clas_cms/uname_clas`;
+#  system $clas_cms/uname_clas;
+#}
+chop $os_name;
+$clas_lib = `printenv CLAS_LIB`;
+chop $clas_lib;
+$libs_loc = "-L$top_dir/lib/$os_name -L$clas_lib ";
+$clas_devel = `printenv CLAS_DEVEL`;
+chop $clas_devel;
+$clas_slib = "-L$clas_build/slib/$os_name";
+#
+# Check to see if CLAS_PACK is same as CLAS_DEVEL/packages
+#
+$clas_devel_pack = "$clas_devel/packages";
+if($clas_devel_pack ne $clas_pack){
+    # there not the same, use include from both
+    $include = "$include -I$clas_devel_pack/include -I$clas_devel_pack/inc_derived";
+    $clas_slib = "-L$clas_devel/slib/$os_name -L$clas_build/slib/$os_name ";
+}
+#
+# Parse the command line
+#
+if($cflags ne ""){
+    # print out the includes and flags
+    print "$include";
+}
+if($libs ne ""){
+    # print out the libs
+    print " $libs_loc -lvertex -leloss -lpid -ltag -llac -lseb -lst -lclasutil -lsc -lc_bos_io -ldc -lec -lcc -ltrk -ldc -lc_bos_io -lsc -lmapmanager -lfputil -lfpack -lrecutl -lonline_dummy -lc_cern -lclasutil -lbos -lfpack -lbankdefs";
+}
+if($libs_min ne ""){
+    # print out the minimum set of libs
+    print " $libs_loc -leloss -lc_bos_io -lmapmanager -lrecutl";
+}
+if($slibs ne ""){
+    # print shared libs
+    print "$clas_slib -lCLASdata";
+}
+exit(0);
+###############################################################################
+#                         Subroutine Printopts                                #
+###############################################################################
+sub printopts{
+    print "Usage: $0 [--options]
+
+          --cflags    CLAS includes 
+
+          --libs      CLAS libs
+
+          --libs_min  Minimum set of CLAS libs (for non-BOS interfaces)
+
+          --lslibs    CLAS shared libs
+
+          --help      Prints this message
+
+          \n";
+}

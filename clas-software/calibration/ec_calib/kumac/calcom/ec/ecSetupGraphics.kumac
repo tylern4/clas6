@@ -1,0 +1,24 @@
+macro ecSetupGraphics
+
+* Author:	Cole Smith
+* Purpose: 	Initialize graphics; some of this stuff is magic. 
+
+  message ecSetupGraphics
+  igset *
+  null 0. 0. 0. 0. 'AB'
+  next
+  opt nstat
+  set lfon -60
+  set vfon -60
+  set gfon -60
+  set lasi 0.3
+  set fais 1
+  igset mtyp 20
+  igset txfp -60
+  igset txci 1
+  igset chhe 0.3
+  set gsiz 0.5
+  set ygti 0.8
+  exec utilGenColormap 
+
+return

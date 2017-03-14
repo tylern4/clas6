@@ -1,0 +1,32 @@
+macro ccPlotSecVec type=norm var=ped stat=rms ymin=0 ymax=6 sec title vec1 vec2 
+
+  next
+  sigma x=array(18,1#18)
+  vec/cre y(ccvecdim) 
+  
+  case [type] in
+    (norm)  vec/copy [vec1] y; line = -1000
+    (ratio) vdivide [vec1] [vec2] y; line = 1.0
+  endcase
+  
+  case [var] in
+   (ped)  xlab1 = LoFi; xlab2 = HiFi
+          ylab1 = [var] [stat];ylab2 = [var] [stat]
+          ymin1 = [ymin]; ymax1 = [ymax]; ymin2 = [ymin]; ymax2 = [ymax]
+  endcase        
+    
+  title_gl $quote([title])
+  
+  do lr = 1,2
+    zone 1 2 [lr] s 
+    null 0 19 [ymin] [ymax]
+    hplot/symbols x y(:,[lr],[sec]) 18 20 0.1
+    line 0 [line] 19 [line]    
+    atitle [xlab[lr]] [ylab[lr]]
+  enddo
+            
+  title_gl ' '
+  zone 1 1
+  alias/del tit*
+  
+return 

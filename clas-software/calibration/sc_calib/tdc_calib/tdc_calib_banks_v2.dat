@@ -1,0 +1,13 @@
+#bank   maxinx  sector stripe  maxlay  type    cols	option
+#CALL	8	0 0    1 8	0	1872	3	-
+#CC	216	1 6    1 36	0	1872	3	-
+#CCT	216	1 6    1 36	0	1190	2	-
+#DSTC	1	0 0    1 1	0	1872	9	-
+#EC	1296	1 6    1 36	6	1872	3	minlayer=1
+ECT	1296	1 6    1 36	6	1190	2	minlayer=1
+LSRT	4	0 0    2 5	0	1190	2	-
+#RFT	2	0 0    6 7	0	1190	2	-
+#SC	684	1 6    1 57	0	1881	5	leftright=1
+SCT	684	1 6    1 57	1	1190	2	layer2lr=1
+#STN0	24	0 0    1 24	0	1190	2	-
+#TGTL	61	0 0    1 61	0	1190	2	-

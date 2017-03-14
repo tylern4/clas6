@@ -1,0 +1,94 @@
+***************** begin:  general.PAR *************************************
+*
+*      Ec (forward shower counter) parameters
+*
+      integer  MAXsectors
+      parameter ( MAXsectors= 6)        !maximum# sectors
+*
+      integer  MAXstrips                !tubes/edge
+      parameter ( MAXstrips= 108)       !normal:36
+*
+      integer  MAXtubes
+      parameter ( MAXtubes=  MAXstrips*(6+3)* MAXsectors)  !total# tubes
+*
+*    6 real layers + 3 whole layers per sector
+*    real tubes are 216*6, 108 additional "whole tube"  
+*
+*
+      integer  MAXpixels
+      parameter ( MAXpixels=  MAXstrips* MAXstrips)    !pixels/layer
+*
+      integer  MAXpeaks, MAXhits, MAXshowers
+      integer  MAXunrecon
+*      parameter ( MAXpeaks= 10)              !maximum# peaks/edge
+      parameter ( MAXpeaks= 30)              !maximum# peaks/edge
+      parameter ( MAXhits= 10)               !maximum# hits/layer
+      parameter ( MAXshowers= 10)            !maximum# showers/sector
+      parameter ( MAXunrecon= 20)            !maximum# unrecon./sector
+*
+      integer  undefined
+      parameter ( undefined= 0)              !intentionally undefined
+*
+      integer  ADC, TDC
+      parameter ( ADC=  undefined+1)
+      parameter ( TDC=  ADC+1)
+*
+        integer  near, midpoint, far
+      parameter ( near=  TDC+1)         !nearest to PMT
+      parameter ( midpoint=  near+1)    !geometric midpoint 
+      parameter ( far=  midpoint+1)   !furthest from PMT
+*
+      integer  lowest, mean, highest
+      parameter ( lowest=  far+1)     !lowest value
+      parameter ( mean=  lowest+1)         !mean value
+      parameter ( highest=  mean+1)        !highest value
+*
+      integer  whole, inner, outer, cover
+      parameter ( whole=  highest+1)       !inner layer
+      parameter ( inner=  whole+1)         !inner layer
+      parameter ( outer=  inner+1)         !outer layer
+      parameter ( cover=  outer+1)         !cover layer
+*
+      integer  Ec_x, Ec_y, Ec_z
+      integer  Ec_dx, Ec_dy, Ec_dz
+      integer  Ec_i, Ec_j, Ec_k 
+      integer  Ec_di, Ec_dj, Ec_dk 
+      integer  Ec_u, Ec_v, Ec_w
+      integer  energy, time, width, quality, unrecon
+      integer  dark, dist, atten, fey, mom2, mom3, mom4
+      integer  dim, last_par
+*
+      parameter ( Ec_x=  cover+1)               !CLAS XYZ coord.
+      parameter ( Ec_y=  Ec_x+1)                !CLAS XYZ coord.
+      parameter ( Ec_z=  Ec_y+1)                !CLAS XYZ coord.
+      parameter ( Ec_dx=  Ec_z+1)                !Errors of CLAS XYZ coord.
+      parameter ( Ec_dy=  Ec_dx+1)                !Errors of CLAS XYZ coord.
+      parameter ( Ec_dz=  Ec_dy+1)                !Errors of CLAS XYZ coord.
+      parameter ( Ec_i=  Ec_dz+1)                !Ec local IJK coord.
+      parameter ( Ec_j=  Ec_i+1)                !Ec local IJK coord.
+      parameter ( Ec_k=  Ec_j+1)                !Ec local IJK coord.
+      parameter ( Ec_di=  Ec_k+1)                !Errors of Ec local IJK coord.
+      parameter ( Ec_dj=  Ec_di+1)                !Errors of Ec local IJK coord.
+      parameter ( Ec_dk=  Ec_dj+1)                !Errors of Ec local IJK coord.
+      parameter ( Ec_u=  Ec_dk+1)                !Ec local UVW coord.
+      parameter ( Ec_v=  Ec_u+1)                !Ec local UVW coord.
+      parameter ( Ec_w=  Ec_v+1)                !Ec local UVW coord.
+*
+      parameter ( energy=  Ec_w+1)             !Ec desc.
+      parameter ( time=  energy+1)          !Ec desc.
+      parameter ( width=  time+1)
+      parameter ( mom2 = width+1)           !Ec desc.
+      parameter ( mom3 = mom2+1)           !Ec desc.
+      parameter ( mom4 = mom3+1)           !Ec desc.
+      parameter ( quality=  mom4+1)        !Ec desc.
+      parameter ( unrecon=  quality+1)      !Ec desc.
+      parameter ( dark=  unrecon+1)         !Ec desc.
+      parameter ( dist=  dark+1)        !Ec desc.
+      parameter ( atten=  dist+1) !Ec desc.
+*
+      parameter ( fey=  atten+1)  !Ec desc.
+      parameter ( dim=  fey+1)      !Ec desc.
+*
+      parameter ( last_par=  dim+1)     !marker
+*
+******************* end:  general.PAR *************************************

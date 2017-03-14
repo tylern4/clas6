@@ -1,0 +1,8 @@
+from build_system import environment
+
+detectorEnv = environment.env(deps=['clas6'])
+
+detectorLibs = detectorEnv.sconstruct('cc dc ec lac sc st tag icf sh'.split())
+#detectorLib = detectorEnv.library('detector', detectorLibs)
+
+#env.return_from_sconstruct(detectorLib)

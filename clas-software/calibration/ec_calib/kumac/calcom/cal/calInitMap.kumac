@@ -1,0 +1,17 @@
+macro calInitMap det map run val
+
+  global/import mappath
+  
+  case [det] in
+    (ec) vec/cre dum(216) r 216*[val]
+         vec/write dum tmp.vec
+         exec mapPut [mappath]/[map].map inner u [run] tmp.vec
+         exec mapPut [mappath]/[map].map inner v [run] tmp.vec
+         exec mapPut [mappath]/[map].map inner w [run] tmp.vec
+         exec mapPut [mappath]/[map].map outer u [run] tmp.vec
+         exec mapPut [mappath]/[map].map outer v [run] tmp.vec
+         exec mapPut [mappath]/[map].map outer w [run] tmp.vec
+  endcase
+  
+return
+     

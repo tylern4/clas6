@@ -1,0 +1,3 @@
+#
+mv -v $CLAS_BIN/$1 $CLAS_BIN/$1.prev
+mv -v $1 $CLAS_BIN/

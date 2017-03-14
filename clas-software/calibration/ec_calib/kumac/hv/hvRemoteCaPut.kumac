@@ -1,0 +1,40 @@
+macro hvRemoteCaPut file tmp
+
+  exec hvGetSnapFile [file]
+    
+  global/import snapfilecontents
+  global/import nlines
+  
+  lun1 = 2
+  n = 0;k = 1
+  tag = '$'
+  
+  do m = 1,[nlines]
+    string  = $word([snapfilecontents],[m],1,[tag])
+    string1 = $word([string],1,1,' ')
+    string2 = $word([string],2,1,' ')
+    string1 = $quote([string1])
+    string2 = $quote([string2])
+    message [string]
+    n = [n]+1
+    if [m].eq.[nlines] then
+      n=12
+    endif
+    case [n] in
+      (1)  fort/file [lun1] kumac/hv/db/tmp.snap unknown
+           call write([lun1],[string1],[string2],' ')
+      (12) message hvRemoteCaPut: Writing HV to Slot [k]
+           n = 0;k = [k] + 1
+           call write([lun1],[string1],[string2],' ')
+           close [lun1]           
+           shell rsh -l clasrun -n clas10 bin/caPut [tmp] > /tmp/dum.dum
+           wait 'Pausing for 8 sec' 8
+      (*)  call write([lun1],[string1],[string2],' ')
+ 
+    endcase
+  enddo
+    
+return
+  
+  
+    

@@ -1,0 +1,33 @@
+macro ecFit view=1 var=adc 
+
+  message ecFit: Processing view [view], variable [var]
+  
+  vec/cre chi2(36)
+  vec/cre par(2) 
+  vec/cre errpar(2)
+  vec/cre dum(2)
+  vec/cre chi2(1)
+  vec/cre strt(36) r 36*1
+  vec/cre stp(36) r 36*0
+*  vec/cre strt(36) r 0 1 1 1 4 31*5
+*  vec/cre stp(36)  r 0 0 0 1 1 31*1
+  vec/cre nrm(36)  r 0 1 1 1 1 31*1
+  
+  exec ecGetPixels [view] 1 [var][view]     y
+  exec ecGetPixels [view] 1 [var]err[view]  yerr
+  
+  vec/inp ecFit[var]_ymaxdat(1,[view],1)  $eval(y(1))
+  vec/inp ecFit[var]_ymaxfit(1,[view],1)  $eval(y(1))
+  vec/inp ecFit[var]_ymaxdat(1,[view],2)  $eval(yerr(1))
+  vec/inp ecFit[var]_ymaxfit(1,[view],2)  $eval(yerr(1))
+  
+  do strip=2,36
+    start= $eval(strt([strip]))
+    stop = $eval(stp([strip]))
+    norm = $eval(nrm([strip]))
+    exec ecFitStrip [var] [view] [strip] [start] [stop] [norm] 
+  enddo
+
+return
+  
+  

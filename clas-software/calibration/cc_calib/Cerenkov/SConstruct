@@ -1,0 +1,31 @@
+from init_env import init_environment
+
+env = init_environment("qt4 root mysql clas")
+
+
+# Include Path
+incpath = ['.', 'src']
+env.Append(CPPPATH = incpath)
+
+# Sources
+Cerenkov_sources = Split("""Cerenkov.cc
+                            src/GetADC_W.cc
+                            src/HV_Control_W.cc
+                            src/PED_Control_W.cc
+                            src/PED_Display_W.cc
+                            src/SPE_Control_W.cc
+                            src/SPE_Display_W.cc
+                            src/bos.cc
+                            src/cc_calib.cc
+                            src/cc_widget.cc
+                            src/database_io.cc
+                            src/help.cc
+                            src/usage.cc""")
+
+Target = 'Cerenkov'
+env.Program(source = Cerenkov_sources, target = Target)
+
+
+
+
+

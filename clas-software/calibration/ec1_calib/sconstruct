@@ -1,0 +1,12 @@
+from build_system import environment
+from glob import glob
+
+ec1_calib_deps = {'clas6': 'default_libs'.split()}
+ec1_calib_src = glob("ec1_nt/*.f")
+
+ec1_calib_env = environment.env(deps=ec1_calib_deps.keys())
+ec1_calib_env.load_dependency(deps=ec1_calib_deps)
+
+ec1_calib_env.AppendUnique(FORTRANPATH = './ec1_nt')
+
+ec1_calib_prog = ec1_calib_env.program(target='ec1_calib', source=ec1_calib_src)

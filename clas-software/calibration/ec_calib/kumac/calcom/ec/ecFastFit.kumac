@@ -1,0 +1,22 @@
+macro ecFastFit 
+
+    vec/cre strt(36) r 0 1 1 2 3 31*4
+    vec/cre stp(36)  r 0 0 1 1 1 31*2
+    vec/cre pix(1296) r
+    vec/cre pixerr(1296) r
+    call kumac/calcom/ec/fun/ecfitlib.f77
+    
+  do i = 1,[#]
+    view = [%i]  
+    message ecFastFit: Fitting view [view]  
+    sigma pixerrr=adcerr[view]/adc[view]
+    sigma pixx=log(adc[view])  
+    ve/cop pixx pix
+    ve/cop pixerrr pixerr
+    call ecfit([view])
+  enddo
+  
+return
+  
+  
+  

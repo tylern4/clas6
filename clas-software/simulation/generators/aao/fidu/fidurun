@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+REVB=/scratch/$USER/input.bos
+WDST=/scratch/$USER/output.bos
+HIST=/scratch/$USER/output.rzh
+rm $WDST $HIST
+#
+export REVB WDST HIST
+#
+$TOP_DIR/bin/$OSNAME/fidu < fidu.inp

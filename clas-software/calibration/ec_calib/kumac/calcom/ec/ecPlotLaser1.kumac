@@ -1,0 +1,79 @@
+macro ecPlotLaser1 sec=4 view=1 strip=1
+
+  glob/import sector
+  message ecPlotLaser1: Plotting laser data for sector [sec] view [view] strip [strip]
+  if [sec].ne.[sector] then
+    exec ecGetLaser [sec]
+  endif
+  glob/import nruns
+
+  case [view] in
+    (1) chview=UF
+    (2) chview=VF
+    (3) chview=WF
+    (4) chview=UB
+    (5) chview=VB
+    (6) chview=WB
+  endcase
+  
+  title = Sector [sec] [chview][strip] Laser Results
+  title_gl [title]
+
+  vec/copy pmt(:,[strip],[view]) 	dum1
+  vec/copy pmtrms(:,[strip],[view]) 	dum2
+  vec/copy pe(:,[strip],[view]) 	dum3
+  vec/copy pmtrms2(:,[strip],[view]) 	dum4
+
+  max0 = $sigma(vmax(filt))*1.1
+  min1 = $sigma(vmin(dum1))*0.9
+  max1 = $sigma(vmax(dum1))*1.1
+  max1a = $sigma(vmax(1./dum1))*1.1 
+  max2 = $sigma(vmax(dum2))*1.1
+  max3 = $sigma(vmax(dum3))*1.1
+  max4 = $sigma(vmax(dum4))*1.1
+
+  zone 2 2
+
+  opt logx
+  exec ecShowLaser [view] [strip] [min1] [max1]
+
+  opt linx
+  null 0. [max0] -100. [max1]
+  atitle 'Filter Setting' 'ADC Centroid'
+  hplot/errors filt pmt(:,[strip],[view]) xerr pmterr(:,[strip],[view]) [nruns] 20 0.18
+
+  opt logx
+  null [min1] [max1] -0.1 [max4]
+  atitle 'ADC Centroid' '(Sigma/Centroid)**2 (X 100)'
+  hplot/errors pmt(:,[strip],[view]) pmtrms2(:,[strip],[view]) xerr err(:,[strip],[view]) [nruns] 20 0.18
+
+  opt logy
+  null 0.000 [max1a] 0.03 [max4]
+  atitle '1/ADC Centroid' '(Sigma/Centroid)**2 (X 100)'
+  hplot/errors pmt2(:,[strip],[view]) pmtrms2(:,[strip],[view]) xerr err(:,[strip],[view]) [nruns] 20 0.18
+
+  a = $eval(ecFitPE_par([view],[strip],1)*100)
+  b = $eval(ecFitPE_par([view],[strip],2)*100)
+  fun/plot [a]+[b]*x 0. [max1a] SL
+  opt linx
+  opt liny
+  
+  xshft = -2.5;  yshft = -1.0
+  string1 = $format($eval(100*ecFitPE_par([view],[strip],2)),f5.1)
+  string2 = $format($eval(100*ecFitPE_errpar([view],[strip],2)),f3.1)
+  string3 = $format($eval(100*ecFitPE_par([view],[strip],1)),f4.2)
+  string4 = $format($eval(100*ecFitPE_errpar([view],[strip],1)),f4.2)
+  string5 = $format(ecFitPE_yld([view],[strip],1),f4.2)
+  string6 = $format(ecFitPE_erryld([view],[strip],1),f4.2)
+  exec xytit 40 $eval([xshft]) $eval([yshft]-0.5) 'm = '//[string1]//' +- '//[string2]
+  exec xytit 40 $eval([xshft]) $eval([yshft]-1.0) 'b  = '//[string3]//' +- '//[string4]
+  exec xytit 40 $eval([xshft]) $eval([yshft]-1.5) '<[V]^2!>='//$format(ecFitPE_chi2([view],[strip]),f4.2)
+  xshft=-1.5;  yshft=-6.0
+  exec xytit 40 $eval([xshft]) $eval([yshft]-0.5) 'PE/MeV = '//[string5]//' +- '//[string6]
+  
+  vec/del dum1
+  vec/del dum2
+  vec/del dum3
+  vec/del dum4
+
+return

@@ -1,0 +1,338 @@
+macro Crude_Tune  
+|
+ close 98
+|
+| Vector that contains number of 2.004 ns shifts needed for allignment
+| ( must be multiplied by 2.004 to get ns )
+| 
+ if ( $VEXIST(DT_EL) = 1 ) then
+  ve/del DT_EL
+ endif 
+ ve/cr DT_EL(48,6)
+|
+| 
+| Vector that contains number of 2.004 shifts needed for sector 2 sector
+|   allignment ( must be multiplied by 2..04 ns to get ns )
+|
+ if ( $VEXIST(DT_SS) = 1 ) then
+  ve/del DT_SS
+ endif
+ ve/cr DT_SS(6) R 0. 0. 0. 0. 0. 0. 
+|  
+| Loop over sectors and do crude tune for the front strips
+|
+ do iSect=1, 6
+  for/file 98 crude_[iSect]_front.ps
+  meta 98 -111
+  exec Crude_Tune_Sect_Front Sector=[iSect]
+  for/close 98 
+ enddo
+|
+|
+|Allign sector to sector time
+|
+ exec  Sec2Sec_Allign
+|
+|
+| Allign the remaining strips for 6 sectors
+|
+ do iSect=1, 6
+  for/file 98 crude_[iSect]_back.ps
+  meta 98 -111
+  exec Crude_Tune_Sect_Back Sector=[iSect]
+  for/close 98  
+ enddo
+|
+return
+|
+|
+|===========================================================================================
+|
+|
+macro Crude_Tune_Sect_Front Sector=1
+|
+| Do front 10 strips with electrons for a given sector
+|
+|
+zone 2 4; opt nfit; opt stat; opt grid; opt htit;
+|
+RF_Period=2.004
+Sector_E = [Sector]
+title 'Sector '//[Sector_E]
+|
+if ( [Sector_e] > 3.1 ) then
+ Sector_H = $SIGMA(INT([Sector_E] - 3)) ; 
+ Sector_H_b = [Sector_H] + 1
+else
+ Sector_H = $SIGMA(INT([Sector_E] + 3)) ;
+ Sector_H_b = [Sector_H] - 1
+endif
+|
+|
+| Aligning first 10 strips 
+|
+|
+mess 'Doing First strips with electrons for sector ' [Sector_e]
+|
+| strip 28 is used to calibrate front
+| one has to make sure this strip is working properly for ALL sectors
+|
+iStrp_h=28
+nChan=200
+|
+|
+| Creating the reference
+|
+iStrp_e=4
+if ( $HEXIST(43000) = 1 ) then
+ h/del 43000
+endif
+1d 43000 ' ' [nChan] -35. +35.
+nt/proj 43000 //PAWC/30.D_T Sect_e=[Sector_E].and.Sect_h=[Sector_H].and.Strp_e=[iStrp_e].and.Strp_h=[iStrp_h] 
+Mean = $HINFO(43000,'MEAN') 
+LoLim = $EVAL( [Mean] - 6. )
+UpLim = $Eval( [Mean] + 6. )
+|
+h/del 43000;  1d 43000 ' ' [nChan] [LoLim] [UpLim]  
+nt/proj 43000 //PAWC/30.D_T Sect_e=[Sector_E].and.Sect_h=[Sector_H].and.Strp_e=[iStrp_e].and.Strp_h=[iStrp_h].and.D_T>[LoLim].and.D_T<[UpLim]
+if ( $VEXIST(Y_VEC) = 1 ) then
+ ve/del Y_VEC
+endif
+ve/cr Y_VEC([nChan])
+get_vec/cont 43000 Y_VEC
+MaxBin = $SIGMA(LVMAX(Y_VEC))
+X_Max = $Sigma([LoLim]+([MaxBin]-1.+1./2.)*([UpLim]-[LoLim])/[nChan]) 
+MeanRef = [X_Max]
+|
+| Creating the backup reference for the case when elastic dominates
+|
+|
+h/del 43000 ; 1d 43000 ' ' [nChan] -35. +35.  
+nt/proj 43000 //PAWC/30.D_T Sect_e=[Sector_E].and.Sect_h=[Sector_H_b].and.Strp_e=[iStrp_e].and.Strp_h=[iStrp_h] 
+Mean = $HINFO(43000,'MEAN') 
+LoLim_b = $EVAL( [Mean] - 6. )
+UpLim_b = $Eval( [Mean] + 6. )
+|
+h/del 43000;  1d 43000 ' ' [nChan] [LoLim_b] [UpLim_b]  
+nt/proj 43000 //PAWC/30.D_T Sect_e=[Sector_E].and.Sect_h=[Sector_H_b].and.Strp_e=[iStrp_e].and.Strp_h=[iStrp_h].and.D_T>[LoLim_b].and.D_T<[UpLim_b] 
+if ( $VEXIST(Y_VEC) = 1 ) then
+ ve/del Y_VEC
+endif
+ve/cr Y_VEC([nChan])
+get_vect/cont 43000 Y_VEC
+MaxBin = $SIGMA(LVMAX(Y_VEC))
+X_Max = $Sigma([LoLim_b]+([MaxBin]-1.+1./2.)*([UpLim_b]-[LoLim_b])/[nChan]) 
+MeanRef_b = [X_Max]
+|
+|
+| Looping over Electron strips
+|
+|
+do iStrp_e = 1 , 10
+ ID_H = 2000+[Sector_E]*100+[iStrp_E]
+ if ( $HEXIST([ID_H]) = 1 ) then
+  h/del [ID_H]
+ endif
+ if ( ([iStrp_e] < 5) .or. ( [iStrp_e] > 8) ) then
+|
+| No elastic  peak here expected
+|
+  1d [ID_H] 'Strip '//[iStrp_e] [nChan] [LoLim] [UpLim]  
+  nt/proj [ID_H] //PAWC/30.D_T Sect_e=[Sector_E].and.Sect_h=[Sector_H].and.Strp_e=[iStrp_e].and.Strp_h=[iStrp_h].and.D_T>[LoLim].and.D_T<[UpLim] 
+  if ( $VEXIST(Y_VEC) = 1 ) then
+   ve/del Y_VEC
+  endif
+  ve/cr Y_VEC([nChan])
+  get_vect/cont [ID_H] Y_VEC
+  MaxBin = $SIGMA(LVMAX(Y_VEC))
+  X_Max = $Sigma([LoLim]+([MaxBin]-1.+1./2.)*([UpLim]-[LoLim])/[nChan]) 
+  NEvt = $HINFO([ID_H],'ENTRIES')
+  Diff = [X_Max] - [MeanRef]
+ else
+|
+| Avoiding elastic peak, working in not the opposite sector
+| 
+  1d [ID_H] 'Strip '//[iStrp_e] [nChan] [LoLim_b] [UpLim_b]  
+  nt/proj [ID_H] //PAWC/30.D_T Sect_e=[Sector_E].and.Sect_h=[Sector_H_b].and.Strp_e=[iStrp_e].and.Strp_h=[iStrp_h].and.D_T>[LoLim_b].and.D_T<[UpLim_b] 
+  if ( $VEXIST(Y_VEC) = 1 ) then
+   ve/del Y_VEC
+  endif
+  ve/cr Y_VEC([nChan])
+  get_vect/cont [ID_H] Y_VEC
+  MaxBin = $SIGMA(LVMAX(Y_VEC))
+  X_Max = $Sigma([LoLim_b]+([MaxBin]-1.+1./2.)*([UpLim_b]-[LoLim_b])/[nChan]) 
+  NEvt = $HINFO([ID_H],'ENTRIES')
+  Diff = [X_Max] - [MeanRef_b]
+ endif 
+ Rem = $RSIGMA(Mod([Diff],[RF_Period]))
+ if ( Abs([Rem]) < [RF_Period]/2. ) then
+  DiffQ = $RSIGMA(INT([Diff]/[RF_Period]))
+ else
+  DiffQ = $RSIGMA( INT([Diff]/[RF_Period]) + Abs([Diff])/[Diff] )
+ endif  
+ if ( [NEvt] < 4. ) then
+  DiffQ = 0.
+ endif
+ ve/input DT_EL([iStrp_e],[Sector_E]) [DiffQ]
+ mess [iStrp_e] [Diff] [DiffQ]
+ h/pl [ID_H]    
+enddo
+|
+| Plot the allignment before crude tuning for the front 
+|
+ID_H_R = 2000+[Sector_E]*100 
+if ( $HEXIST([ID_H_R]) = 1 ) then
+ h/del [ID_H_R]
+endif
+2d [ID_H_R] 'Front Sector '//[Sector_E] 10 0.5 10.5 100 -5. +5.
+nt/proj [ID_H_R] //PAWC/30.(D_T-[MeanRef])%Strp_e Sect_e=[Sector_E].and.Sect_h=[Sector_H].and.Strp_e<11.and.Strp_h=[iStrp_h] 
+zone; opt nsta;
+h/pl [ID_H_R] box
+|
+return
+|
+|
+|======================================================================================================
+|
+|
+macro Sec2Sec_Allign
+|
+| Sector to Sector Allignment ( with respect to sec # 1 )
+|
+zone 2 3 ; 
+title ' Sector to Sector Allignment '
+mess 'Aligning Sector to sector '
+RF_Period=2.004
+do iSectA=2, 6
+ ID_H_Sec = 5500+[iSectA]
+ if ( $HEXIST([ID_H_Sec]) = 1 ) then
+  h/del [ID_H_Sec]
+ endif
+ 1d [ID_H_Sec] 'Sector '//[iSectA] 400 -20. +20. 
+ nt/proj [ID_H_Sec] //PAWC/30.-1.*d_t_algn.f Sect_e=1.and.Sect_h=[iSectA].and.Strp_e<10.and.Strp_h<10 
+ if ( $VEXIST(Y_VEC) = 1) then
+  ve/del Y_VEC
+ endif
+ ve/cr Y_VEC(400)
+ get_vect/cont [ID_H_Sec] Y_VEC
+ MaxBin = $SIGMA(LVMAX(Y_VEC))
+ X_Max = $Sigma(-20.+([MaxBin]-1.+1./2.)*(40.)/400.) 
+ Diff = [X_Max]
+ Rem = $RSIGMA(MOD([Diff], [RF_Period])) 
+ if ( Abs([Rem]) < [RF_Period]/2. ) then
+  DiffQ = $RSIGMA(INT([Diff]/[RF_Period]))
+ else
+  DiffQ = $RSIGMA( INT([Diff]/[RF_Period]) + Abs([Diff])/[Diff] )
+ endif   
+ ve/input DT_SS([iSectA]) [DiffQ]
+ mess [iSectA] [Diff] [DiffQ]
+ h/pl [ID_H_Sec]
+enddo
+|
+return
+|
+|
+|=====================================================================================================
+|
+|
+macro Crude_Tune_Sect_Back Sector=1
+|
+|
+| Align Strips from 11 to 48
+|
+|
+mess 'Doing backward strips with pions for Sector '//[Sector]
+|
+zone 3 4; opt stat; opt nfit; opt grid; opt htit
+nChan = 200
+RF_Period = 2.004
+|
+Sector_H = [Sector]
+title 'Sector '//[Sector]
+|
+if ( [Sector_H] > 3.1 ) then
+ Sector_E = $SIGMA(INT([Sector_H] - 3)) ; 
+ Sector_E_b = [Sector_E] + 1
+else
+ Sector_E = $SIGMA(INT([Sector_H] + 3)) ;
+ Sector_E_b = [Sector_E] - 1
+endif
+|
+if ( $HEXIST(43000) = 1 ) then
+ h/del 43000
+endif
+1d 43000 ' ' [nChan] -35. +35.
+|
+| Creating reference
+|
+iStrp_h = 28
+nt/proj 43000 //PAWC/30.-1.*d_t_algn.f Sect_e=[Sector_E].and.Sect_h=[Sector_H].and.Strp_e>0.and.Strp_e<10.and.Strp_h=[iStrp_h] 
+Mean = $HINFO(43000,'MEAN') 
+LoLim = [Mean]-25.
+UpLim = [Mean]+25.
+h/del 43000
+1d 43000 ' ' [nChan] [LoLim] [UpLim]
+nt/proj 43000 //PAWC/30.-1.*d_t_algn.f Sect_e=[Sector_E].and.Sect_h=[Sector_H].and.Strp_e>0.and.Strp_e<10.and.Strp_h=[iStrp_h] 
+if ( $VEXIST(Y_VEC) = 1 ) then
+ ve/del Y_VEC
+endif
+ve/cr Y_VEC([nChan])
+get_vect/cont 43000 Y_VEC
+MaxBin = $SIGMA(LVMAX(Y_VEC))
+X_Max = $Sigma([LoLim]+([MaxBin]-1.+1./2.)*([UpLim]-[LoLim])/[nChan]) 
+Mean_Ref = [X_Max]
+|
+|
+|
+|
+|  Looping over 38 strips
+|
+|
+
+do iStrp_h=11, 48
+ ID_H = 3000+[Sector_H]*100+[iStrp_h]
+ if ( $HEXIST([ID_H]) = 1 ) then
+  h/del [ID_H]
+ endif
+ 1d [ID_H] 'Strip '//[iStrp_h] [nChan] [LoLim]  [UpLim] 
+ nt/proj [ID_H] //PAWC/30.-1.*d_t_algn.f Sect_e=[Sector_E].and.Sect_h=[Sector_H].and.Strp_e>0.and.Strp_e<10.and.Strp_h=[iStrp_h] 
+ NEvt = $HINFO([ID_H],'ENTRIES')
+ if ( $VEXIST(Y_VEC) = 1 ) then
+  ve/del Y_VEC
+ endif
+ ve/cr Y_VEC([nChan])
+ get_vect/cont [ID_H] Y_VEC
+ MaxBin = $SIGMA(LVMAX(Y_VEC))
+ X_Max = $Sigma([LoLim]+([MaxBin]-1.+1./2.)*([UpLim]-[LoLim])/[nChan]) 
+| Diff = [X_Max] - [Mean_ref]
+ Diff = [X_Max]
+ Rem = $RSIGMA(Mod([Diff],[RF_Period]))
+ if ( Abs([Rem]) < [RF_Period]/2. ) then
+  DiffQ = $RSIGMA(INT([Diff]/[RF_Period]))
+ else
+  DiffQ = $RSIGMA( INT([Diff]/[RF_Period]) + Abs([Diff])/[Diff] )
+ endif  
+ if ( [NEvt] < 4. ) then
+  DiffQ = 0.
+ endif
+ ve/input DT_EL([iStrp_h],[Sector]) [DiffQ]
+ mess [iStrp_h] [Diff] [DiffQ]
+ h/pl [ID_H]     
+enddo
+|
+|  Plot the back panel already corrected. 
+|
+|
+ID_H_R = 3000 + [Sector]*100 
+if ( $HEXIST([ID_H_R]) = 1 ) then
+ h/del [ID_H_R]
+endif
+2d [ID_H_R] ' ' 38 10.5 48.5 100 [LoLim] [UpLim]
+nt/pro [ID_H_R] //PAWC/30.-1.*d_t_algn.f%Strp_h Sect_e=[Sector_E].and.Sect_h=[Sector_H].and.Strp_e>0.and.Strp_e<10.and.Strp_h>10 
+zone; opt nstat; opt nfit; opt grid;
+h/pl [ID_H_R] box
+|
+ 
+|
+return
+

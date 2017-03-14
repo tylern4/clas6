@@ -1,0 +1,255 @@
+macro plot_sc_gain id=1 idoffset=1000
+mess ' plot_sc - Macro to project out monb 2-d plots 24 to a page'
+mess ' plot_sc - id=' [id] ' idoffset='[idoffset]
+* 
+* plot TOF energy loss histograms 
+*	101 - 148    sector 1, scintillators 1-48 
+*	201 - 248    sector 2, scintillators 1-48 
+*	301 - 348    sector 3, scintillators 1-48 
+*	401 - 448    sector 4, scintillators 1-48 
+*	501 - 548    sector 5, scintillators 1-48 
+*	601 - 648    sector 6, scintillators 1-48
+*
+* set options
+*
+option date
+option stat
+*set stat 1111111
+*set fit 111
+set ytic .2
+set xtic .2
+set ymgl 1.
+set ymgu 1.
+set ywin 1.
+set xwin 1.
+set xmgl 0.5
+set xmgr 0.5
+set yhti 0.5
+set xsiz 20.
+set ysiz 20.
+set tsiz 0.2
+set asiz 0.2
+set csiz 0.3
+set chhe 0.2
+set lasi 0.2
+set vsiz 0.2
+*set psiz 0.3
+*set gsiz 0.3
+*set ksiz 0.3
+*set 2siz 0.3
+message ' 2siz'
+*
+set hcol 1107 
+***********************************************************************
+*Create new hbook file for storage of 1-D scintillator gmean histograms
+***********************************************************************
+hi/file 2 gmean_one_dim.hbook ! N ; LDIR
+hi/file 3 log_plots.hbook     ! N ; LDIR
+
+* open metafile
+*
+for/file 66 plot_sc.ps
+meta 66 -111
+*
+* set to scintillator directory
+*
+cd //lun1/sc
+
+*
+* plot
+*
+zone 4 6
+
+*
+* loop over sectors
+*
+* output 24 to a page to print file
+*
+do j=1,6
+   exec plot_sector sector=[j] id=[id] offset=[idoffset]
+enddo
+*
+* create output file with one-dim histograms.
+*
+if [id] = 1 then
+do j=1,6
+   exec plot_gmean  sector=[j] id=[id] offset=[idoffset]
+enddo
+endif
+
+if [id] = 2 then
+do j=1,6
+     exec plot_log  sector=[j] id=[id] offset=[idoffset]
+enddo
+endif
+
+
+
+*
+* close file
+*
+close 66
+*
+* exit and end macro definition
+*
+exitm
+return
+**********************************************************************************
+
+macro plot_sector sector=1 id=1 offset=1000
+mess ' Begin plotting with sector=' [sector] ' id=' [id] ' offset=' [offset]
+* 
+* plot TOF energy loss histograms 
+*	101 - 148    sector 1, scintillators 1-48 
+*	201 - 248    sector 2, scintillators 1-48 
+*	301 - 348    sector 3, scintillators 1-48 
+*	401 - 448    sector 4, scintillators 1-48 
+*	501 - 548    sector 5, scintillators 1-48 
+*	601 - 648    sector 6, scintillators 1-48
+*
+* plot
+*
+nscint = 48
+ihst = [offset]*[sector] + [id]
+message ' plot_sector - ihst='[ihst]
+
+hi/create/slix [ihst] [nscint]
+hi/project [ihst]
+
+
+*
+* loop over scints
+*
+do j=1,25,24
+   exec page ihst=[ihst] scint=[j]
+   wait
+enddo
+
+*
+* exit and end macro definition
+*
+exitm
+return
+*********************************************************
+
+macro page ihst=[ihst] scint=1
+mess 'Macro page, ihst=' [ihst] ' scint=' [scint]
+
+*
+* plot 24 histograms
+*
+do j=[scint],[scint]+23
+   if [j] = 1 .or. [j]=25 then
+      option file
+   else
+      option nfile
+   endif
+   
+   hi/plot [ihst].slix.[j]
+   exe window#push
+   text 0.4 0.8 'SC'//[j] 0.2
+   text 0.4 0.6 'ID'//[ihst] 0.2
+   exe window#pop
+enddo
+
+*******************************
+* exit and end macro definition
+*******************************
+
+exitm
+return
+
+**************************************************************************************************
+macro plot_gmean sector=1 id=1 offset=1000
+mess 'Start Geometric Mean Plots, One to a page sector=' [sector] ' id=' [id] ' offset =' [offset]
+
+cd //lun1/sc
+
+zone 1 1
+nscint = 48
+ihst = [offset]*[sector] + [id]
+ihst1 = 10 + [sector]
+hi/create/slix [ihst] [nscint]
+hi/proj [ihst]
+
+
+do j=1,48
+  hi/plot [ihst].slix.[j]
+enddo
+
+cd //lun2
+
+do j= 1,48
+ 
+
+if [j] = 1 .or. [j]=25 then
+      option file
+   else
+      option nfile
+   endif
+
+   ihst2 = 100*[ihst1] + [j]
+   hi/create/1dhisto [ihst2] name 100 0 2500
+   hi/copy [ihst].slix.[j] [ihst2]
+   hi/hio/hrout [ihst2]
+enddo
+wait
+
+
+zone 4 6
+*******************************
+* exit and end macro definition
+*******************************
+exitm
+return
+
+ 
+
+
+**************************************************************************************************
+macro plot_log sector=1 id=2 offset=1000
+mess 'Start Log ADC Plots, One to a page sector=' [sector] ' id=' [id] ' offset =' [offset]
+
+cd //lun1/sc
+
+zone 1 1
+nscint = 48
+ihst = [offset]*[sector] + [id]
+ihst1 = 20 + [sector]
+hi/create/slix [ihst] [nscint]
+hi/proj [ihst]
+
+
+do j=1,48
+  hi/plot [ihst].slix.[j]
+enddo
+
+cd //lun3
+
+do j= 1,48
+ 
+
+if [j] = 1 .or. [j]=25 then
+      option file
+   else
+      option nfile
+   endif
+
+   ihst2 = 100*[ihst1] + [j]
+   hi/create/1dhisto [ihst2] name 100 0 2500
+   hi/copy [ihst].slix.[j] [ihst2]
+   hi/hio/hrout [ihst2]
+enddo
+wait
+
+
+zone 4 6
+*******************************
+* exit and end macro definition
+*******************************
+exitm
+return
+
+
+
+

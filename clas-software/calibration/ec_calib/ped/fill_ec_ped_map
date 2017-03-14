@@ -1,0 +1,38 @@
+#! /bin/tcsh -f
+
+# Reads online pedestal file created by PEDMAN and 
+# pipes pedestals to offline EC_PEDESTALS.map
+
+# Should only be used on clon cluster 
+# Online and offline environments must be defined
+# e.g.- $CLON_PARMS and $CLAS_PARMS
+
+# usage: fill_ec_ped_map runno
+
+# Cole Smith, University of Virginia, 30-jan-99
+
+
+awk 'NF>1&&NF<5 {print $2+1,int($1/256),256*($1/256-int($1/256)),$3}' $CLON_PARMS/pedman/Tfiles/ec.trans_clasprod_0$1.txt \
+| awk '$2 ~ /1/ {print $4}' \
+| put_map_float -m$CLAS_PARMS/Maps/EC_CALIB.map -sEC_PEDESTALS -iInnerU -t$1
+ 
+awk 'NF>1&&NF<5 {print $2+1,int($1/256),256*($1/256-int($1/256)),$3}' $CLON_PARMS/pedman/Tfiles/ec.trans_clasprod_0$1.txt \
+| awk '$2 ~ /2/ {print $4}' \
+| put_map_float -m$CLAS_PARMS/Maps/EC_CALIB.map -sEC_PEDESTALS -iInnerV -t$1 
+
+awk 'NF>1&&NF<5 {print $2+1,int($1/256),256*($1/256-int($1/256)),$3}' $CLON_PARMS/pedman/Tfiles/ec.trans_clasprod_0$1.txt \
+| awk '$2 ~ /3/ {print $4}' \
+| put_map_float -m$CLAS_PARMS/Maps/EC_CALIB.map -sEC_PEDESTALS -iInnerW -t$1 
+
+awk 'NF>1&&NF<5 {print $2+1,int($1/256),256*($1/256-int($1/256)),$3}' $CLON_PARMS/pedman/Tfiles/ec.trans_clasprod_0$1.txt \
+| awk '$2 ~ /4/ {print $4}' \
+| put_map_float -m$CLAS_PARMS/Maps/EC_CALIB.map -sEC_PEDESTALS -iOuterU -t$1 
+
+awk 'NF>1&&NF<5 {print $2+1,int($1/256),256*($1/256-int($1/256)),$3}' $CLON_PARMS/pedman/Tfiles/ec.trans_clasprod_0$1.txt \
+| awk '$2 ~ /5/ {print $4}' \
+| put_map_float -m$CLAS_PARMS/Maps/EC_CALIB.map -sEC_PEDESTALS -iOuterV -t$1 
+
+awk 'NF>1&&NF<5 {print $2+1,int($1/256),256*($1/256-int($1/256)),$3}' $CLON_PARMS/pedman/Tfiles/ec.trans_clasprod_0$1.txt \
+| awk '$2 ~ /6/ {print $4}' \
+| put_map_float -m$CLAS_PARMS/Maps/EC_CALIB.map -sEC_PEDESTALS -iOuterW -t$1 
+

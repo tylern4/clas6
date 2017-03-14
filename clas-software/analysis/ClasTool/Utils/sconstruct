@@ -1,0 +1,7 @@
+from build_system import environment
+
+UtilsEnv = environment.env(deps='clas6 root'.split())
+UtilsEnv.load_dependency('clas6 root'.split())
+
+UtilsLib = UtilsEnv.library('Utils')
+UtilsEnv.return_from_sconstruct(UtilsLib)

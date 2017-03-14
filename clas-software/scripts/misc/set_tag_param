@@ -1,0 +1,33 @@
+#!/usr/bin/env perl
+$filename = $ARGV[0];
+$incfile  = $ARGV[1]; #"../inc_derived/cvs_tagname.inc";
+$lprint = 0;
+open (CVS,"cvs status -v $filename |");
+while (<CVS>) {
+    if ($lprint) {
+    $lprint = 0;
+    @field = split(/\s+/);
+    $tagname = $field[1];
+    }
+    if (/Sticky Tag/) {
+    @field = split(/\s+/);
+    print "$field[3]";
+#   if ($field[3]!~ "(none)") {
+        $tagname = $field[3];
+#   }
+    }
+    if (/Existing Tags/) {
+    if ($tagname =~ "(none)") {
+        $lprint++;
+    }
+    }
+}
+close (CVS);
+open (OUTP,">$incfile") || die "Could not open output $incfile";
+print OUTP "*   character string containing the actual cvs tag name   *\n";
+print OUTP "\n        character*(*) cvs_tagname \n";
+print OUTP "        parameter (cvs_tagname='$tagname') \n";
+close (OUTP);
+exit
+
+

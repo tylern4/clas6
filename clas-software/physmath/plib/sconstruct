@@ -1,0 +1,5 @@
+from build_system import environment
+
+plibenv = environment.env(deps=['clas6'])
+plibenv.load_dependency('clas6')
+plibenv.library(target='plib')

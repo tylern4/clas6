@@ -1,0 +1,4 @@
+from build_system import environment
+
+g11env = environment.env()
+g11env.library(target='g11photonenergy')

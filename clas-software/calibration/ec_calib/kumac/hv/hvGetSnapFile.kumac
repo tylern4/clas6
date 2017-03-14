@@ -1,0 +1,18 @@
+macro hvGetSnapFile file
+
+  global/cre snapfilecontents
+  global/cre nlines
+  
+  case $fexist([file]) in
+    (0) message hvGetSnapFile: [file] not found!; exitm 0
+  endcase
+  
+  message hvGetSnapFile: Opening [file]
+  
+  tag = '$'
+  command	= 'cat '//[file]
+  snapfilecontents = $shell([command],[tag])
+  nlines       = $words([snapfilecontents],[tag])
+  
+return
+  

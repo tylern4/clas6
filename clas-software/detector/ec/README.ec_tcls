@@ -1,0 +1,65 @@
+Variables in the EC package that are under TCL controll.
+These variables can be separated into two groups -
+
+********************************************************************************
+1.TCL variables that will go with EC code: 
+
+Minimum energy deposition in the strip - 
+EcFitEdge_strip_threshold - (Default = 0.001GeV) used in ecfsp.F
+
+Minimum energy in the peak - 
+EcFitEdge_peak_threshold  - (Default = 0.003GeV) used in ecfsp.F
+
+Minimum energy in the hit - 
+EcFitEdge_hit_threshold  - (Default = 0.010GeV) used in ecfph.F
+
+Weighting the energy distribution in the peak (transverse) logarithmically -
+ec_ln_weights  -  (Default = .TRUE.) used in ecfsp.F
+
+Maximum distance between neghboring strips in the peaks measured 
+in the units of strip (STR_ID(I+1)-STR_ID(I)<=touch_id) -
+touch_id  -  (Default = 2) used in ecfsp.F 
+
+Control parameter for quality of EC internal hit matching -
+ec_match  -  (Default = 3 like 3sigma) used in hit_match.F.
+
+Determine location of Whole, Inner and Outer planes -
+whole_surf  -  (Default = 1. front face of the first scintillator layer) 
+inner_surf  -  (Default = 1. front face of the first scintillator layer)  
+outer_surf  -  (Default = 16. front face of the sixteenth scintillator layer)  
+used in ec_getcal_geom.F
+
+
+********************************************************************************
+2. TCL variables that should (could) disappear with upgrading 
+the code (EC/RECSIS/MAPPING).
+
+Use the fix (375cm) attenuation lengths for the strips -
+def_atten  -  (Default = .FALSE.) used in ec_getcal_atten.F
+It is .TRUE. only for GSIM data analyses. 
+
+
+
+Use default values for ADC constants (PEDESTAL =0 , GAIN = 10ch/MeV) -
+def_ADC  -  (Default = .false.) used in ec_getcal_ADC.F 
+It is .TRUE. only for GSIM data analyses. 
+
+
+Use default values for TDC constants (T0 =0 , TCH = 50ps/ch) -
+def_TDC  -  (Default = .false.) used in ec_getcal_TDC.F 
+It is .TRUE. only for GSIM data analyses. 
+
+Use the ideal geometry settings - 
+def_geom  -  (Default = .TRUE.) used in ec_getcal_geom.F
+At the moment we do not have any thing but that.
+
+TCL variables that are not used any more - 
+Do the analyses by:
+*                    1 - NOT known
+*                    2 - correct attenuation corrections
+anal_opt  -  (Default = 2) used in ecfsp.F 
+
+
+
+
+

@@ -1,0 +1,27 @@
+RULES FOR COMPILING TOF_FORWARD_COSMIC_filter.c
+------------------------------------------------
+First Time Compilation
+----------------------- 
+(1) make sure that environment variables are properly set up.
+    Use the command:
+      source /group/clas/builds/PRODUCTION/packages/cms/jlab.cshrc
+(2) type "make all" to make executable TOF_FORWARD_COSMIC_filter
+
+
+INSTRUCTIONS FOR UPLOADING SC PEDESTAL VALUES
+------------------------------------------------
+(1) copy the pedestal Tfile that you want to use to this directory.
+    The pedestal files are located on clon01 with file name ${CLON_PARMS}/pedman/Tfiles/sc.trans_clasprod_0${RUNNO}.txt
+(2) remove all of the blank lines, header lines, and comment lines from the tfile, such that only lines with pedestal data remain
+(3) run root
+(4) Load the get_ped_values.C script into root
+    Use the command:
+      .L get_ped_values.C
+(5) Execute the function:
+      get_PED_VALUES(char *filename)
+(6) Exit Root
+(7) Open the pedestals_2_db.sh file and change the database RunIndex you wish to upload the pedstals into
+(8) Run pedestals_2_db.sh with the arguments: pedestal_runno, runrangemin, runrangemax
+    Example:
+      pedestals_2_db.sh 55357 55357 99999
+

@@ -1,0 +1,10 @@
+opt date
+set pcol 1001
+set xcol 7
+set ycol 7
+set bcol 7
+set hcol 1000
+igset pmci 0
+igset txci 0
+igset mtyp 20
+igset mscf 0.3

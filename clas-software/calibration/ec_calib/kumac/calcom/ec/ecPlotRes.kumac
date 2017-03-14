@@ -1,0 +1,16 @@
+macro ecPlotRes
+
+  sigma x=array(50,0.5#2.5)
+  vec/cre ex(50) r 50*0 
+
+  null 0.9 2.1 0. 0.20  
+  hplot/errors x y ex ex 50 20 0.18
+  atitle 'MomentumHBT (GeV)' '(p-E)/p'
+  hplot/errors x yerr ex ex 50 24 0.18
+  key 1.1 0.035 20 mean
+  key 1.1 0.02 24 sigma
+  line 0 0 5 0
+    
+return
+  
+    

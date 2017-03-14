@@ -1,0 +1,244 @@
+888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+tagger flow chart:
+
+//////////initialisation//////////
+
+tag_init : reads tagger specific data base
+	so far read only ET-coincidence map, =
+	 and store them in a common in the file "tagcal.CMN".
+	Needs to be added: Absorptive effect due to obstructions in beam (full target)
+	raw to BOS conversion parameters (slot position, etc..)
+	...
+
+tagtcl_init: Initialise the link between tcl variable and fortran variables stored in a common in
+		the file "taginfo.CMN"
+		17 tcl variables so far:
+		E_T_coincidence: was there an E-T hardware coincidence ? - not a the right
+				 place - should be a run time variable - has to be removed.
+		Tagger_Raw_Format = do we need to got some Bank generated out of the raw banks (see the README file) (default = no = 0)
+		Tagger_NO_E   (if equal to 1 we don't use the information coming form the E, for exemple if there is no E) (default=0)
+		Tagger_debug_begin   : first common in event.CMN to be dump on screen during processing (default = 0)
+		Tagger_debug_end     : last common in event.CMN to be dump on screen during processing (default = -1)
+				(if Tagger_debug_end<Tagger_debug_begin nothing is dumped)
+                Tagger_parms_input   : if 0 look first in Map manager, if 1 look first in local files. (default = 0)
+                Tagger_PC_TDC        : if 1 a TDC hit is required to analyse the PC, if 0 the TDC hit is not required. (default =1)
+                Tagger_PS_TDC        : if 1 a TDC hit is required to analyse the PS, if 0 the TDC hit is not required. (default =1)
+                Tagger_TAC_TDC       : if 1 a TDC hit is required to analyse the TAC, if 0 the TDC hit is not required. (default =1)
+                Tagger_warning       : sets how often the warning messages must be written on screen (1= always, 2 = every too warnings, etc..)
+                                             (default = 10)
+                Tagger_TTwin         : Adjacent T time coincidence window (in ns) (default = 10)
+                Tagger_EEwin         : Adjacent E time coincidence window  (in ns) (default = 20)
+                Tagger_ETwin         : E/ T time coincidence window (in ns) (default = 20)
+                Tagger_ETDCmin       : E TDC minimum accepted value (channel value) (default = 700)
+                Tagger_ETDCmax       : E TDC maximum accepted value (channel value) (default = 1200)
+                Tagger_DSDwin        : T- DSD time coincidence window (in ns) (default = 15)
+                Tagger_PSOSwin       : PS paddles time coincidence window  (in ns) (default = 30)
+
+
+      tagtcl_set_def : Were the tcl variables are set to their default values.
+		
+////////// BEGINNING OF RUN //////////
+tag_brun : beginning of run routine, calls:
+	tag_get_runcontrol       : read RUN control parameter. Reads in the Map RUN_CONTROL.map:
+					'energy' = Beam energy
+					'minitorus' = PS current for photon RUN ??
+					'tagger' = tagger magnet current
+					'torus' = torus current
+				   read in the map TAG_CALIB.map:
+					'do_translation' = do we have to make a T counters translation
+							on the data given by TAGT (no =0, yes if <>0)
+        tagcal_read_map	         : read calibration constants for the tagger from map manager 
+                     (map $CLAS_PARMS/Maps/TAG_CALIB.map) (see README file for contents)
+        tagcal_read_local_file   : look for local calibration files. (see README file for names and contents)
+	tagc_read_bounds         : Read ETcoinc map, E & T energy boundaries either in the CLAS_PARMS area or local directory
+					(see README file for hints in what order the 3 previous routines are called)
+	tagcal_read_from_BOS     : read calibration constants for the tagger from BOS (nothing yet - may be ever)
+
+//////////EACH SCALER EVENT (EVERY 10S) //////////
+
+tag_scaler.F : Main tagger routine called from recsis/rec_scaler.F
+           reads the TGS bank and in turns fills the permanent (JW) BOS bank
+           RTSL   G1SL G2SL G3SL G4SL
+           (raw T's) (T's gated with gate 1,2,3 and 4)
+       
+	
+//////////EACH EVENT //////////
+tag_evnt : tagger event procesing, calls:
+   tag_raw_2_BOS      : converts desired raw BOS banks to regular BOS banks (if the tcl swith is on)
+   tag_make_TAGRI     : Tagger hodoscope processing main routine (see below) generates the TAGI & TAGR banks
+   tag_make_PCO       : Pair counter processing main routine (see below) generates the PCO bos bank
+   tag_make_PSO       : Pair spectrometer processing main routine (see below) generates the PSO bos bank
+   tag_make_TACO      : Total absorption counter processing main routine (see below) generates the TACO bos bank
+   tag_dsd_debug      : routine to dump the dsd commons in event.CMN (if the tcl siwtch is on)
+   tag_debug          : routine to dump all tagger hoddoscope commons in event.CMN
+   			the call is controled by the tcl variables Tagger_debug_begin & Tagger_debug_end
+
+=============================================
+tag_make_TAGRI: Tagger hodoscope processing main routine, generates the TAGI & TAGR banks
+   tag_reset_array    : resets raw E & T arrays in event.CMN
+   tag_read_from_BOS  : Read TAGT & TAGE bos banks and fill the tagger commons in event.CMN
+       tag_get_TAGE_mode : determine if the 1977 E counter TDC are in single edge or leading+falling edge mode
+       tag_sort_array : tool-routine to sort one array (here: sort the E-counters array to have Id in order)
+   tag_read_RF        : Gets the RF from the RF bank.
+   tag_analysis       : Tagger hodoscope hits reconstruction routine.
+   tag_process_TAGR   : Compiles the final informations (time, energies, deltas && FLAGS) for the TAGR bank.
+   tag_int_fetch_to_BOS : write the internediate Tagger Bank TAGI for calibration and partial analysis.
+   tag_fetch_to_BOS     : write the TAGR BOS bank.
+
+=============================================
+tag_analysis :Tagger hodoscope hits reconstruction routine, calls :
+   tag_filter_out       : remove/complete missing left/right T TDC hit, select E hits in a reasonable time window.
+   tag_filter_translate : Alternate routine for tag_filter_out, in this routines TAGT informations are translated
+				using the Map Manager translation table (see README file) (this routine is called
+				if the Map TAG_CALIB.map, Subsystem: tag_t, Item: do_translation is non-zero)
+   tag_E_T_geom_match   : geometric matching between E and T
+       tag_coincidence  : Tool-routine to find matched numbers in two arrays, sort the results. 
+   tag_E_T_time_match   : Time matching between E and T's.
+   tag_E_T_binning      : E and T binning (which is also a time coincidence matching between adjacent
+   tag_RF_T_correction  : Timing correction to event using the RF
+
+=============================================
+tag_make_PCO : Pair counter processing (output bank is PCO)
+   tag_read_DSD_BOS    : Read DSPC Bos bank and fill the DSD commons in event.CMN
+   tag_PC_process      : is DSPC bank is not empty analyse Pair counter event. (Convert TDC to time and ADC to Energy)
+   tag_PC_T_match      : determine if the hit in the PC corresponds to a tagged photon
+   tag_PC_fetch_to_BOS : if DSPC bank is not empty store output of the PC analysis in the PCO bank
+=============================================
+tag_make_PSO : Pair spectrometer processing (output bank is PSO)
+   tag_read_PS_BOS     : Read  DSPS  Bos bank and fill the DSD commons in event.CMN
+   tag_PS_process      : is DSPS bank is not empty analyse Pair spectrometer event. (Convert TDC to time and ADC to Energy
+   tag_PS_T_match      : determine if the hit in the PS corresponds to a tagged photon.
+   tag_PS_analysis     : Retrieve all information we can get from the PS hit pattern.
+   tag_PS_fetch_to_BOS : if DSPS bank is not empty store output of the PS analysis in the PSO bank
+=============================================
+tag_make_TACO : Total absorption counter processing (output bank is TACO)
+   tag_read_TAC_BOS     : Read DSTC Bos bank and fill the DSD commons in event.CMN
+   tag_TAC_process      : is DSTC bank is not empty analyse Total Absorption Counter event. (Convert TDC to time and ADC to Energy)
+   tag_TAC_T_match      : determine if the hit in the TAC corresponds to a tagged photon
+   tag_TAC_fetch_to_BOS : if DSTC bank is not empty store output of the TAC analysis in the TACO bank
+////////// END OF RUN //////////
+
+tag_erun        : run End routine
+    tag_erun_warnings : Outputs a summary of all the warnings that hapened during the run.
+
+////////// END OF RECSIS //////////
+
+tag_last        : RECSIS end routine. empty
+
+
+/////////  TOOLS ////////////
+
+tag_bin      : FUNCTION, input  : counter Id, number of adjacent counter hit (1 or 2)
+		         output : Bin
+tag_unbin    : FUNCTION, input : bin
+                         ouput: 1st (sometime unique) counter hit 
+tag_nbc_bin  : FUNCTION, input : bin
+                         ouput : number of counters hit (1 or 2)
+
+tag_deltae   : FUNCTION, input E BIN, output: real energy dispersion of the photon for this E bin.
+
+tag_debug    : routine to dump all tagger commons in common.CMN
+		inputs: 2 numbers which are # of 1st and last common to be dump (see the routine)
+
+////////// Dummy ///////////
+
+tagger_hits : Normally the routine that is used in Gsim to generate E & T hits in the tagger.
+tag_T_alone_analysis : not used anymore.
+ 
+888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+Include files:
+
+
+event.CMN            : Commons containing all info about ONE event in the photon line (tagger,DSD,RF)
+			Rewriten at each event.
+
+tagRunControl.CMN    : Run Control Variables, so far:
+                        Beam eneryg, torus current, tagger current, PS current,
+                        read from the Map $CLAS_PARMS/Map/RUN_CONTROL.map
+			Control siwth for using the T translation map, read from:
+			TAG_CALIB.map, Subsystem: tag_t, Item: do_translation
+
+tagcal.CMN           : Calibration constant commons :
+			ET-geometric matching map.
+			E & T energy boundaries map.
+			E & T base peak position.             (from MAP manager)
+			E & T TDC calibration constants.      (from MAP manager)
+			Ci (T time alignment constants).      (from MAP manager)
+			DSD TDC and ADC calibration constants.(from MAP manager)
+			TAGT translation table                (from MAP manager)
+
+			(see the README file for more info on the calibration constants, map files
+			and text files.)
+
+tagtcl.CMN          : tcl variables. (see README file)
+
+tag_general.PAR      : software RECSIS parameters:
+			BOS Banks Names & Size
+			Electronic module position for the raw to regular BOS BANK conversion
+			
+
+888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+Calling sequence between packages;
+
+////////// some time at the beginning ////////
+recsis/xxx
+(if using user_ana package:)
+    user_ana/user_init   : user histogramming
+         ana/user_book   : intialisation
+         ana/tag_book    : tagger histogram initialisation
+(always:)
+    tag/tag_init         : tagger initialisation routine (see below)
+
+
+
+//////////EACH EVENT //////////
+recsis/recevt               : RECSIS event
+      tag/tag_evnt          : tagger event (CF above)
+
+(if using the user_ana package:)
+      user_ana/user_evnt    : user event analysis
+           ana/tag_fill     : tagger histogram filling routine
+          
+//////////EACH SCALER EVENT (EVERY 10S) //////////
+recsis/rec_scaler              : RECSIS scaler event
+      tag/tag_scaler           : Tagger scaler event (see above)
+
+(if using the user_ana package:)
+      user_ana/user_scaler     : User event analysis
+           ana/tag_scaler_fill : tagger scaler/normalisation histogramm filling
+          
+
+8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+
+TO DO:
+
+- remove E_T_coincidence tcl swith. Get this info from somewhere else - if needed ?
+- check what the minitorus field in the map RUN_CONTROL means. Is it dummy for photon run or the PS magnet current ?
+			do we need this info anyway ? (so far no, but..)
+- remove the routine tagcal_read_from_BOS.F ???
+- remove the routine tagcal_read_file.F
+- test usefullness of tag_reset_array. reduce its size ? remove it ?
+- remove dummy routines.
+
+
+
+=================================================
+| "old_bounds" cvs release tag_brun flow chart: |
+=================================================
+
+////////// BEGINNING OF RUN //////////
+tag_brun : beginning of run routine, calls:
+	tag_get_runcontrol       : read RUN control parameter. Reads in the Map RUN_CONTROL.map:
+					'energy' = Beam energy
+					'minitorus' = PS current for photon RUN ??
+					'tagger' = tagger magnet current
+					'torus' = torus current
+				   read in the map TAG_CALIB.map:
+					'do_translation' = do we have to make a T counters translation
+							on the data given by TAGT (no =0, yes if <>0)
+        tagcal_read_map	         : read calibration constants for the tagger from map manager 
+                     (map $CLAS_PARMS/Maps/TAG_CALIB.map) (see README file for contents)
+        tagcal_read_local_file   : look for local calibration files. (see README file for names and contents)
+	tagcal_read_file         : look for calibration files in CLAS_PARMS
+					(see README file for hints in what order the 3 previous routines are called)
+	tagcal_read_from_BOS     : read calibration constants for the tagger from BOS (nothing yet - may be ever)

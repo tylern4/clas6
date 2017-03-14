@@ -1,0 +1,45 @@
+macro ecFitStrip var=adc view=1 strip=1 strt=1 stop=1 nrmpt=1
+
+  message ecFitStrip: Fitting to variable [var] view [view] strip [strip]
+  sigma x=array(71,1#71)
+  vec/cre par(2) r 5.0 -0.3
+  vec/cre ss(2)  r 0.1 0.1 
+  vec/cre pmn(2) r 1.0 -0.6 
+  vec/cre pmx(2) r 6.0  0.0 
+  
+  exec ecGetPixels [view] [strip] [var][view]     y
+  exec ecGetPixels [view] [strip] [var]err[view]  yerr
+   
+  end = $vlen(y)-[stop]
+  sigma yfe=yerr/y
+  sigma yf=log(y)
+  vector/fit x([strt]:[end]) yf([strt]:[end]) yfe([strt]:[end]) p1 NBQ 2 par ss pmn pmx errpar 
+  call chiq
+  vec/del yf
+  vec/del yfe
+  
+  lambda    = $eval(abs(pixwidth([view])/par(2)))
+  errlam    = $eval(abs(errpar(2)*[lambda]/par(2)))
+  ymaxfit   = $sigma(exp(par(1) + par(2)*[nrmpt]))
+  errymfit  = $sigma([ymaxfit]*sqrt(([nrmpt]*errpar(2))**2 + errpar(1)**2))
+  
+  vec/inp  ecFit[var]_par([strip],[view],1)    par(1)
+  vec/inp  ecFit[var]_par([strip],[view],2)    par(2)
+  vec/inp  ecFit[var]_errpar([strip],[view],1) errpar(1)
+  vec/inp  ecFit[var]_errpar([strip],[view],2) errpar(2)
+  vec/inp  ecFit[var]_chi2([strip],[view])     chi2(1)
+ 
+  vec/inp  ecFit[var]_ymaxfit([strip],[view],1)  [ymaxfit]
+  vec/inp  ecFit[var]_ymaxfit([strip],[view],2)  [errymfit]
+  vec/inp  ecFit[var]_ymaxdat([strip],[view],1)  $eval(y([nrmpt]))
+  vec/inp  ecFit[var]_ymaxdat([strip],[view],2)  $eval(yerr([nrmpt]))
+  vec/inp  ecFit[var]_atten([strip],[view],1)    [lambda]
+  vec/inp  ecFit[var]_atten([strip],[view],2)    [errlam]
+  
+  vec/del par
+  vec/del ss
+  vec/del pmn
+  vec/del pmx
+   
+return
+  

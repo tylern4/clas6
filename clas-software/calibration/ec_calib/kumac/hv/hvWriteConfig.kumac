@@ -1,0 +1,61 @@
+macro hvWriteConfig det=0 sec group vec
+
+  if [det]=0 then
+    message 'Purpose: Writes HV configuration files used to'
+    message '         create EPICS database for forward carriage'
+    message '  Usage: hvWriteConfig det sec group vec'
+    message '    det: Detector (ec,cc,sc)'
+    message '    sec: sector (1-6)'
+    message '  group: MEDM group number'
+    message '    vec: KUIP vector containing HV values'
+    exitm
+  endif
+
+  file = kumac/hv/db/[det][sec].dat
+  
+  message hvWriteConfig: Writing vector [vec] to [file]
+
+  det = $upper([det])
+
+  global/imp HVtag*
+  global/imp [det]map*
+  
+  if $fexist([file]) then
+    shell rm [file]
+  endif
+  
+  lun1 = 2
+  fort/file [lun1] [file] new
+  
+  case [det] in
+     (EC) pmtmax=36;laymax=6;sign=-
+     (CC) pmtmax=18;laymax=2;sign=''
+     (SC) pmtmax=23;laymax=2;sign=-
+  endcase
+  
+  do lay = 1,[laymax]
+    do pmt = 1,[pmtmax]
+      if [pmt].lt.10 then
+        pmt = 0[pmt]
+      endif      
+      string0 = [[det]map([pmt],[lay],[sec])]
+      string1 = [HVtag([string0])]
+      ioc  = $word([string0],1,1,'_')
+      mf   = $word([string0],2,1,'_')
+      slot = $word([string0],3,1,'_')
+      chan = $word([string0],5,1,'_')
+      volt = [sign]$eval([vec]([pmt],[lay],[sec]))
+      string2 = [group] 1 [ioc] [mf] [slot] 02 [chan] [volt]
+      string3 = 20 5 500 500 -1000 -2600
+      string1 = $quote([string1])
+      string2 = $quote([string2])
+      string3 = $quote([string3])
+      call write([lun1],[string1],[string2],[string3])
+    enddo
+  enddo     
+        
+  close [lun1]
+
+return
+
+   

@@ -1,0 +1,13 @@
+import os
+from util import scanFiles
+env = Environment(ENV=os.environ)
+
+pdf = env.PDF(target  = 'Cerenkov_cc.pdf',  source = 'Cerenkov_cc.tex')
+html = env.Command('Cerenkov_cc.html', 'Cerenkov_cc.tex', "go_htlatex $SOURCE");
+
+Depends(html, pdf)
+
+cleans = scanFiles('.', accept=["Cerenkov_cc*", "*.aux"], reject=[".tex"])
+#rint "to remove: ", cleans;
+
+Clean('Cerenkov_cc.html', cleans)

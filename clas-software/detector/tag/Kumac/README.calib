@@ -1,0 +1,293 @@
+This file is under CVS and is tag/Kumac/README.calib
+====================================================
+
+to make the executable tag_put_map:
+
+make tag_put_map -f tag_put_map.mk
+
+To make the executable tag_get_map:
+
+make tag_get_map -f tag_get_map.mk
+
+To make the executable Talign.F:
+
+f77 -o Talign Talign.F 
+
+
+==================================
+Typical tagger calibratin session:
+
+process runs using recsis, and turning on the Tagger histograming
+
+(put in your tcl script:
+
+set ltagger_do     -1;
+set ltagger_h_do   -1:
+)
+
+PART ONE) A high intensity run to check the TDC slopes:
+
+When doing this you migh want to put the E/T coincidence window larger than
+its default value, to be sure not to miss any E/T coincidence because of a 
+miscalibration. To do this, put in your tcl script, or type at the begining
+of recsis processing:
+set Tagger_ETwin 100  
+This set the window to 100 ns.
+
+processing 100000 events should be quite enough.
+   
+Once it is processed, open, using paw the hbook file rexxxx.rzn
+then:
+PAW>cd tag
+
+check that the TDC are well calibrated by executing the kumac files
+lrdisplay.kumac and tdcdisplay.kumac
+
+PAW> exec lrdisplay
+
+shows if the left right TDC are well balanced. (good calibration
+shows horinzontal lines)
+
+PAW> exec tdcdisplay
+
+shows if the T counters TDC are well calibrated using the RF as a reference.
+(good calibration shows horizontal lines)
+
+If if appears that the T-counters are not well calibrated, then
+the calibration of the TDCs has to be done again:
+
+  i) first you have to get the current Calibration constants from the
+     map manager and store them in some text files, to do so you have to
+     use the tag_get_map executable. (see the begining of this file
+     for how to compile this executable)
+     copy the executable in your working directory.
+  ii) execute tag_get_map, enter the run number you just processed,
+      choose the names of the files you want to store the constants in,
+      or just hit return, to have the default names. (note that paw
+      doesn't know capital letters, so some of the defaults name would
+      not be found by paw, and will have to be copied to capital-free files
+      to be read by paw, this is not a great problem though, having the
+      default names will make life easier later on..)
+      Yet, at this point, for exemple,
+      if you want to do the point iii) below next,
+      you can type:
+      jlabs1> cp tagTDCCal.dat tagtdccal.dat
+      (you can now consider tagTDCCal.dat as a backup copy of the original
+       constants, in case you mess up at some point)
+
+  iii) start a paw session. Open the hbook file, Then:
+       PAW> cd tag
+       PAW> exe tdccal
+       you will be asked for the name of the old calibration file, say
+       (to follow our exemple) tagtdccal.dat
+       you will be asked for the name of the new calibration file,
+       say for exemple tagtdccal.new
+       you will be asked for the name of a control file, if you give
+       one name, some intermediate results will be printed in this file,
+       or you can just hit return, and they will be printed on the screen.
+       
+   iv) If everything seemed to work fine, you have a file named 
+       tagtdccal.new that contains constants you are pretty happy with.
+       Now you can reprocess recsis using those new constants,
+       to see if we are happy with the new results.
+       To do that, there is a tcl switch in recsis that allows you
+       to read the constants from local files instead of the Map Manager
+       in your tcl script, put :
+       set Tagger_parms_input 1
+       in that case, though the name of the constant file as to be the 
+       default name (well it is hard coded in recsis)
+       so let's do:
+       mv tagTDCCal.dat tagTDCCal.dat.0 (backup of the original values)
+       mv tagtdccal.new tagTDCCal.dat (put the new value instead)
+       run recsis.
+       redo i)
+
+PART TWO) Low intensity (calibration run)
+
+Before you change your calibration constant, you might keep track of what the
+previous alignement with the TOF was, to do this you can run the little program
+Talign (to make it: 
+saclays1:Kumacs> f77 -o Talign Talign.F
+
+Then run Talign. This program reads the file containing the T counter base peaks,
+and the file containing the Ci constants (if you used the defaults names when
+executing tag_get_map, just hit return) and will produce a file that contains
+5 columns:
+-the first column it the value of the left T counter peak, (pospeakleft)
+-the second column is the value of the right T counter peak (pospeakright)
+-the third column is the value of Ci for this peak (ci)
+-the fourth column is the value of (pospeakleft+pospeakright)/2. +ci for this T.
+-The fifth column is the mean value of (pospeakleft+pospeakright)/2. +ci for all previous T.
+
+The fifth column of the last T counter is therefore the tagger overall
+mean value of (pospeakleft+pospeakright)/2.+ci which represents the offset applied
+to tagger time values relative to the other devices.
+
+
+Again, run RECSIS using a low intensity run (so called normalisation run)
+
+When doing this you migh want to put the E/T coincidence window larger than
+its default value, to be sure not to miss any E/T coincidence because of a 
+miscalibration. To do this, put in your tcl script, or type at the begining
+of recsis processing:
+set Tagger_ETwin 100  
+This set the window to 100 ns.
+You also probably want to put other software coincidence windows quite large,
+to be sure to don't loose any coincidence because of too tight requirement:
+
+#to change the Adjacent T time coincidence window (ns) :
+set Tagger_TTwin 50
+#to change the  Adjacent E time coincidence window(ns) :
+set Tagger_EEwin 50
+#to change the T- DSD time coincidence window  (ns)   :
+set Tagger_DSDwin 50
+
+processing 100000 events should be quite enough.
+
+Start PAW, open the hbook file, change the current directory to tag.
+PAW> h/file 1 rexxxx.rzn 4096
+PAW> cd tag
+
+First you can check that the E and T base peak are OK. by looking at the field
+Time_e versus E_id in the ntuple 1:
+
+PAW> n/pl 1.time_e%e_id -30<time_e<30
+
+The alignment of the peaks doesn't have to be perfect, the intrinsic jitter
+of the E counter is of the order of 6 ns, the default E-T coincidence window
+in the tagger in 20 ns, so if the misalignment is less than a few ns, one
+don't have to recalibrate it.
+
+If you need to recalibrate, make a backup copy of the old calibration:
+(within PAW:
+PAW> sh mv tagposEpeak.dat tagposEpeak.dat.0
+copy the current constant in a file readable by paw:
+PAW> sh mv tagposEpeak.dat.0 tagposepeak.dat
+
+execute the kumac file pospeake:
+PAW> exec pospeake
+
+it will ask for the name of the old file  (in our exemple tagposepeak.dat),
+ and the name of a new one (for exemple tagposepeak.new).
+
+You can also look at the alignement of the T counter base peaks:
+
+PAW> n/pl 1.tmean%T_id -10<tmean<10
+
+Here again it doesn't have to be very precise, because the real
+picky alignement will be done with the constants Ci.
+In theory the position of the base peak is only usefull for nice
+histogramming since even a big shift will be corrected by the Ci
+constants in every steps of the tagger event reconstruction.
+Yet if they are very badly aligned and you want some T-time clean
+histograms, you can execute the kumac macro pospeakt. First backup
+& make the text file readable by PAW:
+
+PAW> sh mv tagposTpeak.dat tagposTpeak.dat.0
+PAW> sh cp tagposTpeak.dat.0 tagpostpeak.dat
+PAW> exe pospeakt
+
+you will be asked for the name of the old file (in our exemple tagpostpeak.dat)
+and a new one ( for exemple tagpostpeak.new)
+
+If you reclaibrated the T counter and E-counter TDC peaks,
+you might as well recalibrate the Down Stream Devices peaks too,
+to do this you can use the macro dsdcal.
+Before you execute the macro, just create with paw a vector of reals oldpos(10),
+and fill it with the values you used to process recsis (that you can find in
+the fille tagdsdcal.dat) (See the message at the beginning of the macro)
+the macro will output the new values of the peak to put in the file
+tagdsdscal.dat.
+
+At this point if you choosed to redo the base peak calibration you will
+have to run again recsis, with the new peak position constants:
+exit paw.
+
+copy the new peak position constant in the RECSIS default name file:
+
+>mv tagposepeak.new tagposEpeak.dat
+>mv tagpostpeak.new tagposTpeak.dat
+
+in your tcl script, tell recsis to read the local constants files:
+
+       set Tagger_parms_input 1
+
+run RECSIS again. 
+<I could have made the Ci alignement kumac to take in account the change in the
+peak position, and may be I will do it one day, but running the tagger only
+100000 events is not very long, so..)
+
+During the execution of recsis, you should see the following messages, that
+tell you that you are reading the constants in the local files.
+
+tag_get_RunI: Getting Tagger Run Control Parameters 
+tag_get_RunI: Reading Run control parameters in the Map Manager 
+tagcal_readW: Reading tagger T-counter TDC constants from local file tagTDCCal.dat 
+tagcal_readW: Reading tagger E-counter TDC constant from local file tagTDCCalE.dat 
+tagcal_readW: Reading tagger Ci constants from local file : tagCalCi.dat 
+tagcal_readW: Reading tagger T-counter peak positions from local file : tagposTpeak.dat 
+tagcal_readW: Reading tagger E-counter peak positions from local file: tagposEpeak.dat 
+tagcal_readW: Reading DSD calibration constants from local file : tagdsdcal.dat 
+tagcal_readW: No local T-counter boundaries file 
+tagcal_readW: No local E-counter boundaries file 
+tagcal_readI: Reading energy T boundaries from file /group/clas/parms/tagT-boundaries.dat 
+tagcal_readI: Reading energy E boundaries from file /group/clas/parms/tagE-boundaries.dat 
+USER_BRUN  I: This is a DUMMY routine, this message written once 
+
+Once this is done, you can start PAW again, and load the new file:
+
+PAW> h/file 1 rexxxx.rzn
+PAW>cd tag
+
+and check that T's and E's are well aligned:
+
+PAW> h/pl 200
+
+Now, you can look at the software alignment of the T's thanks to the RF.
+histogram 300 shows this alignement versus the T bin Id (1 to 121)
+histogram 303 shows the alignement of the T relative to the TAC, versus the T bin.
+If histograms 300 and 303 don't show horizontal lines, or if the line in histogram 300
+isn't centered on 0, the Ci calibration has to be redone again.
+
+Backup and make the old Ci file readable by paw:
+
+PAW> sh mv tagCalCi.dat tagCalCi.dat.0
+PAW> sh cp tagCalCi.dat.0 tagcalci.dat
+
+run the macro cicalib:
+
+PAW> exe cicalib
+
+The input file in our exemle is tagcalci.dat the ouput file can
+be for exemple tagcalci.new
+
+After that you might want to check that everything worked fine:
+exit paw, change the new file name to its default name:
+
+>mv tagcalci.new tagCalCi.dat
+
+run recsis again, 1000000 events is still enough.
+
+With paw, check again that the histograms look fine.
+If is it the case, we can put the new constants in the map manager.
+To do this you just have to use the program tag_put_map.
+It will ask for a run number and for the names of the files containing
+the proper constants. Each time you want to put new constant, give the
+name of the default file, or if you don't want to put a given set of
+constant in the map manager, you can enter a dummy file name.
+
+Now we can check that the constant are properly put in the map manager.
+Tell recsis to read the constants from the map manager, and run it again.
+In you tcl script put:
+
+    set Tagger_parms_input 0
+
+You can also comment all the various tagger flags that has been used
+to loose the timing windows, so that recsis can be processed with the default
+values.
+Once recsis is done, check that the histograms 200 and 300 are satisfactory.
+
+
+
+
+

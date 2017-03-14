@@ -1,0 +1,8 @@
+macro ntup name dim type xlo xhi
+
+
+  name = $quote([name])
+  type = $quote([type])
+  call ntupname([name],[dim],[type],[xlo],[xhi])
+  
+return

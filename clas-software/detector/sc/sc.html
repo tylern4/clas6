@@ -1,0 +1,266 @@
+<html>
+<head>
+<title>SC Reconstruction Package - libsc.a</title>
+</head>
+
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#
+FF0000">
+
+
+<body>
+<center><h1>SC (Time-of-Flight) reconstruction package- libsc.a </h1></center>
+<center>
+<img src="../../icons/blue-line2.gif">
+</center>
+
+<h1>Introduction</h1>
+<P>
+Each scintillator in the ToF array has two phototubes whose timing and pulse 
+height signals are read out with the CLAS DAQ system.  For each hit left and
+right TDC and ADC values are stored in the <B>SC</B> BOS bank.  The TDC values for 
+each side of a hit scintillator are converted to nanoseconds and adjusted in 
+delay with respect to all the other scintillators, and the resulting time is 
+corrected for pulse-height dependence (time-walk).  The ADC values are 
+converted to energy units (MeV).  These converted values form the <B>SC1</B> bank. 
+The actual time of the scintillator hit with respect to the trigger time,
+the energy deposition in the scintillator, and the position of the hit are 
+then calculated and put in the <B>SCR</B> (SCintillator Result) bank.  Finally,
+the code loops over the hits in the <B>SCR</B> bank looking for adjacent hits 
+that match in space and time; the <B>SCRC</B> bank is created and filled.
+</P>
+
+<h1>Documentation</h1>
+<P>
+This package is a C-language implementation of the reconstruction algorithm 
+outlined in the introduction.  The main steering routines are described below.
+
+</P>
+<B><menu>
+<li><B><font COLOR="#AF0000">initialize_tof_(int *runno)</font></B>
+	<menu>
+	Calls routines to fill the SCG(SCintillator Geometry) and SCP
+        (SCintillator Plane) banks and to fill global variables for 
+        calibration constants also retrieved from the map.  Fortran-callable.
+	</menu>
+<li><B><font COLOR="#AF0000">make_SCG_banks(int runno)</font></B>
+        <menu>
+        This routine reads the nominal geometry for all six sectors from the
+        sc_geom.bfp fpack file in the $CLAS_PARMS directory and applies run-
+        dependent translations and rotations to the carriages and panel 4's.
+        </menu>
+<li><B><font COLOR="#AF0000">make_SCP_bank(int sector)</font></B>
+        <menu>
+        Uses the SCG bank for given sector to calculate the normal vectors 
+        and shortest distances to the origin for the four scintillator planes
+        and creates the SCP bank needed for track matching.
+        </menu>
+<li><B><font COLOR="#AF0000">clasSC1_t *make_SC1_bank(int sector)</font></B>
+	<menu>
+	Loops over all the hits in the SC bank for a given sector and makes the
+	SC1 bank for this sector.  Those hits with no good TDC information are
+	discarded.
+	</menu>
+<li><B><font COLOR="#AF0000">clasSCR_t *make_SCR_bank(int sector, const char *dpl)</font></B>
+	<menu>
+	Loops over all the hits in the SC1 bank for a given sector and makes 
+	the SCR bank for this sector.  For hits with tdc and adc information 
+	for one side only, the code attempts to match a track to the
+	scintillator, thereby determining the hit position to within the 
+	accuracy of the tracking.  Either hit-based or time-based tracks can 
+	be used by making the value of <font COLOR="#AF0000">dpl</font> to "<font COLOR="#AF0000">HDPL</font>" for hit based matching or
+	"<font COLOR="#AF0000">TDPL</font>" for time based matching.
+	</menu>
+<li><B><font COLOR="#AF0000">clasSCRC_t *make_SCRC_bank(int sector)</font></B>
+<menu>
+Looks for clusters in the SCR bank and creates the SCRC bank.  If no clusters
+are found then the SCRC bank is a copy of the SCR bank.
+	</menu>
+<li><B><font COLOR="#AF0000">make_sc_banks_( )</font></B>
+<menu>
+Fortran-callable routine for creating the SC1, SCR and SCRC banks.
+	</menu>
+
+</B></menu>
+
+<P>
+The SCR and SCRC banks contain status words indicating the quaility of the 
+scintillator hits/clusters on an event-by-event basis.  The following table 
+describes the possible values of the SCR status word.
+<center>
+<table border=3 width=50% align-center>
+<TR align=center>
+<TD> Value </TD>
+<TD> Meaning </TD>
+</TR>
+<TR align=center>
+<TD> 1 </TD>
+<TD> Left TDC present; no right tube data. </TD>
+</TR>
+<TR align=center>
+<TD> 2 </TD>
+<TD> Left ADC present; hit discarded. </TD>
+</TR>
+<TR align=center>
+<TD> 3 </TD>
+<TD> Left ADC and TDC present; no right tube data.</TD>
+</TR>
+<TR align=center>
+<TD> 4 </TD>
+<TD> Right TDC present; no left tube data. </TD>
+</TR>
+<TR align=center>
+<TD> 5 </TD>
+<TD> Both TDCs present, no ADC information</TD>
+</TR>
+<TR align=center>
+<TD> 6 </TD>
+<TD> Left ADC, right TDC present</TD>
+</TR>
+<TR align=center>
+<TD> 7 </TD>
+<TD> Left ADC and TDC, right TDC present but no right ADC  </TD>
+</TR>
+<TR align=center>
+<TD> 8 </TD>
+<TD> Right ADC present; hit discarded. </TD>
+</TR>
+<TR align=center>
+<TD> 9 </TD>
+<TD> Left TDC, right ADC present</TD>
+</TR>
+<TR align=center>
+<TD> 10 </TD>
+<TD> Both ADCs present; no TDC information; hit discarded. </TD>
+</TR>
+<TR align=center>
+<TD> 11 </TD>
+<TD> Both ADCs present, left TDC present, no right TDC </TD>
+</TR>
+<TR align=center>
+<TD> 12 </TD>
+<TD> Right TDC and ADC only; no left tube data. </TD>
+</TR>
+<TR align=center>
+<TD> 13 </TD>
+<TD> Both TDCs present; right ADC present; left ADC missing. </TD>
+</TR>
+<TR align=center>
+<TD> 14 </TD>
+<TD> Both ADCs present, right TDC present; left TDC missing. </TD>
+</TR>
+<TR align=center>
+<TD> 15 </TD>
+<TD> Complete set:  left TDC, ADC; right TDC, ADC </TD>
+</TR>
+</table>
+</center>
+</P>
+
+<P>
+Scintillator hits that would have status words of 2, 8, or 10 are discarded 
+before the SCR bank is made; these values are included for completeness only.
+The SCRC status word is given by scrc.status=scr1.status+100*scr2.status.
+</P>
+<P>
+A hardware status word is also stored in the SC_CALIBRATIONS map, one for each
+electronic channel.  Possible
+values are:
+<center>
+<table border=3 width=50% align-center>
+<TR align=center>
+<TD> Value </TD>
+<TD> Meaning </TD>
+</TR>
+<TR align=center>
+<TD> 0 </TD>
+<TD> Both signals seem fine at hardware level </TD>
+</TR>
+<TR align=center>
+<TD> 1 </TD>
+<TD> No ADC signal </TD>
+</TR>
+<TR align=center>
+<TD> 2 </TD>
+<TD> No TDC signal </TD>
+</TR>
+<TR align=center>
+<TD> 3 </TD>
+<TD> No ADC or TDC signals </TD>
+</TR>
+<TR align=center>
+<TD> 5 </TD>
+<TD> Problematic on the reconstruction level </TD>
+</TR>
+</table>
+</center>
+</P>
+<P>
+Routines for obtaining the hardware status from the map:
+<B><menu>
+<li><B><font COLOR="#AF0000">int sc_HDWR_channel_status(int sector,int channel)
+	</font></B>
+        <menu>
+        Returns the hardware status for a given
+	electronic channel.  The left and right statuses are encoded as
+	10*(left status) + (right status).
+        </menu>
+<li><B><font COLOR="#AF0000">sc_hdwr_channel_status_(int *sector,int *channel)
+	</font></B>
+	<menu>
+	Fortran-callable wrapper for the above.  
+	</menu>
+</B></menu>
+
+</P>
+
+<a name ="header"><h1>Header Files</h1>
+<P>
+
+</P>
+<menu>
+<li><a href="../include/sc.h"> SC package header file</a> - located in $CLAS_PACK/include/sc.h
+</menu>
+
+<a name ="source"><h1>Source Code</h1>
+<P>
+
+</P>
+<h1>Related Routines</h1>
+<P>
+In addition to the main reconstruction and analysis program (RECSIS), there 
+are numerous utilities that use the libsc.a library:
+</P>
+<menu>
+<li><B><font COLOR="#AF0000">sc_mon:</font></B>  Program for looking at 
+reconstructed results for the scintillators.
+</menu>
+
+<hr>
+<a href = "http://www.cebaf.gov/~manak/offline_libs.html"> <img src="../../icons/cebaf.old.gif" border=0></a>
+<hr>
+<address>
+For comments or questions: 
+<a href="mailto:staylor@cebaf.gov">staylor@cebaf.gov</a><br>
+</address>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

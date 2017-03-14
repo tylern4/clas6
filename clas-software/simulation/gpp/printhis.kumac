@@ -1,0 +1,25 @@
+
+exec /home/bkeeney/alldef
+
+hi/file 1 /work/clas/disk1/bkeeney/gsimko_lite/doca.hbook
+f/file 4 post.ps
+
+meta 4
+
+zon 1 3
+hi/plot 101
+hi/plot 102
+hi/plot 103
+
+hi/plot 401
+hi/plot 402
+hi/plot 403
+
+zon 1 2
+hi/plot 201
+hi/plot 202
+
+close 4
+close 1
+
+shell lpr -Pphyhp2 post.ps

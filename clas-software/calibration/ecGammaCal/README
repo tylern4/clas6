@@ -1,0 +1,59 @@
+PURPOSE:
+	This package is intented to calibrate the CLAS forward electromagnetic calorimeter (EC) for photon runs. There already exists a similar package under $CLAS_PACK/utilities/ec_time but it has been designed for electron runs and used electrons and pions to achieve this purpose. In photon runs, we do not have electrons and the pions are not well suited for calibrating the EC. This package uses gammas to calibrate the EC. Gammas are expected to have the same interaction behavior in the calorimeter than electrons.
+
+REQUIREMENTS:
+	The input files are cooked files which must have the following banks: PART, ECHB, ECPC and TBID. An other bank, MVRT (vertex reconstruction bank from John McNabb), is also rebuilt. Because of this, and also to have a better vertex resolution, only events with at least 2 charged tracks (including the proton) are considered.
+	Some extra libraries are also needed: libpp and libclasEvent: 
+	. libpp contains a set of matrices and vectors operations and can be built from the package $CLAS_PACK/libpp. Be sure to read the README and INSTALL files there!
+ 	. libclasEvent is a library for reading information from an event and can be built from the package $CLAS_PACK/utilities/clasEvent. To build it type "make -f Makefile_alt lib".
+  
+	
+PROCEDURES:
+	You need first to create libpp and libclasEvent libraries and once this is done, do the following:
+
+	(1) create the library and the executables of the ecGammaCal package
+	
+	. type: cvs co ecGammaCal
+	. cd into the ecGammaCal directrory
+	. type: make all
+	This builds a library (libECCalib.a) and the executables  filterGammas, computeCalibConsts, fitTimeDifference, rejectGammas, getCalibConsts and putConstsInMap.
+	Executables are created into your $TOP_DIR/bin/$OSNAME directory , whereas the library is created into your $TOP_DIR/lib/$OSNAME directory. All executables have a help you can access using the -h flag (example type "fitTimeDifference -h") and it is highly recommended to try it to understand the different options as the default values may not be appropriate for every experiment.
+	It is also recommended that you read the documentation Calibration.ps to understand how the calibration is performed. To create it, cd into the Doc directory and type latex Calibration.tex; latex Calibration.tex; dvips Calibration.dvi -o Calibration.ps. I
+		
+	You can also build the library and executables using separated steps but you should build the library first.
+	make lib
+	make computeCalibConsts
+	make fitTimeDifference
+	make rejectGammas
+	etc...
+
+	(2) create a directory on the work disk
+
+	This will be your working directory. All files, calibration constants and ROOT files for analysis will be written into this directory. Cd into this directory. You will need a lot of cooked files (~200) for calibration. Once they are on the disk (in the cache area for instance), arrange the file names with path in a text file, one file per line. Let's call this file "files.dat" for instance.
+	
+	(3) run filterGammas
+
+	filterGammas select events that can be used for calibration. It also rebuilts MVRT bank, drops some unnessaries banks and modify PART bank so that neutrals are considered gammas. Type "filterGammas -h" to understand how to use it, one example can be: "filterGammas -ffiles.dat -oSkimmed" but you need to create the directory Skimmed first. Once filtering is done, all skimmed files will be in the Skimmed directory.
+
+	(4) edit the Perl script calibEC.pl and run it.
+
+	Copy in the working directory the Perl script  calibEC.pl that came with the ecGammaCal package. In normal use, only the first lines should be modified and it is recommended to try the flag "-h" on computeCalibConsts, fitTimeDifference and rejectGammas to see if the default values are what you want.
+	Be sure that the perl script is executable, change the mode if necessary (chmod u+x calibEC.pl) and run the script. A rule of thumb is to count one hour per number of iterations, so for the defaultvalue "$NumberOfIterations = 6", run the script during the night.
+	The script will create some directories: Log (stdout and stderr for the different programs), ROOT (root files for checking the quality of the calibration), CalibConsts (contains the calibration constants) and passX (where X is the number of iterations, this directory contains initial files with bad photons flagged). Be aware that if you run the script again, the content of those directories will be erased.
+
+	(5) check the quality of the calibration constants.
+	
+	. cd into the ROOT directory and copy the showPasses.C ROOT macro that came with the ecGammaCal package under the subdirectory Macros. Type "root" and at the prompt type something like ".x showPasses.C("calib", 6);". "calib" is the generic name for the ROOT files and you should have calib1.root, calib2.root etc in this directory, 6 is the number of iterations used in the example.
+	You will see the result of calibration at each iteration as well as the final calibration. 2 eps files are also produced:  calib_passes.eps and calib_final.eps. For those who know ROOT, you can also check individual tubes. Create a "TBrowser" object for easy navigation, there is also a tree in each ROOT file.
+	. go back into your previous working directory and cd into the CalibConsts directory. Copy the ROOT macro showConsts.C from the ecGammaCal/Macros directory. type "root" and at the prompt, type ".x showConsts.C("calibconsts.dat");". You will see the values of each parameter for each tube; compare them those found in the Calibration.ps manual.
+
+	(6) put the numbers into the map.
+
+	If you are happy with the calibration (and if not, it may be a problem of statistics, so add some more skimmed files using filterGammas and rerun the script) it is time to put the numbers into the Map (EC_CALIB.map); numbers are into the "calibconsts.dat" file you can find into the CalibConsts directory. The program putConstsInMap performs this task, yype "putConstsInMap -h" to have an help. But before doing it, ask the cook chief or do it in a local Map copy. putConstsInMap has also a remove mode (flag "-r") that remove entries in the EC map if you want to override some precious entries. Be careful when doing it, since there is no way to retrieve the deleted entries. It is recommended that you make a copy of the map before any change to want to make to it.
+
+
+	
+
+
+
+

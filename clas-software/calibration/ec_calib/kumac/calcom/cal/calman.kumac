@@ -1,0 +1,207 @@
+macro calman
+
+  close 0
+  
+  message ' '
+  message   '************* CLAS ONLINE CALIBRATION MANAGER *********'
+  begin:
+  message ' '
+    message 'Options:	1) Convert BOS/FPACK to ntuples (claspaw only!) '
+    message '		2) Process pedestal run '
+    message '		3) Plot pedestal summary '
+    message ' 		4) Update online sparcification tables'
+    message '           5) Update Map with pedestals'
+    message '		6) Find ntuple runs '
+    message '           7) Process ntuple'
+    message '           8) EC Gain Matching ' 
+    message '		q) Quit'
+    message ' '
+    read opt 'Enter option: '
+    case [opt] in
+      (q) exitm
+      (*) exec calman#opt[opt]; goto begin
+    endcase
+    
+return
+
+macro opt1
+
+  vec/inp ecmytrans 0
+  banklist = sc
+  nevents = 0
+  
+  message 'Directory of /raid/stage_in: '; shell ls raid
+  
+  loop1:
+  
+  read bosfile 'FPACK/BOS filename (path/file.ext): '
+  
+  if $fexist([bosfile]).eq.0 then
+    message ' '
+    message File [bosfile] does not exist...Try again
+    message ' '
+    goto loop1
+  endif
+
+*  if $fexist(input.evt) then
+*    shell rm input.evt
+*  endif
+
+*  shell ln -s [bosfile] input.evt
+*  bosfile = input.evt
+  
+  read outfile   'Ntuple filename (no path or .ext): '  
+  read nevents   'Number of events (0=all): '
+  read banklist  'Enter bank list to process (ec,sc,cc,ec1,dc,tagt,rc10-16,elsr): '
+  read statlist  'Enter process option for each bank (on,filter,hist): '
+  read opt 	 'Create EC ntuple from EC (1) or raw RC14,15 (2): ' 
+
+  if [opt].eq.2 then
+    vec/inp ecmytrans 1
+  endif  
+  
+  alias/cre banklist $quote([banklist])
+  alias/cre statlist $quote([statlist])
+  
+  exec monBankStatus	off 		claslist
+  exec monBankStatus	banklist 	statlist
+  exec monBookCWN 	ntup_id 	[outfile] banklist
+  exec monBookHist 	banklist
+  exec monBankListDo 	monPedQuery 	banklist  
+  exec monBosProcess 	[bosfile] 	[nevents]
+  exec monSaveNtup	ntup_id 	[outfile]
+  exec monSaveHist	hist 		[outfile]
+  
+  alias/del banklist
+  
+return
+
+macro opt2
+
+  read opt 'Enter ped or gain:' 
+
+  case [opt] in
+     (ped) task = calPedAnal
+    (gain) task = calGainAnal
+  endcase
+
+  read banklist 'BOS banks to include: '  
+  alias/cre banklist $quote([banklist])
+  
+  exec monBankListDo [task] banklist
+  
+  alias/del banklist
+  alias/del seclist
+          
+return
+  
+macro opt3
+
+  global/cre local_printer clonhp
+
+  read var   'Enter ped,adc,tdc,gain:'
+  read det   'Detector (ec,ec1,sc,cc): '
+  read runno 'Run numbers to retrieve: '
+   
+  case [var] in
+     (ped) plot = Pedestals
+    (gain) plot = Gains
+  endcase
+  
+  opt zfl1
+  exec utilSetupGraphics
+  alias/cre runlist $quote([runno])
+  exec calGetVec [det] [var] runlist
+  opt=m;sec=5; ymin=0; ymax=800; type=norm; stat=mean
+  run1=$word([runno],1,1,' '); run2=[run1]; runtit = [run1]
+  title = Run [run1] - $upper([det]) Sector [sec] [var] [stat]
+  loop:
+    read opt 'Sector (1-6), (r)un, (m)ean, rms, (rat)io, (y)limits, p(rint), (q)uit:'
+    case [opt] in
+      (r)  read run1 'Run number: '; runtit = [run1]
+           title = Run [runtit] - $upper([det]) Sector [sec] [var] [stat]
+           type = norm 
+      (m)  stat = mean;ymin=0;ymax=800; title = Run [runtit] - $upper([det]) Sector [sec] [var] [stat]
+    (rms)  stat = rms;ymin=0;ymax=15; title = Run [runtit] - $upper([det]) Sector [sec] [var] [stat]
+    (rat)  read run1 'Run 1: '; read run2 'Run 2: '; type=ratio; runtit = [run1]//'/'//[run2]          
+           title = Run [runtit] - $upper([det]) Sector [sec] [var] [stat]
+           ymin=0.5; ymax=1.5  
+      (y)  read ymin 'Ymin: '; read ymax 'Ymax: '
+      (p)  exec post $time.ps print [local_printer];goto loop
+      (q)  opt nzfl; exitm
+      (*)  sec = [opt]; title = Run [runtit] - $upper([det]) Sector [sec] [var] [stat]
+    endcase
+    exec [det]PlotSecVec [type] [var] [stat] [ymin] [ymax] [sec] [title] [det][stat][run1] [det][stat][run2] 
+  goto loop
+  
+return
+
+macro opt4
+
+  message ' '
+  message ***NOTE: This option now correctly pads sparcification files *******
+  message ******** No editing of *.spar files should be necessary ************
+  message ' '
+  read croc 		'Readout Controller (SC,CC,EC1,EC2): '
+  read run  		'Pedestal run number: '
+  exec calUpdateInitfiles [croc] [run] 
+    
+return
+
+macro opt5
+
+  read det   'Detector (ec,sc,cc): '
+  read runno 'Run number: '
+  exec calGetVec [det] ped [runno]
+  global/cre mappath /group/clas/parms/Maps
+  exec calPutMap [det] ped [runno] [det]mean[runno]
+  global/cre mappath /usr/local/clas/clas_parms/Maps
+  exec calPutMap [det] ped [runno] [det]mean[runno]
+  
+return  
+
+macro opt6
+
+  path = ntup; tag = clas
+  read path 'Enter path for ntuple files: '
+  read tag  'Enter tag word preceding run number: '
+  exec utilFindNtup [path] [tag] [tag]
+  
+return
+
+macro opt7
+  read filelist 'Ntuple files to process: '
+  exec monNtupProcess [filelist]
+return
+
+macro opt8
+  message 'This option calls four kumac macros to process'
+  message 'pixel cut histogram <file> for run <run> '
+  message 'and sector <sec> '
+  message '  '
+  message '1) ecProcessFit <file> <sec> <run> ' 
+  message '2) ecUpdateMeanGains <run>  '
+  message '3) ecCalcGainRatios  fit '     
+  message '4) ecGainMatch       <sec> '
+  
+  read file 'Enter file: '
+  read sec  'Enter sector: '
+  read run  'Enter run number: '
+  
+  exec ecProcessFit [file] [sec] [run]
+  wait 'Control-C to quit ' 0
+  exec ecUpdateMeanGains [run]
+  wait 'Control-C to quit ' 0
+  exec ecCalcGainRatios fit
+  wait 'Control-C to quit ' 0
+  exec ecGainMatch [sec]
+return  
+
+  
+
+  
+
+ 
+  
+  
+   

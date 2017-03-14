@@ -1,0 +1,23 @@
+macro ecNewFit histdata histerr opt
+
+  vec/cre  par(108) r 108*1.0
+  vec/cre  err(108) r 
+  vec/cre step(108) r 108*0.1
+  vec/cre pmin(108) r 108*0.0
+  vec/cre fitsec
+  vec/cre fitlay
+  
+  call kumac/calcom/ec/fun/ecfitlib.f77
+  
+  read sec 'Enter sector to fit (1-6): '
+  read  io 'Enter layer to fit (1,2): '
+  
+  vec/inp fitsec(1) [sec]
+  vec/inp fitlay(1) [io]
+  
+  1d 100 ' ' 1296 1. 1297. 0.
+  hi/put_vect/contents 100 [histdata]
+  hi/put_vect/contents 100 [histerr]
+  hi/fit 100 pixfit [opt] 108 par step pmin pmax err
+  
+return 

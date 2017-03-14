@@ -1,0 +1,26 @@
+ fort/file 33 PulseOcc.ps
+ meta  33 -111
+ Set STAT 0000011
+ zon 1 3
+ option logz
+  hi/pl 210 colz
+ hi/pl 510 colz 
+ hi/pl 610 colz 
+ hi/pl 220 colz 
+ hi/pl 520 colz 
+ hi/pl 620 colz 
+ hi/pl 230 colz 
+ hi/pl 530 colz 
+ hi/pl 630 colz 
+ hi/pl 240 colz 
+ hi/pl 540 colz 
+ hi/pl 640 colz 
+ hi/pl 250 colz 
+ hi/pl 550 colz 
+ hi/pl 650 colz 
+ hi/pl 260 colz 
+ hi/pl 560 colz 
+ hi/pl 660 colz 
+ fort/close 33
+ 
+ 

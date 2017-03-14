@@ -1,0 +1,52 @@
+macro process chain fun
+
+  exec ecCalibGain#init [fun]
+  exec ecCalibGain#book
+  exec ecCalibGain#load [chain] 10 calib
+  exec ecCalibGain#fill 10 [fun]
+  
+return
+
+macro init fun
+
+  vec/cre getsec(1) i 
+  vec/cre pcal(10000) r
+  vec/cre gcal(10000) r
+  vec/cre adccal(10000,20) r
+  vec/cre adcpmt(10000,20) r
+  
+  case [fun] in
+    (calibgetdata) read sec 'Enter sector: '; vec/inp getsec(1) [sec]
+  endcase
+
+return
+
+macro book
+
+  cd //pawc; hi/del *
+
+  1d 200 '' 100 0. 2. 0.
+  2d 201 ''  20 1. 21. 6 1. 7. 0.
+  2d 100 '' 100 0. 2.5 100 0. 2.5 0.
+  2d 101 '' 100 0. 2.5 100 0. 2.5 0.
+  2d 102 '' 100 0. 2.5 100 0. 2.5 0.
+  2d 103 '' 200 -300. 300. 200 -300. 300. 0.
+  2d 104 '' 200 -300. 300. 200 -300. 300. 0.
+  2d 105 '' 200 -300. 300. 200 -300. 300. 0.
+  2d 106 '' 200 -300. 300. 200 -300. 300. 0.
+ 
+return
+
+macro load chain id fun
+
+  cd //[chain]
+  nt/print [id]
+  call kumac/calcom/ec/fun/[fun].f77
+  
+return
+
+macro fill id fun
+
+  nt/loop [id] [fun] 
+  
+return

@@ -1,0 +1,15 @@
+hvdiff is a program that will compare two BURT SC HV files and print, in a separate file, the change in the pmt voltages.
+
+simply compile this program with "make all"
+
+run "hvdiff -h" for instructions on how to use the program
+
+note that if you are comparing two old files and they both contain the coupled paddles (48A, etc) then run "hvdiff_coupled" instead.
+***********************
+print2500s is a program that will print the voltages at -2500 to a file.
+
+simply compile this program with "make all"
+
+run "print2500s -h" for instructions on how to use the program
+
+note that it only works for new .snap files.  old snap files (with coupled paddles 40A - 48B) will not work.

@@ -1,0 +1,31 @@
+
+macro hvRemoteCa opt=0 req snap 
+
+  if [opt]=0 then
+    message Purpose: Performs rsh on clas10 for caGet,caPut access to EPICS HV database
+    message Files: Uses /home/clasrun/lcsmith/hv on HP cluster for gateway
+    message Usage: hvRemoteBurt opt req snap log
+    message opt:  read (r) or write(w) database action
+    message req:  request file name (e.g. EC_Sector5_DVI)
+    message snap: snap file name (e.g. EC_Sector5_DVI)
+    exitm
+  endif 
+
+  global/imp hvreqpath
+  global/imp hvsnappath
+  global/imp hvtmppath
+  
+  req1  = [hvreqpath]/[req].req
+  snap1 = [hvsnappath]/[snap].snap
+  snap2 = kumac/hv/db/[snap].snap
+  tmp  =  [hvtmppath]/tmp.snap 
+
+  case [opt] in
+    (r) message hvRemoteCa: Reading from Mainframe using [req1] Writing to [snap1]
+        shell rsh -n -l clasrun clas10 bin/caGet [req1] [snap1] > /tmp/dum.dum        
+    (w) message hvRemoteCa: Writing to Mainframe from [snap2]
+*        shell rsh -l clasrun -n clas10 bin/caPut [snap1] > /tmp/dum.dum
+        exec hvRemoteCaPut [snap2] [tmp]
+  endcase
+  
+return

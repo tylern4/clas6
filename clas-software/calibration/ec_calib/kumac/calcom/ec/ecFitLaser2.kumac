@@ -1,0 +1,30 @@
+macro ecFitLaser2
+
+  vec/cre ecFitGain_par(6,36)
+  vec/cre ecFitGain_errpar(6,36)
+  vec/cre ecFitGain_chi2(6,36)
+  vec/cre par(2) r 0.5 -0.5
+  vec/cre dum(2)
+  vec/cre errpar(2) 
+
+  do view=1,6
+    do strip=1,36
+      vec/copy hv([view],[strip],:)     x
+      vec/copy pmt(:,[strip],[view])    y
+      vec/copy pmterr(:,[strip],[view]) yerr
+      sigma xf=log(x/x(1))
+      sigma rat=y/y(1)
+      sigma raterr=rat*sqrt((yerr/y)**2 + (yerr(1)/y(1))**2)
+      sigma yfe=raterr/rat
+      sigma yf=log(rat)
+      vector/fit xf yf yfe p1 N 2 par dum dum dum errpar
+      call chiq
+      vec/del yf
+      vec/del yfe      
+      vec/inp ecFitGain_par([view],[strip]) 		par(2)
+      vec/inp ecFitGain_errpar([view],[strip]) 		errpar(2)
+      vec/inp ecFitGain_chi2([view],[strip]) 		chi2(1)
+    enddo
+  enddo
+  
+return      

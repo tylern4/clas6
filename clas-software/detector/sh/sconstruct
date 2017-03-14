@@ -1,0 +1,6 @@
+from build_system import environment
+
+shEnv = environment.env(deps=['clas6'])
+shEnv.load_dependency('clas6')
+shLib = shEnv.library(target='sh')
+shEnv.return_from_sconstruct(shLib)

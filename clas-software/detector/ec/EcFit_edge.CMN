@@ -1,0 +1,33 @@
+***************** begin: EcFit_edge.CMN *************************************
+*
+*- corrected & assigned fitted strip energies
+      real EcFit_stripE( MAXstrips, MAXpeaks, Ec_u: Ec_w,
+     &                              whole: cover, MAXsectors)
+*
+*- total number of peaks on an edge of a layer in a sector
+      integer EcFit_Npeak( Ec_u: Ec_w, whole: cover, MAXsectors)
+*- info on the peak
+      real EcFit_peak( Ec_i: last_par, MAXpeaks, Ec_u: Ec_w,
+     &                              whole: cover, MAXsectors)
+*- info on which strips within a peak
+      integer EcFit_peak_Nstrip( MAXpeaks, Ec_u: Ec_w,
+     &                              whole: cover, MAXsectors)
+      integer EcFit_peak_strip( MAXstrips, MAXpeaks, Ec_u: Ec_w,
+     &                              whole: cover, MAXsectors)
+*- fraction of strip assigned to the peak
+      real EcFit_peak_fraction( MAXstrips, MAXpeaks, Ec_u: Ec_w,
+     &                              whole: cover, MAXsectors)
+*
+*- peak on edge associated with hit in layer within a sector
+      integer EcFit_hit_peak( Ec_u: Ec_w, MAXhits,
+     &                              whole: cover, MAXsectors)
+*- fraction of peak assigned to hit
+      real EcFit_hit_fraction( Ec_u: Ec_w, MAXhits,
+     &                              whole: cover, MAXsectors)
+*
+      COMMON /EcFit_edge/ EcFit_stripE,EcFit_Npeak,EcFit_peak,
+     &                    EcFit_peak_Nstrip,EcFit_peak_strip,
+     &                    EcFit_peak_fraction,
+     &                    EcFit_hit_peak,EcFit_hit_fraction
+
+******************* end: EcFit_edge.CMN *************************************

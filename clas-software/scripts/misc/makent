@@ -1,0 +1,90 @@
+#! /usr/bin/env perl
+
+$file = $ARGV[0];
+shift;
+
+#print "{\n\tgROOT->Reset();";
+print "{\n\tFILE *fp = fopen(\"$file.view\",\"r\");\n";
+
+
+while(<>) {
+if (/^(\d+).*\{(\w+)\}/) {
+	push(@var,($2));
+	
+}
+}
+
+$nvar = $#var + 1;
+$x = "";
+$arrname = $file . "ARR";
+
+print "\tFloat_t $arrname","[$nvar];\n";
+
+print "\n\tInt_t ncols;\n\tInt_t nlines = 0;\n";
+#print "\tTFile *f = new TFile(\"basic.root\",\"RECREATE\");\n";
+
+
+print "\tTNtuple *$file = new TNtuple(\"$file\",\"data\",\"";
+$x = "";
+foreach $v (@var) {
+	print "$x$v";
+	$x = ":";
+}
+print "\");\n";
+
+foreach $v (@var) {
+  print "\t\tprintf(\"$v\\n\");\n";
+}
+
+
+print "\twhile(1) {\n";
+
+$n = 0;
+$k = 0;
+$beg = 0;
+$x = "";
+print "\t\tncols = fscanf(fp,\"";
+foreach $v (@var) {
+  $n++;
+  print "$x%f $var";
+  $end++;
+  if (($n > 5) || ($end ==$nvar)) {
+    print "\",";
+    $x2 = "";
+    for ($i = $beg; $i < $end; ++$i) {
+      print "$x2&$arrname","[$i]";
+      $x2 = ",";
+    }
+    print ");\n";
+    if ($end != $nvar) {
+    print "\tncols =  fscanf(fp,\"";
+  }
+    $n = 0;
+    $beg = $end;
+  }
+    
+}
+  
+
+if ($n > 0) {
+print "\",";
+$x = "";
+$l = 0;
+foreach $v (@var) {
+	print "$x&$arrname","[$l]";
+	$l++;
+	$x = ",";
+}
+print ");\n";
+}
+print "\t\tif (ncols < 0) break;\n";
+
+print "\t$file->Fill($arrname);\n";
+print "\tnlines++;\n";
+print ("\t\tif (!(nlines % 1000)) {\n");
+print "\t\t\tcout << nlines << \"\\r\" << flush;\n";
+print "\t\t}\n";
+print "\t}\n";
+print "\tprintf(\"found %d points\\n\",nlines);\n";
+print "\tfclose(fp);\n}\n";
+

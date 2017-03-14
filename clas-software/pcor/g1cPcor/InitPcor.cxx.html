@@ -1,0 +1,80 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>InitPcor</title>
+</head>
+<body BGCOLOR="#ffffff" LINK="#0000ff" VLINK="#0000ff">
+<a name="TopOfPage"></a>
+<pre>
+<b>// Author: <a href="http://www.phys.cmu.edu/~williams/">Mike Williams</a></b><br>
+<b>// include basic c++ header files </b>
+#include &lt;fstream.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;iostream&gt;
+
+int Nx,Ny,Nz,Cmax,dtime,Ngr;
+double Q[(int)1e6],Xmin,Ymin,Zmin,Dx,Dy,Dz;
+
+extern "C"{
+
+  void InitPcor();
+
+  void initpcor_();
+
+}
+
+void initpcor_(){
+  <b>// fortran wrapper for InitPcor </b>
+  InitPcor();
+}
+
+<a name="InitPcor">
+void InitPcor(){
+  <b>// Inititalizes the g1cPcor package by reading in the CLAS magnetic field map and some info needed to decode it 
+  // This function should be called once prior to apply and charged particle corrections </b>
+
+  int i;
+
+<b>  // if CLAS_PACK is not set to this packages directory, then change the path 
+  // on the next line to the correct location of your copy of the 
+  // Bfield_ascii.dat file.
+  // Then uncomment the next line and comment out the other ifstream line
+  // ifstream inFile("/home/????/packages/utilities/g1cPcor/Bfield_ascii.dat");   </b>
+
+  char fstr[200];
+  sprintf(fstr,"%s/utilities/g1cPcor/Bfield_ascii.dat",getenv("CLAS_PACK"));
+  ifstream inFile(fstr);    
+
+  if(inFile.peek() == EOF){
+    cout << "File read error." << endl;
+    return ;
+  }
+  inFile >> Nx;
+  inFile >> Ny;
+  inFile >> Nz;
+  inFile >> Xmin;
+  inFile >> Ymin;
+  inFile >> Zmin;
+  inFile >> Dx;
+  inFile >> Dy;
+  inFile >> Dz;
+  inFile >> Cmax;
+  inFile >> dtime;
+  inFile >> Ngr;
+
+  for(i=0; i < Ngr; i++){
+    if(inFile.peek() == EOF){
+      cout << "File read error." << endl;
+      return ;
+    }
+    inFile >> Q[i];
+  }
+  inFile.close();
+
+}
+
+</pre>
+</body>
+</html>

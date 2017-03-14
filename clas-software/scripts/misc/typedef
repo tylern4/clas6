@@ -1,0 +1,41 @@
+#! /usr/bin/env perl
+$name = $ARGV[0];
+shift;
+print "Searching $name\n";
+$nline = 0;
+$endline = 0;
+$op = 0;
+$pack = $ENV{"CLAS_PACK"};
+open(A,"< $pack/include/bosddl.h ");
+while (<A>) {
+	chop;
+	$nline++;
+	if (!$op) {
+	if (/typedef\s+struct/) {
+		$op = 1;
+		$start = $nline;
+	}
+	}
+	if ($op) {
+		if (/}\s+(\S+)\s*;/) {
+			$op = 0;
+			if ($1 =~ /$name/) {
+				$endline = $nline;
+			}
+		}
+	}
+	if ($endline >  0) {
+		open(B,"< $pack/include/bosddl.h");
+		$p = 0;
+		$nline = 0;
+		while (<B>) {
+			$nline++;
+			if (($nline <= $endline) && ($nline >= $start)) {
+				print;
+			}
+		}
+		exit(0);
+	}
+	
+}
+

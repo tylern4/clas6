@@ -1,0 +1,24 @@
+###############################################################################
+#                                                                             #
+# This file contains the list of BOS banks that will be required for each     #
+# event for the PART and SEB particle id schemes.                             #
+#                                                                             #
+###############################################################################
+# 
+# PART Banks
+#
+HEAD
+PART
+TAGR
+MVRT
+TBID
+TBER
+#
+# SEB Banks
+#
+HEAD
+EVNT
+TAGR
+TGPB
+SCPB
+DCPB

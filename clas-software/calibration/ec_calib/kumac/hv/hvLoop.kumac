@@ -1,0 +1,19 @@
+macro hvLoop
+
+  vec/cre DVO(12,16,12)
+
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_U_I_res1.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_U_I_res2.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_V_I_res1.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_V_I_res2.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_W_I_res1.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_W_I_res2.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_U_O_res1.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_U_O_res2.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_V_O_res1.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_V_O_res2.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_W_O_res1.snap DVO DVO
+  exec hvReadSnap kumac/hv/ecsc_EC_sect5_W_O_res2.snap DVO DVO
+  
+return
+  

@@ -1,0 +1,37 @@
+from build_system import environment
+
+bankdefsEnv = environment.env(deps='clas6')
+bankdefsEnv.load_dependency('clas6')
+
+bank_def_ddls = [str(x) for x in bankdefsEnv.Glob('*.ddl')]
+try:
+    bank_def_ddls.remove('clasbanks.ddl')
+except:
+    pass
+
+### builder for clasbanks.cc/h - needed by bankdefs lib
+bankdefsEnv.command(
+    target = ['clasbanks.h', 'clasbanks.cc'],
+    source = bank_def_ddls,
+    action = 'clasbanks.pl $TARGETS $SOURCES' )
+
+### builder for clasbanks.ddl - needed by clasbanks.cc/h
+bankdefsEnv.command(
+    target = 'clasbanks.ddl',
+    source = bank_def_ddls,
+    action = 'cat $SOURCES > $TARGET' )
+
+### builder for clas_offsets.inc and clas_index.inc
+bankdefsEnv.command(
+    target = ['clas_offsets.inc', 'clas_index.inc'],
+    source = 'clasbanks.ddl',
+    action = 'bos_param.pl $SOURCE $TARGETS' )
+
+### builder for cvs_tagname.inc (used by gsim)
+bankdefsEnv.command(
+    target = ['cvs_tagname.inc'],
+    source = ['head.ddl'],
+    action = 'set_tag_param $SOURCE $TARGET' )
+
+bankdefsLib = bankdefsEnv.library('bankdefs')
+bankdefsEnv.return_from_sconstruct(bankdefsLib)

@@ -1,0 +1,13 @@
+#!/bin/sh
+debug_flag=`echo $* | perl -e '$_=<>; $return = /DEBUG/; print $return;'`
+host_list='ifarml3 ifarms2 claspc2'
+for host in $host_list; do
+    if [ "$debug_flag" = 1 ] ; then
+	logname=make_${host}_debug.log
+    else
+	logname=make_$host.log
+    fi
+    $CLAS_SCRIPTS/smake $host $* > $logname 2>&1 &
+done
+exit
+# end of shell script

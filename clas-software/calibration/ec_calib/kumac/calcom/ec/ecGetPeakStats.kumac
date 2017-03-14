@@ -1,0 +1,43 @@
+macro ecGetPeakStats type var wid xlo xhi vcen vrms n1 nev
+
+  global/import ntupid
+  
+  vec/cre [vcen](ecvecdim) r 
+  vec/cre [vrms](ecvecdim) r
+  
+  alias/cre pmt (layerec-1)*36+stripec
+  
+  case [type] in
+     (ntup)   nbin = [xhi]-[xlo]
+              2d 1000000 ' ' [nbin] [xlo] [xhi] 216 1. 217. 0.
+  endcase
+  
+  case [var] in
+      (adc)  id1 = $eval([sec]*100+3) ;id2 = $eval([sec]*100+5);var=adcec
+      (tdc)  id1 = $eval([sec]*100+2) ;id2 = $eval([sec]*100+4);var=tdcec
+  endcase
+   
+  do i =10,[#]  
+    sec = [%i]
+    case [type] in
+     (ntup)  hist/op/reset 1000000
+             nt/proj 1000000 [ntupid].pmt%[var] secec=[sec] ifirst=[n1] nevent=[nev]
+     (hist)  hist/copy [id1]([xlo].:[xhi].,1.:216.) 1000000
+    endcase
+    slix 1000000 216
+    hi/proj 1000000
+    do layer = 1,6
+      message ecGetPeakStats: Processing [var] sector [sec] layer [layer]
+      do strip = 1,36
+        chan = ([layer]-1)*36 + [strip]
+        exec utilGetSliceStats 1000000 x [chan] [wid]
+        global/imp cen; global/imp rms
+        vec/inp [vcen]([strip],[layer],[sec]) [cen]
+        vec/inp [vrms]([strip],[layer],[sec]) [rms]
+      enddo
+    enddo              
+  enddo
+  
+  alias/del var
+      
+return

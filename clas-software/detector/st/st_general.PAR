@@ -1,0 +1,163 @@
+c      include file st_general.PAR
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: st_general.PAR,v 1.14 2004/10/26 16:54:55 devita Exp $
+c
+c  Documentation for include file st_general
+c
+c  Purpose:  
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   T. Auger     Created:  Mon Jun 03 10:11:52 EST 1997
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file st_general:
+c  -----------------------------------
+c  RCS information: 
+      CHARACTER*(132)  CIRUN_CONTROL
+      DATA CIRUN_CONTROL/
+     1'$rcsId$'
+     2/  
+c
+c_end_var
+c*************ST BOS common file************
+
+	character*4 StData_BOS_name
+	integer StData_BOS_size
+	integer StnData_BOS_size
+
+	parameter(StData_BOS_name='ST  ')
+	parameter(StData_BOS_size=3)
+	parameter(StnData_BOS_size=2)
+	
+c*************calibration parameters indexing************
+
+	integer Side1,Side2
+	parameter(Side1=1)
+	parameter(Side2=2)
+	
+	integer C0,C1,C2,W0,W1,W2,M0,Lambda,ped,adcmax,TDC_min,TDC_max
+   	integer veff_leg_near,veff_leg_far,veff_nose_near,veff_nose_far
+	integer veff_leg,veff_nose,veff_nose1,veff_nose2
+	parameter(C0=1)
+	parameter(C1=2)
+	parameter(C2=3)
+	parameter(W0=4)
+	parameter(W1=5)
+	parameter(W2=6)
+	parameter(M0=7)
+	parameter(Lambda=8)
+	parameter(adcmax=8)
+	parameter(veff_leg_near=9)
+	parameter(veff_leg_far=10)
+ 	parameter(veff_nose_near=11)		
+	parameter(veff_nose_far=12)
+	parameter(veff_leg=9)
+	parameter(veff_nose=10)
+ 	parameter(veff_nose1=11)		
+	parameter(veff_nose2=12)
+	parameter(ped=13)
+	parameter(TDC_min=14)
+	parameter(TDC_max=15)
+
+	integer St_max_pair
+	integer St_max_side
+	integer St_max_sector
+	integer St_max_hit
+	integer max_track_per_sector
+	parameter(St_max_pair=24) 
+	parameter(St_max_side=2)
+	parameter(St_max_sector=6)
+	parameter(St_max_hit=60)
+	parameter(max_track_per_sector=10)
+	
+
+	integer St_ADC1,St_TDC1,St_ADC2,St_TDC2
+	parameter(St_ADC1=2)
+	parameter(St_TDC1=1)
+	parameter(St_ADC2=4)
+	parameter(St_TDC2=3)
+
+	
+	
+	integer CONVERTED,TIME_WALKED
+	parameter(CONVERTED=1)
+	parameter(TIME_WALKED=2)
+	
+
+	integer HIT_BASED
+	integer TIME_BASED
+	parameter(HIT_BASED=0)
+	parameter(TIME_BASED=1)
+	
+
+
+c*************STR BOS bank parameter************
+
+	character*4 StFit_BOS_name
+	integer StFit_BOS_size
+	
+	parameter(StFit_BOS_name='STR ')
+	parameter(StFit_BOS_size=6)
+	
+c*************STP BOS bank parameter************ --> not used so far Feb98
+
+	character*4 StStp_BOS_name
+	integer StStp_BOS_size
+	integer X,Y,Z
+	integer nose,leg
+	
+	parameter(StStp_BOS_name='STP ')
+	parameter(StStp_BOS_size=8)
+	parameter(X=1)
+	parameter(Y=2)
+	parameter(Z=3)
+	parameter(leg=1)
+	parameter(nose=2)
+
+c*************STI BOS bank parameter************ --> not used so far Feb98
+
+	character*4 StStI_BOS_name
+	character*4 StnStI_BOS_name
+	integer StStI_BOS_size
+	integer StnStI_BOS_size
+	
+	parameter(StStI_BOS_name='ST1 ')
+	parameter(StnStI_BOS_name='STN1')
+	parameter(StStI_BOS_size=6)
+	parameter(StnStI_BOS_size=4)
+	
+c*************TRK BOS bank parameter************
+
+	integer Trk_Result_BOS_size
+
+	parameter(Trk_Result_BOS_size=8)
+
+
+
+c************** St Type info********************
+	integer StType
+	common /sttyp/StType
+
+c
+c----6----------------------------------------------------------------72
+
+
+
+
+
+
+
+

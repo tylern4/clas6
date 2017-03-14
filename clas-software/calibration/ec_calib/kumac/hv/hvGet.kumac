@@ -1,0 +1,31 @@
+macro hvGet det=0 sec dbvar clear=1
+
+  if [det].eq.0 then
+   message 'Purpose: Get hv values from mainframe' 
+   message '         and put in KUIP vector named dbvar '
+   message '  Usage: hvGet det sec dbvar clear'
+   message '    det: Detector package (EC,SC,CC)'
+   message '    sec: Sector number (1,2,3,4,5,6)'
+   message '  dbvar: EPICS HV database variable (DVI,MVI,MCI)'
+   message '  clear: 1=clear vector dbvar between calls, 0=do not'    
+   exitm
+  endif
+
+  dbvar = $upper([dbvar])
+  
+  if $vexist([dbvar]).eq.0 then
+    vec/cre [dbvar]mf(12,16,10)
+    vec/cre [dbvar]([det]vecdim)
+  endif
+
+  if [clear].eq.1 then
+    vec/cre [dbvar]([det]vecdim)
+  endif
+  
+  time = $exec('unixtime')
+  
+  exec hvReadConfig [det][sec]
+  exec hvRemoteCa r [det][sec] [det][sec]_r[time]
+  exec hvReadSnap [det][sec]_r[time] [dbvar] [dbvar]mf [dbvar]
+  
+return

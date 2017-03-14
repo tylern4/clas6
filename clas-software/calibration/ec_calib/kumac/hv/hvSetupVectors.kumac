@@ -1,0 +1,10 @@
+macro hvSetupVectors
+
+  message hvSetupVectors: Setting up vectors
+
+  vec/cre hvmain(12,16,12) r
+  vec/cre ecmf(36,6,6)
+  vec/cre scmf(24,2,6)
+  
+return
+

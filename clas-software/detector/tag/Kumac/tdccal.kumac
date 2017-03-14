@@ -1,0 +1,364 @@
+macro tdccal
+
+message 'previous calibration file :'
+read filenamep
+message 'New calibration file :'
+read filename
+message 'control file:'
+read filenamecont
+message 'Number of bins for L-R plots (suggested value 30)'
+read bins
+message 'Size of window for L-R  plots (ns) (suggested value 10ns):'
+read sizewin
+
+vec/cr pard(3) R 50 0 .5  
+vec/cr stepd(3) R 10 .2 .05 
+vec/cr pmind(3) R 0 -8. .05  
+vec/cr pmaxd(3) R 400 8. 1. 
+
+vec/cr par(3) R 
+
+vec/cr lrslope([bins])
+vec/cr peak(300)
+vec/cr vecrf(50)
+vec/cr fit(4) R
+vec/cr beta(2) R
+vec/cr ccal(4) R
+vec/cr calleft(61)
+vec/cr calright(61)
+vec/cr corrleft(61)
+vec/cr corrright(61)
+vec/cr corrtorf(61)
+vec/cr oldcalleft(61)
+vec/cr oldcalright(61)
+halfsizewin = [sizewin]/2.
+
+opt stat
+opt fit
+
+zone 1 3
+
+next
+
+vec/write pard [filenamecont] 'F8.2,F8.2,F8.2' 'O'
+vec/write stepd [filenamecont] 'F8.2,F8.2,F8.2' ' '
+vec/write pmind [filenamecont] 'F8.2,F8.2,F8.2' ' '
+vec/write pmaxd [filenamecont] 'F8.2,F8.2,F8.2' ' '
+
+vec/write beta [filename] 'F8.2,F8.2,F8.2' 'O'
+
+do i=1,61
+
+l=[i]*2-1
+
+*================================================================
+* first determine the ratio of the slopes left versus slope right
+* verbose
+
+vec/cr num(1) I [i]
+vec/write num [filenamecont] 'I3' ' '
+vec/del num(1)
+
+* step 1: find the main peak:
+
+h/cr/1d 1000 '(L+R)/2 for T'[i] 300 -50. 250.
+n/proj 1000 1.(time_r/2+time_l/2) t_id=[l]
+h/pl 1000
+h/get/cont 1000 peak
+sigma lmax=lvmax(peak)
+sigma chmax = -50. + lmax
+vec/write chmax [filenamecont] 'F8.2' ' '
+
+*wait
+* get the cuts for the L/R determination:
+
+cmin=chmax-5
+cmax=chmax+5
+cut 1 (time_l/2+time_r/2)>[cmin].and.(time_l/2+time_r/2)<[cmax]
+cmin=chmax+20
+cmax=chmax+120
+cut 2 (time_l/2+time_r/2)>[cmin].and.(time_l/2+time_r/2)<[cmax]
+cmin=chmax+5
+cmax=chmax+35
+cut 3 (time_l/2+time_r/2)>[cmin].and.(time_l/2+time_r/2)<[cmax]
+
+* step 2: projection arround the main peak
+
+h/cr/1d 1001 '(R-L)/2 cut for main peak, T'[i] [bins] -[halfsizewin] [halfsizewin]
+n/proj 1001 1.(time_r/2-time_l/2) t_id=[l].and.$1
+h/get/cont 1001 lrslope
+sigma lmax=lvmax(lrslope)
+sigma chmax = [sizewin]*(-.5 + lmax/[bins])
+cmin=chmax-3.
+cmax=chmax+3.
+sigma valmax=lrslope(lmax)
+vec/copy pard par
+vec/copy chmax par(2)
+vec/copy valmax par(1)
+vec/input pmaxd(3) 2.
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' ' '
+h/fit 1001([cmin]:[cmax]) G B 3 par stepd pmind pmaxd
+* store
+vec/copy par(2) fit(1)
+
+*wait
+* step 3: projection for the tail peak+20ns peak+120 ns
+
+h/cr/1d 1002 '(R-L)/2 cut for peak+20ns to peak+120ns, T'[i] [bins] -[halfsizewin] [halfsizewin]
+n/proj 1002 1.(time_r/2-time_l/2) t_id=[l].and.$2
+h/get/cont 1002 lrslope
+sigma lmax=lvmax(lrslope)
+sigma chmax = [sizewin]*(-.5 + lmax/[bins])
+cmin=chmax-3.
+cmax=chmax+3.
+sigma valmax=lrslope(lmax)
+vec/copy pard par
+vec/copy chmax par(2)
+vec/copy valmax par(1)
+vec/input pmaxd(3) 2.
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' ' '
+h/fit 1002 G B 3 par stepd pmind pmaxd
+*h/fit 1002([cmin]:[cmax]) G B 3 par stepd pmind pmaxd
+* store
+vec/copy par(2) fit(2)
+
+* step 4: calculate the left/right correction for next analysis:
+
+* get the slope betaRL = (fit(70ns)-fit(0ns)) / 70ns
+vsub fit(2) fit(1) beta(1)
+vscale beta(1) .014286 beta(1)
+
+*calculate correction factors for left and right:
+*corrleft = 1/(1-betaRL)
+
+vec/input ccal(1) 1
+vscale beta(1) -1 ccal(2)
+vbias ccal(2) 1 ccal(2)
+vdivide ccal(1) ccal(2) corrleft([i])
+
+*corrright = 1/(1+betaRL)
+vec/input ccal(1) 1
+vbias beta(1) 1 ccal(2)
+vdivide ccal(1) ccal(2) corrright([i])
+
+vec/write corrleft([i]),corrright([i]) [filenamecont] 'F8.2,F8.2' ' '
+
+* verification plot:
+coorl=corrleft([i])
+coorr=corrright([i])
+
+n/pl 1.(time_r/2-time_l/2) t_id=[l].and.-[halfsizewin]<(time_r/2-time_l/2)<[halfsizewin]
+n/pl 1.([coorr]*time_r/2-[coorl]*time_l/2)%tmean t_id=[l].and.-[halfsizewin]<(time_r/2-time_l/2)<[halfsizewin]
+n/pl 1.([coorr]*time_r/2-[coorl]*time_l/2) t_id=[l].and.-[halfsizewin]<(time_r/2-time_l/2)<[halfsizewin]
+
+*wait
+* step 5: cross calibration with RF:
+* First cut on main peak
+
+h/cr/1d 1003 'T_mean - RF cut on main peak, T'[i] 50 -2.004 2.004
+n/proj 1003 1.(trf+1.002) t_id=[l].and.$1
+h/get/cont 1003 vecrf
+sigma lmax=lvmax(vecrf)
+if lmax>37 then 
+sigma lmax=lmax-25
+endif
+sigma oldlmax=lmax
+sigma chmax= 2.004 * (-1 + lmax/25)
+cmin=chmax-.5
+cmax=chmax+.5
+sigma valmax= vecrf(lmax)
+vec/copy pard par
+vec/copy chmax par(2)
+vec/copy valmax par(1)
+vec/input pmaxd(3) .2
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' ' '
+n/proj 1003 1.(trf-1.002) t_id=[l].and.$1
+h/fit 1003([cmin]:[cmax]) G B 3 par stepd pmind pmaxd
+vec/copy par(2) fit(3)
+
+*wait
+* second cut on narrow zone for first estimation:
+
+h/cr/1d 1004 'T_mean - RF cut on small zone +5ns +35ns, T'[i] 50 -2.004 2.004
+n/proj 1004 1.(trf+1.002) t_id=[l].and.$3
+h/get/cont 1004 vecrf
+sigma lmax=lvmax(vecrf)
+if lmax>(oldlmax+10) then 
+sigma lmax=lmax - 25
+* achtung mit diese factor !
+endif
+sigma chmax= 2.004*(-1 + lmax/25)
+cmin=chmax-.5
+cmax=chmax+.5
+sigma valmax = vecrf(lmax)
+vec/copy pard par
+vec/copy chmax par(2)
+vec/copy valmax par(1)
+vec/input pmaxd(3) .3
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' ' '
+n/proj 1004 1.(trf-1.002) t_id=[l].and.$3
+h/fit 1004([cmin]:[cmax]) G B 3 par stepd pmind pmaxd
+vec/copy par(2) fit(4)
+
+*wait
+* step 6 first estimation of the calibration:
+* betaRF = (trf(20ns) - trf(0ns))/ 20ns
+vsub fit(4) fit(3) beta(2)
+vscale beta(2) .05 beta(2)
+* corrRF = 1 - betaRF
+vscale beta(2) -1. ccal(1)
+vbias ccal(1) 1 corrtorf([i])
+
+vec/write beta(2),corrtorf([i]) [filenamecont] 'F8.2,F8.2' ' '
+
+corrl=corrleft([i])*corrtorf([i])
+corrr=corrright([i])*corrtorf([i])
+
+n/pl 1.modrf.f([corrl]*time_l/2.+[corrr]*time_r/2-rf1)%tmean t_id=[l]
+
+*wait
+
+*step 7 now best fit with wider cut:
+
+h/cr/1d 1005 'T_mean - RF cut on main peak, T'[i] 50 -2.004 2.004
+n/proj 1005 1.modrf.f([corrl]*time_l/2.+[corrr]*time_r/2-rf1) t_id=[l].and.$1
+h/get/cont 1005 vecrf
+sigma lmax=lvmax(vecrf)
+if lmax>37 then 
+sigma lmax=lmax-25
+endif
+sigma oldlmax=lmax
+sigma chmax= 2.004 * (-1 + lmax/25)
+cmin=chmax-.5
+cmax=chmax+.5
+sigma valmax= vecrf(lmax)
+vec/copy pard par
+vec/copy chmax par(2)
+vec/copy valmax par(1)
+vec/input pmaxd(3) .2
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' ' '
+n/proj 1005 1.modrf.f([corrl]*time_l/2.+[corrr]*time_r/2-rf1)-2.004 t_id=[l].and.$1
+h/fit 1005([cmin]:[cmax]) G B 3 par stepd pmind pmaxd
+vec/copy par(2) fit(3)
+
+*wait
+* second cut on big zone ;
+
+h/cr/1d 1006 'T_mean - RF cut on big zone, T'[i] 50 -2.004 2.004
+n/proj 1006 1.modrf.f([corrl]*time_l/2.+[corrr]*time_r/2-rf1) t_id=[l].and.$2
+h/get/cont 1006 vecrf
+sigma lmax=lvmax(vecrf)
+if lmax>(oldlmax+10) then 
+sigma lmax=lmax - 25
+* achtung mit diese factor !
+endif
+sigma chmax= 2.004*(-1 + lmax/25)
+cmin=chmax-.5
+cmax=chmax+.5
+sigma valmax = vecrf(lmax)
+vec/copy pard par
+vec/copy chmax par(2)
+vec/copy valmax par(1)
+vec/input pmaxd(3) .4
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' ' '
+n/proj 1006 1.modrf.f([corrl]*time_l/2.+[corrr]*time_r/2-rf1)-2.004 t_id=[l].and.$2
+h/fit 1006([cmin]:[cmax]) G B 3 par stepd pmind pmaxd
+vec/copy par(2) fit(4)
+
+*wait
+* Calculate new beta with better precision (hopefully)
+* betaRF = (trf(70ns) - trf(0ns))/ 70ns
+vsub fit(4) fit(3) beta(2)
+vscale beta(2) .014286 beta(2)
+* corrRF = 1 - betaRF
+vscale beta(2) -1. ccal(1)
+vbias ccal(1) 1 ccal(1)
+vmultiply corrtorf([i]) ccal(1) corrtorf([i])
+
+vec/write beta(2),corrtorf([i]) [filenamecont] 'F8.2,F8.2' ' '
+
+corrl=corrleft([i])*corrtorf([i])
+corrr=corrright([i])*corrtorf([i])
+
+n/pl 1.modrf.f([corrl]*time_l/2.+[corrr]*time_r/2-rf1)%tmean t_id=[l]
+
+*wait
+
+h/del 1000
+h/del 1001
+h/del 1002
+h/del 1003
+h/del 1004
+h/del 1005
+h/del 1006
+
+enddo
+
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' 'C'
+
+vec/cr result(3) R 1 0 0
+vec/read result [filenamep] 'F4.0,F8.2,F8.2' 'O'
+vec/copy result(2) oldcalleft(1)
+vec/copy result(3) oldcalright(1)
+do i=2,60
+vec/read result [filenamep] 'F4.0,F8.2,F8.2' ' '
+vec/copy result(2) oldcalleft([i])
+vec/copy result(3) oldcalright([i])
+enddo
+vec/read result [filenamep] 'F4.0,F8.2,F8.2' 'C'
+vec/copy result(2) oldcalleft([i])
+vec/copy result(3) oldcalright([i])
+
+vmul oldcalleft corrleft calleft
+vmul oldcalright corrright calright
+vmul calleft corrtorf calleft
+vmul calright corrtorf calright
+
+
+vec/input result(1) 1.
+vec/copy calleft(1) result(2)
+vec/copy calright(1) result(3)
+vec/write result [filename] 'F4.0,F8.2,F8.2' 'O'
+do i=2,60
+vec/input result(1) [i]
+vec/copy calleft([i]) result(2)
+vec/copy calright([i]) result(3)
+vec/write result [filename] 'F4.0,F8.2,F8.2' ' '
+enddo
+vec/input result(1) 61.
+vec/copy calleft(61) result(2)
+vec/copy calright(61) result(3)
+vec/write result [filename] 'F4.0,F8.2,F8.2' 'C'
+
+zone 1 2
+
+vec/draw calleft 3005 B
+vec/draw calright 3006 B
+
+pic/del a
+pic/cr a
+min 3005 47
+min 3006 47
+h/pl 3005 B
+h/pl 3006 B
+
+vec/cr pard(3) R 50 0 .5  
+vec/cr stepd(3) R 10 .2 .05 
+vec/cr pmind(3) R 0 -8. .05  
+vec/cr pmaxd(3) R 400 8. 1. 
+
+vec/cr par(3) R 
+
+vec/del lrslope
+vec/del peak
+vec/del vecrf
+vec/del fit
+vec/del beta
+vec/del ccal
+vec/del calleft
+vec/del calright
+vec/del corrleft
+vec/del corrright
+vec/del corrtorf
+vec/del oldcalleft
+vec/del oldcalright

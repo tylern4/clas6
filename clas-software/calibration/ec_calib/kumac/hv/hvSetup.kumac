@@ -1,0 +1,7 @@
+macro hvSetup
+
+  exec hvSetupGlobal
+  exec hvSetupVectors
+  exec hvSetupFunctions
+  
+return

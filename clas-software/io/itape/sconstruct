@@ -1,0 +1,9 @@
+from build_system import environment
+
+itapeEnv = environment.env(deps=['clas6'])
+itapeEnv.load_dependency('clas6')
+
+ignore_list = itapeEnv.Glob('*.cc')
+
+itapeLib = itapeEnv.library('itape', ignore=ignore_list)
+itapeEnv.return_from_sconstruct(itapeLib)

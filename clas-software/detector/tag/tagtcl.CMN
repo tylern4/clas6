@@ -1,0 +1,53 @@
+c      include file tagtcl.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: tagtcl.CMN,v 1.9 2006/03/14 05:34:37 pasyuk Exp $
+c
+c  Documentation for include file tagtcl.CMN
+c
+c  Purpose:  common used for storage of tcl runtime variable
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   T. Auger     Created:  Mon Jun 03 10:11:52 EST 1997
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file taginfo:
+c  -----------------------------------
+c 
+	integer Tagger_NO_LR, Tagger_Raw_Format, Tagger_NO_E,
+     +          Tagger_debug_begin,Tagger_debug_end,
+     +          Tagger_DSD_debug,Tagger_parms_input,
+     +          Tagger_PC_TDC,Tagger_PS_TDC,Tagger_TAC_TDC,
+     +          Tagger_warning,Tagger_ETmatch,Tagger_convert,
+     +          Tagger_correct,Tagger_energy_correct
+
+	character*128 tagger_tpeaks_file_name
+	character*128 tagger_ecorr_name
+
+c
+c_end_var
+c  -----------------------------------
+	common /tagtcl/Tagger_NO_LR, Tagger_Raw_Format, Tagger_NO_E,
+     +       Tagger_debug_begin,Tagger_debug_end,
+     +       Tagger_DSD_debug,Tagger_parms_input,
+     +       Tagger_PC_TDC,Tagger_PS_TDC,Tagger_TAC_TDC,
+     +       Tagger_warning,Tagger_ETmatch,Tagger_convert,
+     +	     Tagger_correct,
+     +	     Tagger_energy_correct,
+     +	     Tagger_tpeaks_file_name,
+     +       Tagger_ecorr_name
+	
+	
+c----6----------------------------------------------------------------72

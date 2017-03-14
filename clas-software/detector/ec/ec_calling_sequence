@@ -1,0 +1,29 @@
+ec_init.F:        CALL ECDBA_INIT(NSECTOR)
+ec_evnt.F:      CALL EC_STORE_BOS(LOK)
+    ec_store_bos.F:c        call FSEQR('BOSINPUT',ierr)    ! get from input
+    ec_store_bos.F:          call EcGus_int_sort(N_UI,idUI,loc)  !sort by increasing id#
+    ec_store_bos.F:          call EcGus_int_sort(N_VI,idVI,loc)  !sort by increasing id#
+    ec_store_bos.F:          call EcGus_int_sort(N_WI,idWI,loc)  !sort by increasing id#
+    ec_store_bos.F:          call EcGus_int_sort(N_UO,idUO,loc)  !sort by increasing id#
+    ec_store_bos.F:          call EcGus_int_sort(N_VO,idVO,loc)  !sort by increasing id#
+    ec_store_bos.F:          call EcGus_int_sort(N_WO,idWO,loc)  !sort by increasing id#
+ec_evnt.F:         CALL ECCAL_STRIP(NSECTOR)
+ec_evnt.F:         CALL ECFIT_ANALYZE(NSECTOR)
+    ecfit_analyze.F:            call EcFit_strips_peaks(axis,layer,sector) !strips=>peaks
+        ecfit_strips_peaks.F:      call EcGus_sort(Ngroup,group_E,id_g)
+    ecfit_analyze.F:         call EcFit_peaks_hits(layer,sector) !peaks=>hits
+        ecfit_peaks_hits.F:      call EcGus_sort(Npsble,possibleE,ids)
+        ecfit_peaks_hits.F:        call Ec_ijk_xyz(d(Ec_I),d(Ec_J),d(Ec_K),d(Ec_X),d(Ec_Y),
+        ecfit_peaks_hits.F:        call Ec_ij_path(d(Ec_I),d(Ec_J),path(Ec_U),path(Ec_V),
+    ecfit_analyze.F:      call EcFit_hits_showers(sector) !hits=>showers
+        ecfit_hits_showers.F:      call EcGus_sort(N,prob,IDs)
+        ecfit_hits_showers.F:         call Ec_ijk_xyz
+        ecfit_hits_showers.F~:      call EcGus_sort(N,prob,IDs)
+        ecfit_hits_showers.F~:         call Ec_ijk_xyz
+    ecfit_analyze.F:      call EcDrv_results(sector) !derived results
+ec_evnt.F:         CALL EC_OUTPUT(NSECTOR)
+
+
+
+
+

@@ -1,0 +1,17 @@
+from build_system import environment
+import glob
+
+ptypes_env = environment.env(deps = ['root'])
+
+#ptypes_env['shared'] = True
+
+ptypes_env.load_dependency('root')
+
+ptypes_env.AppendUnique(CPPPATH = ['../include'])	
+
+#ptypes_rdict = ptypes_env.ROOTDictionary('PTypes', 'ParticleInfo.h ParticleTypes.h PTypesLinkDef.h'.split())
+
+ptypes_lib = ptypes_env.library('PTypes', source=glob.glob('*.C'))
+
+#ptypes_env.return_from_sconstruct(ptypes_lib)
+

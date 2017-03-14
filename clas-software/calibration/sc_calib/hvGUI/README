@@ -1,0 +1,19 @@
+RULES FOR COMPILING tofHVgui
+----------------------------
+
+FIRST:make sure you cvs co PATH_TO_MY_HVGUI_DIRECTORY/MapUtils
+
+First Time Compilation
+----------------------- 
+(1) make sure that environment variables are properly set up.
+    Use the command:
+      source /group/clas/builds/PRODUCTION/packages/cms/jlab.cshrc
+(2) change to MapUtils dir and type "make"
+(3) go to main directory (hvGUI/) and type "make all"
+
+Everytime you change/upgrade your version of ROOT,
+libMapUtils.a must be recompiled FIRST linking to the new ROOT libs.
+-------------------------------------------------------------------------
+(1) decend into MapUtils
+(2) type "make clean" then rm libMapUtils.a then "make all"
+

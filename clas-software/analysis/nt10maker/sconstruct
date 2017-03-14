@@ -1,0 +1,9 @@
+from build_system import environment
+import glob
+
+nt10maker_env = environment.env(deps='clas6 root'.split())
+nt10maker_env.load_dependency({'clas6':['default_libs'], 'root': ['default_libs']})
+sources =['nt10maker.cc', 'filter_wrapper.c']
+sources += glob.glob("*.F")
+nt10maker_env.program(source=sources, target='nt10maker')
+

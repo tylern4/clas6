@@ -1,0 +1,20 @@
+from build_system import environment
+
+gamecock_sources = """Jhbook2root.cc JEventCount.cc JCoupledPaddle.cc
+    Calibration.cxx JndexBox.cxx JInteractive.cxx JSurvey.cxx 
+    SConstants.cxx ShowSector.cxx fitlinear.cxx fittimewalk.cxx 
+    fitlandau.cxx fitgauss.cxx fittdc.cxx showsec.cxx Regression.cxx 
+    SingleStripe.cxx ButtonOkCancel.cxx ParameterSlider.cxx SliderBox.cxx 
+    CheckinBox.cxx CheckinValues.cxx  MySQL.cxx CaldbServer.cxx	NeedInput.cxx 
+    ReadRoc.cxx SlotAverage.cxx EnterValues.cxx CaldbBox.cxx SectorAxis.cxx 
+    ReadPipe.cxx Inx.cxx BankDescription.cxx""".split()
+
+gamecock_main = ["gamecock.cxx"] + gamecock_sources
+
+gc_env = environment.env(deps=['clas6', 'mysql', 'root'])
+
+gc_env.load_dependency(['clas6', 'mysql', 'root'])
+
+gc_lib = gc_env.library(target='gamecock', source=gamecock_sources) #ignore=['scgeom.inc','ecgeom.inc','ec1geom.inc'])
+
+gc_prog = gc_env.program(target='gamecock', source=gamecock_main)

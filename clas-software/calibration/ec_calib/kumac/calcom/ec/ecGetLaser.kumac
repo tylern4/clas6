@@ -1,0 +1,53 @@
+macro ecGetLaser sec
+ 
+  glob/cre sector [sec]
+  glob/cre path vec/laser/sector[sec]
+  glob/cre nruns
+
+  message ecGetLaser: Reading laser data from [path]
+  if [sec].eq.1 then
+    exec ecSetupChains sector1/laser_cal cr data
+  else
+    exec ecSetupChains sector[sector] cr data
+  endif
+  
+    vec/cre runs(100)
+    vec/read runs [path]/pe/runs
+    nruns = $vlen(runs)
+    vec/cre filt([nruns])
+    vec/cre pmt([nruns],36,6)
+    vec/cre pmtrms([nruns],36,6)
+    vec/cre pmterr([nruns],36,6)
+    vec/cre pe([nruns],36,6)
+    vec/cre peerr([nruns],36,6)
+    vec/cre ecFitPE_par(6,36,2)
+    vec/cre ecFitPE_errpar(6,36,2)
+    vec/cre ecFitPE_chi2(6,36)
+    vec/cre ecFitPE_yld(6,36)
+    vec/cre ecFitPE_erryld(6,36)
+    vec/cre ecFitPE_src(6,36)
+    vec/cre ecFitPE_errsrc(6,36)
+    vec/cre ped(216)
+    vec/read filt [path]/pe/filt
+    vec/read runs [path]/pe/runs
+    vec/read pmt    [path]/pe/pmt
+    vec/read ped    [path]/pe/ped
+    vec/read pmterr [path]/pe/pmterr
+    vec/read pmtrms [path]/pe/pmtrms
+    vec/read pe     [path]/pe/pe
+    vec/read peerr  [path]/pe/peerr
+    vec/read ecfitpe_par [path]/pe/ecfitpe_par
+    vec/read ecfitpe_errpar [path]/pe/ecfitpe_errpar
+    vec/read ecfitpe_chi2 [path]/pe/ecfitpe_chi2
+    vec/read ecfitpe_yld [path]/pe/ecfitpe_yld
+    vec/read ecfitpe_src [path]/pe/ecfitpe_src
+    vec/read ecfitpe_erryld [path]/pe/ecfitpe_erryld
+    vec/read ecfitpe_errsrc [path]/pe/ecfitpe_errsrc
+    vec/cre xerr([nruns])
+    vec/cre err([nruns])
+
+  sigma pmt2	= 1./pmt
+  sigma pmtrms2	= 100/pe
+  sigma err	= peerr*100/pe**2
+  
+return

@@ -1,0 +1,215 @@
+macro process run sec 
+
+  exec ecAttSummary#init
+  exec ecAttSummary#load
+  exec ecAttSummary#run [run] [sec]
+  exec ecAttSummary#book
+
+return 
+
+macro init
+
+  exec ecSetupVectors
+
+  global/import attpath
+  global/import vecpath
+  
+  vec/cre gain(36,6,6) r
+  vec/cre dumm(36,6,6) r
+  vec/cre attfit(36,6,6) r
+  vec/cre att(36,6,6) r
+  vec/cre alc(1296,6,6) r
+  vec/cre alcfit(1296,6,6) r
+  vec/cre pixgain(1296,6,6) r
+  vec/cre adcc(1296,6,6) r
+  vec/cre pixmap(1296,3) 
+  vec/cre pixwidth(6) r
+  vec/cre sumcor(1296,2,6) r
+  vec/cre sumcorfit(1296,2,6) r
+  vec/cre costh(1296) r
+  vec/cre attdb(36,39,6) r
+  vec/cre attedb(36,39,6) r
+  vec/cre dum(36,39,6)
+  vec/cre rdout(36,39,6)
+  vec/cre weight(39) r 39*1.
+  
+  vec/read att 				[attpath]/attenstackmean_adb.vec  
+  vec/read pixwidth			[vecpath]/ec_pixwidth.vec
+  vec/read costh			[vecpath]/ec_pixcosth.vec
+  vec/read dum,dum,dum,attdb,rdout 	[attpath]/atten_newadb.vec
+  vec/read dum,dum,dum,attedb,rdout 	[attpath]/attenerr_newadb.vec
+  
+  scale = 1.15
+  sigma dum = (attdb eq 0)*180 + (rdout eq 0)*attdb + (rdout eq 1)*attdb*[scale]  
+  vec/cop dum attdb
+  sigma dum =                    (rdout eq 0)*attedb + (rdout eq 1)*attedb*[scale]  
+  vec/cop dum attedb
+  
+return
+
+macro book
+
+  message 'Booking histos'
+
+  1d 10 ';Pixel;Sum of Att Correction' 1296 1. 1297.
+  1d 11 ';Pixel;ADCu+ADCv+ADCw/MIP' 1296 1. 1297.
+  1d 12 ';Sum of Att Correction;Counts' 100 0. 1.
+  1d 13 ';ADCu+ADCv+ADCw/MIP' 100 0. 1.
+  
+return
+
+macro load
+  
+  call kumac/calcom/ec/fun/eccallib.f77
+  
+return
+
+macro run run sec
+
+  global/imp gainpath
+  
+  exec ecFit#fetch [gainpath]/ecPixGain[run]_[sec].vec  [sec] gain dumm
+  exec ecFit#fetch [gainpath]/ecPixAtten[run]_[sec].vec [sec] attfit
+  exec ecGetPixelVec cosmic[run] 1 [sec]
+  sigma sum1 = adc1+adc2+adc3
+  sigma sum2 = adc4+adc5+adc6  
+  sigma sum1 = sum1/300
+  sigma sum2 = sum2/480
+  call ecattcor
+  call ecsumcor
+  do i = 1,6
+    vec/copy pixgain(:,[i],[sec]) cor[i]
+  enddo
+  sigma sumc1 = 100*(adc1/cor1+adc2/cor2+adc3/cor3)/300.
+  sigma sumc2 = 160*(adc4/cor4+adc5/cor5+adc6/cor6)/480.
+  
+return
+
+macro plot1 sec io
+
+  switch z
+  ve/draw sumcor(:,[io],new[sec]) 100
+  ve/draw sumcorfit(:,[io],[sec]) 200
+  ve/draw sum[io] 101
+  ve/draw sumc[io] 201
+  ve/plot sumcor(:,[io],new[sec]) 102
+  ve/plot sumcorfit(:,[io],[sec]) 202
+  ve/plot sum[io] 103
+  ve/plot sumc[io] 203
+  switch g
+  
+  min 10 0.6;max 10 1.
+  min 11 0.6;max 11 1.
+  min 12 0.4
+  min 13 0.4
+  max 12 100
+  max 13 100
+  
+  alias/cre label1 Inner
+  alias/cre label2 Outer
+  
+  zone 2 2
+  
+  title = Sector [sec] label[io]: Attenuation Corrections
+  title_gl [title]
+  
+  opt nstat
+  hi/plot 10
+  set hcol 2
+  hi/plot 100 s
+  set hcol 4
+  hi/plot 200 s
+  hi/plot 11
+  set hcol 2
+  hi/plot 101 s
+  set hcol 4
+  hi/plot 201 s
+  opt stat
+  hi/copy 102(0.4:1.) 105; hi/copy 202(0.4:1.) 205
+  set hcol 2; hi/plot 105; set hcol 4; hi/plot 205 s   
+  hi/copy 103(0.4:1.) 106; hi/copy 203(0.4:1.) 206
+  set hcol 2; hi/plot 106; set hcol 4; hi/plot 206 s 
+
+return
+
+macro plot2 sec lo hi option lay vec n
+
+  set txci 1
+  set hcol 1;igset plci 1
+
+  switch z
+  case [option] in
+    (layer) sigma adc = adc[lay]/cor[lay]
+            vec/draw adc 100
+            vec/draw alc(:,[lay],new[sec]) 101
+            vec/draw alcfit(:,[lay],[sec]) 102
+       (io) vec/draw [vec][lay] 100
+            vec/draw sumcor(:,[lay],new[sec]) 101 
+            vec/draw sumcorfit(:,[lay],[sec]) 102
+  endcase
+  switch g
+  
+  min 100  0.4; max 100 1.3;  hi/plot 100([lo]:[hi])
+  line 0 1 1300 1
+  selnt 1
+  line 5. 4.2 6. 4.2 ; text 6.5 4.2 'Data' 0.3
+  selnt 0
+  set hcol 2; igset plci 2
+  hi/plot 101 s 
+  selnt 1
+  line 5. 3.8 6. 3.8 ; text 6.5 3.8 'Att database' 0.3
+  selnt 0
+  set hcol 4; igset plci 4
+  hi/plot 102 s
+  selnt 1
+  line 5. 3.4 6. 3.4 ; text 6.5 3.4 'Att fit' 0.3
+  selnt 0
+  igset plci 1
+  
+return
+
+macro plot3 run sec
+
+  global/imp attpath gainpath
+  
+  vec/cre attfit(36,6,6) r
+  vec/cre att(36,6,6) r
+  vec/cre attsh(36,6,6) r
+  vec/cre zo(6) i 1 3 5 2 4 6
+  
+*  vec/read att   [attpath]/attenstackmean_adb.vec
+  vec/read att [attpath]/attenstackmean_adbextrap.vec  
+  exec ecFit#fetch [gainpath]/ecPixAtten[run]_[sec].vec [sec] attfit
+  
+  sigma x=array(36,1#36)
+  
+  next
+  
+  do view = 1,6
+     
+    case [view] in
+      (1) chview=U inner
+      (2) chview=V inner
+      (3) chview=W inner
+      (4) chview=U outer
+      (5) chview=V outer
+      (6) chview=W outer
+    endcase
+    
+    zon = $eval(zo([view]))
+    zone 2 3 [zon] s
+    
+    null 0. 38. 0. 600.
+    atitle [chview]//' Strip Number' 'Atten. Length [cm]'
+    hplot/symbols x attfit(:,[view],[sec]) 36 20 0.18
+    hplot/symbols x att(:,[view],new[sec]) 36 24 0.18
+    key 20 150 20 'Pixel Fit'
+    key 20 100 24 'Map Database'
+    
+  enddo
+    
+return
+
+  
+  
+

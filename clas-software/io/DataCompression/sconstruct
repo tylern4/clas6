@@ -1,0 +1,10 @@
+from build_system import environment
+
+datacmp_env = environment.env(deps='clas6 root'.split())
+
+datacmp_env.load_dependency({'clas6': 'default_libs'})
+datacmp_env.load_dependency({'root': 'default_libs'})
+
+datacmp_env.sconstruct('CLASdata')
+
+

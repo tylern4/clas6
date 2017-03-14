@@ -1,0 +1,389 @@
+**************************************************
+macro main [1]
+
+exec dcalign_mon#runsresi  [1]
+exec dcalign_mon#readsresi [1]
+
+shell rm [1].dat
+
+return
+**************************************************
+
+
+
+**************************************************
+macro runsresi [1]=r30910_01
+
+textfile = [1].dat
+epsfbasename = [1]
+if $FEXIST([textfile]).eq.1 then
+   shell rm [textfile]
+endif
+if $FEXIST(postscript).eq.0 then
+   shell mkdir postscript
+   message Making directory postscript
+endif
+
+set ncol 28 ; * Uncomment this line for black & white picture
+palette 1 20 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+
+for angle in 0 1 2 3
+   exec dcalign#lvsresi [angle] col
+   pi/print postscript/[epsfbasename].lvsresi.[angle].eps
+*   wait
+   for sector in 1 2 3 4 5 6
+      exec dcalign#sresi [angle] [sector] [textfile]
+      pi/print postscript/[epsfbasename].sresi.sec[sector].[angle].eps
+*      wait
+   endfor
+endfor
+
+return
+**************************************************
+macro readsresi [1]=nofilespecified
+
+inputfile = [1].dat
+epsfilename = [1].eps
+texfilename = [1].tex
+firsttime = 1
+
+if $FEXIST([inputfile])=0 then
+   mess Cannot find input file [inputfile]
+   exitm
+endif
+
+for angle in 0 1 2 3
+   for sector in 1 2 3 4 5 6
+      ve/cr  means[sector]a[angle](6)
+      ve/cr emeans[sector]a[angle](6)
+      ve/cr sigmas[sector]a[angle](6)
+   endfor
+   ve/cr  rmsmeana[angle](6)
+   ve/cr ermsmeana[angle](6)
+endfor
+
+for angle in 0 1 2 3
+   for sector in 1 2 3 4 5 6
+      for sl in 1 2 3 4 5 6
+      opt = ' '
+      if [firsttime]=1 then
+         opt = 'O'
+      endif
+      ve/read means[sector]a[angle]([sl]),emeans[sector]a[angle]([sl]),sigmas[sector]a[angle]([sl]) [inputfile] ! [opt]
+*      ve/print means[sector]a[angle]([sl])
+      firsttime = 0
+      endfor
+      ve/read rmsmeana[angle]([sector]),ermsmeana[angle]([sector]) _
+              [inputfile] ! [opt]
+*      ve/print rmsmeana[angle]([sector])
+      if [angle]=3 then
+      if [sector]=5 then
+         firsttime=1
+      endif
+      endif
+   endfor
+endfor
+
+opt ndat
+ve/cr suplyrs(6) r 1 2 3 4 5 6
+ve/cr errx(6) r 
+
+set xwin 2.; set ywin 2.2
+
+zone 2 2
+for angle in 0 1 2 3
+   null 0 7 -100 100
+   set dmod 2 ; fu/plot 0 0 7 s ; set dmod 
+   atitle 'SL' 'mean ([m]m)' ! 222
+   set pmci 1 ; g/h/errors suplyrs means1a[angle] errx emeans1a0 6 24 ! 1
+   graph 6 suplyrs means1a[angle] L
+   set pmci 2 ; g/h/errors suplyrs means2a[angle] errx emeans2a0 6 25 ! 1
+   set plci 2 ; graph 6 suplyrs means2a[angle] L 
+   set pmci 3 ; g/h/errors suplyrs means3a[angle] errx emeans3a0 6 26 ! 1
+   set plci 3 ; graph 6 suplyrs means3a[angle] L 
+   set pmci 4 ; g/h/errors suplyrs means4a[angle] errx emeans4a0 6 27 ! 1
+   set plci 4 ; graph 6 suplyrs means4a[angle] L 
+   set pmci 5 ; g/h/errors suplyrs means5a[angle] errx emeans5a0 6 28 ! 1
+   set plci 5 ; graph 6 suplyrs means5a[angle] L 
+   set pmci 6 ; g/h/errors suplyrs means6a[angle] errx emeans6a0 6 29 ! 1
+   set plci 6 ; graph 6 suplyrs means6a[angle] L ; set plci
+*   set pmci 1 ; g/h/errors suplyrs means1a[angle] errx errx 6 24 ! 1
+*   set pmci 2 ; g/h/errors suplyrs means2a[angle] errx errx 6 25 ! 1
+*   set pmci 3 ; g/h/errors suplyrs means3a[angle] errx errx 6 26 ! 1
+*   set pmci 4 ; g/h/errors suplyrs means4a[angle] errx errx 6 27 ! 1
+*   set pmci 5 ; g/h/errors suplyrs means5a[angle] errx errx 6 28 ! 1
+*   set pmci 6 ; g/h/errors suplyrs means6a[angle] errx errx 6 29 ! 1
+endfor
+selnt 10
+text 0 105 'all [q]'  0.45 0
+selnt 20
+text 0 105 '8"L#[q]"L#20'  0.45 0
+selnt 30
+text 0 105 '40"L#[q]"L#65'  0.45 0
+selnt 40
+text 0 105 '75"L#[q]"L#115'  0.45 0
+selnt 1
+set pmci 1 ; exec relkey 93 90 24 'S1' 1. !
+set pmci 2 ; exec relkey 93 88 25 'S2' 1. !
+set pmci 3 ; exec relkey 93 86 26 'S3' 1. !
+set pmci 4 ; exec relkey 93 84 27 'S4' 1. !
+set pmci 5 ; exec relkey 93 82 28 'S5' 1. !
+set pmci 6 ; exec relkey 93 80 29 'S6' 1. !
+set pmci
+pi/print [epsfilename]
+
+if $FEXIST([texfilename]) then
+   shell rm [texfilename]
+endif
+
+call /home/sam/paw/macros/writetable.F($QUOTE([texfilename]))
+
+for angle in 0 1 2 3
+   for sector in 1 2 3 4 5 6
+      ve/del  means[sector]a[angle](6)
+      ve/del emeans[sector]a[angle](6)
+      ve/del sigmas[sector]a[angle](6)
+   endfor
+   ve/del  rmsmeana[angle](6)
+   ve/del ermsmeana[angle](6)
+endfor
+ve/del suplyrs,errx
+
+return
+**************************************************
+macro lvsresi [1]=0 [2]=!
+
+opt ndat
+exec dcalign_mon#colg2
+opt=[2]
+
+if [1]=0 then
+   title 'Layer vs spatial residual'
+elseif [1]=1 then
+   title 'Layer vs spatial residual 8"L#[q]"L#20'
+elseif [1]=2 then
+   title 'Layer vs spatial residual 40"L#[q]"L#65'
+elseif [1]=3 then
+   title 'Layer vs spatial residual 75"L#[q]"L#115'
+endif
+set ysiz 25. ; set xwin 3. ; set fwid 5
+zone 1 6
+set dmod 1 ; set hwid 3 ; set hcol 4
+opt nstat ; opt ngri
+cond1 = abs(fitdoca-calcdoca)<0.3
+quantity = layer%(fitdoca-calcdoca)
+
+zone 2 3
+
+for i in 1 2 3 4 5 6
+   histno = (1000+([1]*100))+[i]
+   h/plot [histno](-0.3:0.3) [opt]
+   atitle ! 'Layer no.' ! 223
+   f/pl 6.5 -10 10 s ; f/pl 12.5 -10 10 s ;  f/pl 18.5 -10 10 s 
+   f/pl 24.5 -10 10 s ; f/pl 30.5 -10 10 s 
+   set plci 2
+   dline 0 0 0.5 36.5 
+   set plci 
+   selnt [i]*10
+   text 0.35 2  SL1 0.35
+   text 0.35 8  SL2 0.35
+   text 0.35 13 SL3 0.35
+   text 0.35 18 SL4 0.35
+   text 0.35 24 SL5 0.35
+   text 0.35 31 SL6 0.35
+endfor
+
+set hwid 4 ; set hcol ; set xwin ; set fwid 
+
+title 
+
+return
+**************************************************
+macro sresi [1]=0 [2]=1 [3]=' '
+
+opt ndat ; opt nfit
+exec dcalign_mon#colg2
+
+aglernge = [1]
+sctr = [2]
+outputfile = [3]
+
+mess Sector [sctr]
+
+title ' '
+if [outputfile].eq.' ' then
+   if [aglernge]=0 then
+      title 'Spatial residual'
+   elseif [aglernge]=1 then
+      title 'Spatial residual 8"L#[q]"L#20'
+   elseif [aglernge]=2 then
+      title 'Spatial residual 40"L#[q]"L#65'
+   elseif [aglernge]=3 then
+      title 'Spatial residual 75"L#[q]"L#115'
+   endif
+endif
+
+set ywin 0.001 ; set yhti 200 ;set yval 200
+set ysiz 25. ; set xwin 3. ; set fwid 5
+zone 1 6
+set dmod 1 ; set hwid 3 ; set hmax 0.60 ; set hcol 1107
+opt nstat ; opt ngri
+set stat 0000100
+cond1 = abs(fitdoca-calcdoca)<0.3
+quantity = layer%(fitdoca-calcdoca)
+
+* loop over SLs 1-6
+for i in 6 5 4 3 2 1
+
+   histno = (1000+([aglernge]*100))+[sctr]
+   histnonew = [histno]*10
+   slix [histno] 6
+   h/proj [histno]
+   h/copy [histno].slix.[i] [histnonew]
+
+   v/cr pars[i](5) r 10000 0.0 0.03 50.0 .06
+   v/cr epars[i](5) r 
+   v/cr step[i](5) r 0.01 0.01 0.01 0.01 0.01
+   v/cr pmin[i](5) r $EVAL($HINFO([histnonew],'MAX')*0.8) _
+                     0.0 0.008 0.0 0.100
+   v/cr pmax[i](5) r $EVAL($HINFO([histnonew],'MAX')*1.2) _
+                     0.0 1.5   0.0 3.3
+
+   h/fit [histnonew] doublegauss q0b 5 _
+          pars[i] step[i] pmin[i] pmax[i] epars[i]
+   h/fit [histnonew] doublegauss q0b 5 _
+          pars[i] step[i] pmin[i] pmax[i] epars[i]
+   h/fit [histnonew] doublegauss q0b 5 _
+          pars[i] step[i] pmin[i] pmax[i] epars[i]
+   h/plot [histnonew](-.5:.5)
+   set plci 2
+   dline 0 0 0 $HINFO([histnonew],'MAX')/$GRAFINFO('HMAX') 
+   set plci 
+   if [i]=2 then
+      set yval 0.3
+   endif
+
+   mean1 = pars[i](2)
+   mean1 = [mean1]*10000
+   mean_sl[i] = [mean1]  |  ( [mean1] + [mean2] )/2.0
+
+   emean1= epars[i](2)
+
+   height1  = pars[i](1)
+   height2  = pars[i](4)
+   ratio    = [height1]/[height2]
+*** Check that the gaussian fits don't swap around
+   if [ratio]<1 then
+      ratio = 1/[ratio]
+   endif
+
+   sigma1  = pars[i](3)
+   sigma1  = [sigma1]*10000
+   sigma2  = pars[i](5)
+   sigma2  = [sigma2]*10000
+*** Check that the gaussian fits don't swap around
+   if [sigma1]>[sigma2] then
+      tmp = [sigma2]
+      sigma2 = [sigma1]
+      sigma1 = [tmp]
+   endif
+
+*** Calculate sigma of the double gaussian
+   sigma_sl[i]  = ([ratio]*[sigma1]*[sigma1])+([sigma2]*[sigma2])
+   sigma_sl[i]  = [sigma_sl[i]]/(([ratio]*[sigma1])+[sigma2]) 
+
+*** Area of each gaussian
+   binwid = $HINFO([histnonew],'XMAX')-$HINFO([histnonew],'XMIN')
+   binwid = [binwid]/$HINFO([histnonew],'XBINS')
+   area1   = ( ([sigma1])*$sigma(sqrt(2*3.14159)) )/[binwid]
+   area2   = ( ([sigma2])*$sigma(sqrt(2*3.14159)) )/[binwid]
+*** Error on the mean = sigma_total / sum of areas
+   emean_sl[i] = [sigma_sl[i]]/($sigma(sqrt([area1]+[area2])))
+
+   meanstrg = mean $format([mean_sl[i]],f3.1) _
+              +/- $format([emean_sl[i]],f3.1) [m]m 
+   resstrg  = [s] $format([sigma_sl[i]],f4.1) [m]m
+
+   exec reltext 3 80 [meanstrg] 0.4 0.0 l
+   exec reltext 3 60 [resstrg] 0.4 0.0 l
+
+   h/del [histnonew] [histno]
+endfor
+
+string = Sector [sctr]
+selnt 1
+atitle 'Spatial Residual (cm)' ! ! 223
+text 16.5 0.6 [string] 0.45
+text 18.5 1.8  SL1 0.45
+text 18.5 5.5  SL2 0.45
+text 18.5 9    SL3 0.45
+text 18.5 13   SL4 0.45
+text 18.5 16   SL5 0.45
+text 18.5 19.5 SL6 0.45
+
+mess SL mean (um) +/- dmean sigma (um)
+for suplyr in 1 2 3 4 5 6
+   mess [suplyr]  $unquote($format([mean_sl[suplyr]],f6.1))  _ 
+                  $unquote($format([emean_sl[suplyr]],f4.1)) _
+                  $unquote($format([sigma_sl[suplyr]],f7.1)) 
+   fstrg = _
+           $unquote($format([mean_sl[suplyr]],f6.1))  _ 
+           $unquote($format([emean_sl[suplyr]],f4.1)) _
+           $unquote($format([sigma_sl[suplyr]],f7.1)) 
+   if [outputfile].ne.' ' then
+      fmess [fstrg] [outputfile]
+   endif
+endfor
+
+rmsmeans = ([mean_sl1]*[mean_sl1] + [mean_sl2]*[mean_sl2] + _
+            [mean_sl3]*[mean_sl3] + [mean_sl4]*[mean_sl4] + _
+            [mean_sl5]*[mean_sl5] + [mean_sl6]*[mean_sl6] )/6.0
+rmsmeans = $sigma(sqrt([rmsmeans]))
+ermsmeans = ([emean_sl1]*[mean_sl1])*([emean_sl1]*[mean_sl1]) + _
+            ([emean_sl2]*[mean_sl2])*([emean_sl2]*[mean_sl2]) + _
+            ([emean_sl3]*[mean_sl3])*([emean_sl3]*[mean_sl3]) + _
+            ([emean_sl4]*[mean_sl4])*([emean_sl4]*[mean_sl4]) + _
+            ([emean_sl5]*[mean_sl5])*([emean_sl5]*[mean_sl5]) + _
+            ([emean_sl6]*[mean_sl6])*([emean_sl6]*[mean_sl6]) 
+ermsmeans = $sigma(sqrt(([ermsmeans])/(36*[rmsmeans]*[rmsmeans])))
+
+rmsstrg =  $unquote($format([rmsmeans],f5.1)) +/- _
+           $unquote( $format([ermsmeans],f4.1)) [m]m
+mess rms of means = [rmsstrg]
+fstrg = $unquote($format([rmsmeans],f5.1)) _
+                 $unquote( $format([ermsmeans],f4.1))
+if [outputfile].ne.' ' then
+   fmess [fstrg] [outputfile]
+endif
+
+set txci 2
+exec reltext 86 87 'rms of means = ' 0.4 0.0 r
+exec reltext 86 85 [rmsstrg] 0.4 0.0 r
+set txci
+
+set hwid 4 ; set hmax 0.90 ; set hcol ; set xwin ; set fwid 
+
+title 
+ve/del *
+
+set yhti
+set ywin
+
+return
+**************************************************
+macro colg2
+igset ncol 56
+call /home/sam/paw/macros/color2.f
+graphics/attributes/palette 1 49 8 9 10 11 12 13 14 15 16 17 18 _
+19 20 21 22 23 _
+24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 _ 
+48 49 50 51 52 53 54 55 56
+**************************************************
+APPLICATION COMIS QUIT
+         REAL FUNCTION doublegauss(X) 
+         COMMON/PAWPAR/PAR(5)
+         doublegauss=par(1)*exp(-0.5*((x-par(2))/par(3))**2) + 
+     &               par(4)*exp(-0.5*((x-par(2))/par(5))**2)
+         END
+QUIT
+**************************************************

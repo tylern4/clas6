@@ -1,0 +1,7 @@
+from build_system import environment
+
+env = environment.env(deps = ['clas6', 'boost'])
+env.load_dependency({'clas6' : 'bankdefs c_bos_io bosio'.split()})
+env.load_dependency({'boost' : ['boost_program_options']})
+
+env.program(target='skim-gflux', source=['skim-gflux.cpp', 'bos_handle.cc'])

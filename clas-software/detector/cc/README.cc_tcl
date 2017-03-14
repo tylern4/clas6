@@ -1,0 +1,31 @@
+Variables in the CC package that are under TCL control.
+=======================================================
+
+  A. Vlassov  03/05/98
+
+  All variables are concerned with fast electron identification
+  program (eid0)
+c
+1.      CCecthr =  150    !  EC deposited energy threshold (in MeV)
+   Minimum total energy deposition in EC for electron candidate
+
+2.      CCscthr =   50    !  10 * SC deposited energy threshold (in MeV)
+   Minimum energy deposition in SC for electron candidate
+   (minimum ionization particle deposits ~10 Mev)
+
+3.      CCscecy =   30    !  Possible difference in Y (Sector) coord.(cm)
+   For real particle Y (Sector R.S) coordinates in SC and EC
+   should be close. That is the threshold for Y coordinate difference.
+
+3.      CCscecz =   15    !  Possible difference in Z (Sector) coord.(cm)
+   For real particle Z (Sector R.S) coordinates in SC and EC
+   should be close. That is the threshold for Z	 coordinate difference.
+
+4.      CCicoor =   35    !  Possible deviation in I - coord in EC (cm)
+   This variable is the threshold for the obtained EC i-coordinate
+   ( along X in Sector R.S.) and those estimated from hitted CC
+   segment number. This estimation is based on GEANT calculations.
+
+5.      CCscpn  =   30    !  10 * Possible deviation in SC paddle #
+   Max difference in CC segment number and SC puddle number.
+c

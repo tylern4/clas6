@@ -1,0 +1,4 @@
+#! /bin/csh
+
+cp $CLON_PARMS/Maps/RUN_CONTROL.map $CLAS_PARMS/Map
+

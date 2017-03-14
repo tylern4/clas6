@@ -1,0 +1,6 @@
+macro utilSetupFunctions
+
+  message utilSetupFunctions: Loading Utility functions
+*  call kumac/util/fun/util.f77
+  
+return

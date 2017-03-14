@@ -1,0 +1,29 @@
+Here are some brief instructions how to update banks:
+
+1) The master copies of all ddl files are stored in
+packages/bankdefs under cvs control. Each BOS bank has its own
+.ddl file. 
+
+2) To update the list of ddl files used by all CLAS software,
+all of the short .ddl files for single bos banks are merged into 
+a file called clasbanks.ddl the simplest way to do this is with the
+cat command:
+	cat `ls ????.ddl ???.ddl ??.ddl` > clasbanks.ddl
+
+3) The file clasbanks.ddl should then be copied over to the
+CLAS_PARMS area where it can be used by recsis and other
+programs that need access to the list of CLAS BOS banks.
+
+4) In addition the script ddl2h should be run on the file
+clasbanks.ddl and the file bosddl.h should be updated for use in
+the c_bos_io library. The command should be:
+	ddl2h clasbanks.ddl > ../include/bosddl.h
+The new bosddl.h file should then be commited to cvs as well.
+
+Let me say that I think the librarian should do points 2) and
+3)  and  4) . The most important
+step is to put a copy of your ddl file into the repostiory - so we
+have a record of it and the bank definition is in a place where it
+will propogate into the offline software. Finally, multiple ddl files should
+be avoided and the files in the CLAS_PARMS area should never
+be directly edited.

@@ -1,0 +1,17 @@
+*** Begin of history file: Tue Aug  8 14:44:16 2000
+hi/file 1  keppel-noradg-1.6-08aug00.rz.0 8191
+nt/print 10
+nt/plot 10.w
+1d 100 '' 200 1. 1.7 0.
+nt/plot 10.w idh=100
+2d 100 '' 100 1. 1.7 100 0.3 1. 0.
+nt/plot 10.2*1.645*ep*(1-csthe)%w idh=100 nevent=10000
+nt/plot 10.2*1.645*ep*(1-csthe)%w idh=100
+hi/plot 100 colz
+opt logz
+hi/plot 100 colz
+help get_vect
+anaIncl#init
+anaIncl#init
+exit
+*** End   of history file: Tue Aug  8 15:05:46 2000

@@ -1,0 +1,108 @@
+#! /usr/local/bin/perl
+
+$code = "a";
+$os = "linux";
+
+$name = $ENV{"LOGNAME"};
+
+for (@ARGV) {
+    if (/^-.*/) {
+	push(@opts,$_);
+     }
+     elsif (/^\+(\w)(.*)/) {
+	 if ($1  eq "o") {	
+	     $os = $2;
+	}
+	 elsif ($1  eq "h") {
+	     print STDERR "make jsub script for given raw data file\n";
+	     print STDERR "Usage: makeE1File filename\n";
+	     print STDERR "\tAny argument which starts with a '-' sign, gets passes to a1c\n";
+	     print STDERR "\t-oOS\tset operation system to OS (default = solaris) For any, use -oany\n";
+	     exit(0);
+	 }
+      }
+     else {
+        push(@arr,($_));
+    }
+}
+
+@ARGV = @arr;
+
+$file = $ARGV[0];
+$file =~ /run(\d+)_cooked.A(\d+)/;
+$run = $1;
+$ext = $2;
+shift;
+@inlist = ();
+
+print stderr "Processing file: $file for run $run","_cooked.A","$ext\n";
+$k = length($run);
+print stderr "Length: $k\n";
+$k = 6 - $k;
+
+$pre = "";
+while ($k--) {
+  $pre = $pre . "0";
+}
+
+print "$pre\n";
+$file = "clas_" . $pre . $run . ".A" . $ext;
+
+
+if ($run < 7316) {
+    $cmd = "ls -1 /mss/clas/e1/data/$file |";
+    $dir = "sep97";
+}
+elsif ($run < 8110) {
+     $cmd = "ls -1 /mss/clas/e1a/data/$file |";
+     $dir = "dec97";
+}   
+
+elsif ($run < 10000) {
+     $cmd = "ls -1 /mss/clas/e1b/data/$file |";
+     $dir = "apr98";
+}
+
+else {
+     $cmd = "ls -1 /mss/clas/e1b/data/$file |";
+     $dir = "feb98";
+ }
+
+open(F,$cmd) || die "Could not execute\n";
+
+print "PROJECT: clas\n";
+print "JOBNAME: a1-$run\n";
+print "COMMAND: /group/clasdev/clas/src/packages/scripts/runE1\n";
+print "MAIL: colemana\@cebaf.gov  weygand\@cebaf.gov\n";
+print "OS: $os\n";
+print "OPTIONS:  ";
+print "$run ";
+foreach $a (@opts) {
+    print "$a ";
+}
+print "-O -i -F -D0xf3fd -P0x3fb -se -j/mss/clas/e1a/production \n";
+
+
+while (<F>) {
+	chop;
+	$file = "$_";
+# parse the file name
+	
+	if ($file =~ /.*\/(\S+).*/) {
+		$f = $1;
+	}
+	else {
+		$f = $file;
+	}
+   	print STDERR "FILE: $file ==> $f\n";
+
+	push(@inlist,($file));
+	print stderr "Processing file: $file\n";
+}
+	print "INPUT_FILES: ";
+	foreach $in (@inlist) {
+		print "$in ";
+	}
+	print "\n";
+
+

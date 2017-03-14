@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<main>
+
+  <Selector beamtype="photon" datatype="gsim" eventbank="GSIM">
+    <file name="/Volumes/msd03/work/gavalian/Simulations/PhiSimInter_Sl_13_Rat_20.root"></file>
+  </Selector>
+
+  <Particles>
+    <part name="beam"  pdgname="gamma"> beam </part>
+    <part name="target"  pdgname="proton"> target </part>
+    <part name="Pion+"  pdgname="pi+"> pi+ </part>
+    <part name="Pion-"  pdgname="pi-"> pi- </part>
+    <part name="Proton" pdgname="proton"> proton </part>
+  </Particles>
+
+  <CompositeParticles>
+    <cpart name="K0L" formula="[beam]+[target]-[Pion+]-[Pion-]-[Proton]"></cpart>
+    <cpart name="K0S" formula="[Pion+]+[Pion-]" >  </cpart>
+    <cpart name="Th0" formula="[beam]+[target]-[Pion+]-[Pion-]" >  </cpart>
+    <cpart name="K0S" formula="[Pion+]+[Pion-]" >  </cpart>
+    <cpart name="MTKS" formula="[beam]-[Pion+]-[Pion-]" >  </cpart>
+    <cpart name="MTP"  formula="[target]-[Proton]" >  </cpart>
+
+    <cpart name="Phi0" formula="[beam]+[target]-[Proton]">  </cpart>
+  </CompositeParticles>
+  <Vectors>
+    <vect name="K0SL"> [beam]+[target] </vect>
+  </Vectors>
+
+  <Variables>
+    <var name="m_ks"  particle="K0S"  system="M">  </var>
+    <var name="m_kl"  particle="K0L"  system="M">  </var>
+    <var name="m_phi" particle="Phi0" system="M">  </var>
+    <var name="beg"   particle="beam" system="P">  </var>
+    <var name="mt_ks" particle="MTKS" system="M2">  </var>
+    <var name="mt_p"  particle="MTP"  system="M2">  </var>
+    <var name="m_pkl" particle="Th0"  system="M">  </var>
+  </Variables>
+</main>

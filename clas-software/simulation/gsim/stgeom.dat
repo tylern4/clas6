@@ -1,0 +1,44 @@
+! Define mother volume        
+-30.0 
+120.
+2.
+3.
+-19.9
+9.6
+11.0
+19.9
+9.6
+11.0 
+33.0
+3.5
+4.5
+! Define leg volume 
+0.15
+5.65
+19.9
+! Define mother for nose region.
+5.77
+1.646
+0.15
+6.950
+! Each segment of nose is made from a triangle...	
+0.767
+46.9
+0.
+0.15
+2.095
+2.095
+0.
+0.15
+0.
+0.
+0.
+! ...and a trapezoid.
+5.77
+2.095
+0.15
+6.183
+! Distance between beam axis and plane containing a leg(to center of leg).
+10.35
+end
+

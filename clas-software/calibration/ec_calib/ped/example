@@ -1,0 +1,13 @@
+load_EC_PEDESTALS 30642 30775  clasdb 'E1-6' calib.RunIndex
+load_EC_PEDESTALS 30776 31160  clasdb 'E1-6' calib.RunIndex
+load_EC_PEDESTALS 31161 31197  clasdb 'E1-6' calib.RunIndex
+load_EC_PEDESTALS 31198 31530  clasdb 'E1-6' calib.RunIndex
+load_EC_PEDESTALS 31531 31542  clasdb 'E1-6' calib.RunIndex
+load_EC_PEDESTALS 31543 31558  clasdb 'E1-6' calib.RunIndex
+load_EC_PEDESTALS 31559 31754  clasdb 'E1-6' calib.RunIndex
+load_EC_PEDESTALS 31755 31771  clasdb 'E1-6' calib.RunIndex
+load_EC_PEDESTALS 31772 31777  clasdb 'E1-6' calib.RunIndex
+load_EC_PEDESTALS 31778 32949  clasdb 'E1-6' calib.RunIndex
+
+
+

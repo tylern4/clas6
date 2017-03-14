@@ -1,0 +1,16 @@
+PDU : a pathology diagnostics utility for the CLAS drift chambers.
+
+Currently under development and should not be in the list of executables to 
+build.  This code should compile and run without crashing, but the repository
+is currently maintained for backup and code tracking, not source distribution.
+Use at your own risk.
+
+Tags:
+
+   "dead_hot_finder" 
+      September 10 1997
+      This version of pdu flags each wire as dead, hot, fine, or nonexistant.
+      Outputs pdu.out and pdu.hbk.
+
+97.09.04
+Richard A Thompson 

@@ -1,0 +1,61 @@
+macro utilCreateNtup id name max index=n 
+
+  exec bos_getddl [name]
+  global/imp [name]*
+  maxvar = max[name]
+
+  call hbnt([id],'CWN')
+
+  lun1 = 21
+  file = ntup.inc
+  
+  if $fexist([file]) then
+    shell rm [file]
+  endif
+  
+  fort/file [lun1] [file] new
+  
+  string = '     '//'integer '//[maxvar]
+  call write([lun1],[string],' ',' ')
+  string = '     '//'parameter ('//[maxvar]//'='//[max]//')'
+  call write([lun1],[string],' ',' ')
+  
+  do i = 1,[[name]ncol]
+    type = $word([[name][i]],2,1,'%')
+    var  = $word([[name][i]],1,1,'%')
+    case [type] in
+      (I) string1 = '     '//'integer '//$quote([var][name])
+      (*) string1 = '     '//'real '//$quote([var][name])
+    endcase
+    call write([lun1],[string1],' ',' ')
+  enddo 
+  
+  string = '     '//'common '//'/'//[name]//'nt/'//[index]
+  call write([lun1],[string],' ',' ')
+  
+  do i = 1,[[name]ncol]
+    var  = $word([[name][i]],1,1,'%')
+    string = '    '//'&,'//[var][name]//'('//[maxvar]//')'
+    call write([lun1],[string],' ',' ')
+  enddo 
+
+  close [lun1]
+  call kumac/util/functions/ntup.f77
+  
+  call ntupname([id],$quote([name]),$quote([index]),1,'I',0,[max])
+  
+  do i = 1,[[name]ncol]
+    type = $word([[name][i]],2,1,'%')
+    var  = $word([[name][i]],1,1,'%')
+    string = [var][name]([index]) 
+    case [type] in
+     (I) xlo = $unquote($word([[name][i]],3,1,'%'))
+         xhi = $unquote($word([[name][i]],4,1,'%'))
+     (*) xlo = 1
+         xhi = 1
+    endcase
+    call ntupname([id],$quote([name]),$quote([string]),0,$quote([type]),[xlo],[xhi])
+  enddo
+   
+return
+  

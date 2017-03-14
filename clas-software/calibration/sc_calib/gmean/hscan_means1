@@ -1,0 +1,30 @@
+#
+# shell script to execute hscan_means
+# 
+# hscan
+#
+# Files used:
+# 
+# Histogram input file:		hscan_input
+# ASCII output file:		hscan_data
+# 
+# gunzip hbook file from repository
+#
+gunzip means.hbook.gz
+#
+# delete, then define new input and output data links
+#
+rm hscan_input
+rm hscan_data
+ln -s means.hbook hscan_input
+ln -s means.dat hscan_data
+#
+ls -lgF hscan_input
+ls -lgF hscan_data
+#
+# take input to program from two lines following command
+hscan_means.exe <<+
+y
+g
++
+#

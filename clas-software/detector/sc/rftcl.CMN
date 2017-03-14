@@ -1,0 +1,36 @@
+c      include file rftcl.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: rftcl.CMN,v 1.1 1998/04/17 21:03:09 anciant Exp $
+c
+c  Documentation for include file rftcl.CMN
+c
+c  Purpose:  common used for storage of RF tcl runtime variable
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   Eric Anciant, april 8th, 1998
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file taginfo:
+c  -----------------------------------
+c 
+	integer rf_get_cal
+c
+c_end_var
+c  -----------------------------------
+	common /rftcl/rf_get_cal
+
+	
+c----6----------------------------------------------------------------72

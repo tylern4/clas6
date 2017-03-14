@@ -1,0 +1,9 @@
+from build_system import environment
+
+cobraEnv = environment.env(deps='root clas6'.split())
+
+#cobraLibs = cobraEnv.sconstruct('ptypes parray clasruns kinfit event clasevent'.split())
+
+cobraLibs = cobraEnv.sconstruct('ptypes parray clasruns kinfit event clasevent'.split())
+
+#, 'parray', 'clasruns', 'kinfit', 'event', 'clasevent'])

@@ -1,0 +1,112 @@
+** mip.kumac  August 17, 2001 Yelena Prok
+**
+** usage: exe mip [pre]
+**        Hbook files for all six sectors should have been created using tof_calib
+**        where the hbook file names have the following convention:
+**        [pre]//[sector]//'.hbook'
+**        [pre] is usually the run number (defined by tof_calib output file name)
+**        [sector] is the sector number (1-6)
+**  
+** This kumac will find the positions of the geometric means of MIP 
+** in TOF counters (paddles). It will use gaussian fits to obtain the 
+** geometric mean and sigma) The output file is a text file with 
+** 288 rows (one for each counter)and 3 columns (counter #, geometric mean, 
+** geometric mean sigma)
+** pre is the first part of the input file name, followed by the sector #
+** means1 is the name of the output text file
+
+macro mip pre=25756may15s
+
+hi/file 41 [pre]//'1.hbook'
+message ' Using ' [pre]//'1.hbook' for ' Sector 1'
+hi/file 42 [pre]//'2.hbook'
+message ' Using ' [pre]//'2.hbook' for ' Sector 2'
+hi/file 43 [pre]//'3.hbook'
+message ' Using ' [pre]//'3.hbook' for ' Sector 3'
+hi/file 44 [pre]//'4.hbook'
+message ' Using ' [pre]//'4.hbook' for ' Sector 4'
+hi/file 45 [pre]//'5.hbook'
+message ' Using ' [pre]//'5.hbook' for ' Sector 5'
+hi/file 46 [pre]//'6.hbook'
+message ' Using ' [pre]//'6.hbook' for ' Sector 6'
+
+opt fit
+cdir //LUN41
+hi/cre/slix 10 48
+hi/proj 10
+do i=1,48
+   j=1100+[i]
+   hi/copy  10.slix.[i] [j] 
+enddo
+cdir //LUN42
+hi/cre/slix 20 48
+hi/proj 20
+do i=1,48
+   j=1200+[i]
+   hi/copy  20.slix.[i] [j] 
+enddo
+cdir //LUN43
+hi/cre/slix 30 48
+hi/proj 30
+do i=1,48
+   j=1300+[i]
+   hi/copy  30.slix.[i] [j] 
+enddo
+cdir //LUN44
+hi/cre/slix 40 48
+hi/proj 40
+do i=1,48
+   j=1400+[i]
+   hi/copy  40.slix.[i] [j] 
+enddo
+cdir //LUN45
+hi/cre/slix 50 48
+hi/proj 50
+do i=1,48
+   j=1500+[i]
+   hi/copy  50.slix.[i] [j] 
+enddo
+cdir //LUN46
+hi/cre/slix 60 48
+hi/proj 60
+do i=1,48
+   j=1600+[i]
+   hi/copy  60.slix.[i] [j] 
+enddo
+cdir //PAWC
+ve/cre man(100) R
+ve/cre column1(288) i 
+ve/cre column2(288) r 
+ve/cre column3(288) r
+
+do k=1,6
+       
+  do l=1,48
+     kn=1000+100*[k]+[l] 
+     hi/get_vec/contents [kn] man
+     ve/cre par(3) R 
+     hi/fit [kn](300.:1000.) g ! 0 par   
+     paddle=([k]-1)*48+[l]
+     padnum=100*[k]+[l]
+     ve/input column1([paddle]) [padnum]
+     ve/input column2([paddle]) par(2)
+     ve/input column3([paddle]) par(3)
+
+     v/del par
+   enddo
+enddo
+
+vec/write  column1,column2,column3 means1.parm ' i4,2(1x,F12.4)'
+
+
+
+
+
+
+
+
+
+
+
+
+
