@@ -1,0 +1,45 @@
+c      include file st_cal.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: stcal.CMN,v 1.5 2004/10/26 16:53:08 devita Exp $
+c
+c  Documentation for include file st_cal
+c
+c  Purpose:  common used for storage of calibration constants
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   T. Auger     Created:  Mon Jun 03 10:11:52 EST 1997
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file st_general:
+c  -----------------------------------
+c 
+	real StCal_values(C0:ped,Side1:Side2,3)
+	real StCal_uncertainties(C0:ped,Side1:Side2,3)
+c 
+	real StnCal_values(C0:TDC_max,St_max_pair)
+	real StnCal_uncertainties(C0:TDC_max,St_max_pair)
+c
+c_end_var
+c  -----------------------------------
+	
+
+	common /stcal/StCal_values,StCal_uncertainties
+	common /stncal/StnCal_values,StnCal_uncertainties
+
+
+c----6----------------------------------------------------------------72
+
+

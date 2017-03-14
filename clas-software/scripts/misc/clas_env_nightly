@@ -1,0 +1,13 @@
+setenv CLAS_BUILD /work/clas/disk2/claslib/nightly
+source $CLAS_BUILD/packages/cms/jlab.cshrc
+if ($OS_NAME == "Linux" || $OS_NAME == "LinuxRH6") setenv PATH /usr/bin:$PATH
+if ($OS_NAME == "Linux") then
+   setenv CERN_ROOT /site/cernlib/pc_linux/98a
+else if ($OS_NAME == "LinuxRH6")  setenv CERN_ROOT /site/cernlib/pc_linux/99
+endif
+echo OS_NAME = $OS_NAME
+echo CLAS_BUILD = $CLAS_BUILD
+echo CERN_ROOT = $CERN_ROOT
+echo gcc = `which gcc`
+echo g77 = `which g77`
+echo g++ = `which g++`

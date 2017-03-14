@@ -1,0 +1,9 @@
+macro ws id opt=0
+
+  case [opt] in
+    (open)  work [id] O
+    (close) work [id] C
+    (*) work -[id] A
+  endcase
+
+return

@@ -1,0 +1,57 @@
+macro ecFitLaser1 start stop
+
+  message ecFitLaser1
+
+  global/import path
+  global/import chan_per_MeV
+
+  vec/cre ecFitPE_par(6,36,2)
+  vec/cre ecFitPE_errpar(6,36,2)
+  vec/cre ecFitPE_chi2(6,36)
+  vec/cre ecFitPE_yld(6,36)
+  vec/cre ecFitPE_erryld(6,36)
+  vec/cre ecFitPE_src(6,36)
+  vec/cre ecFitPE_errsrc(6,36)
+  vec/cre par(2) r 0.5 -0.5
+  vec/cre dum(2)
+  vec/cre errpar(2)
+  vec/cre x  
+
+  sigma pmt2	= 1./pmt
+  sigma pmtrms2	= 1./pe
+  sigma err	= peerr/pe**2
+
+  do view=1,6
+    do strip=1,36
+      message ecFitLaser1: Fitting view [view] strip [strip]
+      vec/copy pmt2([start]:[stop],[strip],[view])    xf
+      vec/copy pmtrms2([start]:[stop],[strip],[view]) yf
+      vec/copy err([start]:[stop],[strip],[view]) 	 yfe
+      vector/fit xf yf yfe p1 QN 2 par dum dum dum errpar
+      call chiq
+      vec/del xf
+      vec/del yf
+      vec/del yfe
+      vec/inp ecFitPE_par([view],[strip],2) 		par(2)
+      vec/inp ecFitPE_errpar([view],[strip],2) 		errpar(2)
+      vec/inp ecFitPE_par([view],[strip],1) 		par(1)
+      vec/inp ecFitPE_errpar([view],[strip],1) 		errpar(1)
+      src = $sigma(sqrt(par(1)))
+      vec/inp ecFitPE_yld([view],[strip]) 		$eval([chan_per_MeV]/par(2))
+      vec/inp ecFitPE_erryld([view],[strip]) 		$eval(5*errpar(2)/par(2)/par(2))
+      vec/inp ecFitPE_src([view],[strip]) 		[src]
+      vec/inp ecFitPE_errsrc([view],[strip]) 		$eval(0.5*[src]*errpar(1)/par(1))
+      vec/inp ecFitPE_chi2([view],[strip]) 		chi2(1)
+    enddo
+  enddo
+  
+  message ecFitLaser1: Writing vectors to [path]/pe 
+  vec/write ecfitpe_par 	[path]/pe/ecFitPE_par
+  vec/write ecfitpe_errpar 	[path]/pe/ecFitPE_errpar
+  vec/write ecfitpe_yld 	[path]/pe/ecFitPE_yld
+  vec/write ecfitpe_src 	[path]/pe/ecFitPE_src
+  vec/write ecfitpe_erryld 	[path]/pe/ecFitPE_erryld
+  vec/write ecfitpe_errsrc 	[path]/pe/ecFitPE_errsrc
+  vec/write ecfitpe_chi2 	[path]/pe/ecFitPE_chi2
+   
+return      

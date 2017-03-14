@@ -1,0 +1,61 @@
+macro scGainMatch runno=0 opt
+
+  if [runno].eq.0 then
+    message 'Purpose: Gain balance and match SC PMTs'
+    message '  Usage: scGainMatch runno opt sec'
+    message '  runno: Run number of saved gain vector'
+    message '    opt: Gain option (mat,bal,both)'
+    message '    sec: list of sectors to change'
+    exitm
+  endif
+
+  exec hvSetup
+
+  global/import gainpath
+  scref = 1000  
+
+  vec/cre   pmt(scvecdim) r 576*10.
+  vec/cre gains(scvecdim) r 
+  vec/cre newhv(scvecdim) r 
+  vec/cre ratio(scvecdim) r
+  vec/cre gm(48,6) r
+  vec/cre log(48,6) r
+  
+  vec/read gains [gainpath]/scgainmean[runno].vec
+  
+  vec/cop gains(:,1,:) gm
+  vec/cop gains(:,2,:) log
+  
+  sigma gainb=exp(log/150)
+  sigma gainm=[scref]/gm
+  
+  case [opt] in
+    (mat) sigma gainl = gainm
+          sigma gainr = gainm
+    (bal) sigma gainl = (1./gainb)
+          sigma gainr =    (gainb)
+   (both) sigma gainl = (gainm/gainb)
+          sigma gainr = (gainm*gainb)
+  endcase
+  
+  do sec=1,6
+    do pmt=1,48
+      vec/inp ratio([pmt],1,[sec]) gainl([pmt],[sec])
+      vec/inp ratio([pmt],2,[sec]) gainr([pmt],[sec])
+    enddo
+  enddo
+  
+  sigma ratio = ratio**(1./pmt)
+  
+  exitm     
+  
+  do i = 3,[#]
+    sec = [%i]
+    exec hvGet sc [sec] DVI
+    sigma newhv = int(DVI*ratio)
+*    exec hvPut sc [sec] newhv
+  enddo
+    
+return  
+    
+  

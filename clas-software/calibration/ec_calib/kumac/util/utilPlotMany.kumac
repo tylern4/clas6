@@ -1,0 +1,25 @@
+macro utilPlotMany vector var test idh xzon yzon
+
+  zone [xzon] [yzon]
+  nbox = [xzon]*[yzon]
+
+  len = $vlen([vector]runs)
+  k = 0
+
+  do i = 1,[len]
+    run = $eval([vector]runs([i]))
+    cd //[vector][run]
+    nt/plot 2000.[var] [test] idh=[idh]
+    k = [k] + 1
+    if [k].ge.[nbox] then
+      k = 0
+      read opt (P)rint, (C)ontinue (Q)uit: 
+      case [opt] in
+        (P,p) read filename Filename: ; exec post [filename] 
+        (Q,q) Exitm
+      endcase
+    endif
+  enddo
+  
+return
+      

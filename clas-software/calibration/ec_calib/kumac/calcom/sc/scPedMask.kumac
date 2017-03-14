@@ -1,0 +1,22 @@
+macro scPedMask input 
+
+  vec/cre scmask(scvecdim)
+  vec/cre dum(scvecdim)
+  vec/cre scput(48) r 24*1. 24*-1
+  
+  do pmt = 1,2
+    do sec = 1,6
+      vec/cop scput(1:48) scmask(1:48,[pmt],[sec])
+    enddo
+  enddo
+  
+  vec/cop [input] dum
+  sigma dum=dum*scmask
+  vec/cop dum [input]
+ 
+  vec/del dum
+  
+return
+  
+  
+  

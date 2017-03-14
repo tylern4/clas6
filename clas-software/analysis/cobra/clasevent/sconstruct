@@ -1,0 +1,16 @@
+from build_system import environment
+import glob
+
+clasevent_env = environment.env(deps = ['root'])
+
+clasevent_env.load_dependency('root')
+
+clasevent_env.AppendUnique(CPPPATH = '../include ../ptypes ../parray'.split(),
+                           LIBS='CLASdata'.split())	
+
+#clasevent_rdict = clasevent_env.ROOTDictionary('Clasevent', 'Photon.h Particle.h Clasevent.h LinkDef.h'.split())
+
+clasevent_lib = clasevent_env.library('ClasEvent', source=glob.glob('*.C'))
+
+#clasevent_env.return_from_sconstruct(clasevent_lib)
+

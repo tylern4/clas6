@@ -1,0 +1,136 @@
+#! /usr/local/bin/perl
+@arr = ();
+
+$dir = $ENV{'CLAS_PARMS'};
+
+if($#ARGV < 0) { &printusage($0);}
+
+for (@ARGV) {
+    if (/^-o.*/) {
+        $dir = $ENV{'CLON_PARMS'};
+	print "using CLON_PARMS map\n";
+    }elsif (/^-h/) {
+	&printusage($0);
+    } else {
+        push(@arr,($_));
+    }
+}
+
+@ARGV = @arr;
+
+if ($#ARGV == 0) {
+    $lo = $ARGV[0];
+    $hi = $ARGV[0];
+}
+
+elsif ($#ARGV == 1) {
+    $lo = $ARGV[0];
+    $hi = $ARGV[1];
+}
+
+print "$lo <-> $hi \n";
+
+for ($runno = $lo; $runno <= $hi; $runno++) {
+    
+    print " RunNo BeamE(MeV)  Q_active  Q_all   Q_live     Torus    MiniTorus   Tagger  Raw Events \n";
+
+    print " $runno ";
+
+    $cmd = "$ENV{'CLAS_BIN'}/get_map_float -m$dir/Maps/RUN_CONTROL.map -sbeam -ienergy -l1 -t$runno |";
+# print "$cmd\n";
+    
+ 
+    open(F,$cmd) || die "could not execute\n";
+    while (<F>) {
+	chop;
+	print "$_";
+    }
+    close(F);
+    
+    $ret = ($? >> 8);
+    
+    if ($ret || 1) {
+
+
+
+	$cmd = "$ENV{'CLAS_BIN'}/get_map_float -m$dir/Maps/RUN_CONTROL.map -sFaraday_cup -iQ_active -l1 -t$runno |";
+# print "$cmd\n";
+	open(F,$cmd) || die "could not execute\n";
+	
+	while (<F>) {
+	    chop;
+	    print "$_";
+	}
+	$cmd = "$ENV{'CLAS_BIN'}/get_map_float -m$dir/Maps/RUN_CONTROL.map -sFaraday_cup -iQ_all -l1 -t$runno |";
+# print "$cmd\n";
+	open(F,$cmd) || die "could not execute\n";
+	
+	while (<F>) {
+	    chop;
+	    print "$_";
+	}
+
+	
+	$cmd = "$ENV{'CLAS_BIN'}/get_map_float -m$dir/Maps/RUN_CONTROL.map -sFaraday_cup -iQ_live -l1 -t$runno |";
+# print "$cmd\n";
+	open(F,$cmd) || die "could not execute\n";
+
+	while (<F>) {
+	    chop;
+	    print "$_";
+	}
+	
+	$cmd = "$ENV{'CLAS_BIN'}/get_map_float -m$dir/Maps/RUN_CONTROL.map -scurrents -itorus -l1 -t$runno |";
+	open(F,$cmd) || die "could not execute\n";
+	
+	while (<F>) {
+	    chop;
+	    print "$_";
+	}
+	
+	
+	$cmd = "$ENV{'CLAS_BIN'}/get_map_float -m$dir/Maps/RUN_CONTROL.map -scurrents -iminitorus -l1 -t$runno |";
+	open(F,$cmd) || die "could not execute\n";
+	
+	while (<F>) {
+	    chop;
+	    print "$_";
+	}
+	
+	$cmd = "$ENV{'CLAS_BIN'}/get_map_float -m$dir/Maps/RUN_CONTROL.map -scurrents -itagger -l1 -t$runno |";
+	open(F,$cmd) || die "could not execute\n";
+	
+	while (<F>) {
+	    chop;
+	    print "$_";
+	}
+
+	$cmd = "$ENV{'CLAS_BIN'}/get_map_int -m$dir/Maps/RUN_CONTROL.map -sevents -iraw -l1 -t$runno |";
+	open(F,$cmd) || die "could not execute\n";
+	
+	while (<F>) {
+	    chop;
+	    print "$_";
+	}
+
+	print "\n";
+	
+    }
+    else {
+	
+	print " not in database!\n";
+    }
+
+
+#     exit $ret;
+}
+
+
+sub printusage {
+    print "  usage: @_[0] lowrun <opt: highrun> <opt:-o>
+    -o(use CLON_PARMS)  
+    -h(print this page)
+";
+     die;
+
+}

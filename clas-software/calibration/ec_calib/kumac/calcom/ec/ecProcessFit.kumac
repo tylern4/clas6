@@ -1,0 +1,23 @@
+macro ecProcessFit file sec runno=0
+
+  exec ecSetupVectors
+  exec ecComisChi2  
+  exec ecGetPixelVec [file] 0 [sec]  
+  exec ecFastFit 1 2 3 4 5 6
+  
+  if [runno].eq.0 then
+    read runno 'ecProcessFit: Enter run number to associate with this fit:'
+  endif
+  
+  global/cre runno [runno]_[sec]
+  global/cre filename [file]
+  global/cre sector [sec]
+  
+  exec ecVectorIO write
+  exec ecPlotSummary2 adc sca=0.0 gain=100
+  
+return
+  
+  
+  
+  

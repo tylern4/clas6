@@ -1,0 +1,9 @@
+macro ecPrintPlots
+
+  do i=1,6
+    exec ecPlotSummary [i]
+    exec post [i] print
+  enddo
+  
+return
+  

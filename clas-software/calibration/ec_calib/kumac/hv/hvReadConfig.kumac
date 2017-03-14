@@ -1,0 +1,76 @@
+macro hvReadConfig file=0
+
+  if [file].eq.0 then
+    message 'Purpose: Reads EPICS HV configuration file.  Maps vector'
+    message '         pointer into global variable HVmap'
+    message '  Usage: hvReadConfig file'
+    message '   file: EPICS HV configuration filename (e.g. ec6)'
+    exitm
+  endif
+
+  file = kumac/hv/db/[file].dat
+
+  case $fexist([file]) in
+    (0) message hvReadConfig: [file] not found!; exitm 0
+  endcase
+  
+  message hvReadConfig: Opening [file]
+  
+  tag 		= '$'
+  command	= 'cat '//[file]
+  filecontents	= $shell([command],[tag])
+  nlines       	= $words([filecontents],[tag])
+  
+  n = 0
+  
+  while [n].lt.[nlines] do 
+    n = [n] + 1
+    string  = $word([filecontents],[n],1,[tag])
+    det     = $word([string],1,1,'_')
+    string2 = $word([string],1,1,' ')
+    sec     = $substring([string2],5,1)
+    case [det] in
+      (EC) pmt  = $substring([string2],9,2)
+           lay  = $substring([string2],7,2)
+           case [lay] in
+             (UI) lay = 1
+             (VI) lay = 2
+             (WI) lay = 3
+             (UO) lay = 4
+             (VO) lay = 5
+             (WO) lay = 6
+           endcase
+   (SC,CC) pmt = $word([string2],3,1,'_')
+           lay = $word([string2],4,1,'_')
+           case [lay] in
+             (L) lay = 1
+             (R) lay = 2
+           endcase
+           case [pmt] in
+             (40A) pmt = 40
+             (40B) pmt = 41
+             (41A) pmt = 42
+             (41B) pmt = 43
+             (42A) pmt = 44
+             (42B) pmt = 45
+           endcase       
+    endcase
+    
+    ioc  = $word([string],4,1,' ')
+    mf   = $word([string],5,1,' ')
+    slot = $eval($unquote($word([string],6,1,' '))+1)
+    chan = $eval($unquote($word([string],8,1,' '))+1)
+    
+    hvpoint 	= [chan],[slot],[mf]
+    bospoint 	= [pmt],[lay],[sec]
+    
+    global/cre HVtag([hvpoint]) 	[string2]
+    global/cre HVmap([string2]) 	[bospoint]
+    global/cre [det]map([bospoint])	[hvpoint]
+     
+  endwhile
+  
+return
+    
+    
+    

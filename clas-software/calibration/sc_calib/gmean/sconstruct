@@ -1,0 +1,14 @@
+from build_system import environment
+
+gmean_cooked_deps = {
+                  'clas6': ['default_libs', 'recsis_libs'], 
+	          'root':['default_libs']
+	          }
+	
+gmean_cooked_env = environment.env(deps=gmean_cooked_deps.keys())
+gmean_cooked_env.load_dependency(gmean_cooked_deps)
+
+gmean_cooked_env.AppendUnique(LIBS='libgamecock.a')
+
+gmean_cooked_env.program(target='gmean_cooked', source='gmean_cooked.c')
+

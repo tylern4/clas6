@@ -1,0 +1,80 @@
+macro testman
+
+  alias/cre test1  u>0
+  alias/cre test2  v>0
+  alias/cre test3  w>0
+  alias/cre test4  x>0
+  alias/cre test5  y>0
+  alias/cre test6  z>0
+  alias/cre test7  u+v+w
+  alias/cre test8  x+y+z
+  alias/cre test9  (u+v+w)+(x+y+z)
+  alias/cre test10 (u+v+w).(x+y+z)
+  alias/cre test11 u.v.w
+  alias/cre test12 x.y.z
+  alias/cre test13 (u.v.w)+(x.y.z)
+  alias/cre test14 (u.v.w).(x.y.z)
+  alias/cre test15 (u+v).(v+w).(u+w).(x+y).(y+z).(x+z)
+  alias/cre test16  u=1
+  alias/cre test17  v=1
+  alias/cre test18  w=1
+  alias/cre test19  x=1
+  alias/cre test20  y=1
+  alias/cre test21  z=1
+  alias/cre test22  u.v.w
+  alias/cre test23  x.y.z
+  alias/cre test24 (u.v.w)+(x.y.z)
+  alias/cre test25 (u.v.w).(x.y.z)
+  alias/cre test26  uvw=1+xyz=1
+  alias/cre test27  uvw=1.xyz=1
+  alias/cre test28  uvw=1.xyz=0
+  alias/cre test29  uvw=1.xyz>1
+  alias/cre test30  (uvw=1+uvw=2).(xyz=1+xyz=2)
+      
+begin:
+  message 'Options: 1) Display Test Summary'
+  message '         3) Exit'
+  read opt 'Enter option: '
+  case [opt] in
+    (1) exec testman#testlegend; goto begin
+    (2) alias/del test*; exitm
+  endcase
+  
+return
+
+macro testsummary [file]
+  next
+  igset chhe 0.6
+  itx 1 19 EC Test Summary
+  line 1 18.5 19 18.5
+  line 1 18.3 19 18.3 
+  igset chhe 0.3 
+  itx 10 19 FILE: [file]
+
+  itx 1 17 Test 
+  itx 4 17 Description
+  
+  x = 11.3
+  
+  do i = 1,6
+    itx [x] 17 S[i]
+    x = [x] + 1.4
+  enddo
+  
+  y = 16.5
+  igset chhe 0.3
+  
+  do i = 1,30
+    itx 1.5 [y] [i] 
+    itx 2.5 [y] text=test[i]
+    x = 11
+    do j = 1,6
+      value = $eval(dum([i],[j]))
+      itx [x] [y] $format([value],F5.3)
+      x = [x]+1.4
+    enddo      
+    y = [y]-0.6
+  enddo
+  
+return
+  

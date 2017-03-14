@@ -1,0 +1,34 @@
+#!/bin/csh -f
+# 
+  echo '   Cleaning up...'
+if (-f calib_prev.dat) then
+  echo ' file "calib_prev.dat" is beeing deleted'
+  rm calib_prev.dat
+endif
+if (-f a1l) then
+  echo ' file "a1l" is beeing deleted'
+rm a1l 
+endif
+if (-f a1r) then
+  echo ' file "a1r" is beeing deleted'
+rm a1r 
+endif
+if (-f t2l) then
+  echo ' file "t2l" is beeing deleted'
+rm t2l 
+endif
+if (-f t2r) then
+  echo ' file "t2r" is beeing deleted'
+rm t2r 
+endif
+
+echo 'Current LAC Maps are taken from: ' $CLAS_PARMS/Maps
+get_map_float -m$CLAS_PARMS/Maps/LAC_CALIB.map -ssector1 -ic1l -t$1 -l128 > a1l
+get_map_float -m$CLAS_PARMS/Maps/LAC_CALIB.map -ssector2 -ic1l -t$1 -l128 >>a1l
+get_map_float -m$CLAS_PARMS/Maps/LAC_CALIB.map -ssector1 -ic1r -t$1 -l128 > a1r
+get_map_float -m$CLAS_PARMS/Maps/LAC_CALIB.map -ssector2 -ic1r -t$1 -l128 >>a1r
+#
+get_map_float -m$CLAS_PARMS/Maps/LAC_T0.map -ssector1 -it2l -t$1 -l128 > t2l
+get_map_float -m$CLAS_PARMS/Maps/LAC_T0.map -ssector2 -it2l -t$1 -l128 >>t2l
+get_map_float -m$CLAS_PARMS/Maps/LAC_T0.map -ssector1 -it2r -t$1 -l128 > t2r
+get_map_float -m$CLAS_PARMS/Maps/LAC_T0.map -ssector2 -it2r -t$1 -l128 >>t2r

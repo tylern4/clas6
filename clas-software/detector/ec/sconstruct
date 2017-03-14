@@ -1,0 +1,6 @@
+from build_system import environment
+
+ecEnv = environment.env(deps=['clas6'])
+ecEnv.load_dependency('clas6')
+ecLib = ecEnv.library(target='ec')
+ecEnv.return_from_sconstruct(ecLib)

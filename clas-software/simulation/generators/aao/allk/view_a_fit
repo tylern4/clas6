@@ -1,0 +1,57 @@
+#!/bin/csh -f
+
+# $1 = mami,e1b,e1e
+# $2 = q2 bin
+# $3 = fit a,b,c,d
+# $4-$7 = obs (1,2,3)
+
+set mami = (0.0)
+set e1b  = (0.4 0.525 0.65 0.75 0.9 0.65 0.75 0.9 1.15 1.45 1.8)
+set e1e  = (0.16 0.20 0.24 0.28 0.32 0.36)
+
+rm dum slfit_inp.dat inp.dat *junk *.vec
+
+cp fits678/$1/fit$2-$3/par.out par.in
+
+if($1 == mami) then 
+  set q2 = $mami[$2] 
+  cp data/cmami-q1-pi0.tbl in1
+  cp data/cmami-q1-pip.tbl in2
+  cp data/amami-q1-pi0.tbl in3
+ endif
+if($1 == e1b) then  
+  set q2 = $e1b[$2] 
+  cp data/ce1b-q$2-pi0.tbl in1
+endif
+if($1 == e1e) then  
+  set q2 = $e1e[$2]  
+  cp data/ce1e-q$2-pi0.tbl in1
+  cp data/ce1e-q$2-pip.tbl in2
+endif
+
+ln -s inp_hallk.dat inp.dat
+
+echo junk.dat       >> dum
+echo 50             >> dum
+echo 0.1            >> dum
+echo 1.0            >> dum
+echo 37             >> dum
+echo 5              >> dum
+echo 1.046          >> dum
+echo 1.22,1.24,0.01 >> dum
+echo $q2,$q2,0.5    >> dum
+echo -1.1,1.1,0.2   >> dum
+echo  0.0,360.0,0.0 >> dum
+echo par.out        >> dum
+echo 2              >> dum
+echo 200000.        >> dum
+echo in$4           >> dum
+echo in$5           >> dum
+echo in$6           >> dum
+echo in$7           >> dum
+
+mv dum slfit_inp.dat
+
+echo -4 0 $3 junk | allk
+
+rm $in par.in inp.dat *junk *.vec

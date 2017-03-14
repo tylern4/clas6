@@ -1,0 +1,4 @@
+#! /bin/csh -f
+date
+CopyParm
+echo 'mCopyParm ' | at now + 30 minutes

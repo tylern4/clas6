@@ -1,0 +1,7 @@
+from build_system import environment
+
+utilitiesenv = environment.env(deps=['clas6'])
+utilitiesenv.load_dependency('clas6')
+utilitiesenv.program(target="caldb_read", source="caldb_read.c")
+utilitiesenv.program(target="caldb_test", source="caldb_test.c")
+utilitiesenv.program(target="caldb_write", source="caldb_write.c")

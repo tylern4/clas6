@@ -1,0 +1,277 @@
+#!/usr/local/bin/perl
+#
+# $Id: mktmpl,v 1.2 1997/06/09 19:35:35 clasrun Exp $
+###########################################################################
+#  simple little script to make fortran templates and include templates
+#
+#   execution:  mktmpl routine (flag firstname lastname)  
+#                               last three arguments are optional  
+#
+#   output:  routine.F  or routine.inc (depends on flag)
+#   
+#   required input:
+#
+#   routine = name of the subroutine or include file
+#
+#   optional input:
+#
+#   flag = f  fortran template (default
+#          b  bourne shell script template
+#          c  c template
+#          i  fortran INCLUDE file template
+#          p  perl script template
+#          w  html template
+#          C  csh script template
+#
+#   examples:
+#       mktmpl test    --> write a routine names test.F with RCS variable
+#       mktmpl test i  --> write an include file test.inc with RCS variable
+#      
+#   firstname = author's first name (optional) 
+#   lastname = author's last name (optional)
+#  
+#   if firstname and lastname are blank, the script tries to read in
+#   a filename .tmpl in users HOME directory which contains the following lines
+#             First : your first name
+#             Last : your last name
+#   if .tmpl is not found and firstname and lastname are blank the enviroment
+#   variable LOGNAME 
+#   is used to finger LOGNAME and obtains the "real life" name from the 
+#   output of finger user.
+#
+#   Enviroment variable CMH_SCRIPT must be defined to point to the
+#   directory that contains the template.F and template.inc files.
+#   Add the line:
+#                 source /clas/cebafb/u1/etc/profile/.clascshrc
+#   to your .cshrc file in your home directory, to pick up the ``official''
+#   CLAS templates.
+#
+#
+#   The USER may have a private version of template.F and/or template.inc using
+#   the enviroment variable to point to it.
+#
+#   mktmpl will not overwrite existing routine.F or routine.inc files
+#
+#   Template Keywords (Case matters):
+#      template  :  overwritten with routine name
+#      John      :  overwritten with author's first name
+#      Doe       :  overwritten with author's last name
+#      day-mon-xx:  overwritten with todays date
+#      nocap     :  denotes lines not to be CAPITALIZED upon output
+#
+#   author of the script: Arne Freyberger
+#   
+###########################################################################
+$tmp_dir = $ENV{"CMH_SCRIPT"};
+#  first get variables from command line (routine name, flag, first, last)
+#  if routine name blank or ? go to help
+if ($ARGV[0] !~ /\w/ || $ARGV[0] eq "\?" || $ARGV[0] eq "h") {
+   print "mktmpl  I: Executing help subroutine\n";
+   &wrt_help; 
+}
+$routine = "\U$ARGV[0]";
+$author1 = "\u$ARGV[2]";
+$author2 = "\u$ARGV[3]";
+$author = $author1.$author2;
+#
+#  pointer to the template file
+if ($tmp_dir !~ /\w/) {
+#   $tmp_dir = "/clas/cebafb/u1/cmobj/script";
+#     Fixed by T.-Y. June 9, 1997
+   $tmp_dir = $ENV{"CLAS_SCRIPTS"};
+# print "mktmpl  I: Enviroment variable CMH_SCRIPT not defined, will use default value.\n";
+}
+$template = "$tmp_dir/template.F";
+$outfile = "\L$routine.\UF";
+#
+#  pointer to users home directory
+$home = $ENV{"HOME"};
+#
+# set the flags and redirect input/output
+#
+$flag = $ARGV[1];
+if ($flag !~ /\w/) {
+$flag = f;
+}
+$_ = fbr;
+if ($flag =~ /[i]/) {
+    $template = "$tmp_dir/template.inc";
+    $outfile = "\L$routine.inc";
+    s/f/i/;
+    if ($flag =~ /i/) {
+        $flag = "$flag r"
+    } 
+}
+if ($flag =~ /[c]/) {
+    $template = "$tmp_dir/template.c";
+    $outfile = "\L$routine.c";
+    s/f/c/;
+    if ($flag =~ /c/) {
+        $flag = "$flag r"
+    } 
+}
+# perl script option
+if ($flag =~ /[p]/) {
+    $template = "$tmp_dir/template.perl";
+    $outfile = "\L$routine";
+    $routine = "\L$routine";
+}
+# bourne script option
+if ($flag =~ /[b]/) {
+    $template = "$tmp_dir/template.bourne";
+    $outfile = "\L$routine";
+    $routine = "\L$routine";
+}
+# cshell script option
+if ($flag =~ /[C]/) {
+    $template = "$tmp_dir/template.cshell";
+    $outfile = "\L$routine";
+    $routine = "\L$routine";
+}
+# cshell script option
+if ($flag =~ /[w]/) {
+    $template = "$tmp_dir/template.html";
+    $outfile = "\L$routine.html";
+    $routine = "\L$routine";
+}
+
+$fflag = $_;
+#
+if (-s "$outfile") {
+    print "mktmpl  W: $outfile FILE ALREADY EXISTS WILL NOT OVERWRITE!!\n";
+    print "mktmpl  W: *****************************************************\n";
+    } else {
+#  get the current date
+#
+$now = `date`;
+chop($now);
+#
+# get authors name from $HOME/.tmpl file
+#
+$afrom = "command line";
+if ($author1 eq "" && -s "$home/.tmpl") {
+    open(IN,"$home/.tmpl");
+    $afrom = "users .tmpl file";
+    while(<IN>) {
+	if (/First\w*/) {
+            @words = split(/:/, $_);
+            $author1 = $words[1]; 
+            chop($author1);
+	} elsif (/Last\w*/) {
+            @words = split(/:/, $_);
+            $author2 = $words[1];
+            chop($author2);
+	}
+    }
+    close(IN);
+	$author = $author1.$author2;
+    }
+#
+# if author is still blank fill it in with REAL LIFE name in finger output
+#
+if ($author1 eq "") {
+    $author1 = $ENV{"LOGNAME"};
+    foreach $_ (`finger "$author1"`) {
+	if (/Login n\w*/) {
+	    @words = split(/: /, $_);
+	    $author = $words[2];
+            chop($author);
+#            @author = split(/ /,$words[2]);
+#            $author1 = "\u\L$author[0]"; 
+#	    $author2 = "\u\L$author[1]";
+#            chop($author2);
+            $afrom = "the output finger cmnd";
+    }
+    }
+}
+#
+#   write out some stuff to the screen
+print "mktmpl  I: using template: $template \n";
+print "mktmpl  I: authors name is: $author, determined by $afrom \n";
+print "mktmpl  I: creating file: $outfile \n";
+#
+#open the template file and output file
+         open(IN,$template);
+         open(OUT,">$outfile");
+# initialize counter iline
+	 $iline=0;
+# loop over lines in "template.F" and overwrite where neccessary
+while(<IN>) {
+    ++$iline;
+    s/template/$routine/g;
+#    s/John/$author1/;
+#    s/Doe/$author2/;
+    s/John Doe/$author/;
+    s/day-mon-xx/$now/;
+#  write out comment lines 'c' without modification
+    if (/^c/ || /^C/) {
+        print OUT $_;
+    } elsif (/nocap/) {
+#  write out "code lines" capitalized unless flagged by "nocap" flag
+        s/nocap//;
+        print OUT "$_";
+    } else {
+        print OUT "\U$_";
+    }
+#
+}
+#
+    close(IN);   
+    close(OUT);
+if ($flag =~ /[p]/) {
+    chmod(0777,$outfile);
+    }
+if ($flag =~ /[b]/) {
+    chmod(0777,$outfile);
+    }
+if ($flag =~ /[C]/) {
+    chmod(0777,$outfile);
+    }
+if ($flag =~ /[t]/) {
+    chmod(0777,$outfile);
+    }
+}
+# help package
+sub wrt_help {
+print "mktmpl  h: simple little script to make fortran templates and include templates\n";
+print "mktmpl  h:\n";
+print "mktmpl  h: execution:  mktmpl routinename (flag firstname lastname)  \n";
+print "mktmpl  h:                        last three arguments are optional  \n";
+print "mktmpl  h:\n";
+print "mktmpl  h: output:  routine.F  or routine.inc (depends on flag)\n";
+print "mktmpl  h:\n";
+print "mktmpl  h: required input:\n";
+print "mktmpl  h:\n";
+print "mktmpl  h: routine = name of the subroutine or include file\n";
+print "mktmpl  h:\n";
+print "mktmpl  h: optional input:\n";
+print "mktmpl  h:\n";
+print "mktmpl  h: flag = fbr (default)\n";
+print "mktmpl  h:    flag = f  fortran template (default)\n";
+print "mktmpl  h:           b  bourne shell script template\n";
+print "mktmpl  h:           c  c template\n";
+print "mktmpl  h:           i  fortran INCLUDE file template\n";
+print "mktmpl  h:           p  perl script template\n";
+print "mktmpl  h:           w  html template\n";
+print "mktmpl  h:           C  csh script template\n";
+print "mktmpl  h:           t  Tcl script template (not implimented yet)\n";
+print "mktmpl  h: examples:\n";
+print "mktmpl  h: mktmpl test    --> write  test.F \n";
+print "mktmpl  h: mktmpl test i  --> write  test.inc \n";
+print "mktmpl  h:\n";
+print "mktmpl  Q: Please enter routine or include name: ";
+$ARGV[0] = <STDIN>;
+chop($ARGV[0]);
+print "mktmpl  Q: (f)ortran or (i)nclude template (<cr> for default fortran)? ";
+$ARGV[1] = <STDIN>;
+chop($ARGV[1]);
+print "mktmpl  h: Thank you and have a most pleasant day \n";
+}
+
+
+
+
+
+
+
+

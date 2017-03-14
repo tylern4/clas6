@@ -1,0 +1,63 @@
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+
+INCLUDE := -I../../include $(INCLUDE) 
+
+RECLIB = -L$(TOP_DIR)/lib/$(OS_NAME) -L$(CLAS_LIB) -lst$(ADD_DEBUG) -lscaler$(ADD_DEBUG) -lpid$(ADD_DEBUG) -ltag$(ADD_DEBUG) -llac$(ADD_DEBUG) -lseb$(ADD_DEBUG) -lst$(ADD_DEBUG) -lclasutil$(ADD_DEBUG) -lsc$(ADD_DEBUG) -lc_bos_io$(ADD_DEBUG)  -ldc$(ADD_DEBUG) -lec$(ADD_DEBUG) -lcc$(ADD_DEBUG) -ltrk$(ADD_DEBUG)  -ldc$(ADD_DEBUG)  -lc_bos_io$(ADD_DEBUG) -lsc$(ADD_DEBUG)  -lmapmanager$(ADD_DEBUG)  -lfputil$(ADD_DEBUG) -lfpack$(ADD_DEBUG) -lrecutl$(ADD_DEBUG) -lonline_dummy$(ADD_DEBUG)  -lclasutil$(ADD_DEBUG)  -lbos$(ADD_DEBUG)  -lfpack$(ADD_DEBUG) -lc_cern$(ADD_DEBUG)
+
+
+CERNPATH= $(CERN_ROOT)/lib
+CERNLIB= -L$(CERNPATH) -lpacklib
+
+MISCLIB_SunOS :=  -L/usr/lib -lm -lc -lnsl -lsocket
+MISCLIB_HP-UX :=  -L/usr/lib -lm -lc -lf
+MISCLIB_AIX :=  -L/usr/lib -lxlf90 -lm -lc 
+MISCLIB_Linux :=  -lm -lc
+MISCLIB_LinuxRH6 :=  -lm -lc -lnsl -ldl -lcrypt
+MISCLIB_LinuxRH7 :=  -lm -lc -lnsl -ldl -lcrypt
+MISCLIB_LinuxRH8 :=  -lm -lc -lnsl -ldl -lcrypt
+MISCLIB_LinuxRH9 :=  -lm -lc -lnsl -ldl -lcrypt
+MISCLIB_OSF1 :=  -L/usr/lib -lm -lc -lfor -lUfor
+
+MISCLIB := $(MISCLIB_$(OS_NAME))
+
+XLIB= -L/lib 
+RPCLIB= -L/usr/lib -lrpcsvc
+TCLLIB= -L/usr/local/lib -ltcl
+
+LIBS= $(RECLIB) $(XLIB) $(RECUTIL) $(CERNLIB)  $(STDLIBS)  $(MISCLIB)
+
+all: exe
+
+EXE= sync$(ADD_DEBUG)
+
+SRCS= sync.c 
+FSRC= 
+
+FOBJ =${FSRC:.F=.o}
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+E_T_SRCS = E_T_matrix.c
+E_T_OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(E_T_SRCS))
+
+exe: $(EXE)
+
+$(EXE): $(OBJS)	
+	$(CC) $(CDBG) $(CFLAGS) -o $@ $^ $(LIBS) $(FLIB)
+
+install: $(EXE) 
+	mv -f $(EXE) $(CLAS_BIN)
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo INCLUDE $(INCLUDE)

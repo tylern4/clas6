@@ -1,0 +1,27 @@
+macro ecCalBankInit run name 
+
+  global/imp [name]*
+
+  nrow  = [[name]nrow]
+  nbank = [[name]nbank]
+  fbank = [[name]fbank]
+  
+  do num = 1,[nbank]
+    message ecCalBankInit: Bank [name]:[fbank]
+    do j = 3,[#],2
+      k = [j]+1
+      case [%k] in
+        (PMT) vec/copy pmtID [name]v[%j](:,[num])
+         (DB) exec ecCalGet[name]v[%j] [run] [num]
+        (INP) read var 'Enter value for this column: '
+              vec/inp [name]v[%j](:,[num]) [var] 
+         (*)  vec/inp [name]v[%j](:,[num]) [nrow]*[%k]
+      endcase
+      message ecCalBankInit: Initializing [name]v[%j] with [%k]
+    enddo
+    exec bos_putvec [name] [fbank]
+    fbank = [fbank] + 1
+  enddo
+  
+  
+return

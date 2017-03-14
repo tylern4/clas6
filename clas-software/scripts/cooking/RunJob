@@ -1,0 +1,951 @@
+#!/apps/bin/perl
+
+use lib ("$ENV{CLAS_TOOLS}/perl");
+use Csql;
+
+# RunJob is the primary PERL script for running the cooking job 
+#          and the post processing on the farm. All the arguments passed to
+#          it preceeded by a '-' are passed on to a1c. The arguments preceeded
+#          by a '+' help to determine which post cooking diagnostics are run.
+#          The main purpose of this script is to provide an outer shell to the
+#          other programs. By calling those other programs from this script
+#          we can parse the output of those programs and store their
+#          information in a relational database intrinsic to PERL(These 
+#          are all the dbmopen and dbmclose commands). Adding +mysql to the 
+#          command line will store this information into the Mysql database
+#          instead of the PERL database. The Mysql database has a web   
+#          interface that makes it easy to look into this information 
+#          later and its use is therefore recommended.
+
+# Usage: RunJob [-h] run_num +P [0x#] +env <string> (+electron|+photon)[+S][+base <string>] [+sp | +se]
+#
+#       -h                          Print this help message.
+#        run_num          Run number to be processed.
+#        +P [0x#]              Bit wise process flag.
+#                0x1               Run a1c.
+#                0x2               Run pid_mon.
+#                0x4               Run pdu.
+#                0x8               Run scaler_mon.
+#                0x10             Run photon_mon.
+#                0x20             Run elastic_mon.
+#                0x40             Run inelastic_mon.
+#                0x80             Run cc_mon.
+#                0x100           Run e_filter.
+#                0x200           Run g1_filter.
+#                0x400           Run physfilter.
+#                0x800           Run trk_mon.
+#                0x1000         Run rf_mon.
+#                0x2000         Run sc_mon.
+#                0x4000         Run Cole Smith's EC ntupilizer
+#                0x8000         Run Sync check
+#                0x10000       Run KK_filter
+#                0x20000       Run physfilter for three charged particles
+#                0x40000       Run g8_mon 
+#                0x80000       Run gflux 
+#                0x100000      Run dstmaker
+#        +env <string>    File name w/path of environment variable text file
+#        +electron        Set run type as electron.
+#        +photon          Set run type as photon.
+#        +S               Run pid_mon as seb_mon also
+#        +base <string>   Basename to attatch to each file
+#        +se              Run standard electron processing 
+#                             (+electron +P 0x3fdef +S -O -i -F -D0xf3dd -P0x3fb -se)
+#        +sp              Run standard photon processing 
+#                             (+photon +P 0xb89f -T1 -st1 -O -D0x103d -cm0 -P0x1fff -i)
+#        +d               mark cache file for early deletion     
+#        +mysql           Store monitoring info in MYSQL db instead of PERL db
+#
+#        If you run sync and a1c you do not need to worry about the sync command in a1c. It will be 
+#        taken care of for you. Also if you chose the +base option you do not need to specify a new 
+#        name in a1c using the -N option. This will also be taken care of automatically.
+
+# Start of RunJob code
+
+if ($ARGV[0] eq "+h" || $ARGV[0] eq "-h") {
+    &PrintUsage;
+    exit(0);
+}
+
+# Parse through command line options
+
+# Set Command defaults
+$seb = 0;
+$jdelete=0;
+$base = "";
+$db_mysql = 0;
+
+# Get the run number
+$run = $ARGV[0];
+shift;
+
+for ($i = 0; $i <= $#ARGV; $i++) {
+    $arg = $ARGV[$i];
+    if ($arg =~ /^-.*/) {
+	push(@opts, $arg);
+     }
+     elsif ($arg =~ /^\+(\w*)/) {
+	 if ($1 eq "h") {
+	     &PrintUsage;
+	     exit(0);
+	 }
+	 elsif($1 =~ /^P/) {
+	     $i++;
+	     $ProcessBit = hex $ARGV[$i];
+	 }
+	 elsif ($1 =~ /^electron/) {
+	     $run_type = "electron";
+	 }
+	 elsif ($1 =~ /^photon/) {
+	     $run_type = "photon";
+	 }
+	 elsif ($1 =~ /S/) {
+	     $seb = 1;
+	 }
+	 elsif ($1 =~ /d/) {
+	     $jdelete = 1;
+	 }
+	 elsif ($1 =~ /^mysql/) {
+	     $db_mysql = 1;
+	     use DBI;
+	 }
+	 elsif ($1 =~ /^base/) {
+	     $i++;
+	     $base = $ARGV[$i];
+	 }
+	 elsif ($1 =~ /^env/) {
+	     $i++;
+	     $env_src_file = $ARGV[$i];
+	 }
+	 elsif ($1 =~/^se/ ) {
+	   $run_type = "electron";
+	   $ProcessBit = "0x3fdef";
+	   $ProcessBit = hex $ProcessBit;
+	   $seb =1;
+	   push(@opts, " -O -i -F -D0xf3dd -P0x3fb -se ");
+	 }
+	 elsif ($1 =~ /^sp/) {
+	   $run_type = "photon";
+	   $ProcessBit = "0x803";
+	   $ProcessBit = hex $ProcessBit;
+	   push(@opts, " -T2 -st1 -ct1938 -cm5996 -P0xF7FF -Ag7lnk_1938_5996_3061_200.bos -O -M10000");
+	 } 
+	 else {
+	     push(@arr, $arg);
+	 }
+     }
+}
+ 
+if ($os eq "") { $os = $ENV{'OSCLAS'} }
+
+# Parse through environmental variable template file
+
+print "\n$0: Going to use file $env_src_file to set environment variables.\n\n";
+
+open(ENV, "$env_src_file") || die "\n$0: Could not open environment variable text template.\n";
+
+while(<ENV>) {
+    if ($_ =~ /^#/) {
+	next;
+    } elsif ($_ =~ /\s*(\S+)\s+(\S+)/) {
+	$ENV{$1} = $2;
+    }
+}
+
+# Get some environmental variables
+
+$host = $ENV{"HOSTNAME"};
+$home = $ENV{"HOME"};
+$os  = $ENV{"OSNAME"};
+
+# Get rid of possible extraneous ending / marks
+
+@env_vars = ("CLAS_BIN","CLAS_PARMS","CLAS_SCRIPTS","CLAS_DB", "CLAS_OUT_PATH","CLAS_TAPE_PATH","CSQL_DBHOST","CSQL_DB","CSQL_USER","CSQL_TABLE");
+
+foreach (@env_vars) {
+  if ($ENV{"$_"} =~ /\/$/) {
+    $ENV{"$_"} =~ s /\/$//;
+  }
+}
+
+# Finished removing extraneous ending / marks
+
+$clas_bin = $ENV{"CLAS_BIN"};
+$clas_parms = $ENV{"CLAS_PARMS"};
+$perl_lib = $ENV{"CLAS_SCRIPTS"};
+$clas_db = $ENV{"CLAS_DB"};
+$OutPath = $ENV{"CLAS_OUT_PATH"};
+$TapePath = $ENV{"CLAS_TAPE_PATH"};
+$SourcePath = $ENV{"CLAS_DATA"};
+$hostname = $ENV{"CSQL_DBHOST"};
+$database = $ENV{"CSQL_DB"};
+$user = $ENV{"CSQL_USER"};
+$table_name = $ENV{"CSQL_TABLE"};
+$ENV{"CLAS_BIN"} .= "/$os";
+
+require "ctime.pl";
+
+require "$perl_lib/RunA1c.pl";
+require "$perl_lib/GetMapFloat.pl";
+require "$perl_lib/RunScaler_mon.pl";
+require "$perl_lib/RunPid_mon.pl";
+require "$perl_lib/RunPDU.pl";
+require "$perl_lib/RunPhoton_mon.pl";
+require "$perl_lib/RunTag_mon.pl";
+require "$perl_lib/RunElastic_mon.pl";
+require "$perl_lib/RunInelastic_mon.pl";
+require "$perl_lib/RunTrk_mon.pl";
+require "$perl_lib/RunSC_mon.pl";
+require "$perl_lib/RunCC_mon.pl";
+require "$perl_lib/RunRF_mon.pl";
+require "$perl_lib/RunE_filter.pl";
+require "$perl_lib/RunG_filter.pl";
+require "$perl_lib/RunPhysfilter.pl";
+require "$perl_lib/RunEC_ntupilizer.pl";
+require "$perl_lib/RunSync.pl";
+require "$perl_lib/RunKK_filter.pl";
+require "$perl_lib/RunItalian_filt.pl";
+require "$perl_lib/CheckDir.pl";
+require "$perl_lib/RunGflux.pl";
+require "$perl_lib/RunDSTmaker.pl";
+# New g8a monitor g8_mon (merges photon_mon, pid_mon, and sc_mon)
+require "$perl_lib/RunG8_mon.pl";
+
+########### Define the variables for processing############ 
+$PROCESS_A1                  = 0x1;
+$PROCESS_PID                 = 0x2;
+$PROCESS_PDU                 = 0x4;
+$PROCESS_SCAL                = 0x8;
+$PROCESS_PHOT                = 0x10;
+$PROCESS_EMON                = 0x20;
+$PROCESS_INEMON              = 0x40;
+$PROCESS_CCMON               = 0x80;
+$PROCESS_EFILT               = 0x100;
+$PROCESS_GFILT               = 0x200;
+$PROCESS_PHYSFILT            = 0x400;
+$PROCESS_TRKMON              = 0x800;
+$PROCESS_RFMON               = 0x1000;
+$PROCESS_SCMON               = 0x2000;
+$PROCESS_COLE                = 0x4000;
+$PROCESS_SYNC                = 0x8000;
+$PROCESS_KK_FILT             = 0x10000;
+$PROCESS_ITAL_FILT           = 0x20000;
+$PROCESS_G8MON               = 0x40000;
+$PROCESS_GFLUX               = 0x80000;
+$PROCESS_DST                 = 0x100000;
+
+#################################################
+
+# Needlessly Initialize all variables
+
+$a1c    = 0;
+$pid    = 0;
+$pdu    = 0;
+$scaler = 0;
+$phot   = 0;
+$emon   = 0;
+$inemon = 0;
+$cc_mon = 0;
+$efilt  = 0;
+$gfilt  = 0;
+$g1filt  = 0;
+$physfilt = 0;
+$trkmon = 0;
+$rfmon  = 0;
+$scmon  = 0;
+$cole   = 0;
+$sync   = 0;
+$kk_filt = 0;
+$ital_filt = 0;
+$gflux =0;
+$dst =0;
+$g8mon =0;
+
+######## End initialization
+
+if ($ProcessBit & $PROCESS_A1) {
+    $a1c = 1;
+}
+if ($ProcessBit & $PROCESS_PID) {
+    $pid = 1;
+}
+if ($ProcessBit & $PROCESS_PDU) {
+    $pdu = 1;
+}
+if ($ProcessBit & $PROCESS_SCAL) {
+    $scaler = 1;
+}
+if ($ProcessBit & $PROCESS_PHOT) {
+    $phot = 1;
+}
+if ($ProcessBit & $PROCESS_EMON) {
+    $emon = 1;
+}
+if ($ProcessBit & $PROCESS_INEMON) {
+    $inemon = 1;
+}
+if ($ProcessBit & $PROCESS_CCMON) {
+    $ccmon = 1;
+}
+if ($ProcessBit & $PROCESS_EFILT) {
+    $efilt = 1;
+}
+if ($ProcessBit & $PROCESS_GFILT) {
+    $gfilt = 1;
+}
+if ($ProcessBit & $PROCESS_G1FILT) {
+    $g1filt = 1;
+}
+if ($ProcessBit & $PROCESS_PHYSFILT) {
+    $physfilt = 1;
+}
+if ($ProcessBit & $PROCESS_TRKMON) {
+    $trkmon = 1;
+}
+if ($ProcessBit & $PROCESS_RFMON) {
+    $rfmon = 1;
+}
+if ($ProcessBit & $PROCESS_SCMON) {
+    $scmon = 1;
+}
+if ($ProcessBit & $PROCESS_COLE) {
+    $cole = 1;
+}
+if ($ProcessBit & $PROCESS_SYNC) {
+    $sync = 1;
+}
+if ($ProcessBit & $PROCESS_KK_FILT) {
+  $kk_filt = 1;
+}
+if ($ProcessBit & $PROCESS_ITAL_FILT) {
+  $ital_filt = 1;
+}
+if ($ProcessBit & $PROCESS_GFLUX) {
+  $gflux = 1;
+}
+if ($ProcessBit & $PROCESS_DST) {
+  $dst = 1;
+}
+if ($ProcessBit & $PROCESS_G8MON) {
+  $g8mon = 1;
+}
+
+
+
+#Check Initial Directory Structure
+if($ProcessBit & 0xb8fe) {
+  CheckDir("$OutPath/monitor");
+}
+
+
+# Originally there was a problem with the permissions on the farm nodes
+# Not sure if it is fixed but why risk changing it.
+
+$cmd="chmod +r *";
+print "$cmd\n";
+system($cmd);
+
+######################################
+# Check to see what files are on the farm node now
+######################################
+
+print"\n$0: Running ls to get a list of all of the files currently on the farm node\n\n";
+
+open(LS,"ls -l  |")  || die "$0: Could not execute ls -l command\n";
+
+while (<LS>) {
+    print;
+}
+
+close (LS);
+
+#####################################
+# If there are no data files on the farm exit the job
+#####################################
+
+#############################
+# Get a list of the data files on the farm
+#############################
+
+print"\n$0: Running ls to get a list of all of the data files currently on the farm node\n\n";
+
+$cmd = "ls -1 clas*$run* ";
+open(LS, "$cmd 2>&1 | ")  || die "\n$0: Could not execute $cmd.\n";
+
+while (<LS>) {
+	chop;
+	if ($a1c || $sync || $scaler || $gflux) {
+	  print "$_\n";
+	  if ($_ =~ /No such file/) {
+	    print "\n No raw data files on farm. Exiting now!\n";
+	    exit(0);
+	  }
+	  if (-z $_ )  {
+	    die "\n$0: File $_ has zero size. Exiting RunJob. Check email for more details.\n";
+	  }
+	  push(@files,($_));
+	}
+}
+
+close(LS);
+
+#################################
+# Get base file name for naming convention
+#################################
+
+if ($a1c || $scaler || $gflux) {
+    $basename = $files[0];
+    $basename =~ s/clas_0*//;
+} else {
+    $lscmd = "ls -1 run* |";
+    open(LS, $lscmd) || die "\n$0: Could not execute $lscmd.\n";
+    while (<LS>) {
+	chop;
+	$basename = $_;
+    }
+    if ($basename =~ /run(\d+)_cooked\.A(\d+)\.(\d+)/) {
+	$basename = "$1.A$2";
+    }
+}
+
+
+#define runno and runext:
+
+$runno = $run;
+if ($basename =~ /(\d+)\.A(\d+)/) {
+    $runext = $2;
+}
+
+if ($base ne "") {
+$basename = $basename.$base;
+}
+
+
+#################################
+# Start bookkeeping for processing
+#################################
+
+print "$0: Processing file $basename.\n";
+
+$db_file = $clas_db."/clas_$basename.db";
+
+$t = time();
+$start_time = &ctime($t);
+
+chop($start_time);
+if ($os eq "Linux") {
+    ($doweek, $month, $day, $time, $year) = split(/\s+/, $start_time);
+    if ($year =~ /US/) {
+	($doweek,$month,$day,$time,$zone,$year) = split(/\s+/, $start_time);
+    }
+}
+else {
+    ($doweek, $month, $day, $time, $zone, $year) = split(/\s+/, $start_time);
+}
+
+print  "$0: Beginning to process $basename on $host at $start_time\n\n"; 
+
+#MYSQL DATABASE INSERTION:
+
+if ($db_mysql) {
+  print "You are using mysql db\n";
+
+#redefine the runext as (100*runno + file number):
+  
+  $runext += 100 * $runno;
+
+  ConnectToServer($hostname, $user, $database);
+
+#The following supposes that one has run CreateDBtable.pl and created a table
+#of entries in the mysql database.
+
+  InsertRow($table_name, $runno, $runext);
+  
+  $proc_st_time = "NOW()";
+
+  @row = (
+	  {
+	    name => "startTime",
+	    value => $proc_st_time
+	   }
+          );
+  UpdateRow(@row);
+}
+
+#PERL DATABASE INSERTION:
+
+else{
+  print "You are using perl db\n";
+
+  dbmopen(%RUN, "$db_file", 0644) || print  "$0: $!\n\n\n\n";
+
+  $RUN{"Host Node"} = $host;
+  $RUN{"Processing Start Time"} = $time;
+  $RUN{"Processing Start Date"} = "$month $day, $year";
+
+  dbmclose(%RUN);
+}
+
+
+
+#####################################################
+############### Run Sync Program #######################
+#####################################################
+
+if ($sync) {
+    $file_list = join(" ", @files);
+    CheckDir("$OutPath/monitor/sync/");
+    RunSync($file_list, "$OutPath/monitor/sync/", $db_file, $basename, $db_mysql);
+}
+
+#####################################################
+############### End Sync Program #######################
+#####################################################
+
+
+########################################################
+############### Start scaler_mon  ###########################
+########################################################
+
+if($scaler) {    
+# Get a string of raw data files
+    $file_list = join(" ", @files);
+    CheckDir("$OutPath/monitor/scaler_mon/");
+    RunScaler_mon("$file_list", "$OutPath/monitor/scaler_mon/", $db_file, $basename, $run_type, $db_mysql);
+    if (-e "core") {
+      print "\n*** Found a core file after scaler_mon. Going to remove it.\n\n";
+      system("rm core");
+    }
+}
+
+#######################################################
+############### End scaler_mon  ###########################
+#######################################################
+
+########################################################
+############### Start gflux  ###########################
+########################################################
+
+if($gflux) {    
+# Get a string of raw data files
+    $file_list = join(" ", @files);
+    CheckDir("$OutPath/monitor/gflux/");
+    RunGflux("$file_list", "$OutPath/monitor/gflux/", $db_file, $basename, $run_type, $db_mysql);
+    if (-e "core") {
+      print "\n*** Found a core file after scaler_mon. Going to remove it.\n\n";
+      system("rm core");
+    }
+}
+
+#######################################################
+############### End gflux  ###########################
+#######################################################
+
+# mark for early deletion
+    if($jdelete){
+	for (@files){
+	    $jdelete_cmd="jcache -d $SourcePath/$_";
+	    system($jdelete_cmd);
+	}
+    }
+
+
+#####################################################
+############### Start RunA1c ###########################
+#####################################################
+
+if ($a1c) {
+
+    if ($sync) { unshift(@opts, " -y$files[0].sync  ") }
+# Add basename to argument list
+    if ($base ne "") { unshift(@opts, " -N$base ") }
+
+    for (@files) {
+	push(@opts, $_);
+    }
+
+    $args = join(" ", @opts);
+    if (!($TapePath =~ /^\/mss/)) {
+#      CheckDir("$TapePath/cooked/");
+      CheckDir("$TapePath/data/");
+    }
+    RunA1c($args, "$TapePath/data/", $db_file, $db_mysql);
+# mark for early deletion
+    if($jdelete){
+	for (@files){
+	    $jdelete_cmd="jcache -d $SourcePath/$_";
+	    system($jdelete_cmd);
+	}
+    }
+}
+
+######################################################
+################ End  RunA1c ###########################
+######################################################
+
+##############################
+# Remove old data files from farm node
+##############################
+
+foreach $file (@files) {
+    $rmcmd = "rm $file |";
+
+    print "\n$0 EXECUTE: $rmcmd \n";
+
+    open(RM, $rmcmd) || warn "Could not perform $rmcmd.\n";
+    
+    while(<RM>) {
+	print;
+    }
+
+    close(RM);
+}
+
+
+######################
+# Get a list of the cooked files
+ ######################
+
+$lscmd = "ls -1 run*A*";
+open(LS,"$lscmd 2>&1 |") || die "$0: Could not execute $lscmd.\n";
+print "\n$0 EXECUTE: $lscmd\n";
+
+while(<LS>) {
+    print;
+    if ($_ =~ /No such file/) {
+      print "\n No cooked files on farm. Exiting now!\n";
+      exit(0);
+    }
+    chop;
+    if (-z $_) {
+      die "\n$0: Cooked file is empty. Exiting job. Please check email for more info.\n";
+    }
+    push(@cooked_files, $_);
+} 
+
+close(LS);
+
+$cooked = join(" ", @cooked_files);
+
+###############################
+# Get some values from run control map
+###############################
+
+$map = $clas_parms."/Maps/RUN_CONTROL.map";
+
+$e_beam = GetMapFloat("beam", "energy", $run, $map, "1");
+$itor = GetMapFloat("currents", "torus", $run, $map, "1");
+$imini = GetMapFloat("currents", "minitorus", $run,  $map, "1");
+$itag = GetMapFloat("currents", "tagger", $run, $map, "1");
+
+#MYSQL DATABASE INSERTION
+
+if ($db_mysql) {
+@row = (
+	{
+	    name => "beamEnergy",
+	    value => $e_beam
+	    },
+	{
+	    name => "torusCurrent",
+	    value => $itor
+	    },
+	{
+	    name => "miniTorusCurrent",
+	    value => $imini
+	    },
+         {
+	    name => "taggerCurrent",
+	    value => $itag
+	    }
+	);
+
+  UpdateRow(@row);
+}
+
+#PERL DATABASE INSERTION
+
+else{
+  dbmopen(%RUN, $db_file, 0644) || print  "$0: Could not open $db_file for offline\n";
+
+  $RUN{"beam energy"} = $e_beam;
+  $RUN{"itorus"} = $itor;
+  $RUN{"iminitorus"} = $imini;
+  $RUN{"itagger"} = $itag;
+
+  dbmclose(%RUN);
+}
+##########################################################
+################### Begin Monitoring Processes #################
+##########################################################
+
+if ($pid) {
+  CheckDir("$OutPath/monitor/pid_mon/");
+  RunPid_mon($cooked, "$OutPath/monitor/pid_mon/", $db_file, $basename, $seb, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after pid_mon. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($pdu) {
+  CheckDir("$OutPath/monitor/pdu/");
+  RunPDU($cooked, "$OutPath/monitor/pdu/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after pdu. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($phot) {
+  CheckDir("$OutPath/monitor/tag_mon/");
+  RunTag_mon($cooked, "$OutPath/monitor/tag_mon/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after tag_mon. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($g8mon) {
+  CheckDir("$OutPath/monitor/g8_mon/");
+  RunG8_mon($cooked, "$OutPath/monitor/g8_mon/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after g8_mon. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($emon) {
+  CheckDir("$OutPath/monitor/elastic_mon/");
+  RunElastic_mon($cooked, "$OutPath/monitor/elastic_mon/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after elastic_mon. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($inemon) {
+  CheckDir("$OutPath/monitor/inelastic_mon/");
+  RunInelastic_mon($cooked, "$OutPath/monitor/inelastic_mon/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after inelastic_mon. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($ccmon) {
+  CheckDir("$OutPath/monitor/cc_mon/");
+  RunCC_mon($cooked, "$OutPath/monitor/cc_mon/",  $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after cc_mon. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($trkmon) {
+  CheckDir("$OutPath/monitor/trk_mon/");
+  RunTrk_mon($cooked, "$OutPath/monitor/trk_mon/", $db_file, $basename, $run_type, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after trk_mon. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($rfmon) {
+  CheckDir("$OutPath/monitor/rf_mon/");
+  RunRF_mon($cooked, "$OutPath/monitor/rf_mon/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after rf_mon. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($scmon) {
+  CheckDir("$OutPath/monitor/sc_mon/");
+  RunSC_mon($cooked, "$OutPath/monitor/sc_mon/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after sc_mon. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($cole) {
+#  if (!($TapePath =~ /^\/mss/)) {
+    CheckDir("/work/clas/production/g8a/Ntuples/");
+#  }
+  RunEC_ntupilizer($cooked, "/work/clas/production/g8a/Ntuples", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after ec_ntupilizer. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($dst) {
+  CheckDir("$OutPath/DST/");
+  RunDSTmaker($cooked, "$OutPath/DST/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after dstmaker. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($efilt) {
+  if (!($TapePath =~ /^\/mss/)) {
+    CheckDir("$OutPath/Kaons/");
+  }
+  RunE_filter($cooked, "$OutPath/Kaons/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after e_filter. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($gfilt) {
+  if (!($TapePath =~ /^\/mss/)) {
+    CheckDir("/work/clas/production/g8a/");
+  }
+  RunG_filter($cooked, "$OutPath/g_filter/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after g_filter. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($physfilt) {
+  if (!($TapePath =~ /^\/mss/)) {
+    CheckDir("$OutPath/physfilter/");
+  } 
+  RunPhysfilter($cooked, "$OutPath/physfilter/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+    print "\n*** Found a core file after physfilter. Going to remove it.\n\n";
+    system("rm core");
+  }
+}
+
+if ($kk_filt) {
+  if (!($TapePath =~ /^\/mss/)) {
+    CheckDir("$OutPath/KK_filter/");
+  }
+  RunKK_filter($cooked, "$OutPath/KK_filter/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+      print "\n*** Found a core file after KK_filter. Going to remove it.\n\n";
+      system("rm core");
+    }
+}
+
+if ($ital_filt) {
+  if (!($TapePath =~ /^\/mss/)) {
+    CheckDir("$OutPath/3Charged_filter/");
+  }
+  RunItalian_filt($cooked, "$TapePath/3Charged_filter/", $db_file, $basename, $db_mysql);
+  if (-e "core") {
+      print "\n*** Found a core file after Italian_filter. Going to remove it.\n\n";
+      system("rm core");
+    }
+}
+
+#########################################################
+################ End  Post Cooking Processing ##################
+#########################################################
+
+##########################################################
+################ Extra End Process Bookkeeping #################
+##########################################################
+
+print "\n$0: Finished processing file $basename.\n";
+
+$t = time();
+$end_time = &ctime($t);
+chop($end_time);
+
+if ($os eq "Linux") {
+    ($doweek, $month, $day, $time, $year) = split(/\s+/, $end_time);
+    if ($year =~ /US/) {
+	($doweek,$month,$day,$time,$zone,$year) = split(/\s+/, $end_time);
+    }
+}
+else {
+    ($doweek, $month, $day, $time, $zone, $year) = split(/\s+/, $end_time);
+}
+
+print  "\n$0: Finished processing $basename on $host at $end_time\n\n"; 
+
+#MYSQL DATABASE INSERTION
+
+if ($db_mysql) {
+
+  $proc_end_time = "NOW()";
+
+  @row = (
+	  {
+	    name => "endTime",
+	    value => $proc_end_time
+	   }
+          );
+  
+  UpdateRow(@row);
+
+  DisconnectFromServer();
+}
+
+#PERL DATABASE INSERTION
+
+else{
+  dbmopen(%RUN, $db_file, 0644) || print "$0: Could not open $db_file for offline\n";
+
+  $RUN{"Processing End Time"} = $time;
+  $RUN{"Processing End Date"} = "$month $day, $year";
+
+  dbmclose(%RUN);
+}
+
+exit;
+
+#####################################################################
+# END MAIN PROGRAM
+#####################################################################
+
+sub PrintUsage {
+    print "\nUsage: $0 [-h] run_num +P [0x#] +env <string> (+electron|+photon)[+S][+base <string>]\n";
+    print "\t-h\t\t Print this help message.\n";
+    print "\trun_num\t\t Run number to be processed.\n";
+    print "\t+P [0x#] \t Bit wise process flag.\n";
+    print "\t\t0x1 \t\t Run a1c.\n";
+    print "\t\t0x2 \t\t Run pid_mon.\n";
+    print "\t\t0x4 \t\t Run pdu.\n";
+    print "\t\t0x8 \t\t Run scaler_mon.\n";
+    print "\t\t0x10 \t\t Run photon_mon.\n";
+    print "\t\t0x20 \t\t Run elastic_mon.\n";
+    print "\t\t0x40 \t\t Run inelastic_mon.\n";
+    print "\t\t0x80 \t\t Run cc_mon.\n";
+    print "\t\t0x100 \t\t Run e_filter.\n";
+    print "\t\t0x200 \t\t Run g1_filter.\n";
+    print "\t\t0x400 \t\t Run physfilter.\n";
+    print "\t\t0x800 \t\t Run trk_mon.\n";
+    print "\t\t0x1000 \t\t Run rf_mon.\n";
+    print "\t\t0x2000 \t\t Run sc_mon.\n";
+    print "\t\t0x4000 \t\t Run Cole Smith's EC ntupilizer.\n";
+    print "\t\t0x8000 \t\t Run Sync check.\n";
+    print "\t\t0x10000 \t Run KK_filter.\n";
+    print "\t\t0x20000 \t Run Italian filter.\n";
+    print "\t\t0x40000 \t Run g8_mon.\n";
+    print "\t\t0x80000 \t Run gflux.\n";
+    print "\t\t0x100000 \t Run dstmaker.\n";
+    print "\t+env <string> \t File name w/path of environment variable text file.\n";
+    print "\t+se \t\t Run standard electron processing (+electron\n";
+    print "\t\t\t +P 0x3fdef +S -O -i -F -D0xf3dd -P0x3fb -se).\n";
+    print "\t+sp \t\t Run standard photon processing (+photon\n";
+    print "\t\t\t +P 0xb88f -T1 -st1 -O -D0x103d -cm0 -P0x1fff -i).\n";
+    print "\t+electron \t Set run type as electron.\n";
+    print "\t+photon \t Set run type as photon.\n";
+    print "\t+S \t\t Run pid_mon as seb_mon also.\n";
+    print "\t+d \t\t mark cache file for early deletion\n";
+    print "\t+base <string> \t Basename to attatch to each file.\n";
+    print "\t+mysql \t\t Store monitoring info in MYSQL db instead of PERL db.\n\n";
+
+    print "\tIf you run sync and a1c you do not need to worry about the sync\n";
+    print "\tcommand in a1c. It will be taken care of for you. Also if you chose\n"; 
+    print "\tthe +base option you do not need to specify a new name in a1c using\n"; 
+    print "\tthe -N option. This will also be taken care of automatically.\n\n";
+}
+
+

@@ -1,0 +1,177 @@
+macro pairfit
+
+* The input hbook from pair_mon is referenced as pair.hbook
+* The output is two text files coupled1.dat and coupled2.dat
+* and a postscript file pairfit.ps to check the quality of the fits.
+* The data files coupled1.dat and coupled2.dat are entered into the 
+* SC_CALIBRATIONS.map, subsystem deta_T, item coupled_paddle1 and 
+* coupled_paddle2, respectively.  After entering these items into the 
+* map, sc_mon needs to be run, and a final paddle2paddle correction is to 
+* be performed.  A p2p.kumac exists to help in this task.
+*
+* April 2004:    It is found that coupled_paddle1 and coupled_paddle2
+* N.Baltzell     are switched.  The fix has been placed in this kumac.
+*                Now #2 is the one with z-value closest to zero.
+*
+*The values in coupled1(2).dat should be subtracted from
+*the values in the database for coupled_paddle1(2).
+*
+*
+opt fit
+opt stat
+opt grid
+
+cd //pawc
+h/del 0
+v/del 0
+
+close 1
+h/file 1 pair.hbook
+
+close 2
+for/file 2 pairfit.ps
+metafile 2 -114
+
+* First just printing the histograms from pair_mon
+
+zone 2 3
+
+do i=40,42
+   do j=1,6
+      h=[j]*100+[i]
+      h/pl [h] box
+   enddo
+   h/del 0
+enddo
+do i=43,48
+   do j=1,6
+      h=[j]*1000+[i]
+      h/pl [h] box
+   enddo
+   h/del 0
+enddo  
+
+* Vectors for the centroids of the fits
+
+v/create mean1(54) R 54*0
+v/create mean2(54) R 54*0
+
+* Vectors for the limits of the gaussian fit 
+
+v/create lg(3) R 1 -20 .01
+v/create hg(3) R 1000 20 .5
+
+* Histogram stats
+
+hrin 140
+xbins=$hinfo(140,'xbins')
+xmin=$hinfo(140,'xmin')
+xmax=$hinfo(140,'xmax')
+
+slope=([xmax]-[xmin])/[xbins]
+xmincenter=[xmin]+[slope]/2
+
+zone 2 2
+do i=1,6
+   do j=40,48
+      if [j].eq.40 then
+         h=[i]*100+40
+         banx [h] -5 25
+         banx [h] -35 -13
+      endif
+      if [j].eq.41 then
+         h=[i]*100+41
+         banx [h] -49 -15
+         banx [h] -80 -57
+      endif
+      if [j].eq.42 then
+         h=[i]*100+42
+         banx [h] -91 -60
+         banx [h] -125 -99
+      endif
+      if [j].eq.43 then
+         h=[i]*1000+43
+         banx [h] -135 -110
+         banx [h] -160 -141
+      endif
+      if [j].eq.44 then
+         h=[i]*1000+44
+         banx [h] -168 -150
+         banx [h] -195 -176
+      endif
+      if [j].eq.45 then
+         h=[i]*1000+45
+         banx [h] -203 -180
+         banx [h] -230 -211
+      endif
+      if [j].eq.46 then
+         h=[i]*1000+46
+         banx [h] -236 -215
+         banx [h] -265 -244
+      endif
+      if [j].eq.47 then
+         h=[i]*1000+47
+         banx [h] -266 -250
+         banx [h] -290 -274
+      endif
+      if [j].eq.48 then
+         h=[i]*1000+48
+         banx [h] -290 -275
+         banx [h] -310 -298
+      endif
+      h/proj [h]
+      
+      v/create move1([xbins])
+      v/create move2([xbins])
+      1d 1 sector[i]-id[j]-1 [xbins] [xmin] [xmax]
+      1d 2 sector[i]-id[j]-2 [xbins] [xmin] [xmax]
+* Switch 1<->2 here:
+      h/get/cont [h].banx.2 move1
+      h/get/cont [h].banx.1 move2
+      h/put/cont 1 move1
+      h/put/cont 2 move2
+      
+* Calculating the peak position and height for fit parameters
+      
+      max1=$sigma(lvmax(move1))
+      max2=$sigma(lvmax(move2))
+      peak1=0
+      peak2=0
+      height1=0
+      height2=0
+      peak1=[xmincenter]+[slope]*([max1]-1)
+      peak2=[xmincenter]+[slope]*([max2]-1)
+      height1=move1([max1])
+      height2=move2([max2])
+
+* Fitting the hitograms
+
+      v/create fit1(3) R [height1] [peak1] .2
+      v/create fit2(3) R [height2] [peak2] .2
+      h/fit 1 g B 3 fit1 ! lg hg !
+      h/fit 2 g B 3 fit2 ! lg hg !
+      
+* Placing the peaks postions into vectors
+      
+      k=([i]-1)*9+[j]-39
+      v/input mean1([k]) fit1(2)
+      v/input mean2([k]) fit2(2)
+
+      h/del 0
+      v/del fit1
+      v/del fit2
+      v/del move1
+      v/del move2
+   enddo
+enddo
+
+* Placing the vectors into the output files
+
+v/write mean1 coupled1.dat f10.6
+v/write mean2 coupled2.dat f10.6
+
+close 2
+close 1   
+
+RETURN
+

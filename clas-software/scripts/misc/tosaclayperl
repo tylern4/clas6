@@ -1,0 +1,25 @@
+#!/usr/bin/csh -f
+foreach file (*)
+  if (-d $file) then
+   echo entering subdirectory $file
+   cd $file
+   ln -s ../tosaclayperl tosaclayperl
+   tosaclayperl
+   rm tosaclayperl
+   cd ..
+  endif
+  if (-f $file) then
+    set tempo=/tmp/$$ 
+    sed -e '1,2s/\/usr\/local\/bin\/perl/\/opt\/gnu\/bin\/perl/' \
+  	-e '1,2s/\/usr\/bin\/perl/\/opt\/gnu\/bin\/perl/' \
+ 	$file >$tempo
+    if ( "`gdiff -q $file $tempo` " != " " ) then
+      echo $file modified
+      mv $file $file.orig
+      mv $tempo $file
+      chmod a+x $file
+    else
+      rm $tempo
+    endif
+  endif
+end

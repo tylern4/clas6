@@ -1,0 +1,285 @@
+<HEAD>
+<title>The Simple Communications ATtachment Reference Manual</title>
+</head>
+<body>
+<h1>Simple Communications ATtachment Reference Manual</h1>
+
+This document only explains what the functions that make up the 
+SCAT library do - not how put them together for an application.  Information
+of this type is found in the SCAT Users Guide.<p>
+In general the SCAT library can be divided into 2 major parts: routines for 
+a producer of events and routines for a consumer of events.<p>
+This manual contains the following sections:<p>
+Pack events for transmission.<p>
+Register a SCAT service to the network.<p>
+Transmit events and messages.<p>
+Probe the network for SCAT processes.<p>
+Establish connections to other SCAT processes.<p>
+Calls used for embedding the SCAT library into existing applications.<p>
+BOS delivery of SCAT Events.<p>
+
+<h2>Event Packing.</h2>
+In order to transmit event data in a machine independent way the data needs 
+to be packaged.  This packaging will handle any architectural differences 
+between machines such that the bytes with in a machine word are
+positioned in memory properly. In general, data that contains integer
+(and floating point data) are very trivial to package. Data that
+contains short integer (16 bit vs 32 bit) are more difficult to
+handle. The SCAT library currently supports all CLAS BOS Banks (that
+are known to the ber program) automatically. There are calls in the
+library that will allow a user to define their own packaging
+algorithms (and as these algorithms are tested and proven they can be
+incorporated into the SCAT library).<p>
+
+<h3>Scat_Pack - This routine takes your data and packages it for
+transmission.</h3><p>
+<b>C language:</b><p>int Scat_Pack (name, format, recNo, rows, cols, size,
+pi)<P>
+char *name - c string BOS bank name.<p>
+char *format - c string BOS bank format.<p>
+int recNo - the BOS record number.<p>
+int rows - the number of rows of data.<p>
+int cols - the number of columns of data.<p>
+int size - the number of words of data.<p>
+int *pi - pointer to the data.<p>
+The size parameter must reflect the length of the data. For example,
+if you want to send 5 short integers: size=5. If you want to send 5
+integers then size still equal 5.<p>
+
+<b>Fortran language:</b><p>scat_pack_ (name, format, rn, rows, cols, size,
+pi, iret, nl, fl)<p>
+The name, format and pi parameters are the same as the C language
+binding.<p>
+int *iret - the Fortran return code.<p>
+int nl - the length of the name string.<p>
+int fl - the length of the format string.<p>
+
+<h3>Scat_PackedCount - answer the number of banks currently
+packed.</h3><p>
+<b>C Language:</b><p>Scat_PackedCount ()<p>
+This routine takes no input parameters and returns an integer.<p>
+
+<h3>Scat_AsPacked - answer the current packing buffer in a format ready
+for transmission.</h3><p>
+<b>C language:</b><p>int Scat_AsPacked (pe)<p>
+Event *pe - a pointer to the packed Event (ready for transmission).<P>
+There is no Fortran binding. Typically, the user will just pack the
+event up and call some form of Scat_Sendxxx.<p>
+<h3>Scat_PackInit - initialize the packing algorithm.</h3><p>
+
+<b>C language:</b><p>int Scat_PackInit ()<p>
+This routine answers 1 if the packer was initialized properly.<p>
+
+<b>Fortran:</b><p>void scat_packinit_(iret)<p>
+int *iret - the Fortran return code.<p>
+
+<h3>Scat_PackForget - drop and free up memory for the current packed
+event.</h3><p>
+
+<b>C language:</b><p>int Scat_PackForget (pe)<p>
+Event *pe - free memory associated with currently packed event. In
+addition, the caller can free memory for a previously aquired event
+(from Scat_AsPacked).<p>
+<b>Fortran:</b><p>void scat_forget_()<p>Drop the event that is
+currently being packed.<p>
+
+<h2>Register a SCAT service to the network</h2><p>
+All SCAT services need to be registered with the network.<p>
+<b>Scat_Register - register the service with the network.</b><p>
+
+<b>C language:</b><p>int Scat_Register (pgm_name)<p>
+char *pgm_name - c string that contains the name of the program to
+register. For example: Scat_Register (recsis) will register a program
+named recsis to the network.<p>
+
+<b>Fortran:</b><p>void scat_register_(name, iret, nameLength)<p>
+char *name - program name.<p>
+int *iret - Fortran return code.<p>
+int nameLength - length of the name string.<p>
+
+<h2>Transmit Events/Send messages</h2><p>
+There are a number of routines to send data/commands/Events around the
+network. The name of the function is used to indicate what each of
+these functions return. Any function with *Nr* (as in Scat_SendEvtNr)
+in the name returns void. Here is a list of functions:<p>
+
+Scat_SendMsgNr<p>
+Scat_SendEvtNr<p>
+Scat_SendMsg<p>
+Scat_SendEvt2Lst<p>
+
+<h3>Scat_SendMsgNr - send a message/command with no reply.</h3><p>
+The no reply is something of a lie - all Scat_Sendxxx routines receive
+a reply of some kind. The routines that don't get a reply actually
+receive a meaningless integer as a reply. The receiving server will
+send back the (meaningless) reply and then process the data in the
+message.<p>
+
+<b>C language:</b><p>int Scat_SendMsgNr (handle, message)<p>
+int handle - the handle returned from Scat_InitHandle.<p>
+char *message - the message to be processed by the receiving
+service.<p>
+<b>Fortran:</b><p>void scat_sendmsgnr (handle, message, iret,
+mlen)<p>
+int *handle - pointer to the handle returned from scat_inithandle_.<p>
+char *message - message to process.<p>
+int *iret - Fortran return code.<p>
+int mlen - the length of the message string.<P>
+
+<h3>Scat_SendEvtNr - transmit a packed event across the network.</h3><p>
+Send a packed event across the network. This function returns void.<p>
+<b>C language:</b><p>int Scat_SendEvtNr (handle, message)<p>
+int handle - the handle returned by Scat_InitHandle.<p>
+char *message - a command to send (see the EventStore users guide for
+details on the content of these commands).<p>
+<b>Fortran:</b><p>void scat_sendevtnr_ (handle, message, iret,
+mlen)<p>
+int *handle - handle return from scat_inithandle.<p>
+char *message - descriptive text (See EventStore Users Guide).<p>
+int *iret - Fortran return code.<p>
+int mlen - length of the message string.<p>
+
+<h3>Scat_SendMsg - send a message/command and receive an event from the
+server.</h3><p>
+<b>C language:</b><p>Event *Scat_SendMsg (handle, message)<p>
+int handle - returned from Scat_InitHandle.<p>
+char *message - message text to be processed by a server.<p>
+
+<h3>Scat_SendEvt2Lst - transmit a packed event to an EventStore list.</h3><p>
+Send a packed event to a specific list inside an EventStore
+object. This is a function to make a common task simple.<p>
+<b>C language:</b><p>int Scat_SendEvt2Lst (handle, listName)<p>
+int handle - the handle returned by Scat_InitHandle.<p>
+char *listName - the list in an EventStore to send this packed event
+to (See EventStore Users Guide for details on lists).<p>
+<b>Fortran:</b><p>void scat_sendevt2lst_ (handle, listName, iret,
+llen)<p>
+int *handle - handle return from scat_inithandle.<p>
+char *listName - name of an EventStore list (See EventStore Users Guide).<p>
+int *iret - Fortran return code.<p>
+int llen - length of the listName string.<p>
+
+<h3>Scat_BrowCreate - Create a browser interface.</h3><p>
+This routine is used between the EventStore and an Browser (like ced)
+to create an efficient interface into the EventStore (see the
+EventStore users guide for more detail).<p>
+<b>C language:</b><p>int Scat_BrowCreate (handle, message)<p>
+int handle - returned from Scat_InitHandle.<p>
+char *message - See EventStore users guide for message content.<p>
+
+<h3>Scat_BrowDestroy - Destroy a browser interface.</h3><p>
+To save memory when a browser dies it should destroy its interface to
+the EventStore.
+<b>C language:</b><p>int Scat_BrowDestroy (handle, message)<p>
+int handle - returned from Scat_InitHandle.<p>
+char *message - see the EventStore users guide.<p>
+
+<h3>Scat_BrowFilter - main browser interface routine.</h3><p>
+A browser sends commands like "next", "previous" and "top" through
+this interface. The EventStore users guide has more detail.<p>
+<b>C language:</B><p>Event * Scat_Browfilter (handle, message)
+int handle - returned from Scat_InitHandle.<p>
+char *message - see EventStore users guide.<p>
+
+<h2>Probe the network for SCAT processes.</h2><p>
+A number of routines are provided to gather information about other
+SCAT processes available on the network. Mostly, these routines are
+used by consumer type processes (ced, and other GUI's) that wish to
+query or control a SCAT process.
+<h3>Scat_Probe - probe a host for SCAT processes.</h3><p>
+<b>C language:</b><p>char ** Scat_Probe (hostname)<p>
+char *hostname - the name of the host to query.<p>
+This routine returns an array of pointers to strings. These strings
+contain enough information to allow a user to connect to a SCAT
+process.<p>
+
+<h3>Scat_LocateProgram - Locate a program (by name) on a host.</h3><p>
+The caller supplies a string for the host to probe and a string for
+the program name to locate on that host. If the program name is found
+the routine returns a handle to that (host, program) pair. This
+routine can be called many times. For any one (host, program) pair the
+scat library maintains only 1 handle. This routine returns that handle.<p>
+<b>C language:</b><p>int Scat_LocateProgram (hostname, programName)<p>
+char *hostname - name of the host where service resides.<p>
+char *programName - the name of the scat process that is set in
+Scat_Register.<p> 
+<b>Fortran:</b><p>
+char *hostname - name of the host where service resides.<p>
+char *programName - the name of the scat process that is set in
+int  *iret - fortran return code.<p>
+int  hostNameLength - number of character in hostname.<p>
+int  programNameLength - number of character in programName.<p>
+
+<h3>Scat_ServerProbe - answer information about a specific SCAT
+process.</h3><p>
+<b>C language:</b><p>char *Scat_ServerProbe (hostname, programNumber,
+versionNumber)<p>
+char *hostname - name of the host where service resides.<p>
+unsigned long programNumber - supplied by Scat_InitHandle or Scat_Probe.<p>
+unsigned long versionNumber - supplied by Scat_InitHandle or Scat_Probe.<p>
+
+<h3>Scat_ServerInfo - answer information about a specific
+server.</h3><p>
+<b>C language:</b><p>char *Scat_ServerInfo (handle)<p>
+int handle - returned from Scat_InitHandle.<p>
+
+<h2>Establish connections with another SCAT process.</h2><p>
+In order to communicate with other SCAT processes on the network a
+connection with the SCAT process must be established. These routines
+currently are something of a scam as they only store the input
+parameters for use by other SCAT library calls. This could change in
+the future and therefore these routines should be used.<p>
+
+<h3>Scat_InitHandle - create a handle to another SCAT process. Return
+a handle that can be used by the other SCAT library calls.</h3><p>
+<b>C language:</b><p>int Scat_InitHandle (hostname, programNumber,
+versionNumber)<p>
+char *hostname - the name of the host where the SCAT process you would
+like to connect to lives.<p>
+unsigned long programNumber - supplied by Scat_Probe.<p>
+unsigned long versionNumber - supplied by Scat_Probe.<p>
+<b>Fortran:</b><p>void scat_inithandle_(hostname, programNumber,
+versionNumber, hlen)<p>
+char *hostname - hostname where SCAT process lives.<p>
+unsigned long *programNumber - supplied by scat_probe_.<p>
+unsigned long *versionNumber - supplied by scat_probe_.<p>
+int hlen - length of the hostname string.<p>
+
+<h3>Scat_HandHost - return the hostname for this handle.</h3><p>
+This routine will answer the hostname associated with a handle.<p>
+<b>C language:</b><p>char *Scat_HandHost (handle)<p>
+int handle - supplied by Scat_Probe.<p>
+
+<h3>Scat_HandProgram - return the program number for this handle.</h3><p>
+This routine will answer the programNumber associated with a handle.<p>
+<b>C language:</b><p>char *Scat_HandProgram (handle)<p>
+int handle - supplied by Scat_Probe.<p>
+
+<h3>Scat_HandVers - return the version number for this handle.</h3><p>
+This routine will answer the version number associated with a handle.<p>
+<b>C language:</b><p>char *Scat_HandVers (handle)<p>
+int handle - supplied by Scat_Probe.<p>
+
+<h2>Embedding the SCAT library into existing applications</h2><p>
+The SCAT library can be embedded into an existing application. The
+application must periodically call Scat_Active to service the network
+connection.
+<h3>Scat_Active - poll the network connection for data to
+process.</h3><p>
+<b>C language:</b><p>void Scat_Active ()<p>
+<b>Fortran:</b><p>void scat_active_ ()<p>
+
+<h2>BOS delivery of SCAT Event data.</h2><p>
+The SCAT library provides a native BOS delivery scheme. By calling
+Scat_Filter2Bos the application can use BOS features to manipulate and
+retrieve physics event data. At the moment the application must drop
+all banks from any physics events currently contained in the BOS
+before calling Scat_Filter2Bos.<p>
+<h3>Scat_Filter2Bos - deliver Event data into BOS array.</h3><p>
+<b>C language:</b><p>int Scat_Filter2Bos (handle, msg, piw, iw_size)<p>
+int handle - supplied by Scat_Probe.<p>
+char * msg - see EventStore Users guide.<p>
+int  * piw - point to the BOS array.<p>
+int    iw_size - size of BOS array in words.<p>
+
+</body>

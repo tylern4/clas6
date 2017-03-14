@@ -1,0 +1,32 @@
+macro hvPlotCurrent nsamples=10 interval=10
+
+  if $vexist(mci).eq.0 then
+    vec/cre mcimf(12,16,10)
+    vec/cre mci(ecvecdim)
+    exec hvReadConfig ec1
+    exec hvReadConfig ec2
+    exec hvReadConfig ec3
+    exec hvReadConfig ec4
+    exec hvReadConfig ec5
+    exec hvReadConfig ec6   
+  endif
+  
+  vec/cre time([nsamples])
+  vec/cre y(5,[nsamples],6)
+  
+  next
+  null 0. 100. -1000. 0. 
+  
+  do i = 1,[nsamples]
+*    exec hvRemoteCa r eccur eccur
+*    exec hvReadSnap eccur MCI mcimf mci
+    vec/inp time([i]) $eval([i]*[interval])
+    do sec = 1,6
+      vec/copy mci(1:5,1,[sec]) y(:,[i],[sec])
+      hplot/symbols time([i]) y(1,[i],[sec]) 1 20+[sec] 
+    enddo
+    wait Sampling [interval]
+  enddo
+  
+return
+    

@@ -1,0 +1,19 @@
+macro ecShowLaser view=1 strip=22 xmin xmax
+
+  message ecShowLaser: Processing view [view] strip [strip]
+  global/import prefix
+  global/import nruns
+  
+  1d 100 ';ADC;Counts ' 500 [xmin] [xmax] 0.
+
+  do index = 1,[nruns]
+    run = $eval(runs([index]))
+    cd //[prefix][run]
+    exec ecComisADCPED
+    pmt = [strip] + 36*([view]-1)
+    nt/proj 100 1000.adcped([pmt]) iadc([pmt]).gt.10
+  enddo
+  
+  hi/plot 100
+  
+return

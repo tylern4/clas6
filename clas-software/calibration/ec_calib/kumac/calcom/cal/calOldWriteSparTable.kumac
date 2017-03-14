@@ -1,0 +1,64 @@
+macro calWriteSparTable det=0 runno pedoff
+
+  if [det]=0 then
+    message 'Purpose: Writes sparcification table to disk file [det][sec]_[run].spar'
+    message '  Usage: calWriteSparTable  det runno pedoff seclist'
+    message '    det: Detector (ec,cc,sc,ec1)'
+    message '  runno: Run number'
+    message ' pedoff: Offset added to pedestal for sparcification'
+    message 'seclist: List of sectors to process'
+    exitm
+  endif
+  
+  global/import sparpath
+  
+  d1 = $vdim([det]PedMean,1)
+  d2 = $vdim([det]PedMean,2)
+  d3 = $vdim([det]PedMean,3)
+    
+  vec/cre   dum([d1],[d2],[d3]) r 
+  vec/cre   thr([d1],[d2],[d3]) r
+  vec/cre ichan([d1],[d2],[d3]) i 
+  vec/cre  iroc([d1],[d2],[d3]) i 
+  vec/cre islot([d1],[d2],[d3]) i
+  vec/cre  ithr([d1],[d2],[d3]) i
+  vec/cre empty i 1000
+  vec/cre  y i
+  
+  vec/copy [det]adcmap dum
+  vec/copy [det]PedMean thr
+  
+  sigma chan = mod(dum,100.)
+  sigma roc  = int(dum/10000.)
+  sigma slot = int(mod(dum,10000.)/100.)
+  
+  sigma thr = (thr eq 0)*1000 + thr
+  sigma thr = int(thr+[pedoff])
+  
+  vec/copy chan ichan
+  vec/copy  roc iroc
+  vec/copy slot islot
+  vec/copy  thr ithr
+    
+  do i = 4,[#]
+    s = [%i]
+    file = [sparpath]/[det][s]_[runno].spar
+    message calWriteSparTable: Writing sparcification thresholds to [file]
+    fort/file 1 [file]
+    do j = 1,[d2]
+      do k = 1,[d1]
+        ve/write islot([k],[j],[s]),ichan([k],[j],[s]),ithr([k],[j],[s]) [file] 3I chopt=' '
+      enddo
+    enddo
+    stop = $eval(chan([d1],[d2],[s]))
+    sigma left=16-mod([stop],16)-1
+    do n = 1,left
+      ve/inp y $eval([stop]+[n]) 
+      ve/write islot([d1],[d2],[s]),y,empty [file] 3I chopt=' '
+    enddo
+    close 1    
+  enddo
+  
+  vec/del dum,thr,ichan,iroc,islot,ithr,empty,y,chan,roc,slot
+   
+return

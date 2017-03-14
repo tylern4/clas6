@@ -1,0 +1,7 @@
+from build_system import environment
+
+env = environment.env(deps=['clas6','cern'])
+
+env.load_dependency({'clas6' : ['recsis_libs', 'default_libs']})
+
+env.program(target='elast_gen',source=['elast_gen.F','bos_ini.F','bos_out.F','bos_end.F'])

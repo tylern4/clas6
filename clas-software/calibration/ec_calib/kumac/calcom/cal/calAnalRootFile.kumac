@@ -1,0 +1,126 @@
+macro process
+
+  exec calAnalRootFile#init
+  exec calAnalRootFile#getruns
+  exec calAnalRootFile#storeruns
+  exec calAnalRootFile#analruns
+  
+return
+
+macro init 
+
+  vec/cre thr2(25,64,100)
+  vec/cre pedm(25,64)
+  vec/cre pedm2(25,64)
+  vec/cre pederr(25,64)
+  vec/cre goodrun(200) i
+  
+return
+
+macro getruns
+  
+  exec utilFindRun ec1_clasprod_ pedman/
+  
+return
+
+macro read path j
+
+  message Reading from [path]
+  
+  vec/cre islot(700) i
+  vec/cre ichan(700) i
+  vec/cre ithr1(700) i
+  vec/cre ithr2(700) i
+  
+  vec/read islot,ichan,ithr1,ithr2 [path]  
+  len = $vlen(ithr1)
+  
+  vec/copy ichan chan
+  sigma chan=chan+1
+  
+  do i = 1,[len]
+    vec/inp thr2($eval(islot([i])),$eval(chan([i])),[j])  $eval(ithr2([i]))
+  enddo
+  
+  vec/del islot,ichan,ithr1,ithr2
+
+return
+
+macro storeruns
+
+  message First run: $eval(ec1_runs(1)) _
+           Last run: $eval(ec1_runs($vlen(ec1_runs)))
+  read run1 'Enter first run:'
+  read nrun 'Enter number of runs (10 max) : '
+  
+  k = 0
+  maxruns = $vlen(ec1_runs)
+  
+  do i = 1,[maxruns]
+    thisrun = $eval(ec1_runs([i]))
+    if ([thisrun].ge.[run1].and.[k].lt.[nrun]) then
+      run = ec1_runs([i])
+      k = [k] + 1
+      exec calAnalRootFile#read pedman/ec1_clasprod_0[run]_hard.spar [k]
+      vec/inp goodrun([k]) [run]
+    endif
+  enddo
+  
+  global/cre calAnalRootFile.nruns [k]
+  
+return
+
+macro analruns
+
+  global/imp calAnalRootFile*
+  
+  nruns = [calAnalRootFile.nruns]
+    
+  2d 100 '' 11 4. 15. 64 1. 65. 0.
+  2d 101 '' 11 4. 15. 64 1. 65. 0.
+  
+  i = 1
+  
+loop:
+
+  run1 = goodrun([i]); run2 = goodrun([i]+1)
+  title = Difference (left) Ratio (right) of Run [run1] and [run2]
+  title_gl [title]
+
+  put_vect/contents 100 thr2(4:14,:,[i])
+  put_vect/contents 101 thr2(4:14,:,$eval([i]+1))
+  
+  sub 100 101 102
+  divide 100 101 103
+  
+  min 102 -10;  max 102 10
+  min 103 0.95; max 103 1.05 
+  
+  zone 2 1
+  
+  hi/plot 102 colz ; hi/plot 103 colz
+  
+  i = [i]+1
+  
+  wait
+  
+  go to loop
+
+  do i = 1,[nruns]
+    put_vect/contents 100 thr2(:,:,[i])
+    put_vect/contents 200 thr22(:,:,[i])
+    add 100 101 101 1. 1.
+    add 200 201 201 1. 1.
+  enddo
+  
+  get_vec/contents 101 pedm
+  get_vec/contents 201 pedm2
+  
+  sigma pedm=pedm/[nruns]
+  sigma pedm2=pedm2/[nruns]
+  
+  sigma pederr=sqrt((pedm2-pedm**2)/([nruns]-1))
+  
+  put_vect/contents 100 pederr
+    
+return

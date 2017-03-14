@@ -1,0 +1,72 @@
+#!/usr/local/bin/perl
+#
+# $Id: mod_ddl,v 1.1.1.1 1997/03/28 20:49:25 marki Exp $
+##########################################################################
+#   Brief Discription:
+#
+#   execution:  dummy
+#
+#   required input:
+#
+#   optional input:
+#
+#   output:    
+#
+#   examples: 
+#
+#   created:  Tue Jul  2 14:02:52 EDT 1996
+#
+#   author of the script: David Turissin
+#   
+##########################################################################
+#  if routine name blank or ? go to help
+if ($ARGV[0] !~ /\w/ || $ARGV[0] eq "\?" || $ARGV[0] eq "h") {
+   print "dummy  I: Executing help subroutine\n";
+   &wrt_help; 
+}
+
+$ddl_file = $ARGV[0];
+$AW1 = $ARGV[1];
+$AW2 = $ARGV[2];
+$AW3 = $ARGV[3];
+$AW4 = $ARGV[4];
+
+rename("$ddl_file","$ddl_file.old");
+open(IN,"$ddl_file.old");
+open(OUT,">$ddl_file");
+while (<IN>) {
+    if (/TABLE/i) {
+	s/!(.*)!/! $AW1 $AW2 $AW3 $AW4 !/;
+    }
+   print OUT $_;
+   print $_;
+}
+close($ddl_file.old);
+close($ddl_file);
+
+#
+# help package
+sub wrt_help {
+print "dummy  h: put help package here\n";
+print "dummy  h:\n";
+print "dummy  h: execution:  dummy  arg[0] arg[1]\n";
+print "dummy  h:\n";
+print "dummy  h: output:  \n";
+print "dummy  h:\n";
+print "dummy  h: required input:\n";
+print "dummy  h:\n";
+print "dummy  h: optional input:\n";
+print "dummy  h:\n";
+print "dummy  h: examples:\n";
+print "dummy  h: dummy arg[0] arg[1]\n";
+print "dummy  h:\n";
+print "dummy  Q: Please enter first argument: ";
+$ARGV[0] = <STDIN>;
+chop($ARGV[0]);
+print "dummy  Q: Please enter second argument: ";
+$ARGV[1] = <STDIN>;
+chop($ARGV[1]);
+print "dummy  h: Thank you and have a most pleasant day \n";
+}
+
+

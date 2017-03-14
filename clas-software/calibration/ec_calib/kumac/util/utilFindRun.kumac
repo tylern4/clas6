@@ -1,0 +1,30 @@
+macro anaFindRun tag=_cooked
+
+  case [#] in
+    (0) path1 = work/
+        npath = 1
+    (*) shift; do i = 1,[#]; path[i] = [%i]; enddo
+        npath = [#]
+  endcase
+  
+  prefix = $substring([tag],1,3) 
+  
+  vec/cre [prefix]_runs(2000) r
+  
+  do i = 1,[npath]
+    command = 'ls '//[path[i]]//[tag]//'*'
+    string  = $shell([command],' ')
+    numfiles = $words([string],' ')
+    do j = 1,[numfiles]
+      file = $word([string],[j],1,' ')
+      n1   = $index([file],[tag])+$len([tag])
+      n2   = $index([file],'_hard.spar')
+      len  = [n2] - [n1]
+      run  = $substring([file],[n1]+1,[len]-1)
+      vec/inp [prefix]_runs([j]) [run]
+    enddo
+  enddo
+  
+return
+      
+    

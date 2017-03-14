@@ -1,0 +1,26 @@
+from build_system import environment
+
+ClasToolEnv = environment.env(deps=['clas6', 'root'])
+ClasToolEnv.load_dependency(['clas6', 'root'])
+
+ClasToolLibs = ClasToolEnv.sconstruct('''\
+    ClasBanks
+    Corrections
+    DSTReader
+    EventSelectorG
+    FillBank
+    Filter
+    Gsim
+    NT10Reader
+    PartSieve
+    TClasTool
+    TPhysClass
+    Utils
+    VirtualReader
+    '''.split())
+
+    ## MapTools # not working yet - can't find header: MySQLServer.h
+    ## TNeutralPair # not working - can't find header: TMomCorEG3.h
+
+ClasToolLib = ClasToolEnv.library(target = 'ClasTool', source = ClasToolLibs)
+ClasToolEnv.return_from_sconstruct(ClasToolLib)

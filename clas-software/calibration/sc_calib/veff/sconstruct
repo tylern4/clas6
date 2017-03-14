@@ -1,0 +1,14 @@
+from build_system import environment
+
+veff_calib_deps = {
+                  'clas6': ['default_libs'], 
+	          'root':['default_libs']
+	          }
+	
+veff_calib_env = environment.env(deps=veff_calib_deps.keys())
+veff_calib_env.load_dependency(veff_calib_deps)
+
+veff_calib_env.AppendUnique(LIBS='libgamecock.a')
+
+veff_calib_env.program(target='veff_calib', source='veff_calib.c')
+

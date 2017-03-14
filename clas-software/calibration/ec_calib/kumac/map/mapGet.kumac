@@ -1,0 +1,18 @@
+macro mapGet map=0 subsystem item size run file
+
+  if [map].eq.0 then
+    message '  Purpose: Retrieve contents of map into file'
+    message '    Usage: mapGet map subsystem item size run file'
+    message '      map: path to map file e.g.-$CLAS_PARMS/Maps/EC_ATTEN.map'
+    message 'subsystem: e.g.- inner,outer'
+    message '     item: e.g. - u,v,w'
+    message '     size: size of array'
+    message '      run: run number'
+    message '     file: output file of <size> numbers'
+    exitm
+  endif     
+ 
+  command = get_map_float -m[map] -s[subsystem] -i[item] -l[size] -t[run] > [file]
+  shell $quote([command])
+  
+return   

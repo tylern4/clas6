@@ -1,0 +1,58 @@
+#! /usr/bin/env perl
+
+@arr = ();
+$neg = 0;
+$fortran = 0;
+
+foreach (@ARGV) {
+    if (/^-n.*/) {
+        $neg = 1;
+    } 
+    elsif (/^-f.*/) {
+        $fortran = 1;
+    }
+    else {
+        push(@arr,($_));
+    }
+}
+ 
+@ARGV = @arr;
+
+$out = "";
+
+if ($#ARGV > -1) {
+
+
+foreach $arg (@ARGV) {
+  if (-e $arg) {
+    open(A,$arg);
+    $main = 0;
+    while (<A>) {
+
+      if ($fortran) {
+	if (!/^\S+/) {
+	  if (/\s+PROGRAM .*/ || /\s+program .*/) {
+	    $main = 1;
+	  }
+	}
+      } else {
+	if (/\s+main\s*\(/ || /^main\s*\(/) {
+	  $main = 1;
+	}
+      }
+    }
+    if ($neg) {
+      if (!$main) {
+	$out = $out . " $arg ";
+      }
+    } else {
+      if ($main) {
+	$out = $out . " $arg ";
+      }
+    }
+  }
+}
+
+print "$out\n";
+}
+

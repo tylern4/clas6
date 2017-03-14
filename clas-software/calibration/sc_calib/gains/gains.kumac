@@ -1,0 +1,211 @@
+macro summary
+mess ' Macro plot - Plot Energy loss in all scintillators'
+*
+* setup frames as for plot, but call min_kumac
+*
+option *
+set *
+next
+*
+* open metafile
+*
+for/file 66 means.ps
+meta 66 -111
+*
+* summary plots of peaks and chi2
+*
+nscint = 288
+vector/create ihist([nscint]) I [nscint]*0.
+vector/create scint([nscint]) R [nscint]*0.
+vector/create err([nscint]) R [nscint]*.01
+vector/create istat([nscint]) I [nscint]*0.
+vector/create peaks([nscint]) R [nscint]*0.
+vector/create peakerr([nscint]) R [nscint]*0.
+vector/create chi2([nscint]) R [nscint]*0.
+vector/read ihist,peaks,peakerr,chi2,istat 'min_parm' '4x,i2,2f10.3,f8.2,i4'
+vector/copy ihist scint
+zone 1 2
+xmin = 0.
+xmax = 50.
+ymin = 0.
+ymax = 2000.
+hplot/null [xmin] [xmax] [ymin] [ymax]
+hplot/errors scint peaks err peakerr [nscint]
+hplot/atitle 'Scintillator Number' 'Peak'
+ymin = 0.
+ymax = 3.
+hplot/null [xmin] [xmax] [ymin] [ymax]
+hplot/sym scint chi2 [nscint]
+hplot/atitle 'Scintillator Number' 'Chi2'
+wait
+*
+* histogram results
+*
+set stat 1111111
+hi/create/1d 1 'Energy Loss Peak (ADC)' 100 0. 2000.
+hi/create/1d 2 'Chi2 for Peak Fit' 100 0. 5.
+vector/hfill peaks 1
+vector/hfill chi2 2
+option date
+option stat
+hi/plot 1
+hi/plot 2
+wait
+*
+* plot
+*
+* set options
+*
+set stat 1111
+option date
+set vsiz .2
+set ytic .2
+set xtic .2
+set tsiz .2
+set ymgl 1.
+set ymgu 1.
+set ywin 1.
+set xwin 1.
+set xmgl 0.5
+set xmgr 0.5
+set yhti 0.5
+set xsiz 20.
+set ysiz 20.
+set tsiz 0.2
+set csiz 0.28
+zone 4 6
+*
+* call histograms setup by min_means_main
+*
+exe min_kumac.kumac
+*
+* reset values to defaults
+*
+option *
+set *
+*
+* close file
+*
+close 66
+*
+* exit and end macro definition
+*
+exitm
+return
+macro plot
+mess ' Macro plot - Plot Energy loss in all scintillators'
+* 
+* plot TOF energy loss histograms 
+*	101 - 148    sector 1, scintillators 1-48 
+*	201 - 248    sector 2, scintillators 1-48 
+*	301 - 348    sector 3, scintillators 1-48 
+*	401 - 448    sector 4, scintillators 1-48 
+*	501 - 548    sector 5, scintillators 1-48 
+*	601 - 648    sector 6, scintillators 1-48
+*
+* set options
+*
+option date
+*set stat 1111111
+*set fit 111
+set vsiz .2
+set ytic .2
+set xtic .2
+set tsiz .2
+set ymgl 1.
+set ymgu 1.
+set ywin 1.
+set xwin 1.
+set xmgl 0.5
+set xmgr 0.5
+set yhti 0.5
+set xsiz 20.
+set ysiz 20.
+set tsiz 0.2
+set csiz 0.28
+next
+*
+* open metafile
+*
+for/file 66 means.ps
+meta 66 -111
+*
+* plot
+*
+zone 4 6
+*
+* loop over sectors
+*
+do j=1,1
+   exec plot_sector sector=[j]
+enddo
+*
+* close file
+*
+close 66
+*
+* exit and end macro definition
+*
+exitm
+return
+macro plot_sector sector=1 scint=1
+mess ' Begin plotting with sector=' [sector] ' scint=' [scint]
+* 
+* plot TOF energy loss histograms 
+*	101 - 148    sector 1, scintillators 1-48 
+*	201 - 248    sector 2, scintillators 1-48 
+*	301 - 348    sector 3, scintillators 1-48 
+*	401 - 448    sector 4, scintillators 1-48 
+*	501 - 548    sector 5, scintillators 1-48 
+*	601 - 648    sector 6, scintillators 1-48
+*
+* plot
+*
+* loop over scints
+*
+do j=1,25,24
+   exec page sector=[sector] scint=[j]
+   wait
+enddo
+*
+* exit and end macro definition
+*
+exitm
+return
+macro page sector=1 scint=1
+mess ' macro test'
+mess 'Macro page, sector=' [sector] ' scint=' [scint]
+*
+* plot 24 histograms
+*
+do j=[scint],[scint]+23
+   hi/plot $eval([sector]*100+[j])
+enddo
+*
+* exit and end macro definition
+*
+exitm
+return
+macro fit sector=1 scint=10
+mess ' Macro Fit: sector=' [sector] ' scint=' [scint]
+*
+* fit energy loss histogram
+*
+npar = 6
+vector/create ihist I
+vector/create par([npar]) R 600. 40. 1. 5000. 0. 0. 0.
+ihist = [sector]*100 + [scint]
+mess ' fit to histogram=' [ihist]
+vector/print par
+*
+*hi/fit [ihist] g ! 3 par
+*vector/print par
+*hi/fit [ihist] g+p2 ! [npar] par
+*hi/fit [ihist] g+e ! [npar] par
+hi/fit [ihist] means_fit.f U [npar] par
+*func/plot means_fit.for 200. 2200.
+vector/print par
+hist/plot [ihist]
+*
+exitm
+return

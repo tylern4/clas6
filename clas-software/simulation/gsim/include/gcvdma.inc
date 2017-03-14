@@ -1,0 +1,9 @@
+c  from patch gcdes in file /usr/site3/cern/hp700_ux90/94a/src/car/geant321.car on Thu Nov 10 11:00:38 EST 1994
+c  this is seq: GCVDMA
+      COMMON/GCVDMA/NVMANY,MANYLE(20),MANYNA(20,15),
+     +MANYNU(20,15),NFMANY,MYCOUN,IMYSE,RAYTRA,VECCOS(3)
+C
+      INTEGER NVMANY,MANYLE,MANYNA,MANYNU,
+     +        NFMANY,MYCOUN,IMYSE
+      REAL RAYTRA,VECCOS
+C

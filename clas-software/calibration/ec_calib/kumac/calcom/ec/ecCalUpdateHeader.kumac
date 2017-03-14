@@ -1,0 +1,49 @@
+macro ecCalUpdateHeader name version runno 
+
+  exec bos_init
+  
+  case [name] in
+    (ECCa) type = 3
+    (ECCt) type = 4
+    (ECCl) type = 5   
+  endcase
+  
+  newversion = [version]+1
+  
+  oldfile = [name]_[version].bfp
+  newfile = [name]_[newversion].bfp
+
+  if $fexist([oldfile]) then
+    exec bos_open [oldfile] 56 BOSIN read old
+    exec bos_read 56
+    exec bos_close BOSIN
+  else
+    message File [oldfile] does not exist! Exiting...
+    exitm
+  endif
+  
+  exec bos_makevec HCAL 1 1
+  
+  vec/inp HCALv3   [runno]    
+  exec bos_putvec  HCAL 0 3
+
+  exec bos_open [oldfile] 56 BOSIN write new
+  exec bos_write   56
+  exec bos_close   BOSIN
+    
+  vec/inp HCALv1   [newversion]
+  vec/inp HCALv2   [runno]
+  vec/inp HCALv3   [runno]
+  vec/inp HCALv4   $exec('unixtime')
+  vec/inp HCALv5   [type]
+  exec bos_putvec  HCAL 0 1 2 3 4 5
+  do sector = 1,6
+    exec bos_putvec  [name] [sector] 
+  enddo  
+  exec bos_open [newfile] 57 BOSOUT write new
+  exec bos_write   57
+  exec bos_close   BOSOUT
+  exec bos_drop
+    
+return
+  

@@ -1,0 +1,29 @@
+macro hvPut det=0 sec vec 
+
+  if [det].eq.0 then
+   message 'Purpose: Put hv values into mainframe'
+   message '  Usage: hvPut det sec vec'
+   message '    det: Detector package (EC,SC,CC)'
+   message '    sec: Sector number (1,2,3,4,5,6) '
+   message '    vec: KUIP vector containing voltages'
+   exitm
+  endif
+  
+  close 0
+  
+  if $vexist([dbvar]).eq.0 then
+    vec/cre [dbvar]mf(12,16,10)
+    vec/cre [dbvar]([det]vecdim)
+  endif
+  
+  time = $exec('unixtime')
+  
+  shell mv kumac/hv/db/[det][sec].snap kumac/hv/db/[det][sec]_previous.snap
+  
+  exec hvReadConfig [det][sec]
+  exec hvWriteSnap [det] [sec] [vec]
+  exec hvRemoteCa w 0 [det][sec]
+  shell mv kumac/hv/db/[det][sec].snap kumac/hv/db/[det][sec]_w[time].snap
+  shell ln -s [det][sec]_w[time].snap kumac/hv/db/[det][sec].snap 
+  
+return

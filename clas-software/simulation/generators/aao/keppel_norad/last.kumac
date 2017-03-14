@@ -1,0 +1,24 @@
+*** Begin of history file: Wed Aug  2 12:25:21 2000
+hi/file 1 keppel-noradg-02aug00.rz.0
+hi/file 1 keppel-noradg-2.5-02aug00.rz.0
+nt/print 10
+nt/pl 10.w thete<45..and..4<(qx**2+qz**2-q0**2)<.6
+hi/file 2 /data/ralph/CLAS/keppel_rad/keppel-radgen-2.5-01aug00.rz.0
+nt/pl //lun2/10.w thete<45..and..4<(qx**2+qz**2-q0**2)<.6 option=sl
+hi/copy 1000000 2000
+nt/pl 10.w thete<45..and..4<(qx**2+qz**2-q0**2)<.6
+hi/copy 1000000 1000
+hi/oper/div 1000 2000 3000 1. 1.
+hi/pl 3000
+hi/pl 1000
+hi/pl 2000
+nt/pl //lun2/10.w thete<45..and..4<(qx**2+qz**2-q0**2)<.6
+hi/copy 1000000 2000
+hi/oper/div 1000 2000 3000 1. 1.
+hi/pl 3000
+nt/pl //lun1/10.w thete<45..and..4<(qx**2+qz**2-q0**2)<.6
+hi/copy 1000000 1000
+hi/oper/div 1000 2000 3000 1. 1.
+hi/pl 3000
+q
+*** End   of history file: Wed Aug  2 13:57:22 2000

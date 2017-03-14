@@ -1,0 +1,20 @@
+macro hvDemo det=0 sec dbvar mf
+
+  if [det].eq.0 then
+   message 'Purpose: Demo of usage of hv* kumacs'
+   message '  Usage: hvDemo det sec dbvar mf'
+   message '    det: Detector package (EC,SC,CC)'
+   message '    sec: Sector number (1,2,3,4,5,6)'
+   message '  dbvar: EPICS HV database variable (DVI,MVI,MCI)'
+   message '     mf: Mainframe number (1-6:EC,7,8:EC,CC,9,10:SC)'
+   exitm
+  endif
+  
+  exec hvGet [det] [sec] [dbvar]  
+  exec hvPlot [mf] [dbvar] [dbvar]mf
+  
+  global/del HVtag*
+  global/del HVmap*
+  global/del [det]map*
+  
+return

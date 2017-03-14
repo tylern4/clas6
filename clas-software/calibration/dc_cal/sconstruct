@@ -1,0 +1,5 @@
+from build_system import environment
+
+dc_cal_env = environment.env(deps='clas6')
+
+dc_cal_env.sconstruct("aligndc".split())

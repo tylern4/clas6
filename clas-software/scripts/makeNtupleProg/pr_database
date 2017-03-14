@@ -1,0 +1,26 @@
+#! /usr/local/bin/perl
+
+# This is a support routine to handle removing the database...
+
+$orig_dir = $ENV{"PWD"};
+$argc = @ARGV;
+
+if ( -e "$orig_dir/headers.db") {
+    dbmopen (%HEADERS,"$orig_dir/headers",0444);
+    while (($key,$value) = each(%HEADERS)) {
+	if ($argc != 0) {
+	    for ($i=0; $i < $argc; $i++) {
+		$_ = $ARGV[$i];
+		tr/a-z/A-Z/;
+		if ($_ eq $key) {
+		    print STDERR "$key has a unique id of $value\n";
+		}
+	    }
+	} else {
+	    print STDERR "$key has a unique id of $value\n";
+	} 
+    }
+} else {
+    print STDERR "Database \"headers\" doesn't exist.   Nothing to print.\n";
+}
+

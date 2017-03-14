@@ -1,0 +1,32 @@
+mir = 10000 is overprecise
+1000 still have 1% precision but run much faster
+mir means minimum number of subdivisions
+OT = precision - right now 1%
+
+ma=100000?
+
+mir = 4th argument of d01fce:
+integer minimum number of integrand values to be allowed, which must not exceed maxpts (fifth argument)
+
+ma  = 5th argument of d01fce: integer maximum number of integrand values to be allowed, which must be at least
+      2**ndim+2*ndim**2+2*ndim+1.  ndim is 3 in exclurad
+
+make.rules defective: it wants to link with g++ - just copy and paste make env
+with g77
+
+
+
+
+table reading:
+
+for SAID2008, mpintp has to be modified (Q2max=4)
+I also modified exclurad.f at line 4429, to read in format "*" instead of FMT=15
+
+
+
+added the external file 
+
+multipole_amps.F  that will also extrapolate multipoles for q2 greater than 5
+
+
+

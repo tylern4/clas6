@@ -1,0 +1,85 @@
+macro ecSetupVectors
+
+* Author:	Cole Smith
+* Purpose: 	Create and initialize vectors
+
+  message ecSetupVectors: Creating vectors
+  
+  global/import vecpath
+   
+  vec/cre attADBmean(36,6,6)
+  vec/cre attADBmeane(36,6,6)
+  vec/cre attADBsig(36,6,6)
+  vec/cre attGSIMmean(36,6,6)
+  vec/cre attADBfit(36,6,6)
+  vec/cre attGSIMfit(36,6,6)
+  vec/cre ccutinner(1)
+  vec/cre ccutouter(1)
+  vec/cre chi2(1)
+  vec/cre cnts1(1296)
+  vec/cre cnts2(1296)
+  vec/cre correction(1)
+  vec/cre costh(1296)
+  vec/cre csum1(36)
+  vec/cre csum2(36)
+  vec/cre csum3(36)
+  vec/cre ecFitadc_atten(36,6,2)
+  vec/cre ecFitadc_chi2(36,6)
+  vec/cre ecFitadc_errpar(36,6,2)
+  vec/cre ecFitadc_par(36,6,2)
+  vec/cre ecFitadc_ymaxdat(36,6,2)
+  vec/cre ecFitadc_ymaxfit(36,6,2)
+  vec/cre ecFitpe_atten(36,6,2)
+  vec/cre ecFitpe_chi2(36,6)
+  vec/cre ecFitpe_errpar(36,6,2)
+  vec/cre ecFitpe_par(36,6,2)
+  vec/cre ecFitpe_ymaxfit(36,6,2)
+  vec/cre ecFitpe_ymaxdat(36,6,2)
+  vec/cre frac(1)
+  vec/cre nrg(6)
+  vec/cre normpix(36,6,6)
+  vec/cre phi(1296)
+  vec/cre pixmin(1)
+  vec/cre pixmax(1) 
+  vec/cre pixdat(1296)
+  vec/cre pixwidth(6)
+  vec/cre theta(1296)
+  vec/cre xpix(3,1296)
+  vec/cre ypix(3,1296)
+  
+  do i = 1,6
+    vec/cre adc[i](1296)
+    vec/cre adcerr[i](1296)
+    vec/cre fitpar[i](3,1296)
+    vec/cre fitpare[i](3,1296)
+    vec/cre pe[i](1296)
+    vec/cre peerr[i](1296)
+  enddo
+  
+  message ecSetupVectors: Initializing vectors
+
+  vec/inp ccutinner 100000
+  vec/inp ccutouter 100000
+  vec/inp nrg 10 10 10 16 16 16
+  
+  message ecSetupVectors: Reading vectors from [vecpath]
+  
+  vec/read normpix    	[vecpath]/normpix.vec
+  vec/read costh    	[vecpath]/ec_pixcosth.vec
+  vec/read csum1    	[vecpath]/csum1.vec
+  vec/read csum2   	[vecpath]/csum2.vec
+  vec/read csum3    	[vecpath]/csum3.vec
+  vec/read phi      	[vecpath]/ec_pixphi.vec
+  vec/read pixwidth 	[vecpath]/ec_pixwidth.vec
+  vec/read theta    	[vecpath]/ec_pixtheta.vec
+  vec/read xpix     	[vecpath]/ec_xpix.vec
+  vec/read ypix     	[vecpath]/ec_ypix.vec
+  vec/read attADBmean	[vecpath]/newatten/attenstackmean_adbextrap.vec
+  vec/read attADBmeane	[vecpath]/newatten/attenstackmeane_adb.vec
+  vec/read attADBsig	[vecpath]/atten/attenstacksig_adb.vec
+  vec/read attGSIMmean	[vecpath]/atten/attenstackmean_gsim.vec
+  vec/read attADBfit    [vecpath]/atten/attenstackfit_adb.vec
+  vec/read attGSIMfit	[vecpath]/atten/attenstackfit_gsim.vec
+  
+return
+  

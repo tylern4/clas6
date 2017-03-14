@@ -1,0 +1,14 @@
+from build_system import environment
+
+sc_mon_deps = {
+                  'clas6': ['default_libs', 'recsis_libs'], 
+	          'cern':['default_libs']
+	          }
+	
+sc_mon_env = environment.env(deps=sc_mon_deps.keys())
+sc_mon_env.load_dependency(sc_mon_deps)
+
+sc_mon_env.AppendUnique(LIBS='-lscat')
+
+sc_mon_env.program(target='sc_mon', source='sc_mon.c')
+

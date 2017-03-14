@@ -1,0 +1,66 @@
+#!/usr/local/bin/perl
+
+if ($ARGV[0] eq "-h") { 
+    &PrintUsage;
+    exit(0);
+}
+
+local($entry) = $ARGV[0];
+$entry =~ s/\.db//;
+dbmopen(%ENTRY, $entry, 0644) || die "\n$0: Could not open database file $ARGV[0]\n";
+
+print "Please enter the variable to add or change:  ";
+
+$var = <STDIN>;
+chop($var);
+
+if ($ENTRY{$var} eq "") {
+    print "Variable $var does not exist.\n";
+    print "Do you want to create it(y|n)? : \n";
+    $ans = <STDIN>;
+    chop($ans);
+    if ($ans eq "n") {
+	dbmclose(%ENTRY);
+	exit(0);
+    } else {
+	print "Variable '$var' now has a value of $ENTRY{$var}\n";
+	print "Do you want to alter that value(y|n)? : \n";
+	$ans = <STDIN>;
+	chop($ans);
+	if ($ans eq "n") {
+	    dbmclose(%ENTRY);
+	    exit(0);
+	} else {
+	    print "Enter the new value here: \n";
+	    $value = <STDIN>;
+	    chop($value);
+	    $ENTRY{$var} = $value;
+	    print "New value for $var is $ENTRY{$var}";
+	    dbmclose(%ENTRY);
+	    exit(0);
+	}
+    }
+}  else {
+    print "Variable '$var' now has a value of $ENTRY{$var}\n";
+    print "Do you want to alter that value(y|n)? : \n";
+    $ans = <STDIN>;
+    chop($ans);
+    if ($ans eq "n") {
+	dbmclose(%ENTRY);
+	exit(0);
+    } else {
+       	print "Enter the new value here: \n";
+	$value = <STDIN>;
+	chop($value);
+	$ENTRY{$var} = $value;
+	print "New value for $var is $ENTRY{$var}\n";
+	dbmclose(%ENTRY);
+	exit(0);
+    }
+}
+
+dbmclose(%ENTRY);
+	
+sub PrintUsage {
+    print "\n\tUsage: $0 <file_name>\n\n";
+}

@@ -1,0 +1,45 @@
+#!/bin/tcsh -f
+# 
+#  This script adds new calib. const. to LAC_calib.map file 
+# 
+if ( -r $1 ) then     
+else 
+   echo 'File "'$1'"' " doesn't exist" 
+   exit 
+endif 
+# debuging
+echo 'Filename ' $1 ' Run Number ' $2 
+echo '$CLAS_PARMS='$CLAS_PARMS
+#
+if ( -r LAC_CALIB.map ) then 
+  rm LAC_CALIB.map
+endif 
+#  
+cp $CLAS_PARMS/Maps/LAC_CALIB.map ./ 
+chmod +w LAC_CALIB.map
+# 
+#for sector1 left 
+awk '{if($1 == 1) print $8}' $1 | put_map_float -mLAC_CALIB.map -ssector1 -ic1l -t$2 
+ 
+#for sector1 right 
+awk '{if($1 == 1) print $8}' $1 | put_map_float -mLAC_CALIB.map -ssector1 -ic1r -t$2 
+ 
+#for sector2 left 
+awk '{if($1 == 2) print $8}' $1 | put_map_float -mLAC_CALIB.map -ssector2 -ic1l -t$2 
+     
+#for sector2 right 
+awk '{if($1 == 1) print $8}' $1 | put_map_float -mLAC_CALIB.map -ssector2 -ic1r -t$2 
+ 
+#
+echo " LAC_CALIB.map has been succesfully updated"
+$CLAS_BIN/scan_map -t LAC_CALIB.map
+#
+if ( -d ../Maps ) then
+  rm -f ../Maps/*.map
+else
+  mkdir ../Maps
+endif
+#
+echo "... Coping LAC_CALIB.map to ../Maps/ "
+mv LAC_CALIB.map ../Maps/ 
+if ( -f ../Maps/LAC_CALIB.map ) echo "... OK."

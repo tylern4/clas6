@@ -1,0 +1,38 @@
+macro hvWriteReq det sec dbvar
+  
+  file = kumac/hv/db/[det][sec].req
+  
+  message hvWriteReq: Writing request file [file]
+
+  det = $upper([det])
+  
+  global/imp [det]map*
+  global/imp Hvtag*  
+
+  if $fexist([file]) then
+    shell rm [file]
+  endif
+  
+  lun1 = 2
+  fort/file [lun1] [file] new
+
+  case [det] in
+     (EC) pmtmax=36;laymax=6
+     (CC) pmtmax=18;laymax=2
+     (SC) pmtmax=45;laymax=2
+  endcase
+  
+  do lay = 1,[laymax]
+    do pmt = 1,[pmtmax]
+      if [pmt].lt.10 then
+        pmt = 0[pmt]
+      endif
+      string1 = B_hv_[Hvtag([[det]map([pmt],[lay],[sec])])].[dbvar]
+      string1 = $quote([string1])
+      call write([lun1],[string1],' ',' ') 
+    enddo
+  enddo
+  
+  close [lun1]
+  
+return

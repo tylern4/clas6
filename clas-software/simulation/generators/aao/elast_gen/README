@@ -1,0 +1,24 @@
+The old directory contains the command line input version
+of elast_gen.  I prefer flat files for fortran since the
+success of cc language wrappers is strongly platform
+dependent.
+
+C Smith
+
+------
+
+Last modified: puneetk Jan 12, 2012
+
+There was no sconstruct or Makefile present in the directory. This code was
+compiled for x86_64 using the 32bit standard environment using scons by
+issuing the command
+
+$ scons alignbits=32
+
+I had to modify the bos_end.F function to comment out a non-critical command
+that spits errors during compiling.
+
+The code runs fine on x86_64 machines in 64bit environment as well. Couldn't
+get the C wrapper working.
+
+puneetk

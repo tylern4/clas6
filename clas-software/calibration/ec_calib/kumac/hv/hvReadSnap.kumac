@@ -1,0 +1,54 @@
+macro hvReadSnap file=0 dbvar=DVI vec1=dvimf vec2=dvi
+
+  if [file]=0 then
+    message Purpose: Reads *.snap files, loads KUIP vector with EPICS database values
+    message Usage: hvReadSnap file dbvar vec1 vec2
+    message file:  Snapshot file name (e.g. EC_Sector5_DVI)
+    message dbvar: EPICS database variable (e.g. DVI MCI MVI)
+    message vec1:   KUIP vector dimensioned (12,16,10)=>(chan,slot,mainframe)
+    message vec2:   KUIP vector dimensioned (pmt,lay,sec) according to detector
+    exitm
+  endif
+  
+  global/imp *map*
+  
+  file = kumac/hv/db/[file].snap
+  
+  exec hvGetSnapFile [file]
+  
+  tag = '$'
+  
+  global/import snapfilecontents
+  global/import nlines
+  
+  string = $word([snapfilecontents],1,1,[tag])
+  nwords = $words([string],' ')
+  
+  if [nwords].eq.1 then
+    message hvReadSnap: No voltages returned...EPICS probably down!
+    exitm
+  endif 
+    
+  n = 0
+  
+  while [n].lt.[nlines] do 
+    n = [n] + 1
+    string	= $word([snapfilecontents],[n],1,[tag])
+    pv      	= $word([string],1,1,' ')
+    volt    	= $word([string],2,1,' ')
+    pnt     	= $substring($word([pv],1,1,'.'),6,$len([pv]))
+    det 	= $word([pnt],1,1,'_')
+    var     	= $word([pv],2,1,'.')
+    bospoint 	= [Hvmap([pnt])]
+    hvpoint 	= [[det]map([bospoint])]
+    if [dbvar].eq.[var] then
+      vec/inp [vec1]([hvpoint])  [volt]
+      vec/inp [vec2]([bospoint]) [volt]
+    endif 
+  endwhile
+  
+  message hvReadSnap: Writing to vector [vec2]
+  
+return
+  
+  

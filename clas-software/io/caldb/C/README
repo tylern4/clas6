@@ -1,0 +1,250 @@
+
+The following is a description of  user-interface "C" functions for analysis 
+ and detector calibration programs. Usage examples with calls listed below
+are provided in the maintest.c  program (in caldbC directory).   
+Database server and client library should have MySQL version 3.22.00 or greater.
+
+An example of an utility programs writing a text file with calibration
+constants (int,float) to the calibration database (an emulation of put_map
+utility) and reading from dbase are provided in caldb/utilities. 
+The file  caldb_write.c caldb_read.c  after  make are creating 
+corresponding  executables. See caldb/utilities/README and also 
+command line help for details.
+
+
+1. Defining Data Structures
+2. Access control
+3. Tasks
+  a) Production
+  b) Storing/Retrieving constants
+  c) Monitoring  constants
+
+
+
+1. The DATA structure
+
+The structure of calibration database was defined 
+to fit existing software.
+
+Database contains calibration constants for all CLAS components.
+All components  are uniquely identified by their 
+System Subsystem  SubSubSystem(Item) channel (array index).
+The unique code for component consist of
+systemID+subsystemId+itemId+index
+Corresponding constants  are stored in a table with a name 
+systemName_subsystemName_itemName as an array[N], where N is the number of channels.
+
+The following example is for 216 channels (float gain values)
+of u-plain in outer part of forward calorimeter (EC). 
+The SystemName=    EC_GAIN
+    SubsystemName= outer
+    ItemName=      u
+defines the table with name EC_GAIN_outer_u with 216  columns v_0001,v_0002...v_0216
+containing in each record all 216 constants. Thus the gain of channel "i" is stored
+in v_000i column.
+
+The table structure is:
+itemValueId author  time minRunSource maxRunSource comment v_0001 v_0002 .....v_000215 v0216
+  int(11)                    int(11)    int(11)    text    float   float      float    float
+
+The field itemValueId contains the unique number for the set of constants and
+columns author,time,minRunSource,maxRunSource,comment contain some details on that particular set.
+
++-------------+-----------+----------------+--------------+--------------+-------------------+----------------+--------
+| itemValueId | author    | time           | minRunSource | maxRunSource | comment  |v_0001  |v_0002... v_0215| v_0216  |
++-------------+-----------+----------------+--------------+--------------+-----------------+------------------+- -------+
+|           4 | dbmanager | 20010129161135 |         7500 |         8542 | copied f | 7.9e-05|1e-04 ... 0.0001| 9.41e-05|
++-------------+-----------+----------------+--------------+--------------+-----------------+------------------+---------+
+
+ The type (float) and the length (216) of corresponding columns
+are stored in the Item table.
+
+The Item table structure is:
+ itemId   itemName  subsystemId length  type    description
+ int(11)   char(64)  int(11)    int(11) char(8)  text
+
+and corresponding record for  EC_GAIN_outer_u  in the Item table looks like
++--------+----------+-------------+--------+-------+---------------------------------------+
+| itemId | itemName | subsystemId | length | type  | description                           |
++--------+----------+-------------+--------+-------+---------------------------------------+
+|    283 | u        |          74 |    216 | float | from the EC_GAIN Map, subsyst outer-u |
++--------+----------+-------------+--------+-------+---------------------------------------+
+
+Corresponding  subsystem name is stored in the Subsystem table which could be linked by the
+subsystemId variable.
+
+The Subsystemtable structure is:
+ subsystemId  subsystemName  systemId  description   
+  int(11)        char(64)     int(11)    text
+
+and corresponding record for   EC_GAIN_outer  in the Subsystem table
++-------------+---------------+----------+----------------------+
+| subsystemId | subsystemName | systemId | description          |
++-------------+---------------+----------+----------------------+
+|          74 | outer         |       14 | from the EC_GAIN Map |
++-------------+---------------+----------+----------------------+
+
+Corresponding  system name is stored in the System table which could be linked by the
+systemId variable.
+
+The System table structure is:
+ systemId       systemName   description   
+  int(11)        char(64)      text
+
+and corresponding record for   EC_GAIN in the System table
+
++----------+------------+--------------+
+| systemId | systemName | description  |
++----------+------------+--------------+
+|       14 | EC_GAIN    | from the Map |
++----------+------------+--------------+
+
+
+
+
+To keep the record of corresponding set of constants (itemValueId=4 in EC_GAIN_outer_u table)
+an entry is added to a RunIndex table
+
++------------+--------+--------+--------+-------------+-----------+----------------+-----------------+
+| RunIndexId | minRun | maxRun | itemId | itemValueId | officer   | time           | comment         |
++------------+--------+--------+--------+-------------+-----------+----------------+-----------------+
+|      21303 |   7500 |   8542 |    283 |           4 | dbmanager | 20010129161135 | copied from Map |
++------------+--------+--------+--------+-------------+-----------+----------------+-----------------+
+
+RunIndex table is one for all components and stores links (itemValueId) to 
+all component tables (defined by itemId). It also contain info on the run 
+validity range and the author of corresponding set.
+
+
+3. Writing the set of constants involves 5 tables.
+
+  a) System,Subsystem,Item -> define the corresponding itemId 
+   where Item.subsystemId=Subsystem.subsystemId AND  System.systemId=Subsystem.systemId
+  b) write a record (216 float values for gains)
+     in  System_Subsystem_Item ( EC_GAIN_outer_u ) table
+  c) "link it" write a record in RunIndex table for corresponding record in
+    the  System_Subsystem_Item table (the same itemValueId). The run validity range
+    should be stored in  RunIndex table.
+
+4. Retrieving  the set of constants for certain run# involves 5 tables.
+  a) System,Subsystem,Item -> define the corresponding itemId 
+   where Item.subsystemId=Subsystem.subsystemId AND  System.systemId=Subsystem.systemId
+  b) get the latest record matching the input run# from  RunIndex table ( minRun<run#<maxRun)
+  c) get the corresponding set of gain constants (216 floats ) from System_Subsystem_Item
+    ( EC_GAIN_outer_u ) table
+
+
+
+I. Access control.
+
+To access the MySQL database one has  to define
+a) DATABASE default calib  
+b) HOSTNAME default clasdb.jlab.org (claspc13.jlab.org). Other hosts running MySQL with
+   copies of the "calib" database could be used as well.
+c) USER     default clasuser (different from CUE password) 
+d) PASSWORD default ""       (needed for users trying to write to database)
+e) RUNINDEX default RunIndex
+This variables are defined in the include file (calib_connect.h), but could be redefined 
+later. Environment variables  CALDB_HOST,CALDB_USER,CALDB_PASSWORD,CALDB_DBNAME,RUN_INDEX,
+in case they are set will redefine the values of corresponding variables.
+In case none of them will define the variable a command prompt will appear asking for its 
+value. For any Dbase user except "clasuser" writing routines will ask a password, unless
+the variable CALDB_PASSWORD is defined.
+
+
+
+
+II. 4 TASKS using C-API:
+
+  1. CONNECT/DISCONNECT
+  2. WRITING CONSTANTS
+  3. LINKING
+  4. READING
+
+1. CONNECT to MySQL database
+   input host(localhost,caldb.jlab.org...),dbasename,user,password
+   output connection handler
+   example
+   mysql=ConnectToServer(host,dbasename,user,password);
+
+    Function prototype:
+    MYSQL *ConnectToServer(char *host,char *dbname,char *user,char *user_password)
+   DISCONNECT (when ending the session release the handler)
+   example
+   DisconnectFromServer(mysql);
+    Function prototype:
+    void DisconnectFromServer(MYSQL *conn)
+   
+
+
+2.WRITING
+  input:
+  1.systemName,subsystemName,itemName to fill a valueID table systemName_subsystemName_itemName (EC_GAIN_outer_u).
+  2. value array of N constants for corresponding item (216 calibration constants "v_0001...v_0216" for EC_GAIN_outer_u)
+  3. author
+  4. time
+  5. the range of runs used in  extraction (minRunSource,maxRunSource)
+  6. comment (calib_comment) including some details on the procedure (version of software ....)
+  7. mysql connection handler.
+
+  output:
+   itemValueId   a variable containing the number of entry in  systemName_subsystemName_itemName table.
+   istat        a status of the transaction (0 if OK)
+  example:
+  istat=WriteConstantSet(mysql,systemName,subsystemName,itemName,minRun,maxRun,calib_comment,value,&itemvaluid)
+
+  Function prototype:
+
+  int WriteConstantSet(MYSQL *conn, char *systemname,char *subsystemname,char *itemname, int minrunsource,
+                       int maxrunsource,char *calib_comment,char *value, itemvalue *itemvalueid)
+
+3. LINKING
+  input:
+   1.systemname,subsystemname,itemname (to get the tablename=EC_GAIN_outer_u and the itemId=283 (see item table))
+   2.RunIndexTable  Name="RunIndex"  (also a working copy of RunIndex table could be used)
+   3.minrun, maxrun minimum and maximum run# validity range for this set of constants (could be 
+                 different from minrunsource,maxrunsource)
+   4.runindex_comment,author  comment and author filled in a runcomm structure(see later) 
+           (could be different from valuId table values)
+   5.itemvalueid the number of entry in the valueId table (EC_GAIN_outer_u).
+   6.mysql connection handler
+
+  output:
+   runindexid  ID# in RunIndex for this entry.
+   structure  commentstruc { int minRunSource;int maxRunSource; char *author; char *time;char *comment;}
+               (defined in the  calib_connect.h)  gives details on constants for
+                record=itemvalueid of  systemName_subsystemName_itemName table.
+
+   istat        a status of the transaction (0 if OK)
+
+  example:
+   istat=LinkConstantSet(mysql,systemName,subsystemName,itemName,RunIndexTable,minRun,maxRun,calib_comment
+                        ,itemvalueid,runcomm,&runindexid)
+   Function prototype:
+   int LinkConstantSet(MYSQL *conn, char *systemname,char *subsystemname,char *itemname,char *RunIndexTable, 
+                          int minrun, int maxrun,char *runindex_comment,itemvalue itemvalueid, 
+                          commentstruc runcomm,itemvalue *runindexid) 
+
+
+3.READING
+
+ input:
+   1.systemname,subsystemname,itemname (to get the tablename=EC_GAIN_outer_u and the itemId=283 (see item table))
+   2.RunIndexTable  Name="RunIndex"  (also a working copy of RunIndex table could be used)
+   3.runno   run#
+   4.date   (consider inputs before validity date and take the latest set)
+
+ output
+   itemvalueid the number of entry in the valueId table
+   structure  commentstruc { int minRunSource;int maxRunSource; char *author; char *time;char *comment;}
+   structure  valuestruc {int length; char *type; char **item;} (defined in the  calib_connect.h) gives
+              length (216),type (float) and value string with constants ("v_0001...v_0216)
+   istat        a status of the transaction (0 if OK)
+
+  example:
+	istat=ReadConstants(mysql,systemName,subsystemName,itemName,RunIndexTable,runno,date, 
+                    &itemvaluid, &runcomm,&tlvalue);
+   Function prototype:
+    int ReadConstants(MYSQL *conn, char *systemname,char *subsystemname,char *itemname,char *RunIndexTable,
+               int runno, char *date,itemvalue *itemvaluid, commentstruc *runcomm,valuestruc *tlvalue )
+

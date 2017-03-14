@@ -1,0 +1,20 @@
+*** Begin of history file: Mon Aug  7 12:00:17 2000
+hi/file 1 keppel-radgen-2.5-07aug00.rz.2
+hi/file 1 keppel-radgen-2.5-07aug00.rz.2 8191
+nt/print 10
+nt/plot 10.es
+nt/plot 10.w
+nt/plot 10.wreal
+nt/plot 10.w
+nt/plot 10.wreal
+nt/plot 10.w%q0
+nt/plot 10.es%ep
+nt/plot 10.q0
+nt/plot 10.ep
+nt/plot 10.es
+nt/plot 10.2*2.445*ep*(1-cos(thet)
+nt/plot 10.2*2.445*ep*(1-csthe)
+nt/plot 10.thete%csthe
+nt/plot 10.cos(thete*3.141592/180.)-csthe
+exit
+*** End   of history file: Mon Aug  7 12:20:33 2000

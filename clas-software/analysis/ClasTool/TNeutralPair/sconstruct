@@ -1,0 +1,7 @@
+from build_system import environment
+
+TNeutralPairEnv = environment.env(deps='clas6 root'.split())
+TNeutralPairEnv.load_dependency('clas6 root'.split())
+
+TNeutralPairLib = TNeutralPairEnv.library('TNeutralPair')
+TNeutralPairEnv.return_from_sconstruct(TNeutralPairLib)

@@ -1,0 +1,51 @@
+macro ecGenAttCor
+
+  global/import attenpath
+  global/import vecpath
+
+  vec/cre att(36,6,6) r
+  vec/cre alc(1296,6,6) r
+  vec/cre alcdb(1296,6,6) r
+  vec/cre pixmap(1296,3) 
+  vec/cre pixwidth(6) r
+  vec/cre sumcor(1296,2,6) r
+  vec/cre costh(1296) r
+  vec/cre attdb(36,39,6) r
+  vec/cre attedb(36,39,6) r
+  vec/cre dum(36,39,6)
+  vec/cre rdout(36,39,6)
+  vec/cre weight(39) r 39*1.
+  
+  vec/read pixwidth   [vecpath]/ec_pixwidth.vec
+  vec/read costh      [vecpath]/ec_pixcosth.vec
+  vec/read dum,dum,dum,attdb,rdout [attenpath]/atten_newadb.vec
+  vec/read dum,dum,dum,attedb,rdout [attenpath]/attenerr_newadb.vec
+  scale = 1.15
+  sigma dum = (attdb eq 0)*180 + (rdout eq 0)*attdb + (rdout eq 1)*attdb*[scale]  
+  vec/cop dum attdb
+  sigma dum =                    (rdout eq 0)*attedb + (rdout eq 1)*attedb*[scale]  
+  vec/cop dum attedb
+    
+  call kumac/calcom/ec/fun/eccallib.f77
+*  fun1 100 exp(-(x-10)**2/60)+0.5*exp(-(x-20)**2/60)  39 0 40 chopt=' ' 
+*  get_vect/contents 100 weight
+    
+  do i=1,[#]  
+    file = [%i]
+    vec/read att [attenpath]/[file].vec
+    vec/inp sumcor 15552*0. 
+    call ecattcor
+    call ecsumcor
+    vec/cre alc[i](1296,6,6) r
+    vec/copy alc alc[i]
+    vec/cre  sumcor[i](1296,2,6) r
+    vec/copy sumcor sumcor[i]
+    vec/copy alcdb alc
+    vec/inp sumcor 15552*0. 
+    call ecsumcor
+    vec/cre sumcordb[i](1296,2,6) r
+    vec/copy sumcor sumcordb[i]
+  enddo
+    
+return
+  

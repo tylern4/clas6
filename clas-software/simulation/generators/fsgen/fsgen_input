@@ -1,0 +1,60 @@
+100000 		 / number of (gp) interactions to be generated
+1	 1  	/ first variable-> number of output files with above number of events, second variable-> bos file number to start 
+1		  / number of final states per (gp) interaction to be generated
+5.7	  	 / incident electron energy
+1.,5.6          / total hadron mass or real photon energy range
+0.,0.          / photon mass (for real photons =0.)
+0.,0.       	/ X Bjorken
+2212  0   0		/target   target-nucleon  spectator-nucleon, if last two are =0, target is the first one
+/ Log file 
+gp_pee_71.log
+/ On the following lines (input BOS file, output BOs file & N-tuple file) 0=.true.
+1         test_in.evt 
+1         ep_eepe_test_  
+0         gp_pee_0_1_15.hbook
+/ distribution parameters 
+0               / Power of Q2 dependence, if <0 user suplied function is needed
+0.0   0.0  -15            / first parameter->slop of t-dipendance, if <0 user suplied function is needed, second and third are |t_min| and |t_max|
+1              /Genbod kgenev, =1 for constant weights, =2 for Fermi energy dependent weughts
+'list'	         / 'list' or 'notlist'  prints to standart out
+'decay'	         / decay or not final decayed particles
+'noedit'	 / edit or not final LUND data buffer
+/ Final state that should be generated /
+2	/ number of outgoing particles
+71    318  0   0   0   0  0.0
+2212   0  0  0    0    0  0.        / particle code and decay channels
+/ Decay channels for some of decay products /
+9                 / Just the number of defined particles
+71 318 318  0   0   0   0
+111 670 671  0   0   0   0
+ 113 708 711  0   0   0   0
+ 221 672 678  0   0   0   0
+ 223 712 716  0   0   0   0
+ 331 679 684  0   0   0   0
+ 333 717 724  0   0   0   0
+ 310 970 971  0   0   0   0
+ 2224 1126 1126  0   0   0   0
+/ RANMAR integer sequence number (1 to 900000000) for initialization.
+99011
+/ Run number (default 1)
+1
+/ Target pozition (Z)
+0.0 0.0 0.0
+/ crate or not TAGR bank
+0
+/ Some fiducial acceptances
+8           / number of lines below
+11   0. 6. 0. 180. -180. 180.  0
+2212 0.3 6. 5. 180. -180. 180.  0
+2112 0.3 6. 8. 180. -180. 180.  0
+45 0. 6. 0. 180. -180. 180. 0
+211 0. 6. 0. 180. -180. 180. 0
+-211 0. 6. 0. 180. -180. 180.  0
+321 0.2 6. 5. 180. -180. 180.  0
+-321 0. 6. 10. 180. -180. 180.  0
+/ Format in above PID pmin pmax thmin thmax phmin phmax flag
+/ No fiducial cuts if flag =0; uses max min of angles if 1; needs user
+/ fiducial function if -1
+1         gp_ee_test.txt 
+
+

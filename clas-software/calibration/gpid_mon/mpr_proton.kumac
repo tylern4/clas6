@@ -1,0 +1,12 @@
+
+sliy 6114 50
+hi/proj 6114
+sliy 6314 50
+hi/proj 6314
+
+do i=1,50
+id=10000+[i]
+hi/cop 6114.sliy.[i] [id]
+id=11000+[i]
+hi/cop 6314.sliy.[i] [id]
+enddo

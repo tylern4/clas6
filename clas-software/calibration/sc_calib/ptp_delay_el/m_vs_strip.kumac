@@ -1,0 +1,35 @@
+macro m_vs_strip
+|
+ 2d 1100 'Sector 1' 48 0.5 48.5 70 -0.1 1.3
+ 2d 1200 'Sector 2' 48 0.5 48.5 70 -0.1 1.3
+ 2d 1300 'Sector 3' 48 0.5 48.5 70 -0.1 1.3
+ 2d 1400 'Sector 4' 48 0.5 48.5 70 -0.1 1.3
+ 2d 1500 'Sector 5' 48 0.5 48.5 70 -0.1 1.3
+ 2d 1600 'Sector 6' 48 0.5 48.5 70 -0.1 1.3
+|
+ nt/pro 1100 50.Mass%Strp_h Sect_h=1
+ nt/pro 1200 50.Mass%Strp_h Sect_h=2
+ nt/pro 1300 50.Mass%Strp_h Sect_h=3
+ nt/pro 1400 50.Mass%Strp_h Sect_h=4
+ nt/pro 1500 50.Mass%Strp_h Sect_h=5
+ nt/pro 1600 50.Mass%Strp_h Sect_h=6
+|
+ 2d 2100 'Sector 1' 48 0.5 48.5 70 -0.1 1.3
+ 2d 2200 'Sector 2' 48 0.5 48.5 70 -0.1 1.3
+ 2d 2300 'Sector 3' 48 0.5 48.5 70 -0.1 1.3
+ 2d 2400 'Sector 4' 48 0.5 48.5 70 -0.1 1.3
+ 2d 2500 'Sector 5' 48 0.5 48.5 70 -0.1 1.3
+ 2d 2600 'Sector 6' 48 0.5 48.5 70 -0.1 1.3
+|
+ nt/pro 2100 50.Mass%Strp_e Sect_e=1
+ nt/pro 2200 50.Mass%Strp_e Sect_e=2
+ nt/pro 2300 50.Mass%Strp_e Sect_e=3
+ nt/pro 2400 50.Mass%Strp_e Sect_e=4
+ nt/pro 2500 50.Mass%Strp_e Sect_e=5
+ nt/pro 2600 50.Mass%Strp_e Sect_e=6
+|
+
+
+return
+
+

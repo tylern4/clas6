@@ -1,0 +1,10 @@
+JOBNAME: CC Calibration
+PROJECT: eg1b
+MAIL:    ungaro@jlab.org
+TRACK:   reconstruction
+OS:      linux
+MEMORY:  500 MB  
+
+OTHER_FILES: /home/ungaro/projects/calib/Cerenkov/Cerenkov
+OTHER_FILES: /home/ungaro/projects/calib/Cerenkov/farm/go_COOK
+

@@ -1,0 +1,198 @@
+macro summary
+mess ' Macro plot - Plot Attenuation Length in all scintillators'
+*
+* setup frames as for plot, but call min_kumac
+*
+option *
+set *
+next
+*
+* open metafile
+*
+for/file 66 atten.ps
+meta 66 -111
+*
+* summary plots of peaks and chi2
+*
+nscint = 288
+vector/create ihist([nscint]) I [nscint]*0.
+vector/create scint([nscint]) R [nscint]*0.
+vector/create err([nscint]) R [nscint]*.01
+vector/create istat([nscint]) I [nscint]*0.
+vector/create atten([nscint]) R [nscint]*0.
+vector/create atterr([nscint]) R [nscint]*0.
+vector/create offset([nscint]) R [nscint]*0.
+vector/create offerr([nscint]) R [nscint]*0.
+vector/create chi2([nscint]) R [nscint]*0.
+vector/read ihist,offset,atten,offerr,atterr,chi2,istat 'min_parm' '4x,i2,4f10.3,f8.2,i4'
+vector/copy ihist scint 
+zone 1 3
+xmin = 0.
+xmax = 50.
+ymin = 0.
+ymax = 1000.
+hplot/null [xmin] [xmax] [ymin] [ymax]
+hplot/errors scint atten err atterr [nscint]
+hplot/atitle 'Scintillator Number' 'Attenuation Length'
+ymin = -1.
+ymax = 1.
+hplot/null [xmin] [xmax] [ymin] [ymax]
+hplot/sym scint offset [nscint]
+hplot/atitle 'Scintillator Number' 'Offset'
+ymin = 0.
+ymax = 2.
+hplot/null [xmin] [xmax] [ymin] [ymax]
+hplot/sym scint chi2 [nscint]
+hplot/atitle 'Scintillator Number' 'Chi2'
+wait
+*
+* histogram results
+*
+set stat 1111111
+hi/create/1d 1 'Attenuation Lengths' 100 0. 1000.
+hi/create/1d 2 'Offset' 100 -1. 1.
+hi/create/1d 3 'Chi2 for Fit' 100 0. 5.
+vector/hfill atten 1
+vector/hfill offset 2
+vector/hfill chi2 3
+option date
+option stat
+hi/plot 1
+hi/plot 2
+hi/plot 3
+wait
+*
+* plot
+*
+* set options
+*
+set stat 1111
+option date
+set vsiz .2
+set ytic .2
+set xtic .2
+set tsiz .2
+set ymgl 1.
+set ymgu 1.
+set ywin 1.
+set xwin 1.
+set xmgl 0.5
+set xmgr 0.5
+set yhti 0.5
+set xsiz 20.
+set ysiz 20.
+set tsiz 0.2
+set csiz 0.28
+zone 4 6
+*
+* call histograms setup by min_atten_main
+*
+exe min_kumac.kumac
+*
+* reset values to defaults
+*
+option *
+set *
+*
+* close file
+*
+close 66
+*
+* exit and end macro definition
+*
+exitm
+return
+macro plot
+mess ' Macro plot - Plot Energy loss in all scintillators'
+* 
+* plot TOF energy loss histograms 
+*	101 - 148    sector 1, scintillators 1-48 
+*	201 - 248    sector 2, scintillators 1-48 
+*	301 - 348    sector 3, scintillators 1-48 
+*	401 - 448    sector 4, scintillators 1-48 
+*	501 - 548    sector 5, scintillators 1-48 
+*	601 - 648    sector 6, scintillators 1-48
+*
+* set options
+*
+option date
+*set stat 1111111
+*set fit 111
+set vsiz .2
+set ytic .2
+set xtic .2
+set tsiz .2
+set ymgl 1.
+set ymgu 1.
+set ywin 1.
+set xwin 1.
+set xmgl 0.5
+set xmgr 0.5
+set yhti 0.5
+set xsiz 20.
+set ysiz 20.
+set tsiz 0.2
+set csiz 0.28
+next
+*
+* open metafile
+*
+for/file 66 atten.ps
+meta 66 -111
+*
+* plot
+*
+zone 4 6
+*
+* loop over sectors
+*
+do j=1,1
+   exec plot_sector sector=[j]
+enddo
+*
+* close file
+*
+close 66
+*
+* exit and end macro definition
+*
+exitm
+return
+macro plot_sector sector=1 scint=1
+mess ' Begin plotting with sector=' [sector] ' scint=' [scint]
+* 
+* plot TOF energy loss histograms 
+*	101 - 148    sector 1, scintillators 1-48 
+*	201 - 248    sector 2, scintillators 1-48 
+*	301 - 348    sector 3, scintillators 1-48 
+*	401 - 448    sector 4, scintillators 1-48 
+*	501 - 548    sector 5, scintillators 1-48 
+*	601 - 648    sector 6, scintillators 1-48
+*
+* plot
+*
+* loop over scints
+*
+do j=1,25,24
+   exec page sector=[sector] scint=[j]
+   wait
+enddo
+*
+* exit and end macro definition
+*
+exitm
+return
+macro page sector=1 scint=1
+mess ' macro test'
+mess 'Macro page, sector=' [sector] ' scint=' [scint]
+*
+* plot 24 histograms
+*
+do j=[scint],[scint]+23
+   hi/plot $eval([sector]*100+[j])
+enddo
+*
+* exit and end macro definition
+*
+exitm
+return

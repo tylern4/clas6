@@ -1,0 +1,18 @@
+#! /usr/local/bin/perl
+#usage: PutFile file directory
+
+# script tojputremote a file -> mss directory and then delete the file
+
+$file = $ARGV[0];
+$dir = $ARGV[1];
+
+$cmd = "jputremote $file $dir/$file ";
+
+open(A,"$cmd 2>&1 |") || die "Could not execute $cmd\n";
+
+while (<A>) {
+	print;
+}
+
+unlink($file);
+	

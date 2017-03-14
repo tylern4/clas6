@@ -1,0 +1,16 @@
+#! /bin/sh
+
+for file in $*
+do
+	if [ -w $file ]
+        then
+	        test -d $file
+		if [ !$? ]; then
+		   echo $file exists as a directory already: not made
+		fi
+	
+	else
+		mkdir $file
+	fi
+done
+

@@ -1,0 +1,14 @@
+from build_system import environment
+
+env = environment.env(deps = 'clas6 cern')
+
+env.load_dependency('clas6')
+env.load_dependency('cern')
+
+env.AppendUnique(CPPPATH = ['.'])
+
+import glob
+src_list = glob.glob('*.cc')
+
+for source in src_list:
+        env.program(source=[source])

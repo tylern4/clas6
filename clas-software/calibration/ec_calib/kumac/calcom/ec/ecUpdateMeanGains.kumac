@@ -1,0 +1,35 @@
+macro ecUpdateMeanGains run
+
+  global/import gainpath
+  
+  ifile1 = [gainpath]/ecgains.vec
+  ifile2 = [gainpath]/ecgainfitg[run].vec
+  ofile1 = [gainpath]/ecgaincor[run].vec
+  ofile2 = [ifile1]
+      
+  vec/cre  ratio(ecvecdim) r 1296*1.
+  vec/cre ecgain(ecvecdim) r
+  vec/cre   dum1(ecvecdim) r
+  vec/cre   dum2(ecvecdim) r
+  vec/cre   mask(ecvecdim) r 1296*1.
+  
+  vec/read ecgain  [ifile1] 
+  vec/read dum1    [ifile2]
+  
+  do i = 2,[#]
+    sec = [%i]
+    vec/read ratio(:,:,[sec]) [gainpath]/crt[sec]_gaincor.vec
+    vec/inp mask(:,:,[sec]) 216*0
+  enddo
+  
+  sigma dum2   = ((1-mask)*dum1)/ratio
+  sigma ecgain = ecgain*mask+dum2
+  
+  vec/write dum2    [ofile1]
+  vec/write ecgain  [ofile2]
+  
+  vec/del dum*,ratio,mask,ecgain
+  
+return
+  
+  

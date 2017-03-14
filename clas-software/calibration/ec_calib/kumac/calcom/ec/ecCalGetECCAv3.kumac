@@ -1,0 +1,14 @@
+macro ecCalGetECCav3 run sec
+
+  message ecCalGetECCav3: Getting vector for run [run] sector [sec]
+  
+  vectorname = ecrms[run]
+
+  if ($vexist([vectorname]).eq.0) then
+    exec calGetVec ec ped [run]
+  endif
+  
+  vec/copy ecrms[run](:,:,[sec]) ECCav3(:,[sec])
+  
+return
+  

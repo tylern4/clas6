@@ -1,0 +1,14 @@
+***************** begin: EcEvu.CMN *************************************
+*
+*      Ec unpacked raw data
+*
+      real EcEvu_strip( ADC: TDC, MAXstrips, Ec_u: Ec_w,
+     &                         inner: cover, MAXsectors)
+*
+      integer EcEvu_Nreported( Ec_u: Ec_w,
+     &                         inner: cover, MAXsectors)
+      integer EcEvu_reportedID( MAXstrips, Ec_u: Ec_w,
+     &                         inner: cover, MAXsectors)
+*
+      COMMON /EcEvu/ EcEvu_Nreported,EcEvu_reportedID,EcEvu_strip
+******************* end: EcEvu.CMN *************************************

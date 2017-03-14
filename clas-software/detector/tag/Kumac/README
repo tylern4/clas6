@@ -1,0 +1,368 @@
+This file is under CVS, tag/Kumac/README
+========================================
+
+Notes on how to run RECSIS tag package and interpret
+recsis/ana tagger histograms and ntuples:
+
+1) How to build & run RECSIS:
+
+You must belong to the unix group clas. If not, contact the computer center (cebaf).
+Check out the user_ana package:
+
+jlabs1> cvs checkout user_ana
+
+Consult Mark Ito's webb page, for more informations:
+http://claspc2.cebaf.gov/~marki/ 
+
+make the executable:
+
+jlabs1> cd user_ana
+jlabs1> make
+
+In order to run recsis, you need to use a tcl script.
+If you wish to process only the tagger package, and produce
+the standard tagger histograms and ntuple, an adequate
+script can be found under CVS, in tcl, check out this directory:
+
+jlabs1> cvs checkout tcl
+
+The name of the script is tag.tcl
+copy it in your local directory:
+
+jlabs1> cp $(TOP_DIR)/tcl/tag.tcl 
+
+Then you have to update in this file the line that
+tells which input file you want to use:
+
+inputfile <the data file you want to analyse>
+
+make a link to your executable,
+for exemple if you are using a Sun platform:
+
+jlabs1> ln -s $(TOP_DIR)/bin/SunOS/user_ana recsis
+
+(or 
+jlabs1> ln -s $(TOP_DIR)/bin/AIX/user_ana recsis
+jlabs1> ln -s $(TOP_DIR)/bin/HP-UX/user_ana recsis
+jlabs1> ln -s $(TOP_DIR)/bin/Linux/user_ana recsis
+on other platforms)
+
+run recsis:
+
+jlabs1> recsis -t tag
+
+after some initialisations, you will get a prompt.
+
+You will also a bunch of messages telling you the predefine
+tcl interactive procedures:
+
+defining the <cdir> proceedure, that defines the PAWC directory
+usage: cdir //PAWC/NEWDIR 
+
+defining the <global_section> procedure, this will turn on/off
+PAW shared memory for those machines that support it
+usage: global_section off  default is off
+
+defining the <book> procedure, that books new histograms
+usage: book id title nx xlow xmax [ny ylow ymax PAWDIR] 
+
+defining the <bookn> procedure, that books new ntuples
+usage: bookn id title [c1 c2 c3 ... c25] 
+
+defining the <fill> procedure for histograms  defined via <book> procedure
+usage: fill id BANK.SEC.VAR [ BANK.SEC.VAR ] 
+
+defining the <filln> procedure for ntuples  defined via <bookn> procedure
+usage: filln id BANK.SEC.VAR [ BANK.SEC.VAR .... BANK.SEC.VAR ] 
+
+defining the <dump> procedure, which dumps histograms to the terminal
+usage: dump [id //PAWC/SC ] 
+
+defining the <bdump> procedure, which dumps a BOS bank to the terminal
+usage: bdump BANKNAME [ jw ] : iw/jw -> BOS iw/jw array 
+
+defining the <ndump> procedure, which dumps all BOS bank names in memory 
+usage: ndump [ jw ] : iw/jw -> BOS iw/jw array 
+
+defining the <edump> procedure, which dumps ALL BOS banks in memory
+usage: edump [ jw ] : iw/jw -> BOS iw/jw array 
+
+defining the <bedit> procedure, for bank editting
+usage: bedit BANKNAME row col sector newvalue [ jw ] : iw/jw -> BOS iw/jw a
+
+defining the <par> procedure, which pause execution at the END of event
+usage:  par
+
+defining the <pause> procedure, which pause execution at the  BEGINNING of 
+usage:  pause
+
+defining the <go> procedure, which resumes execution
+usage:  go [number of events to process]
+
+defining the <fpack> procedure, for FPACK commands
+files under FPACK control
+usage: fpack "fpack command string" 
+
+defining the <closefile> procedure, which will close input or output
+files under FPACK control
+usage: closefile [CLASINPUT] 
+
+defining the <inputfile> procedure, which defines the input file
+usage:  inputfile filename 
+
+defining the <outputfile> procedure, which defines the output file
+usage:  outputfile filename 
+
+Defining  <doevent> procedure ref page 16b in FPACK manual 
+
+usage: doevent "1000 2000 3000 4000:" 
+Defining  <dorun> procedure ref page 16b in FPACK manual 
+
+usage: dorun "1000 2000 3000 4000:" 
+defining the <quit> procedure, which causes immediate job termination
+usage:  quit
+
+defining the <exit> procedure, which causes an orderly job termination
+usage:  exit
+
+defining the <exit_pend> procedure, which causes an orderly job terminatione event loop
+usage:  exit_pend
+
+defining the <status> procedure, which dumps jobs  status to the terminal
+usage:  status
+
+defining the <turnon> procedure for turning on  reconstruction packages
+usage: turnon [ seb trk cc tof egn lac trig tagger user start ALL ] 
+
+defining the <turnoff> procedure for turning off  reconstruction packages
+usage: turnoff [ seb trk cc tof egn lac trig tagger user start ALL ] 
+
+Defining to <paw> procedure, to launch a PAW session type: paw
+
+Defining to <ced> procedure, to launch a ced session type: ced
+
+
+A very usefull porocedure is "go" that tells you to process a given number of
+events, for exemple:
+
+RECSIS_PROMPT> go 20000
+
+will process 20000 events.
+Another usefull procedure is exit, that terminates recsis and saves
+all ntuples and histograms in an hbook file:
+
+RECSIS_PROMPT> exit
+
+You normally have in you current directory a new hbook file, 
+called rexxx.rzn. You can now open this file with PAW:
+jlabs1> paw
+
+PAW> h/fil 1 rexxx.rzn
+
+go into the tagger paw subdirectory:
+
+PAW> cd tag
+
+see what's in there:
+
+PAW> h/lis
+
+ ===> Directory : 
+          1 (N)   TAGI & RF   
+          4 (N)   TAGR
+          3 (N)   DSD 
+          2 (1)   Number of good hits/event   
+        100 (1)   Pattern E binned
+         10 (1)   Energy pattern (GeV)
+         11 (1)   TAGR time (ns)  
+        101 (1)   Pattern T binned in time
+        102 (1)   Pattern T binned all hits   
+        103 (1)   Pattern T unbinned in time  
+        104 (1)   Pattern T unbinned all hits 
+        105 (1)   Raw T scalers   
+        106 (1)   T gate 1 scalers - G1SL 
+        107 (1)   T gate 2 scalers - G2SL 
+        108 (1)   T gate 3 scalers - G3SL 
+        109 (1)   T gate 4 scalers - G4SL 
+        200 (2)   Ttime - Etime (ns) vs E_id  
+        300 (2)   Ttime - RFtime (ns) vs T id 
+        500 (1)   Tagger time - ST time, all Tagger hits  
+        510 (1)   Tagger time - ST time, best Tagger guess
+        520 (1)   Tagger time at vertex- ST time  
+        501 (2)   Tagger time vs ST time, all Tagger hits 
+        511 (2)   Tagger time vs ST time,best Tagger guess
+        301 (2)   Ttime - PCtime (ns) vs T id 
+        302 (2)   Ttime - PStime (ns) vs T id 
+        303 (2)   Ttime - TACtime (ns)  vs T id   
+        304 (2)   Ttime - STtime (ns)  vs T id
+        305 (2)   Ttime - STtime (ns)  vs ST sector   
+        311 (2)   T-Signal arrival time at Trigger supervisor (ns) (using PC as ref) vs T id  
+        312 (2)   T-Signal arrival time at Trigger supervisor (ns) (using PS as ref) vs T id  
+        313 (2)   T-Signal arrival time at Trigger supervisor (ns) (using TAC as ref) vs T id 
+        314 (2)   T-Signal arrival time at Trigger supervisor (ns) (using ST as ref) vs T id  
+        400 (1)   T0 tagger - RF (ns) 
+
+PAW > n/pri 1
+
+
+ ********************************************************
+ * NTUPLE ID=    1  ENTRIES=  63570   TAGI & RF   
+ ********************************************************
+ *  Var numb  *   Name    *    Lower     *    Upper     *
+ ********************************************************
+ *      1     * T_id      * 0.100000E+01 * 0.121000E+03 *
+ *      2     * TIME_L    * -.518737E+02 * 0.130874E+03 *
+ *      3     * TIME_R    * -.521878E+02 * 0.130379E+03 *
+ *      4     * E_id      * 0.100000E+01 * 0.767000E+03 *
+ *      5     * TIME_E    * -.551500E+02 * 0.130300E+03 *
+ *      6     * TMEAN     * -.536341E+02 * 0.128577E+03 *
+ *      7     * TRF       * -.100193E+01 * 0.100195E+01 *
+ *      8     * GRF       * 0.885010E-03 * 0.200334E+01 *
+ *      9     * RF1       * 0.113819E+02 * 0.911044E+02 *
+ *     10     * RF2       * 0.114310E+02 * 0.912025E+02 *
+ *     11     * Nbhit     * 0.100000E+01 * 0.700000E+01 *
+ *     12     * TNEXT     * -.522795E+01 * 0.506921E+01 *
+ ********************************************************
+
+PAW > n/pri 3
+
+
+ ********************************************************
+ * NTUPLE ID=    3  ENTRIES=  30153   DSD 
+ ********************************************************
+ *  Var numb  *   Name    *    Lower     *    Upper     *
+ ********************************************************
+ *      1     * Id        * 0.100000E+01 * 0.100000E+02 *
+ *      2     * Time      * -.913320E+02 * 0.136795E+03 *
+ *      3     * ELT       * 0.000000E+00 * 0.791000E+04 *
+ *      4     * ERT       * 0.000000E+00 * 0.843000E+03 *
+ *      5     * ELB       * 0.000000E+00 * 0.101700E+04 *
+ *      6     * ERB       * 0.000000E+00 * 0.153100E+04 *
+ *      7     * ESUM      * 0.000000E+00 * 0.558900E+04 *
+ *      8     * ESUM2     * 0.000000E+00 * 0.427000E+03 *
+ *      9     * ESUM3     * 0.000000E+00 * 0.000000E+00 *
+ *     10     * T_id      * 0.000000E+00 * 0.121000E+03 *
+ *     11     * T_time    * -.529102E+02 * 0.128438E+03 *
+ *     12     * trigt     * -.999000E+03 * -.999000E+03 *
+ ********************************************************
+
+PAW > n/pri 4
+
+
+ ********************************************************
+ * NTUPLE ID=    4  ENTRIES=  63570   TAGR
+ ********************************************************
+ *  Var numb  *   Name    *    Lower     *    Upper     *
+ ********************************************************
+ *      1     * ener      * 0.385721E+00 * 0.174897E+01 *
+ *      2     * time      * -.206471E+02 * 0.161564E+03 *
+ *      3     * TIMErf    * -.210338E+02 * 0.161313E+03 *
+ *      4     * STAT      * 0.700000E+01 * 0.150000E+02 *
+ *      5     * T_id      * 0.100000E+01 * 0.121000E+03 *
+ *      6     * E_id      * 0.100000E+01 * 0.767000E+03 *
+ ********************************************************
+
+So there are 3 ntuples, and a bunch of histograms,
+there names already give you an idea of their purpose.
+Let's review them:
+
+1) histograms:
+
+          2 (1)   Number of good hits/event
+
+This histogram tells you how many hits have been reconstructed for each
+trigger in the tagger (multiplicity - x axis).
+There is as many entries as event (triggers) processed.
+An entry equal to 0 means no hit has been reconstructed in the tagger.
+A hit is a geometric and timed coincidence between an E counter, and the left
+and right pmst of the corresponding T counter.
+
+        100 (1)   Pattern E binned
+
+This is the pattern of the binned E counters for all reconstructed hits.
+The X axis, is the bin Id of the E counters. Binning of the E counters is
+defined as follows :
+-If the electron went through E-counter 1, the bin is 1.
+-If the electron went through E1 & E2, the bin is 2.
+-IF the electron went through E2 only, the bin is 3.
+- And so on...
+Since there are 384 E counters, there are 787 bins.
+A quick conversion from bin to E counter # is:
+- For odd bin: add 1, divide by 2. ( bin 325 -> 326/2 = E 163)
+- For even bin: divide by 2. (bin 466 -> E 233)
+
+         10 (1)   Energy pattern (GeV)
+
+This pattern is very similar to the previous one, because it
+is made out of the E bins pattern, for all reconstructed
+hits, but the Ebin Id has been converted into photon Energy
+(E counter means "energy counter")
+The horizontal axis is the energy in Gev.
+
+         11 (1)   TAGR time (ns)  
+
+This plots shows the distribution in time of all the reconstructed hits
+in the tagger. The X axis is the time in nanosecond. This time can be
+interpreted as the time at which the tagged photon reaches the center
+of the target (if it reaches it). Of course this time has no meaning by
+itself and has to be compared to other devices reconstructed time
+(Time of Flight, Start counter, pair spectrometer)
+
+        101 (1)   Pattern T binned in time
+
+This is the pattern of the hits in the T-counters. The binning is the same as for
+the E counters:
+-If the electron went through T-counter 1, the bin is 1.
+-If the electron went through T1 & T2, the bin is 2.
+-IF the electron went through T2 only, the bin is 3.
+Since there are 61 T-counters, there are 121 T-counter bins.
+There can be several hits in the tagger for one trigger, but only
+one of them was part of the trigger. In this histograms, hits are 
+selected in a little window arround 0, so that they should be, if
+the calibration constants used are up to date, hits that are part
+of the trigger.
+The number of entries in this histogram tells you how well this worked,
+it should be close to the number of event processed.
+
+        102 (1)   Pattern T binned all hits   
+
+This histogram is the same than the previous one, but for all hits.
+The number of entries in this histogram is the number of event processed
+times the average multiplicity of hits in the tagger.
+
+        103 (1)   Pattern T unbinned in time 
+
+This histogram is the same than 101, with the only difference that
+the binning corresponds this time to T-counters themselves (61 T-Counters).
+When one electron went throught 2 adjacent T-counters, both column have been
+incremented. The number of entries of this histograms divided by the
+number of event processed gives you an idea of the overlaping between adjacent
+T counters. ( arround 20%)
+
+        104 (1)   Pattern T unbinned all hits 
+
+This histogram is the same than 102, with the only difference that
+the binning corresponds this time to T-counters themselves (61 T-Counters).
+
+        105 (1)   Raw T scalers   
+        106 (1)   T gate 1 scalers - G1SL 
+        107 (1)   T gate 2 scalers - G2SL 
+        108 (1)   T gate 3 scalers - G3SL 
+        109 (1)   T gate 4 scalers - G4SL 
+        200 (2)   Ttime - Etime (ns) vs E_id  
+        300 (2)   Ttime - RFtime (ns) vs T id 
+        500 (1)   Tagger time - ST time, all Tagger hits  
+        510 (1)   Tagger time - ST time, best Tagger guess
+        520 (1)   Tagger time at vertex- ST time  
+        501 (2)   Tagger time vs ST time, all Tagger hits 
+        511 (2)   Tagger time vs ST time,best Tagger guess
+        301 (2)   Ttime - PCtime (ns) vs T id 
+        302 (2)   Ttime - PStime (ns) vs T id 
+        303 (2)   Ttime - TACtime (ns)  vs T id   
+        304 (2)   Ttime - STtime (ns)  vs T id
+        305 (2)   Ttime - STtime (ns)  vs ST sector   
+        311 (2)   T-Signal arrival time at Trigger supervisor (ns) (using PC as ref) vs T id  
+        312 (2)   T-Signal arrival time at Trigger supervisor (ns) (using PS as ref) vs T id  
+        313 (2)   T-Signal arrival time at Trigger supervisor (ns) (using TAC as ref) vs T id 
+        314 (2)   T-Signal arrival time at Trigger supervisor (ns) (using ST as ref) vs T id  
+        400 (1)   T0 tagger - RF (ns) 

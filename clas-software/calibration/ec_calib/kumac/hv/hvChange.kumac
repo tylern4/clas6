@@ -1,0 +1,32 @@
+macro hvChange det=0 sec volts
+
+  if [det].eq.0 then
+    message 'Purpose: Change HV in forward carriage detectors'
+    message '  Usage: hvChange det sec volts'
+    message '    det: Detector (ec,cc,sc)'
+    message '    sec: Sector (1,2,3,4,5,6)'
+    message '  volts: Voltage change (+,-)'
+    exitm
+  endif  
+     
+  exec hvGet [det] [sec] DVI
+  
+  sigma newhv=DVI+[volts]
+
+  do i = 1,$vdim(dvi,1)
+    do j = 1,$vdim(dvi,2)
+      message OLDHV([i],[j],[sec]) = $eval(dvi([i],[j],[sec])) NEWHV([i],[j],[sec]) = $eval(newhv([i],[j],[sec])) 
+    enddo
+  enddo
+  
+  read option Do you want to change HV now? (yes/no):
+   
+  case [option] in
+    (yes)  exec hvPut [det] [sec] newhv
+     (no)  exitm 'Exiting without change'
+  endcase   
+  
+return  
+  
+
+  

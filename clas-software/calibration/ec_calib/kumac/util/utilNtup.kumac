@@ -1,0 +1,107 @@
+macro find  tag=_cooked
+
+    chain -
+  
+  case [#] in
+    (0) path1 = work/
+        npath = 1
+    (*) shift; do i = 1,[#]; path[i] = [%i]; enddo
+        npath = [#]
+  endcase 
+  
+  vec/cre runs(2,100) r
+  
+  do i = 1,[npath]
+    command = 'ls '//[path[i]]//'*.rzn* '//[path[i]]//'*.hbook'
+    string  = $shell([command],' ')
+    numfiles = $words([string],' ')
+    k = 0
+    do j = 1,[numfiles]
+      file = $word([string],[j],1,' ')
+      n1   = $len([path[i]])+1
+      n2   = $index([file],[tag])
+      if [n2].ne.0 then
+        len  = [n2] - [n1]
+        run  = $substring([file],[n1]+1,[len]-1)
+        if [run].ne.[runsave] then
+          n = 1; k = [k]+1
+        endif
+        message utilNtup.find: Attaching [file] to chain r[run]-[n] 
+        chain r[run]-[n] [file]
+        runsave = [run]
+        vec/inp runs(:,[k]) [runsave] [n]
+        n = [n]+1
+      endif
+    enddo
+  enddo
+  
+return
+
+macro get chain
+
+  if $substring([chain],1,1).eq.r then
+    run = $substring([chain],2,6)
+  endif
+  
+  global/cre utilNtup.runno [run]
+  vec/cre runno(1) i [run]
+
+  do i = 1,100
+    runtest = $eval(runs(1,[i]))
+    if [runtest].eq.[run] then
+      global/cre utilNtup.nchains $eval(runs(2,[i]))
+      exitm
+    endif
+  enddo
+
+return
+
+macro load chain id 
+
+  cd //[chain]-1
+  nt/print [id]
+  nfun = $eval(0.5*([#]-2)) 
+  do i = 1,[nfun]
+    shift; shift
+    message utilNtup.load: Loading COMIS function [1].f
+    call kumac/[2]/fun/[1].f77
+  enddo
+  
+return
+
+macro fill chain id fun ifirst=1 nevent=0
+
+  global/imp utilNtup*
+  message utilNtup.fill: Executing COMIS function [fun]
+  message utilNtup.fill: Starting eventloop at event [first] $date $time $rtime $cptime
+  nproc = $hinfo([id],'entries')
+  evtot = 0
+  cptime = $cptime
+  rtime  = $rtime
+  
+  do i = 1,[utilNtup.nchains]
+    cd //[chain]-[i]
+    nt/print 10    
+    nevt = $hinfo([id],'entries')
+    evtot = [evtot]+[nevt]
+        
+    message Looping over [nevt] events in member _
+    [i]-[utilNtup.nchains] of chain [chain]
+  
+    case [nevent] in
+      (0) nt/loop [id] [fun] ifirst=[ifirst]; nev=[nevt]
+      (*) nt/loop [id] [fun] ifirst=[ifirst] nevent=[nevent]; nev=[nevent]
+    endcase
+  enddo
+    
+  cptime = $cptime-[cptime]
+  rtime  = $rtime-[rtime]
+  
+  message  [evtot] events processed on $machine $os 
+  message utilNtup.fill: Process Events/sec   (CPU)=$eval([evtot]/[cptime])
+  message utilNtup.fill: Process Events/sec  (live)=$eval([evtot]/[rtime])
+  
+return
+
+ 
+      

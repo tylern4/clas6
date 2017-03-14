@@ -1,0 +1,4 @@
+#/usr/bin/csh
+cat $CVSROOT/CVSROOT/commitlog | grep $1 | wc
+
+

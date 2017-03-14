@@ -1,0 +1,40 @@
+macro ccUpdateHV
+************************************************************
+* macro ccUpdateHV -- change the voltages in the CLAS      *
+* Cerenkov detector.  Asks for the name of the voltage     *
+* file as input.  The voltages in this file are in a       *
+* different order than that expected by the HV system:     *
+*                                                          *
+*     HV order              file order                     *
+*     ========              ==========                     *
+*        1A                     1A                         *
+*        2A                     1B                         *
+*        3A                     2A                         *
+*       ...                     2B                         *
+*       18A                    ...                         *
+*        1B                    17B                         *
+*       ...                    18A                         *
+*       18B                    18B                         *
+*                                                          *
+* So, the arrays must be modified correctly.               *
+************************************************************
+vector/create v_hv(18,2,6)
+read file Enter the file name
+vector/read dum1,dum2,v_new [file]
+do i=1,6
+  do j=1,2
+    do k=1,18
+      if ([j] .eq. 1) then
+        id=$sigma(2*[k]-1)
+      else
+        id=$sigma(2*[k])
+      endif
+      index = $sigma(([i]-1)*36+[id])
+      vector/copy v_new([index]) v_hv([k],[j],[i])
+    enddo
+  enddo
+enddo
+for i in 1 2 3 4 5 6
+  exec hvPut cc [i] v_hv
+endfor
+exitm

@@ -1,0 +1,93 @@
+<html>
+<head>
+<title> Mapmanager</title>
+</head>
+
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#
+FF0000">
+
+
+<body>
+
+<center><h1>The Mapmanager Page</h1></center>
+<center><img src="../icons/blue-line2.gif"></center>
+
+<a name ="introduction"><h1>Introduction</h1>
+<P>
+Conceptually, the mapmanager calibration database stores arrays of 
+calibration constants along a time-line. When a user wishes to retrieve 
+the calibration constants for a given run number, the map manager
+looks at the time-line for that particular constant and returns the last 
+current array for that particular item. For example, the toroidal misalignment
+was measured for runs 150, 689, and 900, and values were stored in the
+mapmanager database for those runs. Later, we wish to analyze run 800, a 
+call is made to the mapmanager to get the calibration constants for that
+run. The mapmanager checks for constants at run 800 and finds none, it 
+then moves back along the time-line to get the most up-to-date constants,
+in this case from run 689. The mapmanager then returns the values for 
+run 689 as the correct constants for run 800.
+</P>
+
+<a name="libraries"><h1>Documentation</h1></a>
+<P>
+The mapmanager source code is stored in cvs. For most people it is not 
+necessary to compile your own library - you can just link to 
+$CLAS_LIB/libmapmanager.a - Note that the environment variable 
+$CLAS_LIB is defined by the 
+<a href="../cms/jlab.cshrc">
+jlab.cshrc</a> located in /group/clas/builds/LATEST/packages/cms/jlab.cshrc - you should source this file before using cvs.
+</P>
+<menu>
+<li><B><a href="map_help.txt"> Man Page</a> </B>- located in $CLAS_PACK/Map/map_help.txt. Note: for each C routine listed on the man page there is a corresponding FORTRAN routine with the same arguments.
+<li><B><a href="../utilities/maputil/maputil.html"> <b>Command Line operation of the Database</a></B> - a group of routines allowing one to run the mapmanager from the command line. </b>
+<li><B><a href="../include/map_manager.h"> Header file: map_manager.h</a></B> - located in $CLAS_PACK/include/map_manager.h
+</menu>
+
+<h1> Commonly used mapmanager subroutine calls (<font COLOR="#AF0000"> C </font>)</h1>
+<P> <B> FORTRAN vesions of the same routines exist, they use the same arguments as the C routines </B></P>
+<menu>
+<li><B><font COLOR="#AF0000">int map_get_float(const char filename[], const char subsystemname[], 
+                      const char itemname[], int arraylength, float farray[],
+                      int runNo, int *firsttime)</font></B>
+	<menu>
+	<B>Given the name of the map (filename) including the path, the subsystem name, item name, the length of the array and the run number (or Unix time), return a filled array of floating point numbers and the run number in the map from which those numbers were obtained (firsttime).</b>
+	</menu>
+<li><B><font COLOR="#AF0000">int map_get_int(const char filename[], const char subsystemname[], 
+                      const char itemname[], int arraylength, int iarray[],
+                      int runNo, int *firsttime)</font></B>
+	<menu>
+	<b>Given the name of the map (filename) including the path, the subsystem name, item name, the length of the array and the run number (or Unix time), return a filled array of integer numbers and the run number in the map from which those numbers were obtained (firsttime).</b>
+	</menu>
+</menu>
+
+<h1>Examples</h1></a>
+<P>
+Examples of code used to read various map database files
+</P>
+<menu>
+<li><a href="../sc/sc_maputil.c"> C code routines, sc_brun_ and sc_read_map </a>, used to load the time of flight database into the Off-Line analysis
+<li> FORTRAN callable  C routine <a href="../ec/ec_maputil.c">ec_read_map_</a> used to load Electromagnetic Calorimeter calibration constants
+</menu>
+
+<hr>
+<a href ="../offline_libs.html"><img src="../icons/cebaf.old.gif" border=0> back to the Software Libraries Page</a>
+<hr>
+
+<address>
+For comments or questions: 
+<a href="mailto:manak@jlab.org">send email to Joe Manak</a><br>
+</address>
+
+<pre>
+$Id: mapmanager.html,v 1.4 2000/09/27 20:34:25 marki Exp $
+</pre>
+
+</body>
+</html>
+
+
+
+
+
+
+

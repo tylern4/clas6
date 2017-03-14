@@ -1,0 +1,156 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+
+ifdef USEBOSIO
+BOSLIB= -lbosio$(ADD_DEBUG)
+else
+BOSLIB = -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG)
+endif
+
+STDLIBS= -L$(LOCAL_LIB) -L$(CLAS_LIB) -lclasEvent$(ADD_DEBUG) -leloss$(ADD_DEBUG) -lmomentum_correction$(ADD_DEBUG) -lplib$(ADD_DEBUG) -lpid$(ADD_DEBUG) -lec$(ADD_DEBUG) -lcc$(ADD_DEBUG) -lsc$(ADD_DEBUG) -ltrk$(ADD_DEBUG) -ldc$(ADD_DEBUG) -llac$(ADD_DEBUG) -lst$(ADD_DEBUG)  -lpid$(ADD_DEBUG) -ltag$(ADD_DEBUG) -lscaler$(ADD_DEBUG) -lvertex$(ADD_DEBUG) -lbankdefs$(ADD_DEBUG) -lclasutil$(ADD_DEBUG)   -lc_bos_io$(ADD_DEBUG) -lrecutl$(ADD_DEBUG) -litape$(ADD_DEBUG) $(BOSLIB) -lc_bos_io$(ADD_DEBUG) -lmapmanager$(ADD_DEBUG)  -lonline_dummy$(ADD_DEBUG) -lc_cern$(ADD_DEBUG) -lpp$(ADD_DEBUG) -ltxtEvent$(ADD_DEBUG)  -lpwaUtil$(ADD_DEBUG)
+
+#use the newest cern library
+CERNPATH= $(CERN_ROOT)/lib
+CERNLIB= -L$(CERNPATH) -lpacklib
+MATHLIB= -lm
+
+FINCLUDE := $(FINCLUDE) -I./include
+INCLUDE := $(INCLUDE) -I./include
+
+CCSRCS:=  pipipi.cc 
+
+fSRCS:= 
+
+FSRCS:= 
+
+SRCS:=  
+
+fOBJS= $(patsubst %.f,$(OBJDIR)/%.o,$(fSRCS))
+FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+CCOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(CCSRCS))
+
+convertSRCS= convert.cc
+convertOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(convertSRCS))
+
+electroGenSRCS= electroGen.cc
+electroGenOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(electroGenSRCS))
+
+electronSRCS= electron.cc
+electronOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(electronSRCS))
+
+gamp2lowqSRCS= gamp2lowq.cc
+gamp2lowqOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(gamp2lowqSRCS))
+
+halldSRCS= halld.cc
+halldOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(halldSRCS))
+
+makebosSRCS= makebos.cc
+makebosOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(makebosSRCS))
+
+mcgen.bnlSRCS= mcgen.bnl.cc
+mcgen.bnlOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(mcgen.bnlSRCS))
+
+mcgenSRCS= mcgen.cc
+mcgenOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(mcgenSRCS))
+
+ppgenSRCS= ppgen.cc
+ppgenOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(ppgenSRCS))
+
+3pigenSRCS= 3pigen.cc
+3pigenOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(3pigenSRCS))
+
+testerSRCS= tester.cc
+testerOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(testerSRCS))
+
+gen_beamSRCS= gen_beam.c
+gen_beamOBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(gen_beamSRCS))
+
+makeiSRCS= makei.c
+makeiOBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(makeiSRCS))
+
+convert: $(convertOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+electroGen: $(electroGenOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+electron: $(electronOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+gamp2lowq: $(gamp2lowqOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+halld: $(halldOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+makebos: $(makebosOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+mcgen.bnl: $(mcgen.bnlOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+mcgen: $(mcgenOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+ppgen: $(ppgenOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+3pigen: $(3pigenOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+tester: $(testerOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+gen_beam: $(gen_beamOBJS)
+	$(CC) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+makei: $(makeiOBJS)
+	$(CC) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+all: lib  convert electroGen electron gamp2lowq halld makebos mcgen.bnl mcgen ppgen 3pigen tester gen_beam makei
+
+LIBS= $(LOCAL_LIB)/libmcgen$(ADD_DEBUG).a
+lib: $(LIBS)
+
+$(LIBS): $(OBJS) $(FOBJS) $(fOBJS) $(CCOBJS)
+	$(VDIR) $(LOCAL_LIB)
+	ar rv $@ $?
+install:  convert electroGen electron gamp2lowq halld makebos mcgen.bnl mcgen ppgen 3pigen tester gen_beam makei
+	$(VDIR) $(LOCAL_BIN)
+	mv convert $(LOCAL_BIN)
+	mv electroGen $(LOCAL_BIN)
+	mv electron $(LOCAL_BIN)
+	mv gamp2lowq $(LOCAL_BIN)
+	mv halld $(LOCAL_BIN)
+	mv makebos $(LOCAL_BIN)
+	mv mcgen.bnl $(LOCAL_BIN)
+	mv mcgen $(LOCAL_BIN)
+	mv ppgen $(LOCAL_BIN)
+	mv 3pigen $(LOCAL_BIN)
+	mv tester $(LOCAL_BIN)
+	mv gen_beam $(LOCAL_BIN)
+	mv makei $(LOCAL_BIN)
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo FFLAGS $(FFLAGS)
+	@echo CCLAGS $(CCFAGS)
+	@echo INCLUDE $(INCLUDE)
+	@echo LOCAL_LIB $(LOCAL_LIB)
+	@echo LOCAL_BIN $(LOCAL_BIN)
+	@echo LOCAL_INCLUDE $(LOCAL_INCLUDE)
+	@echo OBJDIR $(OBJDIR)

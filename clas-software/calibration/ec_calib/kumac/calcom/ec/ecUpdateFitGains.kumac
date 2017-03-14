@@ -1,0 +1,36 @@
+macro ecUpdateFitGains run  
+
+  global/import gainpath
+  
+  ifile1 = [gainpath]/ecfitgains.vec
+  ofile1 = [ifile1]
+  ofile2 = [gainpath]/ecgainfit[run].vec
+  
+  vec/cre ecgain(ecvecdim)
+  vec/cre fit(ecvecdim)
+  vec/cre dum(ecvecdim) 
+  vec/cre mask(ecvecdim) r 1296*1.
+  
+  if ($fexist([ifile1]).eq.1) then
+    vec/read ecgain [ifile1]
+  endif
+  
+  exec ecSetupVectors
+  
+  do i = 2,[#]
+    sec = [%i]
+    global/create runno [run]_[sec]
+    exec ecVectorIO read  
+    vec/cop ecfitadc_ymaxfit(:,:,1) fit(:,:,[sec])
+    vec/inp mask(:,:,[sec]) 216*0
+  enddo
+  
+  sigma dum = ((1-mask)*fit)
+  sigma ecgain = ecgain*mask+dum
+  
+  vec/write ecgain  [ofile1]
+  vec/write ecgain  [ofile2]
+  
+  vec/del dum,mask,fit,ecgain
+  
+return

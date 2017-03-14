@@ -1,0 +1,7 @@
+from build_system import environment
+
+FilterEnv = environment.env(deps='clas6 root'.split())
+FilterEnv.load_dependency('clas6 root'.split())
+
+FilterLib = FilterEnv.library('Filter')
+FilterEnv.return_from_sconstruct(FilterLib)

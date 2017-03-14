@@ -1,0 +1,177 @@
+macro eccal
+
+  close 0
+
+  alias/cre calopt1	eccal#opt1
+  alias/cre calopt2	eccal#opt2
+  alias/cre calopt3	eccal#opt3
+  alias/cre calopt4	eccal#opt4
+  alias/cre calopt5	eccal#opt5
+  alias/cre calopt6	eccal#opt6
+  alias/cre calopt7	eccal#opt7
+  alias/cre calopt8	eccal#opt8
+
+  message ' '
+  message   '********* CLAS EC ONLINE CALIBRATION *********'
+  begin:
+  message ' '
+    message 'Options:	1) Convert BOS/FPACK to ntuples (claspaw only!) '
+    message '		2) Process pedestal run '
+    message '		3) Plot pedestal summary '
+    message '		4) Process laser run '
+    message '		5) Plot laser summary '
+    message '		6) Find ntuple runs '
+    message '		7) Make pixel mask file '
+    message '		8) Process pixel run '
+    message '		q) Quit'
+    message ' '
+    read opt 'Enter option: '
+    case [opt] in
+      (q) alias/del calopt*; exitm
+      (*) exec calopt[opt]; goto begin
+    endcase
+    
+return
+
+macro opt1
+
+  seclist = 5
+  banklist = ec
+  pedrun = -786
+  thrrun = 786
+  nevents = 0
+  loop1:
+  
+  read bosfile 'FPACK/BOS filename (path/file.ext): '
+  
+  if $fexist([bosfile]).eq.0 then
+    message ' '
+    message File [bosfile] does not exist...Try again
+    message ' '
+    goto loop1
+  endif
+  
+  read outfile 'Ntuple filename (no path or .ext): '  
+  read nevents 'Number of events to process (0=all): '
+  read seclist 'Sectors to include: '
+  read banklist 'BOS banks to include: '
+  
+  alias/cre seclist $quote([seclist])
+  alias/cre banklist $quote([banklist])
+  vec/inp hseclist 1 5 5*0
+  
+  exec utilListToVector sectorlist seclist
+  exec monBankStatus off ecraw scraw dc0 cc sc ec ec1 crt
+  exec monBankStatus on banklist
+  exec monBankListDo monPedQuery banklist  
+  exec monBosProcess [bosfile] [outfile] 1 2000 [nevents]
+  
+  alias/del banklist
+  alias/del seclist
+  
+return
+
+macro opt2
+
+  read runno 'Run number: '
+  read cwnfile 'Ntuple file containing pedestal data (no path or extension): '
+  read seclist 'Sectors to include: '
+  read nev 'Number of events to analyze: '
+  alias/cre seclist $quote([seclist])
+  hi/file 1 ntup/[cwnfile].rzn
+  globa/cre runno [runno]
+  exec ecGetPedStats 0. 801. ecPedMean ecPedRms [nev] seclist
+  close 1
+  next 
+  loop:
+    read opt 'Plot pedestal spectrum for PMT (#), all (0), quit(q):'
+    case [opt] in
+      (q) opt nstat
+          go to continue
+      (0) opt nstat; hi/plot 1000000 colz
+      (*) opt  stat; hi/plot 1000000.sliy.[opt]
+    endcase
+  goto loop
+  continue:
+  read opt 'Save pedestals to disk? (yes/no): '
+  case [opt] in
+    (yes)  global/imp pedpath
+           case $fexist([pedpath]/ec/run[runno]) in
+             (0) shell mkdir [pedpath]/ec/run[runno]
+           endcase
+           message Writing run [runno] pedestal data to [pedpath]/ec/run[runno]
+           vec/write ecPedMean [pedpath]/run[runno]/ec/pedmean[runno].vec
+           vec/write ecPedRms  [pedpath]/run[runno]/ec/pedrms[runno].vec
+           exec writemap [runno] 5 15   
+     (no)  exitm
+  endcase 
+        
+return
+  
+macro opt3
+
+  exec utilSetupGraphics
+  read runno 'Run numbers to retrieve: '
+  alias/cre runlist $quote([runno])
+  exec ecGetPed runlist
+  sec=5; ymin=0; ymax=800; var=mean; type=norm; run1=$word([runno],1,1,' '); run2=[run1]
+  loop:
+    read opt 'Sector (1-6), run # (r), mean (m), rms (rms), ratio (rat), ylimits (y), quit(q):'
+    case [opt] in
+      (r)  read run1 'Run number: '
+           title = Run [run1] - EC Sector [sec] Pedestals
+           type = norm 
+      (m)  var = mean
+    (rms)  var = rms
+    (rat)  read run1 'Run 1: '; read run2 'Run 2: '; type=ratio          
+           title = Run [run1]/[run2] - EC Sector [sec] Pedestals 
+      (y)  read ymin 'Ymin: '; read ymax 'Ymax: '
+      (q)  exitm
+      (1-6)  sec = [opt]
+    endcase
+    vec1 = [var][run1]; vec2 = [var][run2]
+    exec ecPlotSecVec [type] [var] [ymin] [ymax] [var][run1] [var][run2] [sec] [title]
+  goto loop
+  
+return
+
+macro opt4
+  message 'Option not yet implemented'
+return
+
+macro opt5
+  message 'Option not yet implemented'
+return
+
+macro opt6
+
+  path = ntup; tag = clas
+  read path 'Enter path for ntuple files: '
+  read tag  'Enter tag word preceding run number: '
+  exec utilFindNtup [path] [tag] [tag]
+  
+return
+
+macro opt7
+
+  exec utilMakeMaskFile pixelinner
+  
+return
+
+macro opt8
+
+  exec ecSetup
+  exec ecProcess 
+  
+return 
+
+ 
+
+  
+
+  
+
+ 
+  
+  
+   

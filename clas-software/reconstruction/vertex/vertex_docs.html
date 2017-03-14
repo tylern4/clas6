@@ -1,0 +1,162 @@
+<HTML>
+<TITLE>John McNabb's Vertex Reconstruction Page</TITLE>
+<BODY>
+<H1>The Vertex Routines in Recsis</H1>
+<hr>
+<H3>What the Vertex Routines Do</H3>
+   The purpose of the vertex routines are twofold: first, define the best 
+possible vertex for all tracks, and second identify detached vertices.
+The routines assume that the magnetic field is negligible in the vicinity of 
+the target and that straight line approximations for the track will work.  
+There are two different sets of vertex routines, those that make the 
+<A href="#VERT">VERT bank</A>, and those that make the 
+<A href="#MVRT">MVRT bank</A>.
+
+<hr>
+<H3> <A name = "VERT"> The VERT banks </A></H3>
+The VERT bank is based upon several simplifying assumptions, first that 
+the tracks are straight lines, and second, that the vertex is the point 
+that is halfway between two of these straight lines.
+In the first VERT bank, each track is matched with the beam-line.  
+In the second bank, each 
+track is matched with all other tracks such that all possible pairs of tracks 
+are analyzed.  Note that this means for events with more than two tracks that
+each track will be a part of more than one vertex.   
+The two VERT banks contain the following information (from vert.ddl):
+<pre>
+!********************************************************************
+!       BANKname BANKtype      ! Comments
+ TABLE  VERT  ! create write display delete ! vertex Result bank
+!
+! THE COORDINATE SYSTEM USED IN THIS BANK IS THE DETECTOR COORDINATE SYSTEM.
+!
+!   ATTributes:
+!   -----------
+!COL ATT-name FMT    Min     Max    ! Comments
+!
+  1  vertex     I   -1000    1000   ! vertex id
+  2  trk1       I       0      10   ! track #1
+  3  trk2       I       0      10   ! track #2
+  4  x          F  -1000.   1000.   ! x vector3_t vert{x,y,z}
+  5  y          F  -1000.   1000.   ! y 
+  6  z          F  -1000.   1000.   ! z
+  7  sepd       F   -100.    100.   ! seperation distance
+!
+! 
+!     
+!
+ END TABLE
+</pre>
+<p>   
+
+<h4>Using the VERT Routines</h4>
+To make the VERT bank,  vertex_brun(int runno) must first be run to 
+initialize the beamline location then for each event, 
+make_vert() should be called, which at present requires the 
+existance of either the TBTR or HBTR banks.
+The routine takes two tracks (or one track and the beam line) and finds 
+the point midway on the shortest line segment between the two.  That vertex 
+is stored in a vector3_t (which has the x,y,z coordinates) and trk1 and trk2 
+are used to store the id number of the tracks used from the HBTR or TBTR bank. 
+A value of 0 represents the beam-line.  The length of the line segment is 
+stored in sepd. VERT bank 1 consists of only tracks matched to the beamline, 
+whereas VERT bank 2 consists of all possible pairs of tracks.  the 
+<A href="#MVRT">MVRT</A> bank should probably now be used instead of 
+VERT bank 2.
+
+<hr>
+<H3> <A name = "MVRT"> The MVRT banks </A></H3>
+The MVRT banks are the results of a multi-track vertex fitting routine that 
+uses the information from the TBER bank.  A least squared fit is done on 
+the vertex location, minimizing the distance to each track, weighted by the 
+appropriate error from the Covariancce matrix of each track.  The algorithem 
+used is described in <u> Statistical and Computation Methods in Datas 
+Analysis</u> by Siegmund Brandt.  The MVRT bank is made using all the 
+tracks in the event.  The ddl file looks like:
+<pre>
+!********************************************************************
+!       BANKname BANKtype      ! Comments
+ TABLE  MVRT  ! create write display delete ! vertex Result bank
+!
+! THE COORDINATE SYSTEM USED IN THIS BANK IS THE DETECTOR COORDINATE SYSTEM.
+!
+!   ATTributes:
+!   -----------
+!COL ATT-name FMT    Min     Max    ! Comments
+!
+  1  v_id       I   -1000    1000   ! info about track ids
+  2  ntrk       F   -100.    100.   ! number of tracks used to make vertex
+  3  x          F  -1000.   1000.   ! x vector3_t vert{x,y,z}
+  4  y          F  -1000.   1000.   ! y 
+  5  z          F  -1000.   1000.   ! z
+  6  chi2       F  -1000.   1000.   ! chi2
+  7  cxx        F  -1000.   1000.   ! Covariance matrix array element
+  8  cxy        F  -1000.   1000.   ! Covariance matrix array element
+  9  cxz        F  -1000.   1000.   ! Covariance matrix array element
+ 10  cyy        F  -1000.   1000.   ! Covariance matrix array element
+ 11  cyz        F  -1000.   1000.   ! Covariance matrix array element
+ 12  czz        F  -1000.   1000.   ! Covariance matrix array element
+!
+! note v_id is based upon the track id used to make the
+! vertex.  v_id = (summed over all tracks used) 2^(tber id of track(0-9)) 
+!
+ END TABLE
+</pre>
+<h4>Using the MVRT Routines</h4>
+To make the MVRT bank,  vertex_brun(int runno) must first be run to 
+initialize the beamline location then for each event, make_mvrt() 
+should be called.  This requires the existance of the TBER bank.
+The routine takes all tracks and reports back the best vertex in 
+the vector3_t vert.  The absolute chi2 is reported as well as the 
+covariance matrix array elements (which are symmetric).  Note that 
+this is not the normalized chi2 and also that the elements of the 
+covariance matrtix are proportional to the errors reported in tracking, 
+so if you double the value of all the covarinace matrix elements of the 
+tracks, the covariance matrix of the vertex will double.  At present, it 
+seeems like the errors reported in the TBER banks are too small.
+ntrk is the number of tracks used to make the vertex, and in all cases this 
+should be the same as the number of tracks in the TBER bank.
+The purpose of v_id is for use when different combinations of tracks are used 
+to find a detached vertex.  
+It is defined as the sum over all tracks used of 2 raised to the 
+track number(1-10).  The beamline is given a track number of 0, a;though this 
+is not implemented yet.
+In other words, each 1 bit represents a track used in making the vertex: 
+For two tracks
+(1 and 2) v_id = 6, for three (0(the beamline),1,and 2) the value is 7,and for 9 tracks + the beamline (0,1,2,3,...9) v_id= 2^10-1.
+A value less than 2 means that only one track was used, and the position 
+returned was the point of closest approach of that track to the beamline, in 
+which case the errors reported are the square of the elements of the vector 
+to the beamline(as stored in the map)
+(ie Cxx= dx*dx, Cyy= dy*dy, Czz=dz*dz, and all off-diagonal elements are = 0).
+note that this is slightly different from the VERT 
+bank which reports the point halfway between the two.  
+
+<h3>Future Work</h3>
+There are a few minor changes that need to be done in routines beneath 
+make_mvrt().  the service routine mtv(..) needs to have one extra parameter 
+added to allow the information about the suggested change to the track 
+parameters to be passed up, 
+and possibly a new bank should be made about what these 
+suggested changes are.  
+Also routines that use the mtv(...) routine to identify detached
+vertecies need to be written.  neither of these changes should effect how 
+make_mvrt is called or used.
+
+<hr>
+return to my <A HREF="http://www.phys.cmu.edu/~mcnabb/physics/trk.html">tracking pages </A>
+<P>
+return to my <A HREF="http://www.phys.cmu.edu/~mcnabb/physics/physics.html">physics related links </A>
+<p>use my <A HREF="http://www.phys.cmu.edu/~mcnabb/jwcm.html">Recursion Link</A> to go back to my home page
+<p>
+Please send questions or comments about this page to: 
+<A HREF="mailto:mcnabb+@andrew.cmu.edu">mcnabb+@andrew.cmu.edu</A>
+<H6>Last Updated: 1 DECEMBER 1998</H6>
+</BODY></HTML>
+
+
+
+
+
+
+

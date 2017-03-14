@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>caldb: Map emulation for the MySQL database</title>
+<body>
+<h1>caldb: Map emulation for the MySQL database</h1>
+
+<p> libcaldb.a contains routines that provide a Map-like interface to
+the CLAS MySQL-based calibration database. It was written to provide
+backward compatibility for analysis codes that access the <a
+href="../Map/mapmanager.html">Mapmanager</a>. As such, calling
+arguments are identical to those of the Map routines. At present, the
+following routines are supported:
+
+<ul>
+<li> map_stat_item
+<li> map_get_char
+<li> map_get_float
+<li> map_get_int
+<li> map_put_char
+<li> map_put_float
+<li> map_put_int
+</ul>
+
+See the <a
+href="../Map/mapmanager.html">Mapmanager page</a> for calling arguments.
+
+<p> For more general information on the calibration database, see the
+<a href="http://clasweb.jlab.org/caldb/caldb/">CLAS Calibration
+Database</a> document. You can also browse the contents of the
+database using the <a
+href="http://claspc2.jlab.org/cgi-bin/marki/caldb/cq.pl">Calibration
+Database Query Page</a>.
+
+<p><address>
+<a href="mailto:marki@jlab.org">Mark M. Ito</a>
+</address>
+<pre>
+$Id: caldb.html,v 1.1 2001/04/05 15:28:53 marki Exp $
+</pre>
+</html>

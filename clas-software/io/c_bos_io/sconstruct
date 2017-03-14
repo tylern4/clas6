@@ -1,0 +1,6 @@
+from build_system import environment
+
+c_bos_ioEnv = environment.env(deps=['clas6'])
+c_bos_ioEnv.load_dependency('clas6')
+c_bos_ioLib = c_bos_ioEnv.library('c_bos_io', ignore=['trackswim.c','ptracb.f'])
+c_bos_ioEnv.return_from_sconstruct(c_bos_ioLib)

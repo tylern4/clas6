@@ -1,0 +1,14 @@
+from build_system import environment
+from glob import glob
+
+ec_time_deps = {'clas6': 'default_libs'.split()}
+#ec_time_src = glob("*.F")
+#fout_map = ec_time_src.pop(0)
+fout_map = "fout_map.F"
+ec_time_src = "ectimes4.F ec_xyz_duvw.F fill_seb_nt.F retime.F".split()
+	 
+ec_time_env = environment.env(deps=ec_time_deps.keys())
+ec_time_env.load_dependency(deps=ec_time_deps)
+
+ec_time_prog = ec_time_env.program(target='ec_time', source=ec_time_src)
+ec_time_prog = ec_time_env.program(target='fout_map', source=fout_map)

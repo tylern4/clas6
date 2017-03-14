@@ -1,0 +1,179 @@
+#!/bin/bash
+
+if [[ $# -lt 3 ]]; then
+    echo "usage:"
+    echo "  for i in include detector io reconstruction analysis; do $0 svndir cvsdir \$i --brief; done"
+    echo ""
+    echo "i=io; `basename $0` `pwd` /home/goetz/clas-cvs \$i --exclude='evnt_2_bos.F' --exclude='make_vert.c' --exclude='evout.[ch]' --exclude='scatbos.c' --exclude='analysis.c' --exclude='user_control.inc' --exclude='ic_book.F' --exclude='*_qpad.c' --exclude='user_init.F' --brief"
+fi
+
+svn=$1
+cvs=$2
+dir=$3
+shift
+shift
+shift
+opts="$@"
+
+function print-header() {
+    a=$1
+    b=$2
+    echo -n "${red} >>> ${cl}"
+    echo -n "${orange}${a}${cl}    ${green}${b}${cl}"
+    echo "${red} <<< ${cl}"
+}
+
+function diff-this() {
+    a=$1
+    b=$2
+    diff $opts \
+    -bB --ignore-all-space --ignore-blank-lines --ignore-space-change \
+    --exclude=sconstruct --exclude=[Mm]akefile --exclude=Makefile_alt* \
+    --exclude=.svn --exclude=CVS --exclude=.cvsignore \
+    --exclude='Linux*' \
+    $a $b \
+    | grep -v 'Common subdirectories: ' \
+    | sed "s#$a/##g" \
+    | sed "s#$b/##g" \
+    | highlight --syntax='diff' --ansi \
+    | sed '/^$/d'
+}
+
+if [[ $dir == "include" ]]; then
+    c="packages"
+    for i in include; do
+        print-header SVN/$i CVS/$c/$i
+        diff-this $svn/$i $cvs/$c/$i
+        #MOVED_FILES=`diff-this $svn/$i $cvs/$c/$i \
+        #| grep "Only in $cvs/$c/$i" \
+        #| awk '{print $NF}'`
+    done
+
+    # moved files from include dir in CVS
+
+    a=io/caldb/C/calib_envir.h
+    b=packages/include/calib_envir.h
+    print-header $a $b
+    diff-this $svn/$a $cvs/$b
+
+    a=pcor/g10pcor/g10pcor.h
+    b=packages/include/g10pcor.h
+    print-header $a $b
+    diff-this $svn/$a $cvs/$b
+
+    a=io/c_bos_io/g3D.h
+    b=packages/include/g3D.h
+    print-header $a $b
+    diff-this $svn/$a $cvs/$b
+
+    a=io/Map/map_manager.h
+    b=packages/include/map_manager.h
+    print-header $a $b
+    diff-this $svn/$a $cvs/$b
+
+    #for i in $MOVED_FILES; do
+    #print-header "SVN($i)" "CVS($i)"
+    #svnfile=`find $svn -name "$i"`
+    #cvsfile=`find $cvs -name "$i"`
+    #print-header "SVN($svnfile)" "CVS($cvsfile)"
+    #diff-this $svnfile $cvsfile
+    #done
+fi
+
+if [[ $dir == "detector" ]]; then
+    s="detector"
+    c="packages"
+    for i in cc dc ec icf lac sc st tag; do
+        print-header SVN/$s/$i CVS/$c/$i
+        diff-this $svn/$s/$i $cvs/$c/$i
+    done
+fi
+
+if [[ $dir == "io" ]]; then
+    s="io"
+    c="packages"
+    for i in bankdefs bosio caldb c_bos_io clasutil c_sql itape recutl; do
+        print-header SVN/$s/$i CVS/$c/$i
+        diff-this $svn/$s/$i $cvs/$c/$i
+    done
+
+    # Map needs special treatment
+    s="io"
+    c="packages"
+    for i in Map; do
+        print-header SVN/$s/$i CVS/$c/$i
+        svnfiles=`find $svn/$s/$i -name "*.*" | grep -v '.svn'`
+        cvsfiles=`find $cvs/$c/$i -name "*.*" | grep -v 'CVS'`
+        for sf in $svnfiles; do
+            cf=$(find $cvs/$c/$i -name $(basename $sf))
+            diff-this $sf $cf
+        done
+        for cf in $cvsfiles; do
+            sf=$(find $svn/$s/$i -name $(basename $cf))
+            diff-this $sf $cf
+        done
+    done
+
+    s="io"
+    c="packages/utilities"
+    for i in bosdump countbos; do
+        print-header SVN/$s/$i CVS/$c/$i
+        diff-this $svn/$s/$i $cvs/$c/$i
+    done
+fi
+
+if [[ $dir == "reconstruction" ]]; then
+    s="reconstruction"
+    c="packages"
+    for i in ana c_cern eloss epics gem online_dummy pid recsis scaler scat seb tagM trk user user_ana vertex; do
+        print-header SVN/$s/$i CVS/$c/$i
+        diff-this $svn/$s/$i $cvs/$c/$i
+    done
+
+    s="reconstruction"
+    c="packages/utilities"
+    for i in a1; do
+        print-header SVN/$s/$i CVS/$c/$i
+        diff-this $svn/$s/$i $cvs/$c/$i
+    done
+fi
+
+if [[ $dir == "pcor" ]]; then
+    s="pcor"
+    c="packages/utilities"
+    for i in g10pcor Pcor; do
+        print-header SVN/$s/$i CVS/$c/$i
+        diff-this $svn/$s/$i $cvs/$c/$i
+    done
+fi
+
+if [[ $dir == "calibration" ]]; then
+    s="calibration"
+    c="packages"
+    print-header SVN/$s/dc3 CVS/$c/reccal/dc3
+    diff-this $svn/$s/dc3 $cvs/$c/reccal/dc3
+
+    print-header SVN/$s/stn_calib CVS/$c/utilities/stn_calib
+    diff-this $svn/$s/stn_calib $cvs/$c/utilities/stn_calib
+
+    print-header SVN/$s/tag_calib CVS/$c/utilities/tag_calib
+    diff-this $svn/$s/tag_calib $cvs/$c/utilities/tag_calib
+fi
+
+if [[ $dir == "analysis" ]]; then
+    s="analysis"
+    c="packages/utilities"
+    for i in clasEvent clasEvent/vkTAGR; do
+        print-header SVN/$s/$i CVS/$c/$i
+        diff-this $svn/$s/$i $cvs/$c/$i
+    done
+fi
+
+if [[ $dir == "physmath" ]]; then
+    s="physmath"
+    c="packages/utilities"
+    for i in libpp plib pwaUtil; do
+        print-header SVN/$s/$i CVS/$c/$i
+        diff-this $svn/$s/$i $cvs/$c/$i
+    done
+fi

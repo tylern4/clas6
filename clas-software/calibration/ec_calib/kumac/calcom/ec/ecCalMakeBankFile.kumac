@@ -1,0 +1,22 @@
+macro ecCalMakeBankFile file run
+ 
+  exec bos_init
+  exec bos_open [file] w
+  
+  do i = 3,[#]
+    name = [%i]
+    exec bos_makevec [name]
+    global/imp [name]*
+    exec bos_create [name] C+ [[name]fbank] [[name]nbank] [[name]nrow] [[name]ncol] [[name]fmt]
+    exec ecCalBankInit [run] [name] [name]Init
+  enddo
+  
+  exec bos_write whandle C
+  exec bos_drop C
+  exec bos_close whandle
+  
+return
+
+  
+  
+  

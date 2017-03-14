@@ -1,0 +1,10 @@
+3        ! =2 for two charged particles only, =3 with neutral particle
+1 	     ! 1=lambda, 2=sigma
+0	     ! 0=unpol, 1=pol
+4.2475	 ! beam energy     (GeV)
+1.6 3.0  ! Wmin Wmax	   (GeV)
+.5  3.0  ! Q2min Q2max     (GeV)^2
+10. 60.  ! the_e_min, the_e_max (deg)
+0.2  4.1 ! lower and upper limit for scattered electron (GeV)
+5000	 ! number of events
+1.0      ! multiplication factor for sigr_max

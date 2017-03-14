@@ -1,0 +1,12 @@
+from build_system import environment
+
+txtEvent_env = environment.env(deps=['clas6'])
+txtEvent_env.load_dependency('clas6')
+
+txtEvent_env.library(target='txtEvent', source=['txtEvent.cc'])
+txtEvent_env.install_headers()
+
+txtEvent_prog_env = txtEvent_env.Clone()
+txtEvent_prog_env.AppendUnique(LIBS=['txtEvent', 'pp'])
+
+txtEvent_prog_env.program(source=['txtEvent2bos.cc'])

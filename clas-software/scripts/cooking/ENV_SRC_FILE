@@ -1,0 +1,124 @@
+# ENV_SRC_FILE
+#
+# by                : Simeon McAleer
+# Institution: Florida State University
+# Date           : July 29, 1999
+# 
+# This text file is read by both RunJob, ProcessRun, and makeSub in
+# order to set the environmental variables needed for a consistent 
+# production cooking. The file should contain the below set of environment
+# variable names followed by their definition.
+#
+#  Any line that begins with a pound sign is assumed to be a comment
+
+# Path which defines the location of the suplimentary cooking scripts such
+# as RunA1C and RunCC_mon.
+
+CLAS_SCRIPTS /work/clas/pdisk4/clarisse/pass0/v1/scripts/
+
+# Path to bin directory for analysis executables. It is not necessary to 
+# specify the operating system after the bin directory. The operating 
+# system Linux or SunOS will be added in RunJob depending on what farm 
+# system the job is running on.
+
+CLAS_BIN /work/clas/pdisk4/clarisse/pass0/v1/bin/
+
+# Path to the Perl offline database.
+
+CLAS_DB /work/clas/pdisk4/clarisse/pass0/v1/database/
+
+# Location of the data files on the silo
+
+CLAS_DATA /mss/clas/g7a/data
+
+# Path where the monitoring histograms will be written. The subdirectories 
+# under this path will be in monitor/ and then the name of the executable. 
+# For pid histograms the standard is CLAS_OUT_PATH/monitor/pid_mon. You 
+# only need to specify the path to the directory containing monitor. Then 
+# make sure the directories exist for the monitoring programs that you 
+# have chosen.
+
+CLAS_OUT_PATH /work/clas/pdisk4/clarisse/pass0/v1/
+
+# Path where the cooked files, the filtered files and the ntuples will be 
+# written. Due to the size of these files they are typically written to 
+# the tape silo. Under this directory the files will be placed in 
+# directories CLAS_TAPE_PATH/cooked, CLAS_TAPE_PATH/Kaons,
+# CLAS_TAPE_PATH/physfilter and CLAS_TAPE_PATH/ntuples respectively.
+# An internal check in the cooking scripts will decide whether a jput is needed,
+# so this path can be set to a work disk.
+
+CLAS_TAPE_PATH /work/clas/pdisk4/clarisse/pass0/v1/
+
+# Path to the location of the calibration map directory
+
+CLAS_PARMS /work/clas/pdisk4/marki/parms
+#CLAS_PARMS /work/clas/disk1/huertas/cooking
+
+# Environments for MYSQL monitoring database
+CSQL_DBHOST clasdb.jlab.org
+CSQL_DB g7_offline
+CSQL_USER offline_g7
+CSQL_TABLE pass0_v1_test
+
+# email address to send reports to
+CLAS_MAIL clarisse@jlab.org
+
+os Linux
+
+# Filter for the file extensions which need to be cooked. Two possible 
+# usages are shown. In the first only the A00 and A01 files are 
+# chosen. The extensions must be separated by colon punctuation mark. 
+# In the second example any file in the data directory that exists for that run 
+# be processed. 
+
+FILE_FILT A00
+#FILE_FILT *
+#FILE_FILT A00:01:02
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

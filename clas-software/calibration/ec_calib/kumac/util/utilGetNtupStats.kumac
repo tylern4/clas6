@@ -1,0 +1,20 @@
+macro utilNtupStats 
+
+  message utilNtupStats
+  global/create nevents 0 'Number of events in ntuple chain'
+  global/import prefix
+  global/import ntupid
+  
+  nruns = $vlen(runs)
+  
+  do i = 1,[nruns]
+    run = $eval(runs([i]))
+    cd //[prefix][run]
+    nt/print [ntupid]
+    nevents = [nevents] + $hinfo([ntupid],'entries')
+  enddo
+  
+  close 1
+    
+return
+    

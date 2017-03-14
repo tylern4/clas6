@@ -1,0 +1,28 @@
+macro ecTriggers
+
+  goto plot
+
+  1d 1 '' 100 80. 5000. 0. 
+
+  do s = 1,6
+    nt/plot 2000.ecsum(2,100,0,[s]) idh=1
+    hi/copy 1 [s]01 
+    nt/plot 2000.ecsum(2,100,0,[s]) evclass=1 idh=1
+    hi/copy 1 [s]02   
+    nt/plot 2000.ecsum(2,100,0,[s]) evclass=2 idh=1
+    hi/copy 1 [s]03
+  enddo
+  
+plot:
+
+zone 2 3  
+  
+  do s = 1,6
+    hi/plot [s]01; hi/plot [s]02 s
+    title = Sector [s] EC ADCSUM ; atitle [title]
+  enddo  
+    
+return    
+    
+    
+    

@@ -1,0 +1,21 @@
+macro ecCompareGains sec run1 run2
+
+  global/import gainpath
+  
+  global/create runno [run1]_[sec]
+  exec ecVectorIO read  
+  ifile = [gainpath]/ecgaincor[run2].vec
+    
+  vec/cre   fit(ecvecdim) r
+  vec/cre  mean(ecvecdim) r
+  
+  vec/cop  ecfitadc_ymaxfit(:,:,1) fit(:,:,[sec])
+  vec/read mean [ifile]
+  
+  title = EC Sector [sec] PMT Gains: Fit Run [run1] Mean Run [run2]
+  
+  exec ecPlotSecVec norm gain 0 300 [sec] [title] fit mean
+  
+return 
+  
+     

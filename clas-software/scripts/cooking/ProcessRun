@@ -1,0 +1,212 @@
+#!/usr/local/bin/perl
+
+#  ProcessRun is the starting point for this set of cooking scripts.
+#                   it calls NextRun to determine the next run to be cooked.
+#                   It also calls MakeRunSub which makes a submission 
+#                   file. ProcessRun then uses the jsub command to submit this 
+#                   job to the computing farm.
+
+# Usage: ProcessRun [-h] run_number +env <string> +exe exec [+o OS] [+queue <queue>]  [-OPTS] ARGS
+#                -h                                  Print this message.
+#                run_number            Run number to be processed.
+#                +env <string>           File name, w/path, of environment variable text file.
+#                +exe <exec>               Executable to be run, w/full path specified.
+#                +o <OS>                      Operating system to run the job on [default = Linux].
+#                +q <queue>      Farm queue to run on [default = ].
+#                -OPTS   Options preceeded by '-' are passed to a1c.
+#                ARGS    Arguments are passed to executable. 
+
+
+require "ctime.pl";
+
+############# Set default variables
+
+$os = "Linux";
+
+############# Finished setting default variables
+
+# Parse through the command line arguments 
+
+if ($ARGV[0] eq "-h" || $ARGV[0] eq "+h") {
+    &PrintUsage;
+    exit(0);
+}
+
+if ($ARGV[0] =~ /(\d+)/) {
+    $run_number = $ARGV[0];
+    shift;
+} else {
+  $run_number = "";
+}
+
+for ($i = 0; $i <= $#ARGV; $i++) {
+  $arg = $ARGV[$i];
+  if ($arg =~ /^-.*/) {
+    push(@opts, $arg);
+  }
+  elsif ($arg =~ /^\+(\w*)/) {
+    if ($1 eq "h") {
+      &PrintUsage;
+      exit(0);
+    }
+    elsif ($1  eq "o") {
+      $i++;
+      $os = $ARGV[$i];
+    }
+    elsif($1 =~ /^exe/) {
+      $i++;
+      $exe = $ARGV[$i];
+    }
+    elsif ($1 =~ /^env/) {
+      $i++;
+      $env_src_file = $ARGV[$i];
+    }
+    else {
+      push(@arr, $arg);
+    }
+  }
+  else {
+    push(@arr, $arg);
+  }
+}
+
+@ARGV = @arr;
+
+# Parse through environmental variable template file
+if ($env_src_file  eq "") { 
+  print "$0: Can not run without a source file for environment variables  identified.\n";
+  print "\n Please try again using the +env <string> flag. \n";
+}
+
+print "\n$0: Going to use file $env_src_file to set environment variables.\n\n";
+
+open(ENV, "$env_src_file") || die "\n$0: Could not open environment variable text template.\n";
+
+while(<ENV>) {
+    if ($_ =~ /^#/) {
+	next;
+    } elsif ($_ =~ /\s*(\S+)\s+(\S+)/) {
+	$ENV{$1} = $2;
+    }
+}
+
+#######################################################
+# Get rid of possible extraneous ending / marks on environment variables
+#######################################################
+
+@env_vars = ("CLAS_BIN","CLAS_PARMS","CLAS_SCRIPTS","CLAS_DB", "CLAS_OUT_PATH","CLAS_TAPE_PATH","CLAS_DATA");
+
+foreach (@env_vars) {
+  if ($ENV{"$_"} =~ /\/$/) {
+    $ENV{"$_"} =~ s /\/$//;
+  }
+}
+
+
+$ENV{'CLAS_BIN'} .= "/$os";
+
+$dbdir = $ENV{"CLAS_DB"};
+$data_path = $ENV{"CLAS_DATA"};
+
+if ($dbdir eq "") { 
+    print "\n$0: Can not run without a database directory identified.\n";
+    print "\nPlease specify a database directory using \n\n";
+    die "CLAS_DB in the ENV_SRC_FILE\n\n";
+}
+if ($data_path eq "") {
+    print "\n$0: Can not run without a path to the data identified.\n";
+    print "\n Please specify a path to the data  using\n\n";
+    die "CLAS_DATA in the ENV_SRC_FILE\n\n";
+}
+if ($exe eq "")  {
+  print "\n$0: Can not run without an executable identified.\n";
+  print "\n Please specify an executable using\n\n";
+  die "ProcessRun run_number +exe executable.\n";
+} elsif (!(-e $exe) || !(-x $exe)) {
+  print "\n$0: Executable either doesn't exist or has the wrong execuatble permission.\n";
+  die "Please check and try again.\n";
+}
+
+require "$ENV{'CLAS_SCRIPTS'}/CheckDir.pl";
+
+CheckDir($dbdir);
+CheckDir($ENV{"CLAS_OUT_PATH"});
+if (!($ENV{"CLAS_TAPE_PATH"} =~ /^\/mss/)) {
+  CheckDir($ENV{"CLAS_TAPE_PATH"});
+}
+
+# Re add +env option to argument list if using RunJob
+if ($exe =~ /RunJob$/) {
+  push(@ARGV, "+env $env_src_file");
+}
+##########################################
+
+print "\nOS: $os\n";
+print "Database Directory: $dbdir \n";
+print "Executable: $exe \n";
+print "Data Location: $data_path \n";
+
+foreach $arg (@ARGV) {
+    print "ARGUMENT: $arg\n";
+}
+foreach $opt (@opts) {
+    print "OPTION: $opt\n";
+}
+
+print "\n";
+
+# First, get the current runs
+
+open(C,"nextRun $run_number | ") || die "\n$0:  Could not execute nextRun.\n";
+
+TAPE:
+while (<C>) {
+    if (!($_ =~ /(\d+)/)) {
+	print $_;
+	next;
+    }
+    chop;
+    $run = $_;
+    
+    if ($run == "0" ) {
+	exit(0);
+    }
+    close (C);
+}
+
+# This run needs to be processed     
+print "Processing run $run\n";
+
+$cmd = "makeSub $run +o $os +exe $exe @ARGV  @opts > $dbdir/submit$run";
+system($cmd);
+
+$cmd = "jsub $dbdir/submit$run";
+print "$cmd\n";
+system($cmd);
+
+open(D,">>$dbdir/done");
+print D $run,"\n";
+close(D);
+
+open(L,">> $dbdir/log");
+$t = time();
+print L "Submit run $run at ",  &ctime($t);
+
+exit(0);
+
+sub PrintUsage {
+    print "\n";
+# The $0 variable contains the name of the file being processed
+    print "Usage: $0 [-h] run_number +env string +exe exec [+o OS] [+queue <queue>][-OPTS] ARGS\n";
+    print "\t-h \t\tPrint this message.\n";
+    print "\trun_number \tRun number to be processed.\n";
+    print "\t+env <string> \tFile name, w/path, of environment variable text file.\n";
+    print "\t+exe <exec>\tExecutable to be run, w/full path specified.\n";
+    print "\t+o <OS> \tOperating system to run the job on [default = Linux]\n";
+    print "\t+queue <queue> \tFarm queue to run on [default = ].\n";
+    print "\t-OPTS \tOptions preceeded by '-' are passed to a1c.\n";
+    print "\tARGS \tAdditional arguments are passed to executable. \n";
+}
+
+
+

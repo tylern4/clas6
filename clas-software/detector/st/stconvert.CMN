@@ -1,0 +1,50 @@
+c      include file st_convert.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: stconvert.CMN,v 1.6 2004/06/22 00:17:53 devita Exp $
+c
+c  Documentation for include file st_convert
+c
+c  Purpose:  
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   T. Auger     Created:  Mon Jun 03 10:11:52 EST 1997
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file st_convert:
+c  -----------------------------------
+c   
+c*************STI BOS bank parameter************
+
+	real StCorrected_data(St_max_pair,St_TDC1:St_ADC2)
+	integer StStatus(St_max_pair)
+	integer StNconvertedHits(St_max_pair)
+	integer StWhich_pairid(St_max_hit)
+	integer StWhichTrk(St_max_hit,St_max_pair)
+	integer StWhichSector(St_max_hit,St_max_pair)
+	integer StWhichTrkSec(St_max_hit,St_max_pair)
+	real StWhichTrkLength(St_max_hit,St_max_pair)
+	integer StWhereHit(St_max_hit,St_max_pair)
+c
+c_end_var
+c
+
+	common /stconvert/StStatus,StNconvertedHits,StCorrected_data,
+     &   	StWhich_pairid,StWhichTrk,StWhichSector,StWhichTrkLength,
+     &	        StWhichTrkSec,StWhereHit
+
+	
+c----6----------------------------------------------------------------72
+

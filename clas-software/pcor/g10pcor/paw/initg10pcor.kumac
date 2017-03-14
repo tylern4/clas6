@@ -1,0 +1,13 @@
+ macro initg10pcor
+   
+   v/cr cpim(6240) r
+   v/cr cpr(5400)  r
+   v/cr cpimh(6240) r
+   v/cr cprh(5400)  r
+
+   v/read cpim pcorpppm_tm.pim.dat
+   v/read cpr  pcorpppm_tm.pro.dat
+   v/read cpimh pcorpppm_tm.pim.high.dat
+   v/read cprh  pcorpppm_tm.pro.high.dat
+   
+ return

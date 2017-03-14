@@ -1,0 +1,198 @@
+<html>
+<head>
+<title>Installing COBRA</title>
+<link rel=stylesheet type="text/css" href="style.css">
+</head>
+<body text="#000000" bgcolor="#ffffff">
+<table border=0 cellspacing="0" cellpadding="0" width="95%" bgcolor="ffffff">
+<tr><td width="10">&nbsp;</td>
+<td>
+<center>
+<h1>Installing COBRA</h1>
+</center>
+<hr>
+Below are instructions on how to install COBRA broken up into the following
+sections,
+<p>
+<a class="blue" href="./install.html#Src" target="basefrm">Getting the Source Code</a>
+<p>
+<a class="blue" href="./install.html#SetUp" target="basefrm">Setting up the Enviornment</a>
+<p>
+<a class="blue" href="./install.html#Build" target="basefrm">Building COBRA</a>
+<p>
+<hr>
+<a name="Src"></a>
+<center><h2>Getting the COBRA Source Code</h2></center>
+<p>
+The source code is located in the CLAS CVS repository (cvs.jlab.org:/group/clas/clas_cvs) under packages/utilities/cobra.  
+<hr>
+
+<a name="SetUp"></a>
+<center><h2>Setting Up the Enviornment</h2></center>
+<p>
+First, make sure your ROOT enviornment is set. Just add the following lines to
+your .cshrc file.
+
+<div class="command"><pre>
+# ROOTSYS is where your local copy of ROOT is located
+setenv ROOTSYS /usr/local/root
+setenv LD_LIBRARY_PATH ${ROOTSYS}/lib
+setenv PATH ${PATH}:${ROOTSYS}/bin
+</pre></div>
+
+<p>
+Next, you'll need to make sure that you have your CLAS enviornment set up. 
+The specific values of these enviornment variables will depend on where you're
+running. Below is an example shell script used at cmu to set the CLAS
+enviornment.
+
+<div class="command"><pre>
+#! /bin/tcsh -f
+#
+# Set up CLAS enviornment for Ed Wood
+#
+setenv TOP_DIR /home/edwood/clas/ # Ed has some packages in a personal copy
+setenv CLAS_LOCATION /home/classoft/
+setenv CLAS_ROOT  /home/classoft/clas/
+setenv CVS_RSH	  ssh
+setenv CVSROOT    edwood@cvs.jlab.org:/group/clas/clas_cvs
+setenv OS_NAME LinuxRHEL3 # Ed is running Red Hat Enterprise
+setenv BUILDS     $CLAS_ROOT/builds
+setenv CLAS_PROD  $BUILDS/LATEST
+setenv CLAS_DEVEL $BUILDS/LATEST
+setenv CLAS_PACK  $TOP_DIR/packages
+setenv CLAS_LIB   $CLAS_DEVEL/lib/LinuxRHEL3
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${CLAS_DEVEL}/slib/LinuxRHEL3
+setenv PATH ${PATH}:${CLAS_DEVEL}/bin/LinuxRHEL3
+setenv OSCLAS "`uname`RHEL3"
+setenv OSNAME "`uname`RHEL3"
+setenv CLAS_PARMS /home/clasg11/jlabg11/CLAS_PARMS # parms from g11 area
+setenv CLAS_CMS $CLAS_DEVEL/packages/cms
+#
+# Alias some useful displays
+#
+alias show_clas        'echo ""; \
+                        echo "         CVSROOT " $CVSROOT;\
+			echo "         OS_NAME " $OS_NAME;\
+                        echo "         TOP_DIR " $TOP_DIR;\
+                        echo "         CLAS_LOCATION " $CLAS_LOCATION;\
+                        echo "         CLAS_ROOT " $CLAS_ROOT;\
+                        echo "         BUILDS " $BUILDS;\
+                        echo "         CLAS_PROD " $CLAS_PROD;\
+                        echo "         CLAS_DEVEL " $CLAS_DEVEL;\
+                        echo "         CLAS_PACK " $CLAS_PACK;\
+			echo "         CLAS_LIB " $CLAS_LIB;\
+			echo "         CLAS_PARMS " $CLAS_PARMS;\
+                        echo "";\
+                        echo "";'
+
+# Set up CERN enviornment
+setenv CERN /usr/local/cern
+setenv CERN_LEVEL 2004
+setenv CERN_ROOT $CERN/$CERN_LEVEL
+setenv CERN_LIB ${CERN_ROOT}/lib
+setenv CERN_BIN ${CERN_ROOT}/bin
+setenv CERNLIB ${CERN_ROOT}/lib
+</pre></div>
+<p>
+
+Once your CLAS and ROOT enviornments are set, setting up the COBRA enviornment 
+is simple. Just add the following lines to your .cshrc file.
+
+<div class="command"><pre>
+# COBRASYS is where your local copy of COBRA is located
+setenv COBRASYS /home/edwood/clas/packages/utilities/cobra 
+setenv PATH ${PATH}:${COBRASYS}/bin
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${COBRASYS}/lib
+</pre></div>
+
+That's it, your enviornment should be ok.
+
+<hr>
+
+<a name="Build"></a>
+<center><h2>Building COBRA</h2></center>
+<p>
+COBRA has several build options, which you choose will depend on what you want
+it to do. Configuring COBRA can be done by running the configure script in the
+top directory. This script produces globals.mk, in the same directory, which
+defines all the libs, includes, flags, etc. needed to build COBRA software.
+
+<div class="command"><pre>
+[edwood@plan9 cobra]$ ./configure --help
+Usage: configure [--options]
+ 
+     --interface &lt;inter&gt; Build data interface 'inter'. This is a build option
+                         to specify which CLAS data interfaces should be built
+                         into ClasEvent.
+                          
+                         Options: Bos ==&gt; For BOS file interface
+                                  CLASdata ==&gt; Compressed ROOT file interface
+                                  all ==&gt; Build all interfaces
+ 
+     --build &lt;package&gt;   Build 'package' into COBRA. This tells COBRA which
+                         CLAS packages to build in when it's compiled.
+                         Note: Make sure your CLAS_PACK or CLAS_DEVEL has these
+                               pacakages.
+ 
+                         Options: Pcor ==&gt; g11/g1c momentum corrections
+                                  g11pcor ==&gt; New g11a momentum corrections
+ 
+     --warn &lt;level&gt;      Set warning level (default is all). This adds -Wlevel
+                         to the compiler flags.
+ 
+     --opt &lt;level&gt;       Set optimization level (default is 2). Adds -Olevel to
+                         the compiler flags.
+ 
+     --debug             Turn debugging ON (default is OFF)
+ 
+     --f2c &lt;lib&gt;         FORTRAN to C conversion library (default is g2c)
+ 
+     --help              Print this message
+ 
+ 
+Example Usage:
+[destro@cobracmd]$ ./configure --interface all --build g11pcor
+</pre></div>
+
+If you have the complete set of CLAS packages, I'd recommend building with the
+--interface all flag. With just the CLASdata interface (compressed ROOT files), you
+can get away with only linking against 3 CLAS libs (eloss,map_manager and 
+recutl). As far as packages go, make sure you have the package before you try
+and build it in. If you don't have it, need it, or want it, then it should be
+ok to leave it out.
+<p>
+
+Once you've configured COBRA, you can build it by simply typing make in the 
+top directory (to be safe, do a make clean if you're rebuilding it).
+
+<div class="command"><pre>
+[edwood@plan9 cobra]$ make
+</pre></div>
+<p>
+
+When the build is done, you should have the following libs in cobra/lib.
+<div class="command"><pre>
+[edwood@plan9 cobra]$ ls lib/ <font color="green">
+libClasEvent.so  libEvent.so   libPArray.so
+libClasRuns.so   libKinFit.so  libPTypes.so </font>
+</pre></div>
+<p>
+Now proceed to the <a class="blue" href="start.html">Getting Started</a> 
+section to check to see the things built properly.
+<hr>
+<br>
+<hr size="1"><address style="align: right;">
+&copy 2005 <a class="blue" href="http://www-meg.phys.cmu.edu/~williams/" target="_Top">Mike Williams</a>, Department of Physics, Carnegie Mellon University.
+<hr size="1">
+</center>
+
+<address>
+
+</ADDRESS>
+</td>
+<td width="10">&nbsp;</td></tr>
+</table>
+<br><br>
+</BODY>
+</html>

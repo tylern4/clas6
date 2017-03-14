@@ -1,0 +1,111 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+#
+#
+#Last updated 6/4/24 by Rob Fersch (fersch@jlab.org)
+#
+#
+
+include $(CLAS_CMS)/rules.make
+include $(CLAS_CMS)/Rules.make
+
+ifdef USEBOSIO
+BOSLIB= -lbosio$(ADD_DEBUG)
+else
+BOSLIB = -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG)
+endif
+
+STDLIBS= -L$(TOP_DIR)/lib/$(OS_NAME) -L$(CLAS_LIB) -L$(MYSQL_LIB_PATH) -lsc$(ADD_DEBUG) -lc_cern$(ADD_DEBUG) -lpid -lc_bos_io$(ADD_DEBUG) -lec$(ADD_DEBUG) -lcc$(ADD_DEBUG) -lrecutl$(ADD_DEBUG) -lclasutil$(ADD_DEBUG) -lonline_dummy -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG) -lc_bos_io$(ADD_DEBUG)  -lst 
+
+INCLUDE += -I$(MYSQL_INCLUDE_PATH)
+
+ifndef MAP
+	STDLIBS += -lcaldbMap$(ADD_DEBUG) -lclasutil$(ADD_DEBUG) -L$(MYSQL_LIB_PATH) -lmysqlclient  -ldl
+else
+	STDLIBS += -lmapmanager$(ADD_DEBUG)	
+endif
+
+STDLIBS += -lcaldbMap$(ADD_DEBUG) -lclasutil$(ADD_DEBUG) -lmysqlclient$(ADD_DEBUG)  -ldl$(ADD_DEBUG)
+
+
+STDLIBS +=  -lz -ltcl$(ADD_DEBUG)
+
+
+#ifeq "$(OS_NAME)" "LinuxRH6"
+#STDLIBS +=  -lz  -ltcl$(ADD_DEBUG)
+#endif
+#ifeq "$(OS_NAME)" "LinuxRH6"
+#STDLIBS +=  -lz  -ltcl$(ADD_DEBUG)
+#endif
+#ifeq "$(OS_NAME)" "LinuxRHEL3"
+#STDLIBS +=  -lz  -ltcl$(ADD_DEBUG)
+#endif
+#ifeq "$(OS_NAME)" "LinuxRH7"
+#STDLIBS +=  -lz  -ltcl$(ADD_DEBUG)
+#endif
+#ifeq "$(OS_NAME)" "LinuxRH8"
+#STDLIBS +=  -lz  -ltcl$(ADD_DEBUG)
+#endif
+#ifeq "$(OS_NAME)" "LinuxRH9"
+#STDLIBS +=  -lz  -ltcl$(ADD_DEBUG)
+###LIBS    +=  -lstdc++
+#endif
+ifeq "$(OS_NAME)" "SunOS"
+OTHER = /usr/local/lib
+STDLIBS += -lsocket -lnsl -L$(OTHER)/ -ltcl 
+endif	
+
+
+#use the newest cern library
+CERNPATH= $(CERN_ROOT)/lib
+CERNLIB= -L$(CERNPATH) -lpacklib 
+MATHLIB= -lm
+
+FINCLUDE := $(FINCLUDE) -I./include
+INCLUDE  := $(INCLUDE)  -I./include
+
+
+
+MISCLIB_SunOS :=  -L/usr/lib -lm -lc -lnsl -lsocket
+MISCLIB_HP-UX :=  -L/usr/lib -lm -lc -lf
+MISCLIB_AIX :=  -L/usr/lib -lxlf90 -lm -lc 
+MISCLIB_Linux :=  -L/usr/lib  -lm -lc /usr/lib/libf2c.a
+
+MISCLIB := $(MISCLIB_$(OS_NAME))
+
+LIBS= $(STDLIBS) $(BOSLIBS) $(CERNLIB) $(FLIB) $(MISCLIB) $(MATHLIB) $(STDLIBS) 
+
+tof_calib: tof_calib.o 
+	$(CC)  -o $@ tof_calib.o $(LIBS)
+
+hscan_atten: hscan_atten.o
+	$(F77) -o $@ hscan_atten.o $(LIBS)
+
+min_atten: min_atten_main.o min_atten.o
+	$(F77) -o $@ min_atten_main.o min_atten.o $(LIBS)
+
+adc_const: adc_const.o
+	$(F77) -o $@ adc_const.o $(LIBS)
+
+ALL = tof_calib hscan_atten min_atten adc_const
+
+all: $(ALL)
+
+env:
+	@echo CC $(CC)
+	@echo F77 $(F77)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo LIBS $(LIBS)
+	@echo CERNLIB\\t$(CERNLIB)
+
+
+
+
+
+
+

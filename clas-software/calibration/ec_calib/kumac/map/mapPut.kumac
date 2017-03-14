@@ -1,0 +1,21 @@
+macro mapPut map subsystem item run file ifirst
+
+  if [map].eq.0 then
+    message '  Purpose: Deposit contents of file into map'
+    message '    Usage: mapGet map subsystem item run file'
+    message '      map: path to map file e.g.-$CLAS_PARMS/Map/EC_ATTEN.map'
+    message 'subsystem: e.g.- inner,outer'
+    message '     item: e.g. - u,v,w'
+    message '      run: run number'
+    message '     file: input file of numbers'
+    exitm
+  endif 
+      
+  if [ifirst]=1 then
+    command = rem_map_arr   -m[map] -s[subsystem] -i[item] -t[run]
+    shell $quote([command])
+  endif
+  command = put_map_float -m[map] -s[subsystem] -i[item] -t[run] < [file]
+  shell $quote([command])
+  
+return   

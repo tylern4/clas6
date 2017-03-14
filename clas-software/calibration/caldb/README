@@ -1,0 +1,31 @@
+# 
+#  Created: 25-MAY-2000 by Riad Suleiman
+#  $Id: README,v 1.12 2000/12/03 23:11:21 marki Exp $
+#
+
+    To translate from Map to MySQL:
+
+  - calib_clear.sql:
+    If an old version of the database exists, use these sql commands
+    to delete it and create an empty one.
+
+    mysql < calib_clear.sql
+
+  - dbcreate.pl: 
+    Create the tables of "calib" database (takes Item.txt and 
+    RunPeriod.txt as input). Connects as dbmanager on the localhost.
+
+  - map2db.pl:
+    Fills the tables with the current values of constants from map files.
+
+The normal dbuser should use the following two scripts: 
+
+    To translate from MySQL to Map:
+
+  - runmap.pl:
+  Create the map files for the runs in the specified range  
+
+    To add values to MySQL:
+
+  - addset.pl:
+    Add a new set of values to "calib" database. 

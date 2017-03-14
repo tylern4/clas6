@@ -1,0 +1,154 @@
+>>> THIS FILE GIVES AN EXEMPLE OF HOW TO USE THE TMapMan class interactively in root  <<<
+>>> IN THIS EXEMPLE I GET THE VALUE OF THE Ci CONSTANTS in the Map TAG_CALIB.map for  <<<
+>>> the run 12456, increments some of the constants by 1, and put them back at that   <<<
+>>> run number                                                                        <<<
+
+<<< ( DON'T TEST THIS CLASS IN THE CLASPARMS AREA !!! USE LOCAL COPY OR LOCAL TEST )  >>>
+<<< ( MAP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! )  >>>
+
+sip bash mapman :root
+  *******************************************
+  *                                         *
+  *        W E L C O M E  to  R O O T       *
+  *                                         *
+  *   Version   2.00/13   30 October 1998   *
+  *                                         *
+  *  You are welcome to visit our Web site  *
+  *          http://root.cern.ch            *
+  *                                         *
+  *******************************************
+
+CINT/ROOT C/C++ Interpreter version 5.13.78, Oct 22 1998
+Type ? for help. Commands must be C++ statements.
+Enclose multiple statements between { }.
+root [0] .L /home/anciant/CLAS/slib/Linux/libROOTmapmanager.so
+root [1] TMapMan m("TAG_CALIB.map")                           
+root [2] m.Print()                                            
+Map File:TAG_CALIB.map
+Subsystem name is not defined
+Subsystems are:
+> pc containing 3 items
+> ps containing 5 items
+> tac containing 4 items
+> tag2tof containing 1 items
+> tag_e containing 2 items
+> tag_t containing 7 items
+(int)(-2)
+root [3] m.SetMap("tag_t")                                    
+(int)0
+root [4] m.Print(12456)                                       
+Map File:TAG_CALIB.map
+Subsystem: tag_t
+Item name is not defined
+Items are:
+> ci : length: 121 - type: FLOAT - Nentries: 10
+> do_translation : length: 1 - type: INT - Nentries: 3
+> dt_left : length: 61 - type: FLOAT - Nentries: 10
+> dt_right : length: 61 - type: FLOAT - Nentries: 10
+> slope_left : length: 61 - type: FLOAT - Nentries: 8
+> slope_right : length: 61 - type: FLOAT - Nentries: 8
+> transl_to_table : length: 122 - type: INT - Nentries: 5
+(int)(-3)
+root [5] m.SetMap("ci")                                       
+(int)0
+root [6] m.Print()                 
+Map File:TAG_CALIB.map
+Subsystem: tag_t
+Item: ci - Length: 121 - type: FLOAT
+(int)0
+root [7] m.Print(12456)
+Map File:TAG_CALIB.map
+Subsystem: tag_t
+Item: ci - Length: 121 - type: FLOAT
+Time of entry was: 12014
+
+ - 0.53 - 1.13 - 0.6 - 0.73 - 0.8 - 1.36 - 0.56 - 0.73 - 0.69 - 1.15
+ - 0.7 - 0.84 - 0.64 - 1.07 - 0.54 - 0.63 - 0.63 - 1.07 - 0.6 - 0.74
+ - 0.66 - 1.15 - 0.8 - 0.84 - 0.45 - 0.84 - 0.75 - 1.19 - 0.42 - 1.13
+ - 0.8 - 0.79 - 0.67 - 1.33 - 0.69 - 1.1 - 0.65 - 1.14 - 0.73 - 0.65
+ - 0.02 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81(int)0
+root [8] float ci[121]                                        
+root [9] m.GetFloatArray(121,ci,12456)
+(int)0
+root [10] #include <iostream.h>        
+root [11] {for (int k=0;k<20;k++) cout <<k<<" : "<<ci[k]<<endl;}
+0 : 0.53
+1 : 1.13
+2 : 0.6
+3 : 0.73
+4 : 0.8
+5 : 1.36
+6 : 0.56
+7 : 0.73
+8 : 0.69
+9 : 1.15
+10 : 0.7
+11 : 0.84
+12 : 0.64
+13 : 1.07
+14 : 0.54
+15 : 0.63
+16 : 0.63
+17 : 1.07
+18 : 0.6
+19 : 0.74
+root [12] {for (int k=0;k<80;k++) ci[k]+=1;}                    
+root [13] {for (int k=0;k<20;k++) cout <<k<<" : "<<ci[k]<<endl;}
+0 : 1.53
+1 : 2.13
+2 : 1.6
+3 : 1.73
+4 : 1.8
+5 : 2.36
+6 : 1.56
+7 : 1.73
+8 : 1.69
+9 : 2.15
+10 : 1.7
+11 : 1.84
+12 : 1.64
+13 : 2.07
+14 : 1.54
+15 : 1.63
+16 : 1.63
+17 : 2.07
+18 : 1.6
+19 : 1.74
+root [14] m.PutFloatArray(121,ci,12456)
+(int)0
+root [15] m.Print()                                             
+Map File:TAG_CALIB.map
+Subsystem: tag_t
+Item: ci - Length: 121 - type: FLOAT
+(int)0
+root [16] m.Print(12456)
+Map File:TAG_CALIB.map
+Subsystem: tag_t
+Item: ci - Length: 121 - type: FLOAT
+Time of entry was: 12456
+
+ - 1.53 - 2.13 - 1.6 - 1.73 - 1.8 - 2.36 - 1.56 - 1.73 - 1.69 - 2.15
+ - 1.7 - 1.84 - 1.64 - 2.07 - 1.54 - 1.63 - 1.63 - 2.07 - 1.6 - 1.74
+ - 1.66 - 2.15 - 1.8 - 1.84 - 1.45 - 1.84 - 1.75 - 2.19 - 1.42 - 2.13
+ - 1.8 - 1.79 - 1.67 - 2.33 - 1.69 - 2.1 - 1.65 - 2.14 - 1.73 - 1.65
+ - 1.02 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81
+ - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81
+ - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81
+ - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81 - 1.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81 - 0.81
+ - 0.81(int)0
+root [17] 
+
+
+ENJOY

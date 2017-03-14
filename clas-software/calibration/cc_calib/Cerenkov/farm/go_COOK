@@ -1,0 +1,32 @@
+#!/bin/csh -f
+
+source /home/ungaro/.tcshrc
+
+\ls -alp
+
+set file = `\ls *c*_0*.A*`
+set ext  = `\echo $file | awk -F.  '{print $2}'`
+
+set RI   = $1
+set DATA = $2
+set DEST = $3
+set run  = $4
+
+\echo
+\echo Analyzing file $file, run number $run, extension $ext
+\echo Destination Directory $DEST
+\echo Run Index $RI
+\echo
+
+
+# Creates ROOT File with SPE info
+./Cerenkov -USE_QT=0 -PROCESS_SPE=1 -RUN_INDEX=$RI $file
+mv  cc_adc_spe_$run".root" cc_adc_spe_$run"."$ext".root" 
+
+\ls -alp
+
+mkdir -p $DEST
+cp cc_adc_spe_$run"."$ext".root" $DEST
+
+\echo
+\echo

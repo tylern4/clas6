@@ -1,0 +1,32 @@
+macro utilMakeMaskFile [mask]
+ 
+  message utilMaskMaskFile
+  exec ecSetupGlobals
+  exec ecSetupVectors
+  exec ecSetupRun
+  call kumac/crt/fun/[mask]cut.f77
+  global/import *
+  case $fexist(masks/run[runno]) in
+    (0) shell mkdir masks/run[runno]
+  endcase
+  message utilMaskMaskFile: Creating mask [mask] with [nevents] events
+  mask/file [mask] n  
+  switch z
+  do i=1,1
+    message 
+    message utilMaskMaskFile: Starting [mask]cut [i] at $date $time $rtime $cptime
+    nt/loop [ntupid] [mask]cut=[i]>>[mask]([i])
+    message utilMaskMaskFile: Pixelcut [i]: Events/sec (CPU)=$eval([nevents]/$cptime)
+    message utilMaskMaskFile: Pixelcut [i]: Events/sec (live)=$eval([nevents]/$rtime)
+  enddo
+  switch g
+  mask/close [mask]
+  close 1
+  shell mv [mask].mask masks/run[runno]
+  message utilMaskMaskFile: Moving maskfile to masks/run[runno]/run[runno].mask
+  
+return
+  
+
+  
+  

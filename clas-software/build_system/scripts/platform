@@ -1,0 +1,18 @@
+#!/bin/bash
+
+function build_system_platform() {
+unset TERM
+echo -e "import sys\nfrom build_system import platform_string\nenv = Environment()\nsys.stdout.write(platform_string.platform_string(env))" | scons --cache-disable --silent -f -
+export TERM=/bin/bash
+}
+
+TMPDIR=/tmp/build_system
+TMPFILE=$TMPDIR/platform_name.txt
+
+if [[ ! -f $TMPFILE || `wc -w $TMPFILE | awk '{print $1}'` -ne 1 ]]; then
+	mkdir -p $TMPDIR
+	build_system_platform > $TMPFILE
+fi
+
+cat $TMPFILE
+

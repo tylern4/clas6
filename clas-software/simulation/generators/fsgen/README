@@ -1,0 +1,20 @@
+! Event generator based on GENBOD, with added feuters for generating
+! a t-channel production events
+!
+!
+Executable name "fsgen", can be made by typing "make" in the
+directory where source files are. Works the same way as the
+rest of the CLAS software packages.
+
+To run "fsgen", files "fsgen_input", "lund_upd.dat" and "celeg.ddl"
+should be present in the working directory. The running conditions
+are defined in "fsgen_input".
+
+Particle ID scheme is PDG, for decay channels JETSET is used.
+For light nuclei (2H, 3He, 4He, 3H) GEAN PID is used.
+
+Output bos banks are MCTK, MCVX, HEAD, TAGR (if flag is set).
+
+Most of explanations are given in the "fsgen_input".
+
+File "lund_upd.dat" can be used to insert new particles.

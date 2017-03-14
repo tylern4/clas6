@@ -1,0 +1,11 @@
+from build_system import environment
+
+scriptsEnv = environment.env(deps=['clas6'])
+
+scriptsEnv.install_scripts([
+    'build',
+    'makeMonitorProg',
+    'makeNtupleProg',
+    'misc' ])
+
+scriptsEnv.install_scripts('cooking', recursive=False)

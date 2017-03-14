@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Pcor Info</title>
+</head>
+<body BGCOLOR="#ffffff" LINK="#ff0000" VLINK="#ff0000">
+<a name="TopOfPage"></a>
+<br>
+<center>
+<h1>Pcor Package</h1>
+
+<hr>
+
+<br>
+<table width=95% border=0 bgcolor="000000"><td align=left><font color="#ffffff" face="Tahoma, Verdana, Arial" size="4"><b>&nbsp Overview of the Package</b></font></td></table><br>
+<table border=0 width=95% ><tr><td valign=top>
+This package was written to implement charged particle momentum and tagged photon energy corrections for the g1c or g11 run periods (it is an updated version of g1cPcor).  Information regarding how the corrections were derived can be found in <a href="http://www.jlab.org/Hall-B/notes/clas_notes04/2004-017.ps">CLASnote 2004-017</a>.   Charged particle corrections, which are performed by the function <a href="Pcor.cxx.html#DCpcor">DCpcor</a>, are parameterized in terms of |&int;Bxdl|/p, &theta;, &phi;, charge and sector. To calculate |&int;Bxdl|, this package crudely swims the particles through the CLAS magnetic field which is read into memory once when the package is initialized via the <a href="InitPcor.cxx.html#InitPcor">InitPcor</a> function. This function also initializes some quantities needed to decode the field map used in calculating |&int;Bxdl|. We also make corrections to the charged particle momenta for energy lost in the drift chambers using the <a href="Pcor.cxx.html#DCeloss">DCeloss</a> function. Both charged particle corrections can be made by calling <a href="Pcor.cxx.html#Pcor">Pcor</a>. Corrections to the tagged photon energy are performed by the function <a href="Pcor.cxx.html#TAGRcor">TAGRcor</a> (the tagger corrections can be applied with out calling <a href="InitPcor.cxx.html#InitPcor">InitPcor</a> first).
+</td></tr></table>
+<br>
+<table width=95% border=0 bgcolor="000000"><td align=left><font color="#ffffff" face="Tahoma, Verdana, Arial" size="4"><b>&nbsp Compiling and Linking</b></font></td></table><br>
+<table border=0 width=95% ><tr><td valign=top>
+The <a href="InitPcor.cxx.html#InitPcor">InitPcor</a> function reads in the CLAS magnetic field from a .dat file located in this directory. If your CLAS_PACK enviornment variable is set to this packages directory, then the file should be read in correctly.  However, if you have CLAS_PACK set to a different version of the packages, one that's old enough not to have this directory, then the code won't know where to find the .dat file.  To fix this, either change your CLAS_PACK enviornment variable or just open InitPcor.cc with your favorite editor and put in the path to the .dat file by hand (there are comments near the beginning of the file that tell you where to make the changes).
+<br><br>
+To compile the library type make lib in this directory.  This archives libPcor.a in your TOP_DIR/lib/OS_NAME directory (TOP_DIR and OS_NAME are CLAS enviornment variables). To link to this library you need to add the line -L$(TOP_DIR)/lib/$(OS_NAME) -lPcor to the libs you're linking against. You will also need to add the Pcor.h header file to your includes.  This can be done by checking Pcor.h out of the packages/includes directory (which presumably you're allready linking to), or by adding this directory to your includes with the line -I/????/packages/utilities/Pcor replacing the question marks with the appropriate path.
+<br><br>
+To call these functions in a language other than C++ (i.e. fortran), you have to add the line -lstdc++ (the standard C++ library) to the libs you're linking against (it should come after -lPcor). You'll also have to declare an external prototype of the function prior to calling it (for example, EXTERNAL INITPCOR). In C/C++ you'll, of course, have to include the header file with a #include"Pcor.h" statement.
+</td></tr></table>
+<br>
+<table width=95% border=0 bgcolor="000000"><td align=left><font color="#ffffff" face="Tahoma, Verdana, Arial" size="4"><b>&nbsp Applying the Corrections</b></font></td></table><br>
+<table border=0 width=95% ><tr><td valign=top>
+<a href="InitPcor.cxx.html#InitPcor">InitPcor</a> must be called once prior to applying any of the charged particle corrections.  <a href="Pcor.cxx.html#Pcor">Pcor</a> should be run prior to applying the standard ELOSS corections to the particle. The C/C++ version takes the measured 4-momentum as a CLAS vector4_t structure along with the charge and sector as int's and returns the corrected 4-momentum as a  CLAS vector4_t structure. The fortran version is a subroutine that takes the measured momentum as a 4-D real array along with the sector and charge as integers and alters the 4-momentum internally. <a href="Pcor.cxx.html#TAGRcor">TAGRcor</a> can be called at any time. The C/C++ version takes the measured photon energy, the endpoint energy and a run ID flag (1 for 3.115 g1c, 2 for 2.4 g1c, 3 for g11 ...these are the only 3 so far, any other flag performs the correction with no beam offset, this actually works very well for g2a) and returns the corrected photon energy.  The fortran version is again a subroutine that takes the same arguments and corrects the passed photon energy.
+
+
+<hr>
+<br>
+<center>
+Please send bug reports, suggestions, comments or requests concerning this code to <a href="mailto:williams@ernest.phys.cmu.edu">williams@ernest.phys.cmu.edu</a>
+<br><br>
+
+<hr>
+<br>
+</body>
+</html>

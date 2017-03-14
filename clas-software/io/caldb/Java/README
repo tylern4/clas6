@@ -1,0 +1,32 @@
+For example of  CALDB Java-interface run the Caldbjview.bat script
+
+setup java in CUE:
+>setup java
+
+check out the code (packages/caldbJ) compile and run the Calibjview
+
+>gmake
+>Caldbjview.bat [host] [dbase]
+host and dbase are optional, their default values are clasdb and calib.
+
+
+To get the set of constants (button Constants) choose the system,subsystem,item
+define the RunIndex table name (default RunIndex) the upper limit on 
+date of production (default 2037-1-1 for Date) and the run number
+(default 28000 for Runno ).
+A window with a histogram of choosed constant set will appear.
+
+For Time Graph type dependence (button Time Graph) choose 
+the  system,subsystem,item and channel#,
+define  RunIndex table name, Date and the run range  ( RunMin< run# < RunMax) 
+A display window with  constant vs run# will appear in addition to
+the list of values.
+
+The Graph with difference is giving a distribution of differences
+of corresponding calibration constants ( system,subsystem,item)
+for 2 runs, run#=RunMin and run#=RunMax.
+
+
+Graphic support, is based on JAS package.
+
+Send  questions and comments to H.Avagyan avakian@jlab.org 

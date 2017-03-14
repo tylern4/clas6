@@ -1,0 +1,13 @@
+4        ! npart (2=e- and K+, 4=e-,K+,photon,neutral ptl)
+1	     ! 1= lambda, 2=sigma
+0	     ! 0=unpol, 1=pol
+.005	 ! target thickness (radiation length)
+6.045	 ! beam energy     (GeV)
+1.6 4.0  ! Wmin Wmax	   (GeV)
+.8 10.0  ! Q2min Q2max     (GeV)^2
+8. 60.   ! the_e_min, the_e_max (in deg)
+.45 6.1  ! lower and upper limit for scattered electron (GeV)
+.005     ! minimum photon energy for integration
+200000   ! number of events
+1.0      ! multiplication factor for sigr_max
+

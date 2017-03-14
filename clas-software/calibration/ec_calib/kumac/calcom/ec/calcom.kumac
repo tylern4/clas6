@@ -1,0 +1,141 @@
+macro calcom goto
+
+  go to [goto]
+  exitm
+  
+fillgsimneg:
+
+  cd //gsim
+  nt/print 2000
+  call kumac/calcom/cal/fun/reclib.f77
+  
+  alias/cre test chargemctk.lt.0
+  
+  1d 100 '' 100 0.005 0.2 0.
+  1d 101 '' 100 0.005 0.2 0.
+  1d 110 '' 100 0.005 0.2 0.
+  1d 111 '' 100 0.005 0.2 0.
+  
+  nt/plot 2000.echbsum(10,1) test idh=100
+  nt/plot 2000.echbsum(11,1) test idh=101
+  nt/plot 2000.echbsum(10,1) test.and.goodpx(1.) idh=110
+  nt/plot 2000.echbsum(11,1) test.and.goodpx(1.) idh=111
+  
+fillgsimpos:
+
+  cd //gsim
+  nt/print 2000
+  call kumac/calcom/cal/fun/reclib.f77
+  
+  alias/cre test chargemctk.gt.0
+  
+  1d 200 '' 100 0.005 0.2 0.
+  1d 201 '' 100 0.005 0.2 0.
+  1d 210 '' 100 0.005 0.2 0.
+  1d 211 '' 100 0.005 0.2 0.
+  
+  nt/plot 2000.echbsum(10,1) test idh=200
+  nt/plot 2000.echbsum(11,1) test idh=201
+  nt/plot 2000.echbsum(10,1) test.and.goodpx(1.) idh=210
+  nt/plot 2000.echbsum(11,1) test.and.goodpx(1.) idh=211
+  
+  exitm
+  
+fillgsim:
+
+  cd //gsim
+  nt/print 2000
+  call kumac/calcom/cal/fun/reclib.f77
+  
+  1d 100 '' 100 0.005 0.2 0.
+  1d 101 '' 100 0.005 0.2 0.
+  1d 110 '' 100 0.005 0.2 0.
+  1d 111 '' 100 0.005 0.2 0.
+  
+  nt/plot 2000.echbsum(10,1) idh=100
+  nt/plot 2000.echbsum(11,1) idh=101
+  nt/plot 2000.echbsum(10,1) goodpx(1.) idh=110
+  nt/plot 2000.echbsum(11,1) goodpx(1.) idh=111
+  
+  
+fill1795:
+
+  cd //re1795
+  nt/print 2000
+  call kumac/calcom/cal/fun/reclib.f77
+  
+  1d 200 '' 100 0.005 0.2 0.
+  1d 201 '' 100 0.005 0.2 0.
+  1d 210 '' 100 0.005 0.2 0.
+  1d 211 '' 100 0.005 0.2 0.
+  
+  nt/plot 2000.echbsum(10,6) idh=200
+  nt/plot 2000.echbsum(11,6) idh=201
+  nt/plot 2000.echbsum(10,6) goodpx(6.) idh=210
+  nt/plot 2000.echbsum(11,6) goodpx(6.) idh=211
+  
+fill1801:
+
+  cd //re1801
+  nt/print 2000
+  call kumac/calcom/cal/fun/reclib.f77
+  
+  1d 200 '' 100 0.005 0.2 0.
+  1d 201 '' 100 0.005 0.2 0.
+  1d 210 '' 100 0.005 0.2 0.
+  1d 211 '' 100 0.005 0.2 0.
+  
+  nt/plot 2000.echbsum(10,6) idh=200
+  nt/plot 2000.echbsum(11,6) idh=201
+  nt/plot 2000.echbsum(10,6) goodpx(6.) idh=210
+  nt/plot 2000.echbsum(11,6) goodpx(6.) idh=211
+  
+plot:
+
+  zone 2 2
+  opt stat;opt fit
+  title_gl 'Top: GSIM Bottom: Run 3741 - No Pixel Cut'  
+  hi/fit 100(0.015:0.04) g 
+  atitle 'EC Inner Energy (GeV)'
+  hi/fit 101(0.03:0.06) g
+  atitle 'EC Outer Energy (GeV)'
+  hi/fit 200(0.015:0.04) g
+  atitle 'EC Inner Energy (GeV)'
+  hi/fit 201(0.02:0.06) g
+  atitle 'EC Outer Energy (GeV)'
+  
+  selnt 1
+  title = Nevents= $hinfo(100,'sum')
+  itx 5. 15. [title] 
+  title = Nevents= $hinfo(101,'sum')
+  itx 14. 15. [title] 
+  title = Nevents= $hinfo(200,'sum')
+  itx 5. 5. [title] 
+  title = Nevents= $hinfo(201,'sum')
+  itx 14. 5. [title] 
+  
+  wait
+  
+  title_gl 'Top: GSIM Bottom: Run 3741 - Cut: 1 or 2 strips/view'  
+  hi/fit 110(0.015:0.04) g 
+  atitle 'EC Inner Energy (GeV)'
+  hi/fit 111(0.03:0.06) g
+  atitle 'EC Outer Energy (GeV)'
+  hi/fit 210(0.015:0.04) g
+  atitle 'EC Inner Energy (GeV)'
+  hi/fit 211(0.02:0.06) g
+  atitle 'EC Outer Energy (GeV)'
+  
+  selnt 1
+  title = Nevents= $hinfo(110,'sum')
+  itx 5. 15. [title] 
+  title = Nevents= $hinfo(111,'sum')
+  itx 14. 15. [title] 
+  title = Nevents= $hinfo(210,'sum')
+  itx 5. 5. [title] 
+  title = Nevents= $hinfo(211,'sum')
+  itx 14. 5. [title] 
+  
+return
+  
+  

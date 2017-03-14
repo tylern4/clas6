@@ -1,0 +1,27 @@
+      integer istack,iblock,nlines,nblock
+      integer ind,idig,i,j,nw,ncluster1,ncluster2,ncluster3,ncluster4
+*      clustering variables
+       integer  Npar,MaxClust
+       parameter (Npar=50,MaxClust=10)
+      integer ec1_stat_in,ec1_stat_out,ec1_stat_rec,ltdc1,ltdc2
+      integer indi1(MaxClust),indi2(MaxClust),indi3(MaxClust),indi4(MaxClust)
+      integer indadc1(MaxClust),indtdc2(MaxClust)
+      integer indadc2(MaxClust),indtdc1(MaxClust)
+      integer indadc3(MaxClust),indtdc4(MaxClust)
+      integer iupd1,iupd2,indlong(MaxClust),indshrt(MaxClust)
+      integer ivtdc2(MaxClust),ivtdc1(MaxClust),ivtdc4(MaxClust)
+      real adc0(40,4,2),tdc0(40,4,2)
+      real    depin1l(MaxClust), depin1r(MaxClust)
+      real    stackm1l(MaxClust),stackm1r(MaxClust)
+      real    depin2l(MaxClust), depin2r(MaxClust)
+      real    stackm2l(MaxClust),stackm2r(MaxClust)
+      real    depin3l(MaxClust), depin3r(MaxClust)
+      real    stackm3l(MaxClust),stackm3r(MaxClust)
+      real    depin4l(MaxClust), depin4r(MaxClust)
+      real    stackm4l(MaxClust),stackm4r(MaxClust)
+      real    deptempr(MaxClust),deptempl(MaxClust) 
+      real    ec1_alphashdo,ec1_alphalodo
+      integer ix_in,iy_in,ix_out,iy_out,ix_1,iy_2,ix_3,iy_4
+c
+      real  tdepl, tdepr
+      integer  index,nclust,pmtfired

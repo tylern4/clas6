@@ -1,0 +1,7 @@
+from build_system import environment
+
+simulationEnv = environment.env(deps=['clas6'])
+simulationEnv.load_dependency('clas6')
+
+simulationEnv.sconstruct('gsim gpp filter_tagr generators'.split())
+

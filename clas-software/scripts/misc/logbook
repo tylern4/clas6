@@ -1,0 +1,39 @@
+#!/usr/bin/csh -f
+
+#  logbook
+
+#  starts ingres logbook gui
+
+#  logbook only runs where we have ingres licenses, currently:
+#    clon00
+#    clon02
+#    db3
+#    db5
+
+
+#  ejw, 1-dec-97
+
+if ($HOST == "clon00") then
+	runimage ~opper/elogbook -ddb5::clasprod >& /dev/null &
+
+else if ($HOST == "clon02") then
+	runimage ~opper/elogbook -ddb5::clasprod >& /dev/null &
+
+else if ($HOST == "db3") then
+	runimage ~opper/elogbook -ddb5::clasprod >& /dev/null &
+
+else if ($HOST == "db5") then
+	runimage ~opper/elogbook -ddb5::clasprod >& /dev/null &
+
+else
+	echo "" 
+	echo "" 
+	echo " You are attempting to run the Ingres logbook GUI on a node which"
+	echo "   does not have an Ingres license." 
+	echo "" 
+	echo " Kindly try again on clon00, clon02, db3, or db5." 
+	echo "" 
+endif
+
+exit(0)
+

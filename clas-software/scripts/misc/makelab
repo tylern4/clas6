@@ -1,0 +1,9 @@
+#! /usr/local/bin/perl
+
+$n  = $ARGV[0];
+shift;
+
+for ($i = 1; $i <= $n; ++$i) {
+	print "$i x$i {x$i}\n";
+}
+

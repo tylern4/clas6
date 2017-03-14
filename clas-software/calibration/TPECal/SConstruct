@@ -1,0 +1,31 @@
+from init_env import init_environment
+
+env = init_environment("qt4 root mysql clas")
+
+
+# Include Path
+incpath = ['.', 'src', 'src/control', 'src/display', 'src/img']
+env.Append(CPPPATH = incpath)
+
+# Sources
+tpecal_sources = Split("""tpecal.cc
+                          src/GetADC_W.cc
+                          src/control/HV_Control_W.cc
+                          src/control/PED_Control_W.cc
+                          src/control/SPE_Control_W.cc
+                          src/display/PED_Display_W.cc
+                          src/display/SPE_Display_W.cc
+                          src/bos.cc
+                          src/tpecal_calib.cc
+                          src/tpecal_widget.cc
+                          src/database_io.cc
+                          src/help.cc
+                          src/usage.cc""")
+
+Target = 'tpecalib'
+env.Program(source = tpecal_sources, target = Target)
+
+
+
+
+

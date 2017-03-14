@@ -1,0 +1,25 @@
+#! /usr/local/bin/perl
+
+print "<html>\n";
+print "<head>\n";
+print "<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#0000EE\" VLINK=\"#551A8B\" ALINK=\"#FF0000\">\n";
+
+print "<h1> PDU output </h1>\n";
+
+print "<font COLOR=\"#AF0000\">\n";
+
+while(<>){
+    if(/S\d/){
+	print "<p><b>";
+	print $_;
+	print "</p></b>\n";
+    }
+    if(/^Run/){
+
+    }
+}
+
+print "</font>";
+print "</body>\n";
+print "</html>\n";
+

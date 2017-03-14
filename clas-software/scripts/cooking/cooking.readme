@@ -1,0 +1,135 @@
+     The following is a primer on how to cook CLAS data in an organized and 
+efficient manner using the latest scripts.  This includes how to use
+NEXT_TAPE.pl and file_monitor.pl to automatically handle getting data files 
+off the silo for processing, and putting cooked and filtered files back onto 
+the silo.  This is intended for people who have already read CLAS-note:
+1999-016,"e1,g1,and g6 Data Processing Procedures".  There are several files
+worth having on hand to reference.  These are:
+     ENV_SRC_FILE   found in the cooking scripts directory.
+     NEXT_TAPE.pl   found in the cooking scripts directory.
+     list 	    found in the database directory, specified in ENV_SRC_FILE.
+     done           found in the database directory, specified in ENV_SRC_FILE.
+     done_tape      found in the database directory, specified in ENV_SRC_FILE.
+     
+     It is probably worth looking through ENV_SRC_FILE at this time if you 
+have not already done so.     
+
+     There are a few assumptions made in these scripts about the data
+and how you want it processed.  First, it is assumed that the data resides 
+on the tape silo, and that ultimately, you wish to have your cooked data
+placed back on the silo.  The data will be cooked using a1c, and the cooked 
+data run through a series of monitoring and filtering software.  It is assumed
+that all of these programs work!
+     In order to cook the data in an efficient manner, it is necessary to 
+eliminate as many bottlenecks as possible.  Since we wish to both get data
+from the silo, and put it to the silo, accessing tapes on the silo has become
+a major bottleneck.  The scripts NEXT_TAPE.pl and file_monitor.pl are designed
+to help alleviate this bottleneck.
+     The job of NEXT_TAPE.pl is to process the files on the silo that you wish
+to cook, one tape volume at a time.  NEXT_TAPE.pl keeps track of which tapes 
+have been accessed in a file called 'done_tape' in the database directory 
+(as specified in the env_src_file).  This file is in ascii format and can be 
+modified by hand (or preferably with an editor like emacs).  It furthermore 
+enables you to sift through and process only files that have a specified 
+string in their name.  Typing NEXT_TAPE.pl causes the following help 
+information to be printed out:
+*************************************************    
+Usage:
+    NEXT_TAPE.pl [+h] +env <env_src_file> [+pre <prefix>][+post <postfix>][+r <run_min>][+R <run_max>] [+match <pattern>]
+
+        +env <env_src_file>      File name(w/path) of environment variable text file.
+        +pre <prefix>    prefix of file_names in data directory.
+        +post <postfix>          postfix added to output files.
+        +match <pattern>         require <pattern> to be in file name. default is A01. 
+        +r <run_min>     set minimum run number to <run_min>.
+        +R <run_max>     set maximum run number to <run_max>.
+*************************************************    
+     
+     The env_src_file is the only argument which is required to run 
+NEXT_TAPE.pl, for the file specified by it is very important.  It contains 
+environment information that is used by many of the programs that are called 
+during the cooking process.  It is necessary to change most of the parameters 
+in this file before starting to cook a new running period.  When specifying the
+env_src_file, be sure to use the complete path to the env_src_file!  Doing 
+otherwise may cause some sub-scripts to fail mysteriously.
+     The 'prefix' argument is the first part of the file names that you wish to
+cook, including any leading 0's.  The default is "clas_0".
+     The 'postfix' argument is a string added almost to the end of all files 
+produced in the cooking process.
+     The argument 'pattern' is a string that is sought for in all filenames 
+that are to be processed.  Using the default, "A01" will cook only the A01 
+files and is being used by g1c for "pass 0".  For pass 1 cooking, the match 
+pattern should be set to "A"
+     The 'run_min' and 'run_max' arguments allow one to limit the range of runs
+to be cooked.  A stricter requirement is that the runs must be listed in the 
+'list' file in the database directory.  A run must pass both requirements.
+     It is also worth noting that NEXT_TAPE.pl runs the RunJob script with 
+options set for standard photon running.  Anyone wishing to run RunJob with 
+different options will need to modify the $options definition in NEXT_TAPE.pl.
+     
+     When Running NEXT_TAPE.pl, the program searches all tape volumes that 
+contain files in the /mss/ directory that corresponds to the /cache/ directory 
+listed in the env_src_file under CLAS_DATA.  It then checks to see if these 
+files match the other requirements.  If it does not find any, it will tell you,
+and ask if you wish to mark that tape as done.  If you say no, next time you 
+run NEXT_TAPE.pl it should provide you with the same response. If it does find 
+some files on the next tape volume, it will print the tape_jobs.pl command 
+needed to process these files and ask you if you wish to execute it.  If you 
+say yes, it will mark the tape as completed and run the tape_jobs command.
+     If some of the jobs have been previosly submitted, the tape_jobs command 
+may ask you if you want to resubmit the jobs. If you say yes to at least one, 
+or if at least one job has not been submitted previously, The tape_jobs 
+command will calculate the most efficient tape cacheing command to use.  
+It will ask you if you wish to submit the request.  If you say no, keep in 
+mind that you will need to go back and remove the last line from the 
+'done_tape' file.  It will finally ask you if you wish to start the jobs. 
+If you say yes, this will start a cron job that runs every ten minutes and 
+checks to see if the files you submitted for caching have arrived in the cache
+directory.  When it finds one, it will submit a job to the farm, executing the
+RunJob command.
+
+     An example of the use of NEXT_TAPE.pl in cooking g1c, pass0.1 data is:
+NEXT_TAPE.pl +env /work/clas/production/g1c/packages/scripts/cooking_scripts/ENV_SRC_FILE
+
+     Assuming everything works smoothly, some time after you have submitted 
+the jobs, a large number of files will be made and put in the CLAS_TAPE_PATH 
+directory.  These files include the cooked files in the cooked directory, 
+filtered files in the filter directory, and various, you guessed it, 
+monitoring files in the monitor directory.  If you do nothing, the cooked 
+files and filter files will rapidly fill the work disk, and bring 
+your (and everyone elses') cooking jobs to a halt.  To avoid this it is 
+necessary to put the files to tape before deleting them.  To do this in an 
+efficient manner, we run file_monitor.pl which patiently sits on the computer 
+and looks at the size of all files in a directory.  When the total size gets 
+larger than some limit, it will try to jput all the files that have not been 
+modified recently to the silo.  This prevents automatically submitting a jput 
+for each file, which is very inefficient for the silo, while at the same time 
+preventing the work disk from becoming too full.  Below is included an example 
+of three of the file monitoring commands used for g1c pass0:  
+**********************************************************************
+(file_monitor.pl \
+    work_dir=/work/clas/production/g1c/pass0.1/cooked \
+    mss_dir=/mss/clas/g1c/production/pass0/v1/data \
+    size_trigger_copy=20.0e9 \
+    time_since_mod_cut=600 \
+    time_check_period=3600 >& fm.cooked.txt) &
+(file_monitor.pl \
+    work_dir=/work/clas/production/g1c/pass0.1/filter/Eta \
+    mss_dir=/mss/clas/g1c/production/pass0/v1/skims/Eta \
+    size_trigger_copy=6.0e9 \
+    time_since_mod_cut=600 \
+    time_check_period=3600 >& fm.Eta.txt) &
+(file_monitor.pl \
+    work_dir=/work/clas/production/g1c/pass0.1/filter/K \
+    mss_dir=/mss/clas/g1c/production/pass0/v1/skims/K \
+    size_trigger_copy=2.0e9 \
+    time_since_mod_cut=600 \
+    time_check_period=3600 >& fm.K.txt) &
+**********************************************************************
+     The first one is used to monitor the cooked directory every hour to see if
+it is larger than 20Gb.  The second monitors the Eta filter directory to see if
+it has gotten larger than 6Gb.  The last is the command used for the K filter
+directory with a trigger of 2Gb.  All other directories also used 2Gb.  The
+choice of what size trigger should be made based on the typical file sizes in
+each directory and the available space on the work disks.  file_monitor.pl will
+continue to run in the background until explicitly killed.

@@ -1,0 +1,6 @@
+from build_system import environment
+
+tagMEnv = environment.env(deps=['clas6'])
+tagMEnv.load_dependency('clas6')
+tagMLib = tagMEnv.library(target='tagM')
+tagMEnv.return_from_sconstruct(tagMLib)

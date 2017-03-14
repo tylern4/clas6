@@ -1,0 +1,6 @@
+from build_system import environment
+
+patchesEnv = environment.env()
+
+patchesEnv.library(target='patches')
+

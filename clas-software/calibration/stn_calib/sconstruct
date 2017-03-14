@@ -1,0 +1,8 @@
+from build_system import environment
+
+stnenv_deps = {'clas6': ['default_libs'],
+	       'root':  ['default_libs']}
+
+stnenv = environment.env(deps=stnenv_deps.keys())
+stnenv.load_dependency(stnenv_deps)
+stnenv.program(target='stn_calib', source='stn_calib.cc')

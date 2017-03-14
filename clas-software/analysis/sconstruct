@@ -1,0 +1,7 @@
+from build_system import environment
+
+analysisEnv = environment.env(deps=['clas6'])
+
+analysisLib = analysisEnv.sconstruct('clasEvent g12/g12Anal view ced gflux pwa2000 trk_mon trk_mon_lite sync nt10maker'.split())
+
+

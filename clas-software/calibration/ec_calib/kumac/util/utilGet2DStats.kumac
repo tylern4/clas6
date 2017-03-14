@@ -1,0 +1,26 @@
+macro utilGet2DStats id slice wid vec1 vec2
+
+  ybins = $hinfo([id],'xbins')
+  xbins = $hinfo([id],'ybins')
+  
+  bins = [[slice]bins]
+  
+  vec/cre [vec1]([bins]) r
+  vec/cre [vec2]([bins]) r
+  
+  sli[slice] [id] [bins]
+  hi/proj [id]
+  
+  do i = 1,[bins]
+    exec utilGetSliceStats [id] [slice] [i] [wid]
+    global/imp pcen; global/imp prms
+    vec/inp [vec1]([i]) [pcen]
+    vec/inp [vec2]([i]) [prms]
+  enddo
+  
+return 
+    
+  
+  
+
+  

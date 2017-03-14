@@ -1,0 +1,1073 @@
+#! /usr/local/bin/perl
+
+# Author: Mike Klusman
+# Date:   2/22/99
+
+# This script will parse the output from scaler_mon and place the proper
+# information in the Map for photon running...
+# It does not check as to whether a map runno already exists when
+# trying to use a put_map_float call...
+#
+# I have tried to write this PERL script so that it is nearly fool-proof
+# from mistakes when it is called.  Since it will be used in cooking, it
+# should be as robust as possible.
+# ----------------------------------------------------------------------
+
+# Count the number of arguments sent to this PERL script, get the
+# location of the $CLAS_PARMS area.
+# ---------------------------------------------------------------
+
+$ARGC=@ARGV;
+# $map_address=$ENV{"CLAS_PARMS"};
+$map_address=$ENV{"MHW_PARMS"};
+@mask=(0,0,0,0,0,0,0,0,0,0);
+
+@rem_args=();
+@good_args=();
+
+$use_all_info=1;
+
+if (! $ARGC) {
+    &PrintUsage(2);
+}
+
+# Do some checking to make sure something STUPID doesn't happen!!!
+#
+# Possible scenarios:
+#
+#    1) The user placed a -h option in the argument list (calls
+#       Help Screen).
+#    2) The number of arguments is not correct (too large or small).
+#    3) The user attempts to place information into a non-existent
+#       map (This is currently illegal for this script).
+#    4) The user doesn't use an integer to represent a run number.
+#
+# All these cases are caught by the checking conditions below...
+# ------------------------------------------------------------------
+
+$error=0;
+$condition=1;
+
+CHECK: while (! $error && $condition <= 4) {
+
+    if ($condition == 1) {
+
+# Check number of arguments
+# -------------------------
+
+	for ($i=0;$i<$ARGC;$i++) {
+	    if ($ARGV[$i] eq "-h") {
+		$use_all_info=0;
+		$error=2;
+	    }
+
+# Determine if options were given besides the run number
+# ------------------------------------------------------
+
+	    if ($ARGV[$i] eq "raw") {
+		$mask[6] = 1;
+		$mask[7] = 1;
+		push (@rem_args,$i);
+		$use_all_info=0;
+	    }
+	    if ($ARGV[$i] eq "PS") {
+		$mask[2] = 1;
+		$mask[3] = 1;
+		$mask[4] = 1;
+		$mask[8] = 1;
+		$mask[9] = 1;
+		$use_all_info=0;
+		push (@rem_args,$i);
+	    }
+	    if ($ARGV[$i] eq "gamma") {
+		$mask[1] = 1;
+		$use_all_info=0;
+		push (@rem_args,$i);
+	    }
+	    if ($ARGV[$i] eq "all") {
+		push (@rem_args,$i);
+	    }
+	}
+	$condition++;
+
+# Remove the options that don't conform to a run number.  We have
+# already taken care of the options, by setting the mask
+# ---------------------------------------------------------------
+
+	for ($i=0;$i<$ARGC;$i++) {
+	    if ($ARGV[$i] =~ /[0-9]/) {
+		push(@good_args,$ARGV[$i]);
+	    }
+	}
+	@ARGV=@good_args;
+	next CHECK;
+    }
+    if ($condition == 2) {
+#	if ($ARGC != 1) {
+#	    $error=1;
+#	} else {
+	    $condition++;
+#	}
+	next CHECK;
+    }
+    if ($condition == 3) {
+
+# Decode the argument list passed to this PERL script and finish
+# checking.
+# --------------------------------------------------------------
+
+	$runno =$ARGV[0];
+
+	if ($runno =~ /[^0-9]/) {
+	    $error=3;
+	} else {
+	    $condition++;
+	}
+	next CHECK;
+    }
+    if ($condition == 4) {
+	if (! -e "$map_address/Maps/NORM.map" || ! -e "$map_address/Maps/SCALERS.map") {
+	    $error=4;
+	} else {
+	    $condition++;
+	}
+	next CHECK;
+    }
+}
+
+# Send us to the help screen if $error NOT zero; otherwise continue...
+# --------------------------------------------------------------------
+
+if ($error) {
+
+    &PrintUsage($error);
+    
+} else {
+
+# All information extracted from the scaler_mon output is in the form
+# of floating point numbers.
+# -------------------------------------------------------------------
+
+    $map_put_PS_norm_n_cmd="put_map_float -m$map_address/Maps/NORM.map -sPS_scalers -inorm -t$runno \< tempout.txt";
+
+    $map_put_PS_prod_p_cmd="put_map_float -m$map_address/Maps/NORM.map -sPS_scalers -iprod -t$runno \< tempout.txt";
+
+    $map_put_PS_delay_p_cmd="put_map_float -m$map_address/Maps/NORM.map -sPS_scalers -idelay -t$runno \< tempout.txt";
+ 
+    $map_put_ngamma_n_cmd="put_map_float -m$map_address/Maps/NORM.map -snormalization -ingamma -t$runno \< tempout.txt";
+
+    $map_put_ngamma_p_cmd="put_map_float -m$map_address/Maps/NORM.map -sproduction -ipflux_ps -t$runno \< tempout.txt";
+ 
+   $map_put_ratio_p_cmd="put_map_float -m$map_address/Maps/NORM.map -sPS_scalers -iratio -t$runno \< tempout.txt";
+
+    $map_put_livetime_n_cmd="put_map_float -m$map_address/Maps/NORM.map -snormalization -ilivetime -t$runno \< tempout.txt";
+
+    $map_put_livetime_p_cmd="put_map_float -m$map_address/Maps/NORM.map -sproduction -ilivetime -t$runno \< tempout.txt";
+
+    $map_put_prescale_n_cmd="put_map_float -m$map_address/Maps/NORM.map -snormalization -iprescale -t$runno \< tempout.txt";
+
+    $map_put_prescale_p_cmd="put_map_float -m$map_address/Maps/NORM.map -sproduction -iprescale -t$runno \< tempout.txt";
+
+    $map_put_tgs_n_cmd="put_map_int -m$map_address/Maps/SCALERS.map -sTGS -ivalues -t$runno \< tempout.txt";
+
+    $map_put_tgs_p_cmd=$map_put_tgs_n_cmd;
+
+    $map_put_trgs_n_cmd="put_map_int -m$map_address/Maps/SCALERS.map -sTRGS -ivalues -t$runno \< tempout.txt";
+
+    $map_put_trgs_p_cmd=$map_put_trgs_n_cmd;
+
+# Strings to match when parsing scaler_mon output text file.
+# ----------------------------------------------------------
+
+    $norm_gamma="Number of gammas for normalization run";
+    $prod_gamma="Number of gammas for production run";
+    $norm_ps="Normalization PS Scalers";
+    $prod_ps="Production PS trues";
+    $prod_delay_ps="Production PS accidentals";
+    $ratio="Ratio of scalers";
+    $livetime="event_count";
+    $prescale="Prescale from s1st and trgs";
+    $tgs_bank="TGS";
+    $trgs_bank="TRGS";
+
+# Parse the input text file in the following order.  There is no distinction
+# of normalization versus production runs.  If the proper information is in
+# the output file, this script will put it into the map.
+
+# 1) Find the PS normalization run scalers and place into map...
+# 2) Find the Nphoton normalization values and place into map...
+# 3) Find the PS production run scalers and place into map...
+# 4) Find the PS delayed production run scalers and place into map...
+# 5) Find the prescale factor for normalization runs so the proper scaling
+#    can be applied to the number of photons...
+# 6) Get the TGS scalers bank for the totals...
+# 7) Get the TRGS scalers bank for the totals...
+# 8) Find the ratio of PS production scalers to PS normalization scalers and
+#    place into map...(recalculate as necessary)
+# 9) Find the livetime for the run so the proper scaling can be applied to
+#    the number of photons...(recalculate as necessary)
+# -----------------------------------------------------------------------------
+
+# This number represents the maximum number of groups of information that
+# need to be put into the map for photon runs.
+# -----------------------------------------------------------------------
+
+    $number_of_searches=10;
+
+# Determine if the mask needs to be modified from the "all" command
+# -----------------------------------------------------------------
+
+    if ($use_all_info) {
+	for ($i=0;$i<=$number_of_searches;$i++) {
+	    $mask[$i]=1;
+	}
+    }
+
+#    print STDERR "Mask: @mask\n";
+
+# Make arrays which contain the search string, the particular command
+# and the size of the map entry.
+# -------------------------------------------------------------------
+
+# This is the search string as seen above.
+# ----------------------------------------
+
+    $identification[1]=$norm_gamma;
+    $identification[2]=$norm_ps;
+    $identification[3]=$prod_ps;
+    $identification[4]=$prod_delay_ps;
+    $identification[5]=$prescale;
+    $identification[6]=$tgs_bank;
+    $identification[7]=$trgs_bank;
+    $identification[8]=$ratio;
+    $identification[9]=$livetime;
+    $identification[10]=$prod_gamma;
+
+# This is the inherent map command to use.  Looking at the defined commands,
+# it should be clear how these strings are symbols.
+# --------------------------------------------------------------------------
+
+    $map_command[1]="ngamma";
+    $map_command[2]="PS_norm";
+    $map_command[3]="PS_prod";
+    $map_command[4]="PS_delay";
+    $map_command[5]="prescale";
+    $map_command[6]="tgs";
+    $map_command[7]="trgs";
+    $map_command[8]="ratio";
+    $map_command[9]="livetime";
+    $map_command[10]="ngamma";
+
+# The request size of the array for the map entry.
+# ------------------------------------------------
+
+    $size[1]=767;
+    $size[2]=64;
+    $size[3]=64;
+    $size[4]=64;
+    $size[5]=1;
+    $size[6]=192;
+    $size[7]=64;
+    $size[8]=64;
+    $size[9]=1;
+    $size[10]=767;
+
+# Flags for output when the Adding Machine is complete, neglecting zeroth
+# element in this list.
+# -----------------------------------------------------------------------
+
+    @out=(0,0,0,0,0,0,0,0,0,0);
+
+# Make arrays based on size above. Remember that arrays in PERL start at 0!
+# This is kinda ugly, but for the point of working, it does! These are
+# globally defined, so be careful...
+# -------------------------------------------------------------------------
+
+    if ($mask[1]) {
+	@ngamma=();
+	for ($i=0;$i<=$size[1];$i++) {
+	    push(@ngamma,0);
+	}
+    }
+
+    if ($mask[2]) {
+	@PS_norm=();
+	for ($i=0;$i<=$size[2];$i++) {
+	    push(@PS_norm,0);
+	}
+    }
+
+    if ($mask[3]) {
+	@PS_prod=();
+	for ($i=0;$i<=$size[3];$i++) {
+	    push(@PS_prod,0);
+	}
+    }
+
+    if ($mask[4]) {
+	@PS_delay=();
+	for ($i=0;$i<=$size[4];$i++) {
+	    push(@PS_delay,0);
+	}
+    }
+
+    if ($mask[5]) {
+	@prescale=();
+	for ($i=0;$i<=$size[5];$i++) {
+	    push(@prescale,0);
+	}
+    }
+
+    if ($mask[6]) {
+	@tgs=();
+	for ($i=0;$i<=$size[6];$i++) {
+	    push(@tgs,0);
+	}
+    }
+
+    if ($mask[7]) {
+	@trgs=();
+	for ($i=0;$i<=$size[7];$i++) {
+	    push(@trgs,0);
+	}
+    }
+
+    if ($mask[8]) {
+	@ratio=();
+	for ($i=0;$i<=$size[8];$i++) {
+	    push(@ratio,0);
+	}
+    }
+
+    if ($mask[9]) {
+	@livetime=();
+	for ($i=0;$i<=$size[9];$i++) {
+	    push(@livetime,0);
+	}
+    }
+
+    if ($mask[10]) {
+	@ngamma_p=();
+	for ($i=0;$i<=$size[10];$i++) {
+	    push(@ngamma_p,0);
+	}
+    }
+
+# Determine the number of scaler_mon text output files that match
+# based on the run number.
+# ---------------------------------------------------------------
+
+    @scaler_mon_list=();
+
+    unless (open (DIR,"ls -1 scaler\*$runno\*.txt |")) {
+	die "No output text files with run number <$runno> exist.\n";
+    } else {
+	while ($list=<DIR>) {
+	    chop($list);
+	    push(@scaler_mon_list,$list);
+	}
+	close (DIR);
+    }
+
+# If the number of text files found exceeds 1, then we need to do some
+# adding before we can put the number into the map.  In this case, we
+# will do the adding internally and write the output (including tags)
+# to a KNOWN output file which will NOT be erased.  The livetime will
+# need to be recalculated, but this should not be difficult.  If there
+# is only one file that matches, then we can skip this trick and go
+# directly to putting information into the map.
+# --------------------------------------------------------------------
+
+    $number_of_text_files = @scaler_mon_list;
+
+    if (! $number_of_text_files) {
+	exit(0);
+    }
+
+# Assume production running unless we find the "MAGIC" string.
+# ------------------------------------------------------------
+
+    $type_run_flag="p";
+    
+# Loop over all possible pieces of output information to see if they exist.
+# -------------------------------------------------------------------------
+	
+    if ($number_of_text_files) {
+	
+# If multiple files exist, set the new filename to parse as if it
+# were a normalization like run.
+# ---------------------------------------------------------------
+
+	$filename="sum$runno.txt";
+	for ($loop=1;$loop<=$number_of_searches;$loop++) {
+
+# Call parsing routine that adds with parameters from defined arrays above...
+# ---------------------------------------------------------------------------
+
+	    &Adding_Machine($number_of_text_files,$loop,@scaler_mon_list);
+
+	}
+    }
+
+# Need to reset ONE of the tag strings.  This is the ONLY one that needs
+# to have this done.  All others should be fine if left UNTOUCHED.
+# ----------------------------------------------------------------------
+
+    $identification[9]="Livetime from s1st trig bit 7";    
+
+# Parse the final output and place into the map based on tag
+# strings placed there or currently existing there.
+# ----------------------------------------------------------
+
+    for ($loop=1;$loop<=$number_of_searches;$loop++) {
+
+# Only continue if the mask setting is true, otherwise, we don't need
+# parse for information about that particular system/search.
+# -------------------------------------------------------------------
+
+	if ($mask[$loop]) {
+	    if (&Parse_File($filename,$identification[$loop],$size[$loop])) {
+		if ($loop == 1) {
+		    $type_run_flag="n";
+		}
+		$real_cmd=eval("\$map_put_"."$map_command[$loop]"."\_$type_run_flag\_cmd");
+		
+# Evaluate which command to use in the system() call.  (You need to use
+# the eval() command as shown above to get the next level of scalar
+# substitution.
+# ---------------------------------------------------------------------
+
+#	    print STDERR "\n$real_cmd\n";
+#	    if ($loop >= 6 && $loop <= 7) {
+#		print STDERR "Putting results into map SCALERS.map at run number \<$runno\> from file \<$filename\>\n";
+#	    } else {
+#		print STDERR "Putting results into map NORM.map at run number \<$runno\> from file \<$filename\>\n";
+#	    }
+		system($real_cmd);
+		print STDERR "Removing temporary file.\n\n";
+
+# Remove the temporary file from this pass.  This is a cleanup feature.
+# ---------------------------------------------------------------------
+
+	    }
+	    $remove="rm -f tempout.txt";
+	    system($remove);
+	}
+    }
+}
+
+sub PrintUsage {
+
+    $error_code=$_[0];
+
+# Look at what conditions brought us to the help screen...
+# --------------------------------------------------------
+
+    if ($error_code == 1) {
+	$error_mess="ERROR: Too few/many arguments given...";
+	&Box($error_mess);
+    } elsif ($error_code == 2) {
+	$error_mess="Help Screen";
+	print STDERR "\n$error_mess\n-----------\n";
+    } elsif ($error_code == 3) {
+	$error_mess="ERROR: Run number must be integer and strictly positive...";
+	&Box($error_mess);
+    } elsif ($error_code == 4) {
+	$error_mess="ERROR: Map does NOT exist under the definition of \$CLAS_PARMS/Maps";
+	&Box($error_mess);
+    }
+
+# Print a help screen for those who are sure how to use this PERL script.
+# -----------------------------------------------------------------------
+
+    print STDERR "\ngscalers2map:\n\n";
+    print STDERR "\tTakes minimunm of 1 argument.  Is used after scaler_mon dumps\n";
+    print STDERR "\tinformation to text file.  It will handle multiple text files\n\twith the same run number identification substring.\n\n";
+    print STDERR "\tArgument #\tRepresents\n\t-----------\t--------------\n\n";    print STDERR "\t    1\t\t\<run number\>\n\n";
+    print STDERR "\tThis PERL script uses the map manager command (put_map_float).\n\tIt does NOT check to see if \<run number\> already exists in map\n\tNORM.map and SCALERS.map.\n";
+    print STDERR "\n\tThe map is assumed to be in the $map_address/Maps directory.\n";
+    print STDERR "\n\tCurrently information about the PS scalers is stored.\n\t\t(both normalization and production)\n";
+    print STDERR "\n\tThe livetime and ratio of the PS scalers are stored.\n";
+    print STDERR "\tThe TRGS and TGS banks are parsed and stored in SCALERS.map\n";
+    print STDERR "\tThe number of normalization photons is also stored.\n\n";
+
+    print STDERR "\tOne may explicitly select pieces of information to parse and\n";
+    print STDERR "\tplace into the appropriate map.  The key words to use are the\n\tfollowing\n\n";
+    print STDERR "\t\t\"raw\"\tExtracts the TGS and TRGS bank information ONLY.\n";
+    print STDERR "\t\t\"PS\"\tExtracts the normalization or production PS scalers.\n";
+    print STDERR "\t\t\"gamma\"\tExtracts the normalization flux of photons.\n";
+    print STDERR "\t\t\"all\"\tExtracts all possible information available.\n\t\t\tThis is the default.\n";
+
+    if ($error_code == 2) {
+	print STDERR "\n\tThe help screen is called if ANY argument \#(1..n) contains -h\n\tor if NO arguments are given.\n";
+    }
+    print STDERR "\nExample of use:\n---------------\n\n\tgscalers2map 10002\n\n";
+    exit(0);
+}
+
+sub Adding_Machine {
+
+# Set up the local arguments which are filled from the subroutine call.
+# ---------------------------------------------------------------------
+
+    $number_of_files=$_[0];
+    $search_id=$_[1];
+
+    @files=();
+
+# Use the first local argument to determine the limit on the loop.  This
+# should catch all the files sent to this subroutine.
+# ----------------------------------------------------------------------
+
+    for ($loop2=1;$loop2 <= $number_of_files;$loop2++) {
+	push(@files,$_[$loop2+1]);
+    }
+
+# Now comes the difficult task of determining the best way to accomplish
+# the goal of adding these individual files together.
+#
+# One way is to do each section (identification string) first and then
+# progress to the next section (identification string).  This is most
+# likely the easiest, but probably the slowest.  However, since this is
+# a postprocess PERL script, it won't matter how "fast" it gets done so
+# long as it is done right.  This requires a similar structure as the 
+# for loop above that manages the extraction and subsequent map command.
+# ----------------------------------------------------------------------
+
+# Loop over all the files.  This will get the same piece of
+# information from all the files...
+# ---------------------------------------------------------
+
+    for ($loop4=0;$loop4<$number_of_files;$loop4++) {
+
+# Call parsing routine with parameters from defined arrays above...
+# -----------------------------------------------------------------
+
+	$tgs_line=0;
+	$trgs_line=0;
+	$still_okay=1;
+
+	if (&Parse_Piece_File($files[$loop4],$identification[$search_id],$size[$search_id],$search_id)) {
+	    $out[$search_id]=1;
+	}
+    }
+    
+    if ($out[$search_id]) {
+
+# Write the integrated values as if all the run parts were done as one
+# call the the scaler_mon program.  Open a sum file with the run
+# run number as a unique identification tag.  Also, check to make sure
+# the file doesn't already exist; otherwise, don't write anything out.
+# --------------------------------------------------------------------
+
+	open (OUTPUT,">>sum$runno.txt");
+	
+# Mark the new file with the identity string currently used.  There is
+# a small correction to be made for the livetime.  This is the ONLY
+# correction!
+# --------------------------------------------------------------------
+
+	if ($search_id == 9) {
+	    print OUTPUT "Livetime from s1st trig bit 7\n";
+	} else {
+	    print OUTPUT "$identification[$search_id]\n";
+	}
+
+# Loop over the size as determined above from $size[n].
+# -----------------------------------------------------
+
+	for ($k=1;$k<=$size[$search_id];$k++) {
+
+# Choose the proper array to access.
+# ----------------------------------
+
+	    if ($search_id == 1) {
+		print OUTPUT "$ngamma[$k]\n";
+	    }
+	    if ($search_id == 2) {
+		print OUTPUT "$PS_norm[$k]\n";
+	    }
+	    if ($search_id == 3) {
+		print OUTPUT "$PS_prod[$k]\n";
+	    }
+	    if ($search_id == 4) {
+		print OUTPUT "$PS_delay[$k]\n";
+	    }
+	    if ($search_id == 5) {
+		print OUTPUT "$prescale[$k]\n";
+	    }
+	    if ($search_id == 6) {
+		print OUTPUT "$tgs[$k]\n";
+	    }
+	    if ($search_id == 7) {
+		print OUTPUT "$trgs[$k]\n";
+	    }
+	    if ($search_id == 8) {
+		print OUTPUT "$ratio[$k]\n";
+	    }
+	    if ($search_id == 9) {
+		print OUTPUT "$livetime[$k]\n";
+	    }
+	    if ($search_id == 10) {
+		print OUTPUT "$ngamma_p[$k]\n";
+	    }
+	}
+
+# Close the new sum file.
+# -----------------------
+
+	close(OUTPUT);
+    }
+}
+
+sub Parse_File {
+
+# Set up the local arguments which are filled from the subroutine call.
+# ---------------------------------------------------------------------
+
+    $file=$_[0];
+    $string=$_[1];
+    $number_of_elements=$_[2];
+
+# Set up some initial values.
+# ---------------------------
+
+    $found_match=0;
+    $counter=1;
+    
+# Open temporary file for possible map entries...
+# -----------------------------------------------
+
+    open (TEMPOUT,">tempout.txt");
+
+# Open the scaler_mon file $file and attempt to match each line
+# with the target string $string.  If a match is found loop for
+# $number_of_elements and place into opened temporary file.  Return
+# flag denoting that the list actually existed in scaler_mon output
+# file and was transferred to temporary file.
+# -----------------------------------------------------------------
+
+    open (SCALER_MON_FILE,"more $file |");
+    while (<SCALER_MON_FILE>) {
+
+# Remove the newline character add end of line
+# --------------------------------------------
+
+	chop ($_);
+
+# Parse the next $number_of_elements lines and place into a file called
+# tempout.txt.  Set the $found_match flag to 1 to finish the loop and close
+# scaler_mon output file and the tempout.txt file.
+#
+# The $found_match flag is set only if the $string to be matched is exactly
+# what is found from one parsed line and it hasn't been set yet.
+# -------------------------------------------------------------------------
+
+	if ($found_match == 1 && $counter <= $number_of_elements) {
+	    print TEMPOUT "$_\n";
+	    $counter++;
+	} elsif ($_ =~ /\b$string\b/  && $found_match == 0) {
+	    $found_match=1;
+	}
+    }
+
+# Close the scaler_mon output file.
+# ---------------------------------
+
+    close (SCALER_MON_FILE);
+
+# Check to make sure that the number of required entries is correct for
+# the map command.  This should never be a problem if the scaler_mon
+# output is correct; otherwise, we might be accidentally shortening
+# a list of numbers somewhere...
+# ---------------------------------------------------------------------
+
+    if ($counter < $number_of_elements && $found_match) {
+	for ($i=$counter;$i<=$number_of_elements;$i++) {
+	    print TEMPOUT "0.0\n";
+	}
+    }
+
+    close(TEMPOUT);
+
+# Uncomment from the open to the close statements for debugging purposes.
+# -----------------------------------------------------------------------
+
+#    open (DUH,"more tempout.txt |");
+#    while (<DUH>) {
+#	print STDERR "$_";
+#    }
+#    close (DUH);
+
+# Return the status of the search.
+#    1 = found match and transferred output to temporary file.
+#    0 = no match found, deleted temporary file.
+# ------------------------------------------------------------
+
+    return($found_match);
+}
+
+sub Parse_Piece_File {
+
+# Set up the local arguments which are filled from the subroutine call.
+# ---------------------------------------------------------------------
+
+    $file=$_[0];
+    $string=$_[1];
+    $number_of_elements=$_[2];
+    $sid=$_[3];
+
+# Set up some initial values.
+# ---------------------------
+
+    $found_match=0;
+
+# This is the value that relates the physical counting to the
+# memory addressing in C/PERL.
+# -----------------------------------------------------------
+
+    $counter=1;
+    
+# Open the scaler_mon file $file and attempt to match each line
+# with the target string $string.  If a match is found loop for
+# $number_of_elements and place into internal array.  Return
+# flag denoting that the list actually existed in scaler_mon output
+# file and was transferred to an array.
+# -----------------------------------------------------------------
+
+    open (SCALER_MON_FILE,"more $file |");
+    while (<SCALER_MON_FILE>) {
+
+# Remove the newline character at end of line
+# --------------------------------------------
+
+	chop ($_);
+
+# The $found_match flag is set only if the $string to be matched is exactly
+# what is found from one parsed line and it hasn't been set yet.
+#
+# The trgs and the tgs bank are dumped as one line.  This makes it
+# a bit more complicated to disentangle, a special loop might need to be
+# constructed to handle this task.
+#
+# The livetime and ratio of the PS scalers need to be done in separate
+# subroutines.  The livetime requires finding 2 pieces of info, one from
+# the LAST file and the other from a memory location.
+#
+# The ratio of the PS scalers technically would would a map manager
+# interface to grab the MORE RECENT PS normalization scalers and the
+# gate width correction factor.  I will assume this does change, although
+# determination is beyond this program.
+# -------------------------------------------------------------------------
+
+	if ($found_match == 1) {
+	    if ($sid == 6 && ! $tgs_line) {
+		
+# Need to split up the TGS line into usable pieces...
+# ---------------------------------------------------
+
+		@TGSCALERS = ();
+		@TGSCALERS = split(/\s+/,$_);
+	    
+# Get the number of entries in the array
+# --------------------------------------
+
+		$len=@TGSCALERS;
+
+# Loop over all the elements, selecting ONLY the odd ones.  These
+# presumably should be the ones with the numbers!
+# ---------------------------------------------------------------
+	    
+		for ($i=0;$i<$len;$i++) {
+		    $odd = $i%2;
+
+# If $odd is 0, then it should not be a number and we want to skip it
+# --------------------------------------------------------------------
+
+		    if ($odd) {
+			$placement=(($i+1)/2);
+			$tgs[$placement]+=$TGSCALERS[$i];
+		    }
+		}
+
+# No more lines need to be parsed for $sid = 8
+# --------------------------------------------
+
+		$tgs_line=1;
+	    }
+
+	    if ($sid == 7 && ! $trgs_line) {
+		
+# Need to split up the TGS line into usable pieces...
+# ---------------------------------------------------
+
+		@TRGSCALERS = ();
+		@TRGSCALERS = split(/\s+/,$_);
+	    
+# Get the number of entries in the array
+# --------------------------------------
+
+		$len=@TRGSCALERS;
+
+# Loop over all the elements, selecting ONLY the odd ones.  These
+# presumably should be the ones with the numbers!
+# ---------------------------------------------------------------
+	    
+		for ($i=0;$i<$len;$i++) {	    
+		    $odd = $i%2;
+
+# If $odd is 0, then it should not be a number and we want to skip it
+# -------------------------------------------------------------------
+
+		    if ($odd) {
+			$placement=(($i+1)/2);
+			$trgs[$placement]+=$TRGSCALERS[$i];
+		    }
+		}
+# No more lines need to be parsed for $sid = 9
+# --------------------------------------------
+
+		$trgs_line=1;
+	    }
+
+# Use a loop to handle those scalers which are only integrated.
+# These four sections are already put into a one-column output
+# which makes it easy to "count" as the program adds together
+# all the respective file parts.
+#
+# Parse the next $number_of_elements lines and place into an internal
+# array.  Set the $found_match flag to 1 to finish the loop and close
+# scaler_mon output file.  Should return the array of values to be
+# passed again for the next file.
+# -------------------------------------------------------------------
+
+	    if ($counter <= $number_of_elements) {
+		if ($sid == 1) {
+		    $ngamma[$counter]=$ngamma[$counter]+$_;
+		}
+		if ($sid == 2) {
+		    $PS_norm[$counter]=$PS_norm[$counter]+$_;
+		}
+		if ($sid == 3) {
+		    $PS_prod[$counter]=$PS_prod[$counter]+$_;
+		}
+		if ($sid == 4) {
+		    $PS_delay[$counter]=$PS_delay[$counter]+$_;
+		}
+		if ($sid == 5) {
+		}
+		if ($sid == 10) {
+		    $ngamma_p[$counter]=$ngamma_p[$counter]+$_;
+		}
+		$counter++;
+	    }
+	} elsif ($_ =~ /\b$string\b/ && $found_match == 0) {
+	    $found_match=1;
+	    if ($sid == 8) {
+		&Recalculate_Ratio($sid);
+	    }
+	    if ($sid == 9) {
+		&Recalculate_LiveTime($_,$sid);
+	    }
+	}
+    }
+
+# Close the scaler_mon output file.
+# ---------------------------------
+
+    close (SCALER_MON_FILE);
+
+# Check to make sure that the number of required entries is correct for
+# the map command.  This should never be a problem if the scaler_mon
+# output is correct; otherwise, we might be accidentally shortening
+# a list of numbers somewhere...
+# ---------------------------------------------------------------------
+
+    if ($counter < $number_of_elements && $found_match && ($sid != 8 || $sid != 9)) {
+	for ($i=$counter;$i<=$number_of_elements;$i++) {
+
+	    if ($sid == 1) {
+		$ngamma[$i]=0;
+	    }
+	    if ($sid == 2) {
+		$PS_norm[$i]=0;
+	    }
+	    if ($sid == 3) {
+		$PS_prod[$i]=0;
+	    }
+	    if ($sid == 4) {
+		$PS_delay[$i]=0;
+	    }
+	    if ($sid == 7) {
+		$prescale[$i]=0;
+	    }
+	    if ($sid == 8) {
+		$ratio[$i]=0;
+	    }
+	    if ($sid == 9) {
+		$livetime[$i]=0;
+            }
+	    if ($sid == 10) {
+		$ngamma_p[$i]=0;
+     	    }
+	}
+    }
+
+# Uncomment the sid number representation necessary for debugging.
+# ----------------------------------------------------------------
+
+   for ($j=0;$j<=$size[$sid];$j++) {
+#       if ($sid == 1) {
+#	   print STDERR "Current contents of bin $j : $ngamma[$j]\n";
+#       }
+#       if ($sid == 2) {
+#	   print STDERR "Current contents of bin $j : $PS_norm[$j]\n";
+#       }
+#       if ($sid == 3) {
+#	   print STDERR "Current contents of bin $j : $PS_prod[$j]\n";
+#       }
+#      if ($sid == 4) {
+#         print STDERR "Current contents of bin $j : $PS_delay[$j]\n";
+#      }
+#      if ($sid == 5) {
+#         print STDERR "Current contents of bin $j : $prescale[$j]\n";
+#      }
+#      if ($sid == 6) {
+#         print STDERR "Current contents of bin $j : $tgs[$j]\n";
+#      }
+#      if ($sid == 7) {
+#         print STDERR "Current contents of bin $j : $trgs[$j]\n";
+#      }
+#      if ($sid == 8) {
+#         print STDERR "Current contents of bin $j : $ratio[$j]\n";
+#      }
+#      if ($sid == 9) {
+#         print STDERR "Current contents of bin $j : $livetime[$j]\n";
+#      }
+#      if ($sid == 10) {
+#         print STDERR "Current contents of bin $j : $ngamma_p[$j]\n";
+#      }
+   }
+
+# Return the status of the search.
+#    1 = found match and transferred output to array file.
+#    0 = no match found, deleted temporary file.
+# ------------------------------------------------------------
+
+    return($found_match);
+}
+
+sub Box {
+
+# Get argument list and make $line show proper size for underlining.
+# ------------------------------------------------------------------
+
+    $message=$_[0];
+    $length=length($message);
+    $line='-' x $length;
+
+# Make boundary box and fill in error message.
+# --------------------------------------------
+
+    print STDERR "\n";
+    for ($i=0;$i<2;$i++) {
+	print STDERR "$line\n";
+    }
+    print STDERR "$message\n";
+    for ($i=0;$i<2;$i++) {
+	print STDERR "$line\n";
+    }
+}
+
+sub Recalculate_Ratio {
+
+# Set up the local arguments which are filled from the subroutine call.
+# ---------------------------------------------------------------------
+
+    $sid=$_[0];
+    @numerator=();
+    @denominator=();
+
+# Some initialization of arrays for the final answer.
+# ---------------------------------------------------
+
+    for ($k=0;$k<=$size[$sid];$k++) {
+	push(@numerator,0);
+	push(@denominator,0);
+    }
+    
+# Get the gate width correction value from the map.
+# -------------------------------------------------
+
+    $cmd="get_map_float -m$map_address/Maps/NORM.map -sPS_scalers -iwidth_corr -t$runno -l1";
+
+    open (GATE_CORRECTION,"$cmd |");
+    while ($response=<GATE_CORRECTION>) {
+	$accidentals_adjustment=$response;
+    }
+    close(GATE_CORRECTION);
+
+# Apply the gate correction and determine the numerator
+# -----------------------------------------------------
+
+    for ($k=1;$k<=$size[$sid];$k++) {
+	$numerator[$k]=($PS_prod[$k] - $accidentals_adjustment*$PS_delay[$k]);
+    }
+
+# Get the denominator by using another map manager command to grab the
+# normalization scalers from the map.
+# --------------------------------------------------------------------
+
+    $k=1;
+    $cmd="get_map_float -m$map_address/Maps/NORM.map -sPS_scalers -inorm -t$runno -l64";
+
+    open (NORMALIZATION,"$cmd |");
+    while ($response=<NORMALIZATION>) {
+	chop($response);
+	$denominator[$k]=$response;
+	$k++;
+    }
+    close(NORMALIZATION);
+
+# Finish the ratio and put it into the reserved memory location.
+# --------------------------------------------------------------
+
+    for ($k=1;$k<=$size[$sid];$k++) {
+	if ($denominator[$k] != 0) {
+	    $ratio[$k]=$numerator[$k]/$denominator[$k];
+	} else {
+	    $ratio[$k]=0;
+	}
+    }
+}
+
+sub Recalculate_LiveTime {
+
+# Set up the local arguments which are filled from the subroutine call.
+# ---------------------------------------------------------------------
+
+    $number_of_events=$_[0];
+    $sid=$_[1];
+
+# Need to grab the S1ST line pertaining to the number of events counted
+# This may change based on the type of run (production vs. normalization)
+# and the number of input files.  Split off the number from the text...
+# -----------------------------------------------------------------------
+
+    @evtpieces=split(/\s+/,$number_of_events);
+
+# Place the answer into the reserved memory location
+# --------------------------------------------------
+
+    $location=$size[$sid];
+    $livetime[$location]=$evtpieces[2]/$trgs[61];
+}
+
+
+
+
+
+
+
+
+

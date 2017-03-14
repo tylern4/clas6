@@ -1,0 +1,12 @@
+macro makespace len
+
+* This is the worst kludge of all time
+
+  space = ''
+
+  do i = 1,[len]
+    space = [space]//' '
+  enddo
+  
+return [space]
+      

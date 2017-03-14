@@ -1,0 +1,6 @@
+from build_system import environment
+
+genr8_env = environment.env(deps='c')
+genr8_env.load_dependency({'c': ['m']})
+genr8_env.program(source=['genr8.c', 'genkin.c'])
+

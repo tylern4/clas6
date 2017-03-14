@@ -1,0 +1,3 @@
+#/bin/csh
+rm icon.h 
+cat ../icon/bk2.xpm  > icon.h

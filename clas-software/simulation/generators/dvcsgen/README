@@ -1,0 +1,80 @@
+The program is generating ep->e'p'+gamma 
+event sample within given kinematical limits.
+Program is based on the code written by Slava Korotkov (hep-ph/0108077) and
+uses 5 different GPD models and formulas for BH+DVCS from
+Belitsky Muller and Kirchner hep-ph/0112108.
+
+The output of program consist of ntuple (turn off by --nont)
+and a BOS file for GSIM input (turn on by --bos ).
+
+To get possible options
+
+ifarml2.jlab.org> dvcs --help
+ dvcsgen [options]            
+       option  value      default    comment  
+      --pi0                          exclusive pi-0 on 
+      --nodvcs                       DVCS off 
+      --v    verbos_level    0       additional printout 
+      --trig nevents         10      number of triggers 
+      --beam beam_energy     5.754    e- momentum in GeV 
+      --ycol ycol_cut        0.05      ycol-y>ycol_cut 
+      --x  x-min   x-max   0.15 0.65   min max x_Bj 
+      --q2 Q2-min Q2-max   1.2  8.0    min max Q2 in GeV^2 
+      --y y-min y-max      0.05 0.9    min max for y=nu/E      
+      --w2 w^2-min         4.0         min for w^2=M^2+2MyE-Q^2      
+      --e e-min e-max      min max     Eprime in MeV 
+      --t tmin tmax         0 0.5      t  min/max in GeV^2 
+      --th thmin thmax             theta min/max for 	heta in mrad
+      --zpos z-position      0     target z position in mm 
+      --zwidth z-width       0     width in z in mm (zpos+/-zwidth) 
+      --file bos_file     dvcsgen.evt  bos outfile 
+      --weight                     flat distributions with weight(part12)
+      --bos                        write out the bos file 
+      --nont                       do not write out the ntuple 
+      --rndm                       randomize 
+      --gpd  Igpd          1    GPD model (1-A,2-B,3-C,4-D) 
+      --targ target       proton   deuteron/neutron possible 
+      --lpol                       Long.pol.target on  
+      --tpol                       Trans.pol.target  on
+      --mom                        include moments in the ntuple  
+                               Includes all azimuthal moments of DVCS+BH 
+                               separately in the output ntuple
+      --smear                    smear momenta
+                               Smearing of all momenta according to the
+                               formulas:
+                               \delta P/P    = A + B*P
+                               \delta \theta = D + C/P
+                               \delta \phi   = \delta \theta /sin(0.1) 
+      --A    value         0.006   smear param-A'
+      --B    value         0.001  smear param-B'
+      --C    value         0.0008  smear param-C'
+      --D    value         0.001  smear param-D'
+      --proloss                  add proton loss
+                                 if set emulates proton energy loss
+                                 in the generator
+      --print nprint       1000   print every nprint event 
+
+
+
+Running the program
+
+ifarml2.jlab.org> dvcs --beam 11.0 --trig 200000 --weight --t 0 0.5 --rndm --x 0.15 0.65 --q2 1.5 8 
+
+you get a printout on the screen with main kinematic variables.
+
+ dvcsgen input values:
+ NEVENTS:              200000
+ BEAM ENERGY:           11.
+ Eprime   min/max:           0.5  10.4499998
+ Eprime thmin/thmax:           0.0500000007  1.57000005
+ -Delta  tmin/tmax:           0.  0.5
+ Q2  q2min/q2max:           1.5  8.
+ x  xmin/xmax:           0.150000006  0.650000036
+ TARGET:              proton    
+ TARGET z-position:     0.
+ TARGET 1/2 width :     0.
+ polarization     :    0
+ GPD model A,B,C,D:    1
+ y_col cut        :     0.0500000007
+ __________________________________
+ verbosity level 0

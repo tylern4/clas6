@@ -1,0 +1,8 @@
+c  from patch gcdes in file /usr/site3/cern/hp700_ux90/94a/src/car/geant321.car on Thu Nov 10 11:00:38 EST 1994
+c  this is seq: GTSPEE
+*
+      REAL S1,S2,S3,SS1,SS2,SS3,SRAGMX,SRAGMN,
+     +     RAINT1,RAINT2,RMIN1,RMIN2,RMAX1,RMAX2
+      INTEGER ISCOP,NTIM,NTFLAG,IOLDCU,ITSTCU,ISUBLI,IPORLI
+      INTEGER LPASS,JPORJJ,LEP,JSC
+*

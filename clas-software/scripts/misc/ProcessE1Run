@@ -1,0 +1,58 @@
+#! /usr/local/bin/perl
+require "ctime.pl";
+$os = "solaris";
+
+for (@ARGV) {
+    if (/^-.*/) {
+	push(@opts,$_);
+     }
+     elsif (/^\+(\w)(.*)/) {
+	 if ($1  eq "o") {	
+	     $os = $2;
+	}
+	 elsif ($1  eq "h") {
+
+	     exit(0);
+	 }
+      }
+     else {
+        push(@arr,($_));
+    }
+}
+
+@ARGV = @arr;
+
+foreach $arg (@ARGV) {
+    print "ARGUMENT: $arg\n";
+}
+foreach $opt (@opts) {
+    print "OPTION: $opt\n";
+}
+
+# First, get the current runs
+#$off = "$ENV{'HOME'}/clas/offline";
+$off = "/net/fs2/group/clasdev/clas/dec97/database";
+open(C,"nextProcessE1Run | ") || die "could not execute\n";
+
+TAPE:
+while (<C>) {
+ 	chop;
+	$run = $_;
+
+# This run needs to be processed     
+	open(D,">>$off/done");
+	print D $run,"\n";
+	print "Processing run $run\n";
+	
+	$cmd = "makeE1Sub +o$os $run  @ARGV  @opts > $off/submit";
+	system($cmd);
+	$cmd = "jsub $off/submit";
+	print "$cmd\n";
+	system($cmd);
+	open(L,">> $off/log");
+	$t = time();
+	print L "Submit run $run at ",  &ctime($t);
+ 
+exit(0);
+
+    }

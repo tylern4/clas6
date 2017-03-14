@@ -1,0 +1,10 @@
+c  from patch gcdes in file /usr/site3/cern/hp700_ux90/94a/src/car/geant321.car on Thu Nov 10 11:00:38 EST 1994
+c  this is seq: GCPHXS
+      INTEGER MAXPOW,MAXINT
+      PARAMETER (MAXPOW=4)
+      PARAMETER (MAXINT=13)
+      CHARACTER*6 CRNGUP
+      COMMON /GCPXRN/ CRNGUP(MAXINT,MAXELZ)
+      REAL COFS,GPOMIN
+      COMMON /GCPXCF/ COFS(MAXPOW,MAXINT,MAXELZ),GPOMIN(MAXELZ)
+C

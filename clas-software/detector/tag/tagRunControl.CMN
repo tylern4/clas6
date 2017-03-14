@@ -1,0 +1,68 @@
+c      include file tagRunControl.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: tagRunControl.CMN,v 1.8 2006/04/24 05:29:34 pasyuk Exp $
+c
+c  Documentation for include file tagRunControl
+c
+c  Purpose:  common used for storage of calibration constants
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   Eric ANCIANT     Created:  feb 12 1998
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file tagRunControl :
+c  -----------------------------------
+c************* RECSIS Tagger Runcontrols parameters ************
+c
+
+        integer gatePC,gatePS,gateTAC,gatePCdel,gatePSdel
+	parameter (gateTAC = 1)
+	parameter (gatePS = 2)
+	parameter (gatePSdel = 3)
+	parameter (gatePC = 4)
+	parameter (gatePCdel = 5)
+c 
+c
+c_end_var
+c  -----------------------------------
+
+c        integer RunType,EBeamEnergy,EBeamCurrent,RadiatorNumber,
+c     +  TargetType,TargetStatus,ScalerConfiguration,TriggerConfiguration,
+c     +  TriggerPrescale,TaggerMagnetCurrent,Collimator,ETCoincidenceStatus,
+c     +  PSMagnetCurrent,PSConverter
+
+c        common/TagRunControl/RunType,EBeamEnergy,EBeamCurrent,RadiatorNumber,
+c     +  TargetType,TargetStatus,ScalerConfiguration(4),TriggerConfiguration,
+c     +  TriggerPrescale(14),TaggerMagnetCurrent,Collimator,ETCoincidenceStatus,
+c     +  PSMagnetCurrent,PSConverter
+
+         real Beam_energy,PS_current,tagger_current,torus_current
+         integer tagger_do_t_trans, use_tgtlr, et_map_from_db
+
+        common/TagRunControl/Beam_energy(1),PS_current(1),
+     +	tagger_current(1),torus_current(1),
+     +  tagger_do_t_trans(1), use_tgtlr, et_map_from_db
+
+c
+c  Beam_energy is in MEV
+c  PS_current is in Amp
+c  tagger_current is in Amp
+c  torus_current id in Amp
+c
+c
+c
+c----6----------------------------------------------------------------72
+

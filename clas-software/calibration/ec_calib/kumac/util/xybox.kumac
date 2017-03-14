@@ -1,0 +1,40 @@
+macro xybox zone=1 xfrac=0 yfrac=0 nl=0
+
+  selnt [zone]  
+  vpxmax = $grafinfo('vpxmax')
+  vpymax = $grafinfo('vpymax')
+  selnt 1
+  wxmax = $grafinfo('wnxmax')
+  wymax = $grafinfo('wnymax')
+  xmax = [vpxmax]*[wxmax]
+  ymax = [vpymax]*[wymax]
+  xlo = [xfrac]*[xmax]
+  yhi = [yfrac]*[ymax]
+  chhe = $grafinfo('?chhe')
+  mtyp = $grafinfo('?mtyp')
+  ylo = [yhi]-[nl]*[chhe]*2.5
+  if $vexist(txtlen)=0 then
+    vec/cre txtlen([nl])
+  endif
+  do nlines = 1,[nl]
+    text = text[nlines]
+    len = $len([text])
+    vec/inp txtlen([nlines]) [len]
+  enddo
+  max = $sigma(vmax(txtlen))
+  xhi = [xlo] + [max]*[chhe]*0.85
+  xmid = 0.5*([xlo]+[xhi])
+*  pave [xlo] [xhi] [ylo] [yhi] 0.4 0 1005 tr 
+  xoff =  0.5
+  yoff = -1.2
+  yshft = 0.0
+  exec font 7 0 2 0 0.4
+  itx $eval([xmid]) $eval([yhi]-0.6) text0
+  key $eval([xmid]-2.5) $eval([yhi]-0.4) [mtyp] 
+  exec font 7 0 1 0 0.3
+  do nlines = 1,[nl]
+    itx $eval([xlo]+[xoff]) $eval([yhi]+[yoff]+[yshft]) text[nlines]
+    yshft = [yshft] - 0.5
+  enddo
+
+return

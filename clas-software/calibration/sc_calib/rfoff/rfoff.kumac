@@ -1,0 +1,199 @@
+macro rfoff [1]=./histo/hst27272_sum_seb.hbook [2]=6120 [3]=48 [4]=1 [5]=10
+* First close all open files and delete all histograms
+close 0; 
+hi/del 0
+ve/del *
+for/file 66 test_el.ps
+meta 66 -111
+option date
+option stat
+option fit
+option nbox
+option file
+set fcol 2
+*
+zone 2 3 
+*
+*close 0; hi/del 0
+* get histogram file name from macro argument
+monhistfile=[1]
+* histogram ID, the base number it will add sector extention, to slice and fit
+idh=[2]
+* number of slices, for electron =25, for hadron =48
+nbin=[3]
+* for electron RF is X-axis:(ftyp=0) for hadron RF is Y-axis:(ftyp=1)
+ftype=[4]
+* 
+maxbin=[5]
+*
+* Do loop over 6 2d histograms (6 sectors), that are RF-Offset vs PaddleID
+do i=1,6
+* Histogram ID are 312*, where *=[Sector]
+	hid=[idh]+[i]
+* Get one histogram at the time.
+	hi/fil 1 [monhistfile] 
+	cdir //lun1/SEB
+	hrin [hid]
+	clos 1
+	hi/pl [hid] box
+* There 25 bins (25 peddals) along the Y-axis,
+	
+if [ftype] .eq. 0. then 
+		slix [hid] [nbin]
+	else
+		sliy [hid] [nbin]
+	endif
+	hi/proj [hid]
+* This are to keep results of the fit, and write them into the file.
+	vec/cr pd(1); vec/cr gm(1); vec/cr dgm(1); vec/cr gs(1); vec/cr dgs(1)
+* Now loop through paddles from 1(bin 2) to 22 (bin 23), there are no electrons after 22. 
+	do j=2,[nbin]
+		jpd=[j]-1
+* this is a vector of a fit parameters.
+		vec/cr p(3); vec/cr dp(3); 
+* Copy each slice into 1d histogram.
+		if [ftype] .eq. 0. then 
+			hi/copy [hid].slix.[j] 11111
+		else
+			hi/copy [hid].sliy.[j] 11111
+		endif
+*
+*here we skip paddles without enough events ( less than 10 )
+*
+		if ($HINFO(11111,'max') .lt. [maxbin]) then
+                  hi/pl 11111
+                  GO TO CLOOP
+                else
+                endif
+*
+		mess [i]  [j]
+* Get the mean and RMS, and set fit ranges from (mean - 2*RMS) to (mean + 2*RMS)
+		am=$HINFO(11111,'MEAN')
+		rms=$HINFO(11111,'RMS')
+		bmin=[am]-[rms]
+		bmax=[am]+[rms]
+		hi/fit 11111([bmin].:[bmax].) g ! ! p ! ! ! dp
+* Now store fit results into temp. vector
+		vec/inp gm(1) p(2); vec/inp dgm(1) dp(2)
+		vec/inp gs(1) p(3); vec/inp dgs(1) dp(3)
+		vec/in pd(1) [jpd]
+* then write them into the file, file name is rfoff*.dat, where *=[sector].
+		vec/write pd,gm,dgm,gs,dgs rfoff//[i].dat 5f10.3 o
+		CLOOP:
+	enddo
+* Loop over paddles is ended, next line will close the data file for the sector "i".
+*	vec/write ''  rfoff//[i].dat f10.3 c
+
+enddo
+close 66
+*
+vec/write pd(1)  rfoff7.dat f10.3 o
+shell rm rfoff7.dat
+* Done with fitting, fill the file for DB
+mess about to call rfoffset [ftype]
+call rfoffset.f([ftype])
+mess after rfoffset
+*
+wait
+*
+return
+*
+* Now plot the results
+*
+******************************MACRO PLOT*************************************
+*
+macro plot
+*
+*initial cleanup
+*
+hi/del *
+ve/del *
+pict/del *
+*
+for/file 66 test1_el.ps
+meta 66 -111
+op nbox
+set txci 1
+set bwid 4
+set hwid 4; set lwid 4;
+set tfon 20; set vfon 20; set lfon 20 
+* Read in RF offset fit results from the data files (6 sectors)
+vec/read x1,y1,dy1,z1,dz1 rfoff1.dat
+vec/read x2,y2,dy2,z2,dz2 rfoff2.dat
+vec/read x3,y3,dy3,z3,dz3 rfoff3.dat
+vec/read x4,y4,dy4,z4,dz4 rfoff4.dat
+vec/read x5,y5,dy5,z5,dz5 rfoff5.dat
+vec/read x6,y6,dy6,z6,dz6 rfoff6.dat
+lv=48
+*$vlen(x1) 
+*
+vec/cr dx([lv]) r [lv]*0.00001
+*
+zone 1 2
+set txci 1
+pdmax=[lv]*1.
+null 0. [pdmax] -0.8 0.8 
+atit 'SC-paddle ID' 'Mean of the Gaussian fit' '' 220
+*
+text 2.5 0.32 'sector 1' 0.3
+hpl/err x1 y1 dz1 dy1 [lv] 25 0.2
+set pmci 2
+set txci 2
+text 2.5 0.29 'sector 2' 0.3
+hpl/err x2 y2 dz1 dy2 [lv] 25 0.2
+set pmci 3
+set txci 3
+text 2.5 0.26 'sector 3' 0.3
+hpl/err x3 y3 dz1 dy3 [lv] 25 0.2
+set pmci 4
+set txci 4
+text 2.5 0.23 'sector 4' 0.3
+hpl/err x4 y4 dz1 dy4 [lv] 25 0.2
+set pmci 7
+set txci 7
+hpl/err x5 y5 dz1 dy5 [lv] 25 0.2
+text 2.5 0.2 'sector 5' 0.3
+set pmci 6
+set txci 6
+text 2.5 0.17 'sector 6' 0.3
+hpl/err x6 y6 dz1 dy6 [lv] 25 0.2
+*
+set txci 1
+null 0. [pdmax] 0. 0.7
+atit 'SC-paddle ID' 'Sigma of the Gaussian fit' '' 220
+*
+text 2.5 0.45 'sector 1' 0.3
+hpl/err x1 z1 dx dz1 [lv] 21 0.2
+set pmci 2
+set txci 2
+text 2.5 0.42 'sector 2' 0.3
+hpl/err x2 z2 dx dz2 [lv] 21 0.2
+set pmci 3
+set txci 3
+text 2.5 0.39 'sector 3' 0.3
+hpl/err x3 z3 dx dz3 [lv] 21 0.2
+set pmci 4
+set txci 4
+text 2.5 0.36 'sector 4' 0.3
+hpl/err x4 z4 dx dz4 [lv] 21 0.2
+set pmci 7
+set txci 7
+hpl/err x5 z5 dx dz5 [lv] 21 0.2
+text 2.5 0.33 'sector 5' 0.3
+set pmci 6
+set txci 6
+text 2.5 0.3 'sector 6' 0.3
+hpl/err x6 z6 dx dz6 [lv] 21 0.2
+*
+close 66
+return
+
+
+
+
+
+
+
+
+
+

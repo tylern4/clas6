@@ -1,0 +1,95 @@
+clasDIS is a generator based on the polarized
+leptoproduction LUND type program
+PEPSI2 (Polarized Electron-Proton Scattering Interactions),
+which  is a modification of the LEPTO6.5.
+More details are available at
+http://www.thep.lu.se/~maul/pepsi.html)
+http://www.thep.lu.se/tf2/staff/torbjorn/Pythia.html
+http://www3.tsl.uu.se/thep/lepto/
+
+PDF used by default is the set grsv2000 
+hep-ph/0011215 ( LO standard scenario DATA FILE 'std2000_lo.grid')
+polarised DF from file ./pdf/grv98nld.grid for NLO.pwd
+
+
+
+
+The output of clsDIS is a bos file containing MCTK and PART
+banks for -mcin GSIM input.
+
+
+clasDIS --help will produce the following
+list of command line options
+ 
+ clasDIS [options]            
+       option  value      default  comment  
+      --v    verbos_level    0     additional printout 
+      --trig nevents         10     number of triggers 
+      --beam beam_energy     5700   e- momentum in MeV 
+      --zpos z-position      0    target z position in mm 
+      --zwidth z-width       0    width in z in mm (zpos+/-zwidth) 
+      --file bos_file     clasDIS.evt  bos outfile 
+      --targ target       proton   deuteron/neutron possible 
+      --pol  polarization    0%    -100 - 100% target polarization 
+      --file bos_file     clasDIS.evt  bos outfile 
+      --print nprint       1000   print every nprint event 
+      --norand                   keep the  old random number
+
+
+--v verbos_level is the verbosity level. Values > 0 will
+result in extended printout. --v 101-103 will print result
+of LULIST(1-3) with a table of generated particles from JETSET.
+(see more details in PEPSI LEPTO and PYTHIA manuals)  
+
+
+clasDIS --v 101 --trig 1
+...........
+Max of differential cross section (for weighting) =  0.7647E+00
+ obtained in    0.00 seconds.
+
+ NEVENT= 1
+                            Event listing (summary)
+
+    I  particle/jet KS     KF orig    p_x      p_y      p_z       E        m
+
+    1  !e-!         21     11    0    0.000    0.000    5.700    5.700    0.001
+    2  !p+!         21   2212    0    0.000    0.000    0.000    0.938    0.938
+    3  !gamma!      21     22    1    0.144    0.453    5.379    5.126   -1.698
+    4  e-            1     11    1   -0.144   -0.453    0.321    0.574    0.001
+    5  (u)          13      2    0   -0.193    1.046    4.968    5.080    0.006
+    6  (ud_0)       13   2101    2    0.337   -0.592    0.412    0.985    0.579
+    7  (u)       A  12      2    5   -0.193    1.046    4.968    5.080    0.006
+    8  (ud_0)    V  11   2101    6    0.337   -0.592    0.412    0.985    0.579
+    9  (string)     11     92    7    0.144    0.453    5.379    6.065    2.760
+   10  p+            1   2212    9    0.395    1.009    4.547    4.768    0.938
+   11  (omega)      11    223    9   -0.251   -0.555    0.832    1.297    0.787
+   12  pi+           1    211   11   -0.099   -0.099   -0.030    0.200    0.140
+   13  pi-           1   -211   11   -0.142   -0.321    0.244    0.450    0.140
+   14  (pi0)        11    111   11   -0.009   -0.136    0.618    0.647    0.135
+   15  gamma         1     22   14    0.050   -0.117    0.458    0.475    0.000
+   16  gamma         1     22   14   -0.059   -0.019    0.160    0.172    0.000
+                   sum:  0.00         0.000    0.000    5.700    6.638    3.403
+
+
+
+
+--file bos_file   is the name of  output bos file which will contain
+                 MC events both in MCTK and PART banks.
+
+
+--targ target     possible values are  proton/deutron/neutron 
+              (any other string will be interpreted as proton)
+
+--norand            running with norand will keep the old random 
+               number stored in the file RNDMSTATUS. By default
+               numbers (MRLU,PRLU arrays) will be replaced by the
+               latest generated set. 
+ 
+--zpos  value      z-position (in mm) of the event in GSIM coordinate system
+              default value is 0
+--zwidth value     half width (in mm) of the target (events distrivbuted randomly 
+              in z+/-zwidth. Default 0.
+
+--pol  value       target polarization (by default     0%)
+                   possible values -1 and 1 (+/-100% of target polarization) 
+ 

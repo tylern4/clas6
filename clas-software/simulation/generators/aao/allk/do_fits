@@ -1,0 +1,34 @@
+#!/bin/csh -f
+
+# $1 = low  W
+# $2 = high W
+# $3 = mami,e1b,e1e
+# $4 = fit code Bits 0-9: pi0 pi+ crs alt' alt asym sigT sig0 sigTT sigTL sigTLP
+#                          1   2   4   8    16  32   64   128   256  512   1024
+
+if($3 == mami) then
+  set q2 = (0.0)
+  set ebeam = (0.)
+endif
+if($3 == e1b) then
+  set q2 = (0.4 0.525 0.65 0.75 0.9 0.65 0.75 0.9 1.15 1.45 1.8)
+  set ebeam = (1.645 1.645 1.645 1.645 1.645 2.445 2.445 2.445 2.445 2.445 2.445)
+endif
+if($3 == e1e) then
+  set q2  = (0.16 0.20 0.24 0.28 0.32 0.36)
+  set ebeam = (1.046 1.046 1.046 1.046 1.046 1.046)
+endif
+
+set n = 1
+
+while ($n <= $#q2)
+  set q=$q2[$n]
+  set eb=$ebeam[$n]
+  cp data/c$3-q$n-pi0.tbl dat1
+  cp data/a$3-q$n-pi0.tbl dat2
+  fit_a_run $4 $eb $1 $2 $q $q fit$n-a param-orig.dat dat2 JUNK JUNK JUNK
+#  fit_a_run $4 $eb $1 $2 $q $q fit$n-b param-sl_3.dat dat1 JUNK JUNK JUNK
+#  fit_a_run $4 $eb $1 $2 $q $q fit$n-c param-nsl.dat dat1 JUNK JUNK JUNK  
+#  fit_a_run $4 $eb $1 $2 $q $q fit$n-d param-nslsig.dat dat1 JUNK JUNK JUNK  
+  @ n++
+end

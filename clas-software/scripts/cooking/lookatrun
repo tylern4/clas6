@@ -1,0 +1,19 @@
+#!/apps/bin/perl
+
+if ($ARGV[0] eq "-h") { 
+    &PrintUsage;
+    exit(0);
+}
+
+local($entry) = $ARGV[0];
+$entry =~ s/\.db$//;
+dbmopen(%ENTRY, $entry, undef);
+foreach $key (keys %ENTRY) {
+    print "$key has a value of $ENTRY{$key}\n";
+}
+dbmclose(%ENTRY);
+
+sub PrintUsage {
+    print "\nUsage: $0 <file_name>\n";
+    print "\tfile_name \t\tName of file to look at.\n\n";
+}

@@ -1,0 +1,209 @@
+#!/usr/bin/env python
+
+import os, sys
+
+if len(sys.argv) > 1:
+    if "-h" in sys.argv:
+        print "usage: g12Anal -L<mode> | makeht.py > m<mode>.cpp"
+        sys.exit(0)
+###
+
+labels = sys.stdin.read()
+
+labels = labels.splitlines()
+
+header = labels[0].split()
+if "Labels" in header:
+    cview_mode = header[2]
+    mode = cview_mode.lower()
+else:
+    print "Problem with reading stdin."
+    print "Is the first line something like the following?"
+    print "  Labels for M<mode> (<channel>)"
+    sys.exit(-1)
+###
+
+index = []
+description = []
+variable = []
+
+for line in labels[1:]:
+    line = line.split()
+    try:
+        index.append(str(int(line[0]) - 1))
+        desc = line[1]
+        if len(line) > 3:
+            for word in line[2:-1]:
+                desc += " " + word
+        description.append(desc)
+        variable.append(line[-1][1:-1])
+    except:
+        pass
+###
+
+labels_zip = zip(index, variable, description)
+
+print '''
+#include <cmath>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#ifndef NOBOOST
+    #include <boost/xpressive/xpressive.hpp>
+    namespace xpr = boost::xpressive;
+#endif
+
+#include <TROOT.h>
+#include <TFile.h>
+#include <TH1.h>
+#include <TH2.h>
+
+using namespace std;
+
+/**
+ * CUTS
+ * various cut parameters get their own namespace
+ * so they don't interfere with the column names
+ **/
+namespace cut {
+    double dvtime_rf_st = 0.4;
+    double photon_energy = 4.4;
+    double misspz = 0.1;
+    double misspt = 0.05;
+}
+
+int main(int argc, char** argv) {
+    string outfile = "''' + mode + '''.root";
+    if(argc == 2) {
+        outfile = argv[1];
+    }
+    TFile* fout = new TFile(outfile.c_str(),"RECREATE");
+
+    enum ntuple_names_t {
+''',
+for i, var, desc in labels_zip[:-1]:
+    print "\t\t" + var + "=" + i + ",\t// " + desc + "\n",
+print "\t\t" + variable[-1] + "=" + index[-1] + "\t// " + description[-1] + "\n",
+print '''    };
+    vector<float> v(''' + str(len(labels_zip)) + ''');
+
+    /**
+     * LIMITS and BINNING
+     * define minimums, maximums, and binning for histograms
+     * these could go into their own namespace so they
+     * don't interfere with the column names (like the cuts above)
+     **/
+    int run_min = 56363;
+    int run_max = 57323;
+
+    int dbeta_nbins = 400;
+    float dbeta_min = -2.;
+    float dbeta_max = 2.;
+
+    int vtime_nbins = 400;
+    float vtime_min = -2.;
+    float vtime_max = 2.;
+
+    /**
+     * HISTOGRAMS
+     * define the histograms here.
+     **/
+    TH1F* h1 = new TH1F("h1","run - 56363",run_max - run_min,0,run_max-run_min);
+    TH2F* hdvtime_st = new TH2F("hdvtime_st",";run - 56363;#Delta vtime_{RF-ST}",
+            run_max-run_min,0,run_max-run_min,
+            vtime_nbins,vtime_min,vtime_max);
+
+    int nlines = 0;
+    int i;
+    string input;
+    stringstream ss;
+    int nwords = ''' + str(len(labels_zip)) + ''';
+    #ifndef NOBOOST
+        xpr::sregex float_regex = +(xpr::digit | '.' | 'e' | 'E' | 'd' | 'D');
+    #endif
+    while(getline(cin,input)) {
+        #ifndef NOBOOST
+            xpr::sregex_token_iterator cur(input.begin(), input.end(), float_regex);
+            xpr::sregex_token_iterator end;
+            for(nwords=0; cur != end; ++cur) nwords++;
+        #endif
+        if(nwords == ''' + str(len(labels_zip)) + ''') {
+            ss.clear(stringstream::goodbit);
+            ss.str(input);
+            for(i=0; i<''' + str(len(labels_zip)) + '''; i++) ss >> v[i];
+
+/**
+ * FILLING HISTOGRAMS
+ * start filling histograms here.
+ * at this point, the vector v contains floats from
+ * a single line of standard input (stdin)
+ **/
+/// no cuts
+h1->Fill(v[run] - run_min);
+hdvtime_st->Fill(v[run] - run_min, v[vtime] - v[stvtime]);
+
+/*
+if(v[ebeam] > cut::photon_energy) {
+    /// high-energy photons
+} else {
+    /// low-energy photons
+}
+if(fabs(v[vtime] - v[stvtime]) < cut::dvtime_rf_st) {
+    /// stvtime cut
+    if(fabs(v[missz]) < cut::misspz_cut) {
+        /// no missing pz
+        if(sqrt(pow(v[missx],2) + pow(v[missy],2)) < cut::misspt) {
+            /// no missing pt
+        }
+    } else if(v[missz] > cut::misspz) {
+        /// non-zero missing pz
+        if(sqrt(pow(v[missx],2) + pow(v[missy],2)) > cut::misspt) {
+            /// non-zero missing pt
+        }
+    }
+}
+*/
+
+            if (!(++nlines % 1000)) {
+                clog << nlines << '\\r';
+                fout->Write("",TObject::kOverwrite);
+            }
+        }
+    }
+    clog << "found " << nlines << " points\\n";
+    fout->Write("",TObject::kOverwrite);
+    fout->Close();
+}
+/**
+ * to fill histogram into root file m''' + mode + '''.root
+ *
+ * replace $HOME/local/include with directory where boost headers
+ * are located. Alternatively, you can add the option
+ *    -DNOBOOST
+ * to skip over the boost-dependent lines. However, then you must
+ * be certain that each line you pass to this program is exactly
+ * the right number of floating-point numbers (nan's and shorter
+ * lines will mess this program up in this case)
+ *
+ * compile ''' + mode + ''':
+ * g++ -o ''' + mode + ''' ''' + mode + '''.cpp \\
+   -I/group/clasdev/local/include \\
+   -I`root-config --incdir` `root-config --libs`
+ *
+ * then issue the command:
+ * cat /work/clas/disk1/clasg12/g12anal/\*\/\*.g12anal.tgz \\
+   | tar -ignore-blocks -zxOf - \\
+   | cview "''' + cview_mode + ''' " \\
+   | ''' + mode + '''
+ *
+ * or, if you have the .view file already created (i.e. it is
+ * consists of only numbers
+ *
+ * you can then open root in another process and look at the
+ * histograms as they are filled.
+ **/
+'''
+

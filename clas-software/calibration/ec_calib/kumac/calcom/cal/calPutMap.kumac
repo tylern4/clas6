@@ -1,0 +1,49 @@
+macro calPutMap  det var run vec
+
+  global/import mappath
+  
+  case [det] in
+    (ec) case [var] in
+                (att) mapfile = EC_ATTEN.map
+                (ped) mapfile = EC_PEDESTALS.map
+               (gain) mapfile = EC_GAIN.map
+              (tgain) mapfile = EC_TCH.map
+              (tzero) mapfile = EC_T0.map
+         endcase
+    (sc) case [var] in
+           (ped,gain) mapfile = SC_CALIB.map
+         endcase
+    (cc) case [var] in
+           (ped) mapfile = CC_CALIB.map; sub=pedestals
+           (tdc) mapfile = CC_CALIB.map; sub=T0
+         endcase
+  endcase 
+
+  case [det] in  
+    (ec) vec/write [vec](:,1,:) tmp.vec
+         exec mapPut [mappath]/[mapfile] inner u [run] tmp.vec 1
+         vec/write [vec](:,2,:) tmp.vec
+         exec mapPut [mappath]/[mapfile] inner v [run] tmp.vec 1
+         vec/write [vec](:,3,:) tmp.vec
+         exec mapPut [mappath]/[mapfile] inner w [run] tmp.vec 1
+         vec/write [vec](:,4,:) tmp.vec
+         exec mapPut [mappath]/[mapfile] outer u [run] tmp.vec 1
+         vec/write [vec](:,5,:) tmp.vec
+         exec mapPut [mappath]/[mapfile] outer v [run] tmp.vec 1       
+         vec/write [vec](:,6,:) tmp.vec
+         exec mapPut [mappath]/[mapfile] outer w [run] tmp.vec 1
+    (sc) vec/write [vec](:,1,:) tmp.vec
+         exec mapPut [mappath]/[mapfile] pedestals left  [run] tmp.vec 1
+         vec/write [vec](:,2,:) tmp.vec
+         exec mapPut [mappath]/[mapfile] pedestals right [run] tmp.vec 0
+    (cc) vec/cre cc1(ccvecdim); vec/cre cc2(2,18,6); vec/copy [vec] cc1
+         call kumac/calcom/cal/fun/ccrotate.f77(1) 
+         vec/write cc2 tmp.vec
+         exec mapPut [mappath]/[mapfile] [sub] mean [run] tmp.vec 1
+         vec/del cc1,cc2              
+  endcase
+         
+return
+                
+           
+  

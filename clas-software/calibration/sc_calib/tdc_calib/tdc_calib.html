@@ -1,0 +1,91 @@
+<html>
+<head>
+<title>tdc_calib: calculate TDC calibration constants for SC_CALIBRATIONS</title>
+<body>
+<h1>tdc_calib: calculate TDC calibration constants for SC_CALIBRATIONS</h1>
+
+<p> Rewriting of the TDC calibration routine became necessary, because the
+existing program was unable to handle runs bigger than 2 GeV (split into
+several physical bosfiles). Other than the program used before, the tdc_calib is
+specialized in calculating the TDC calibration especially for the
+SC_CALIBRATION. It uses the ROOT environment for doing the actual fit as well as for
+monitoring the results. 
+
+<h3> Usage </h3>
+<pre>
+   tdc_calib [-options] &lt;inputfile1&gt; [&lt;inputfile2&gt; ...] &lt;br&gt;
+
+Options:
+
+   -r &lt;file&gt;        write root histograms to &lt;file&gt;       [D=no hist]
+
+   -d &lt;directory&gt;   write calibration constants to &lt;dir&gt;  [D=current]
+
+   -h               show commandline options
+
+</pre>
+<p>
+tdc_calib needs one special pulser run to calculate the TDC calibration
+constants. One run comprises usually 9GB data, therefore a list of physical
+filenames is needed. You can use all kind of
+wildcards, which are expanded to valid filenames by the shell. <p>
+
+The recommended way in passing an additional file/directory option to
+tdc_calib is including a blank 
+between the option and the argument. The program understands the -dDirectory
+notation as well, however, the shell is unable to expand special character
+like leading ~ then.</p>
+
+<h3> Running </h3>
+<img src=tdc_calib_running.gif> <p>
+For each channel, 175 different delay time settings between TDC start and stop and
+four different masks (each mask includes only one TDC channel out of four) 1000 pulser
+events are taken. If there are enough TDC entries for a given channel, a Gauss
+fit routine extracts the mean value and the error and some additional information
+to survey the quality of the fit (like chi-square, sigma, area under
+curve...). A value of 2 in the histogram above indicates, that the fit has
+been rejected by the program. If there are only few values sorted out, there is
+nothing to worry about. If there is no entry (value=0), no TDC values in the
+valid range has been found. </p>
+
+<h3> Checking Histograms </h3>
+<table>
+<tr><td width=15% valign=top> <img src=tdc_calib_menu.gif> </td>
+
+<td width=85% valign=top>
+<b> gs0 - gs5 </b> Some 2D histograms to survey the quality of the gauss
+fits. Use the ROOT drag and drop features to set a range for the Z-axis, if
+the default is not convenient.<br><br>
+<b> T0 - T2 </b> The results for the calibration constants. Use the button <b>
+toggle L/R </b> to toggle between the values for the left and right TDC. This
+option button works for other histograms as well.<br><br>
+<b> Option: raw histo, show fit, 2deg par </b> This buttons are radio-buttons,
+only one of this options is active at any time. It affects the presentation of
+the sector overview as well as the single channel display. The <b> raw histo </b>
+option shows the original TDC entries, the <b> show fit </b> the second degree
+polynomial fit through the gauss fit results. Choose the <b> 2deg par </b>
+option to see the deviation from the linear fit enlarged. In these graphs, the
+linear and constant component are subtracted from the points.<br><br>
+<b> Single channel </b> This button opens a sub-menu with one button for each
+channel. One might consider, to make the sector overview histograms clickable,
+to get a more intuitive access to single channels in future program
+versions. However, to do so could interfere with the generic ROOT event
+handler and has be considered to be to dangerous.<br><br>
+<b> Write file </b> The resulting constants as well as their errors are
+written to files using an unambiguous naming convention like T1lerr.dat . If no
+option -d is given, the files will be written to the current directory.<br><br>
+<b> Write caldb </b> If you think, it is not convenient to write and link 12
+sets of constants manually to the caldb database server, try this graphical
+interface. You have to be database officer, to write the new constants to the
+common RunIndex, but writing to a private RunIndex works as well.
+After filling the check-in form, it uses the traditional perl
+script caldb_write_and_link to perform the database update. The output from the perl script is
+shown in a new popup window.<br><br>
+<center> <img src=tdc_calib_checkin.gif> </center>
+</td>
+</tr>
+</table>
+
+<h3> Questions, Comments, Bug-Reports </h3>
+ <a href=mailto:langhei@physics.sc.edu> J&ouml;rn Langheinrich </a>
+</html>

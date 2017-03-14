@@ -1,0 +1,56 @@
+c      include file st_trk.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: sttrk.CMN,v 1.6 2004/06/22 00:19:43 devita Exp $
+c
+c  Documentation for include file st_trk
+c
+c  Purpose:  
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   T. Auger     Created:  Mon Jun 03 10:11:52 EST 1997
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file st_trk:
+c  -----------------------------------
+c 
+c*************TRK BOS bank parameter************
+
+
+	integer StTrknumber(St_max_pair)
+	integer ntrk_hit_leg(St_max_pair,St_max_side)
+	integer ntrk_hit_nose(St_max_pair,St_max_side)
+        integer Ntrk_hit(St_max_pair),ntr
+        integer StFoundTrk(St_max_hit,St_max_hit,St_max_pair)
+        integer StTrkSector(St_max_hit,St_max_pair)
+        integer StTrkNumSec(St_max_hit,St_max_pair)
+        integer StTrkWhere(St_max_hit,St_max_pair)
+        
+c l_st distance along ST from track hit point
+c to the end of ST leg. 
+			 	
+	real l_st(St_max_hit,St_max_pair)
+	real StTrkLength(St_max_hit,St_max_pair)
+	
+	logical trk_found(St_max_pair)
+c
+c_end_var
+c
+	common /sttrk/StTrknumber,ntrk_hit_leg,ntrk_hit_nose,Ntrk_hit,
+     1                l_st,trk_found,ntr,StFoundTrk,StTrkSector,StTrkLength,
+     2		      StTrkNumSec, StTrkWhere	
+
+c----6----------------------------------------------------------------72
+

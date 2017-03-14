@@ -1,0 +1,8 @@
+macro ecSetupRecsis
+
+  global/import gainpath
+  exec calGetVec ec ped 607
+  vec/copy ecmean607 ecped
+  vec/read ecgain [gainpath]/ecadcgain.vec
+  
+return

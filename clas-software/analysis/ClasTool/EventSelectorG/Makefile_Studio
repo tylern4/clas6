@@ -1,0 +1,31 @@
+#
+# Notice:
+#
+# At CEBAF you must execute the following before this will compile and link.
+#
+# SETUP YOUR CLAS ENVIRONMENT (setclas LATEST    )
+# SETUP YOUR ROOT ENVIRONMENT (use root/2.22     )
+# LINUX: SETUP EGCS 1.1.1     (use egcs/1.1.1    )
+#
+#
+#
+#
+SRC_FILES=main.cc
+
+include ../Makefile_top
+#
+# BOS
+#
+BOSINC    = -I$(CLAS_PACK)/include -I$(CLAS_PACK)/inc_derived
+BOSLIB    = -L$(CLAS_LIB) -lbosio -lbankdefs
+#
+#INCLUDES += $(BOSINC)
+OTHERLOADLIBS= $(ROOTGLIBS) $(ROOTLIBS) -lXMLIO -lXMLParser -L$(localslib) -lClasBanks -lVirtualReader -lDSTReader -lCTEventSelectorG
+#
+CREATED_EXE = ClasTool_GuiStudio.exe
+#
+all: exe
+#
+include ../Makefile_bottom
+include Makefile_depends
+

@@ -1,0 +1,70 @@
+c      include file st_geom.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: stgeom.CMN,v 1.5 2001/08/08 15:40:51 liji Exp $
+c
+c  Documentation for include file st_geom
+c
+c  Purpose:  
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   T. Auger     Created:  Mon Jun 03 10:11:52 EST 1997
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c     - add ST geometry info. as in GSIM
+c_end_doc
+c
+c_begin_var
+c  variables for include file st_geom:
+c  -----------------------------------
+c 
+
+c	real cx_leg, cy_leg, cz_leg
+c     	real cx_nose, cy_nose, cz_nose
+c      	real D_leg, W_leg, L_leg
+c      	real D_nose, W_nose, L_nose
+c  	real leg_x_max
+c  	real leg_y_min,leg_y_max
+c  	real leg_z_min,leg_z_max
+c  	real nose_x_min,nose_x_max
+c  	real nose_z_min,nose_z_max
+c  	real nose_y,a_nose,b_nose,c_nose
+c  	real z_offset
+      	
+c      	parameter(cx_leg=1.0)
+c      	parameter(cy_leg=0.0)
+c      	parameter(cz_leg=0.0)
+c      	parameter(D_leg=10.2)     ! should be the same as trk_geom.F
+c      	parameter(W_leg=5.77*2.)
+c      	parameter(L_leg=19.9*2.)
+c      	parameter(cx_nose=0.866)
+c      	parameter(cy_nose=0.0)
+c      	parameter(cz_nose=0.5)
+c      	parameter(D_nose=18.783)  ! should be the same as trk_geom.F
+c      	parameter(W_nose=1.646*2.)
+c      	parameter(L_nose=6.95*2.)
+c      	parameter(z_offset=2.0)
+
+	integer pair_id_2_sect_id(St_max_pair,St_max_side)
+	real St_Normal_vect(1:St_max_sector,X:Z,leg:nose) ! not used Feb98
+	real St_Rnormal_dist(1:St_max_sector,leg:nose)    ! not used Feb98
+c
+c_end_var
+
+	
+c	common /stgeom/St_Normal_vect,St_Rnormal_dist,pair_id_2_sect_id,
+c     1                 leg_x_max,leg_y_min,leg_y_max,leg_z_min,leg_z_max,
+c     2		       nose_x_min,nose_x_max,nose_z_min,nose_z_max,
+c     3		       a_nose,b_nose,c_nose			
+	common /stgeom/pair_id_2_sect_id
+	
+c----6----------------------------------------------------------------72
+

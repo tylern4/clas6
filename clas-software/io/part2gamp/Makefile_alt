@@ -1,0 +1,97 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+
+ifdef USEBOSIO
+BOSLIB= -lbosio$(ADD_DEBUG)
+else
+BOSLIB = -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG)
+endif
+
+STDLIBS= -L$(LOCAL_LIB) -L$(CLAS_LIB) -lclasEvent$(ADD_DEBUG) -leloss$(ADD_DEBUG) -lplib$(ADD_DEBUG) -lpid$(ADD_DEBUG) -lec$(ADD_DEBUG) -lcc$(ADD_DEBUG) -lsc$(ADD_DEBUG) -ltrk$(ADD_DEBUG) -ldc$(ADD_DEBUG) -llac$(ADD_DEBUG) -lst$(ADD_DEBUG)  -lpid$(ADD_DEBUG) -ltag$(ADD_DEBUG) -lscaler$(ADD_DEBUG) -lvertex$(ADD_DEBUG) -lbankdefs$(ADD_DEBUG) -lclasutil$(ADD_DEBUG)   -lc_bos_io$(ADD_DEBUG) -lrecutl$(ADD_DEBUG) -litape$(ADD_DEBUG) $(BOSLIB) -lc_bos_io$(ADD_DEBUG) -lmapmanager$(ADD_DEBUG)  -lonline_dummy$(ADD_DEBUG) -lc_cern$(ADD_DEBUG) -lpp -lpwaUtil$(ADD_DEBUG)
+
+#use the newest cern library
+CERNPATH= $(CERN_ROOT)/lib
+CERNLIB= -L$(CERNPATH) -lpacklib
+MATHLIB= -lm
+
+FINCLUDE := $(FINCLUDE) -I./include
+INCLUDE := $(INCLUDE) -I./include
+
+CCSRCS:= 
+
+FSRCS:= 
+
+SRCS:=  
+
+FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+CCOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(CCSRCS))
+
+addbeamSRCS= addbeam.cc
+addbeamOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(addbeamSRCS))
+
+countgampSRCS= countgamp.cc
+countgampOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(countgampSRCS))
+
+gamp2partSRCS= gamp2part.cc
+gamp2partOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(gamp2partSRCS))
+
+part2gampSRCS= part2gamp.cc
+part2gampOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(part2gampSRCS))
+
+partMakerSRCS= partMaker.cc
+partMakerOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(partMakerSRCS))
+
+addbeam: $(addbeamOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+countgamp: $(countgampOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+gamp2part: $(gamp2partOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+part2gamp: $(part2gampOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+partMaker: $(partMakerOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+all: lib  addbeam countgamp gamp2part part2gamp partMaker
+
+LIBS= $(LOCAL_LIB)/libpart2gamp$(ADD_DEBUG).a
+lib: $(LIBS)
+
+$(LIBS): $(OBJS) $(FOBJS) $(CCOBJS)
+	$(VDIR) $(LOCAL_LIB)
+	ar rv $@ $?
+install:  addbeam countgamp gamp2part part2gamp partMaker
+	$(VDIR) $(LOCAL_BIN)
+	mv addbeam $(LOCAL_BIN)
+	mv countgamp $(LOCAL_BIN)
+	mv gamp2part $(LOCAL_BIN)
+	mv part2gamp $(LOCAL_BIN)
+	mv partMaker $(LOCAL_BIN)
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo FFLAGS $(FFLAGS)
+	@echo CCLAGS $(CCFAGS)
+	@echo INCLUDE $(INCLUDE)
+	@echo LOCAL_LIB $(LOCAL_LIB)
+	@echo LOCAL_BIN $(LOCAL_BIN)
+	@echo LOCAL_INCLUDE $(LOCAL_INCLUDE)
+	@echo OBJDIR $(OBJDIR)

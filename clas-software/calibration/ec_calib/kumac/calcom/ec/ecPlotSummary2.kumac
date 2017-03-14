@@ -1,0 +1,88 @@
+macro ecPlotSummary2 var=adc run=-1 gain=50 db=ADBmean sca=0.5 pathout=' ' 
+
+  global/import sector
+  global/import filename 
+
+  next  
+  case [var] in
+    (adc) ytit='ADC at PMT';ymin=[gain]*[sca];ymax=[gain]*(2.-[sca]);lin=[gain]
+    (pe)  ytit='P.E. / MeV';ymin=0.5;ymax=5.0;lin=-100
+    (att) ytit='Atten Length (cm)';ymin=0;ymax=600;lin=-100
+    (pe1) ytit='P.E. / MeV';ymin=0.;ymax=8.;lin=100;run=Laser;lin=3.5
+    (pe2) ytit='Rel. Var. of Laser';ymin=0.;ymax=0.1;lin=-100;run=Laser
+    (chi) ytit='Chi**2 of Laser Fit';ymin=0.1;ymax=10.0;lin=1;run=Laser
+  endcase
+  
+  global/import sector
+  title = Sector [sector] File [filename] EC Views 
+  title_gl [title]
+  
+  vec/cre y1(36)
+  vec/cre y2(36)
+  vec/cre y1e(36)
+  vec/cre y2e(36)
+  vec/cre ex(36)
+  vec/cre xe(36)
+  vec/cre zo(6) i 1 3 5 2 4 6
+  sigma x=array(36,1#36)
+  
+  do view = 1,6
+    case [var] in
+      (adc)  vec/cop ecFitadc_ymaxfit(1:,[view],1) y1(1:)
+             vec/cop ecFitadc_ymaxfit(1:,[view],2) y1e(1:)
+      (att)  vec/cop ecFitadc_atten(1:,[view],1) y1(1:)
+             vec/cop ecFitadc_atten(1:,[view],2) y1e(1:)
+      (pe)   vec/cop ecFitpe_ymaxfit(1:,[view],1) y1(1:)
+             vec/cop ecFitpe_ymaxfit(1:,[view],2) y1e(1:)
+      (pe1)  vec/cop ecFitPE_yld(1:,[view]) y1(1:)
+             vec/cop ecFitPE_erryld(1:,[view]) y1e(1:)
+      (pe2)  vec/cop ecFitPE_src(1:,[view]) y1(1:)
+             vec/cop ecFitPE_errsrc(1:,[view]) y1e(1:)
+      (chi)  vec/cop ecFitPE_chi2(1:,[view]) y1(1:)
+    endcase
+    
+    case [view] in
+      (1) chview=U inner
+      (2) chview=V inner
+      (3) chview=W inner
+      (4) chview=U outer
+      (5) chview=V outer
+      (6) chview=W outer
+    endcase
+    
+    zon = $eval(zo([view]))
+    zone 2 3 [zon] s
+    if ([view].eq.4).and.([var].eq.adc) then
+      ymin=[ymin]*1.6
+      ymax=[ymax]*1.6
+      lin=[lin]*1.6
+    endif
+*    ymin = 0;ymax=200
+    null 0. 40. [ymin] [ymax]
+    atitle [chview]//' Strip Number' [ytit]
+    line 0 [lin] 36 [lin] 
+    hplot/errors x y1 ex y1e 36 20 0.18
+    if [var].eq.att then
+      if [db].eq.ADBmean then
+        hplot/errors x att[db](:,[view],new[sector]) xe attADBmeane(:,[view],new[sector]) 36 24 0.18 
+      else
+        hplot/symbols x att[db](:,[view],new[sector]) 36 24 0.18 
+      endif
+      key 20 150 20 'Pixel Fit'
+      key 20 100 24 'ecatten.map'
+    endif
+
+  enddo
+  
+  title_gl ' '
+  if [pathout].ne.' ' then
+    case [var] in
+      (att) pict/print [pathout]/r[run][var][db].gif
+      (adc) pict/print [pathout]/r[run][var].gif
+      (pe)  pict/print [pathout]/r[run][var].gif
+      (pe1) pict/print [pathout]/r[run][var].gif
+      (pe2) pict/print [pathout]/r[run][var].gif
+    endcase
+  endif
+  
+return

@@ -1,0 +1,34 @@
+macro ecVectorIO mode=write 
+
+  global/import runno
+  global/import gainpath 
+  file = [gainpath]/ecFit[runno].vec
+  message ecVectorIO: Opening [file] and doing a vector [mode]
+  
+  vec/[mode] ecFitadc_par     [file] ! o
+  vec/[mode] ecFitadc_errpar  [file] ! ' ' 
+  vec/[mode] ecFitadc_atten   [file] ! ' '
+  vec/[mode] ecFitadc_ymaxfit [file] ! ' '
+  vec/[mode] ecFitadc_ymaxdat [file] ! ' '
+  vec/[mode] ecFitadc_chi2    [file] ! ' '
+    
+  vec/[mode] ecFitpe_par     [file] ! ' '
+  vec/[mode] ecFitpe_errpar  [file] ! ' ' 
+  vec/[mode] ecFitpe_atten   [file] ! ' '
+  vec/[mode] ecFitpe_ymaxfit [file] ! ' '
+  vec/[mode] ecFitpe_ymaxdat [file] ! ' '
+  vec/[mode] ecFitpe_chi2    [file] ! ' '
+
+  do i = 1,6
+    vec/[mode] adc[i]    [file] ! ' '
+    vec/[mode] adcerr[i] [file] ! ' '
+    vec/[mode] pe[i]     [file] ! ' '
+    vec/[mode] peerr[i]  [file] ! ' '
+    vec/[mode] fitpar[i] [file] ! ' '
+    vec/[mode] fitpare[i] [file] ! ' '
+  enddo
+  
+  vec/[mode] cnts1 [file] ! ' '
+  vec/[mode] cnts2 [file] ! c
+  
+return

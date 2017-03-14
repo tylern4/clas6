@@ -1,0 +1,37 @@
+#!/bin/tcsh -f
+# 
+#  This script adds new calib. const. to LAC_t0.map file 
+# 
+if ( -r $1 ) then     
+else 
+   echo 'File "'$1'"' " doesn't exist" 
+   exit 
+endif 
+#
+if ( -r LAC_T0.map ) then 
+  rm LAC_T0.map
+endif 
+#  
+cp $CLAS_PARMS/Maps/LAC_T0.map ./ 
+chmod +w LAC_T0.map
+# 
+#for sector1 left 
+awk '{if($1 == 1) print $4}' $1 | put_map_float -mLAC_T0.map -ssector1 -it2l -t$2 
+ 
+#for sector1 right 
+awk '{if($1 == 1) print $5}' $1 | put_map_float -mLAC_T0.map -ssector1 -it2r -t$2 
+ 
+#for sector2 left 
+awk '{if($1 == 2) print $4}' $1 | put_map_float -mLAC_T0.map -ssector2 -it2l -t$2 
+     
+#for sector2 right 
+awk '{if($1 == 1) print $5}' $1 | put_map_float -mLAC_T0.map -ssector2 -it2r -t$2 
+ 
+#
+echo " LAC_T0.map has been succesfully updated"
+$CLAS_BIN/scan_map -t LAC_T0.map
+
+echo "... Coping LAC_T0.map to ../Maps/ "
+mv LAC_T0.map ../Maps/ 
+if ( -f ../Maps/LAC_T0.map ) echo "... OK."
+

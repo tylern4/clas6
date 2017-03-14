@@ -1,0 +1,38 @@
+|
+macro t0_calib Chain_Name=ALF E_beam=2.4 
+|
+|
+|  Fine Tune
+|
+ve/cr E_BM(1) R [E_beam]
+|
+title ' ' 
+h/file 44 fine_tune.hbook 4096 N
+cdir //[Chain_Name] ; nt/loop 10 rf_tof_cal.f ; cdir //lun44 ; hrout 20;
+cdir //PAWC  ; h/del 10 ; exec fine_tune ;
+ve/write dt_s 'dt_s.dat' '48(1X,G13.7)' 'OC' ;
+ve/write dt_s_err 'dt_s_err.dat' '48(1X,G13.7)' 'OC'
+ve/write failflag 'failflag.dat' '48(1X,G13.7)' 'OC'
+shell lp fine*.ps ;
+wait 'Press OK after you have checked all the histograms' ;
+ve/copy failflag status
+cdir //LUN44 ; h/del 20; hrout 0 ; close 44 ;
+h/del 0 ;
+|
+| Crude Tune 
+|
+|
+title ' ' 
+h/file 44 crude_tune.hbook 4096 N
+cdir //[Chain_Name] ; nt/loop 10 t0_pi_cal.f ; cdir //lun44 ; hrout 30;
+cdir //PAWC ; h/del 10 ; exec crude_tune ;
+ve/write dt_el 'dt_el.dat' '48(1X,G13.7)' 'OC' ;
+ve/write dt_ss 'dt_ss.dat' '6(1X,G13.7)' 'OC' ;
+call add_up.f ;
+ve/write dt 'dt.dat' '48(1X,G13.7)' 'OC' ;
+shell lp crude*.ps ;
+cdir //LUN44 ; h/del 30 ; hrout 0;  close 44 ;
+|
+mess 'Calibration Done Succesfully '
+|
+return

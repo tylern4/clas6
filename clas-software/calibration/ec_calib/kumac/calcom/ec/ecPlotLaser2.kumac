@@ -1,0 +1,49 @@
+macro ecPlotLaser2 view=1 strip=1
+
+  if $vexist(pmt).ne.1 then
+    vec/cre pmt(5,36,6)
+    vec/cre pmtrms(5,36,6)
+    vec/cre pmterr(5,36,6)
+    vec/cre pe(5,36,6)
+    vec/cre peerr(5,36,6)
+    vec/cre hv(6,36,5)
+    vec/cre xerr(5)
+    vec/read pmt    vec/laser/hv/pmt
+    vec/read pmterr vec/laser/hv/pmterr
+    vec/read pmtrms vec/laser/hv/pmtrms
+    vec/read pe     vec/laser/hv/pe
+    vec/read peerr  vec/laser/hv/peerr
+    vec/read hv     vec/laser/hv/hv
+  endif
+
+  case [view] in
+    (1) chview=UF
+    (2) chview=VF
+    (3) chview=WF
+    (4) chview=UB
+    (5) chview=VB
+    (6) chview=WB
+  endcase
+  
+  title_gl [chview][strip]//' Laser Results'
+  vec/cre xerr(6)
+  zone 2 2
+  vec/copy hv([view],[strip],:)     x
+  vec/copy pmt(:,[strip],[view])    y
+  vec/copy pmterr(:,[strip],[view]) yerr
+  sigma xf=log(x/x(1))
+  sigma rat=y/y(1)
+  sigma raterr=rat*sqrt((yerr/y)**2 + (yerr(1)/y(1))**2)
+  sigma yfe=raterr/rat
+  sigma yf=log(rat)
+  max1 = $sigma(vmax(y))*1.1 
+  min = $sigma(vmin(x))*0.98
+  max = $sigma(vmax(x))*1.02
+  null [min] [max] 100. [max1]
+  atitle 'HV' 'ADC Centroid'
+  hplot/errors  x y xerr yerr 5 20 0.18
+  null -0.02 0.1 -0.02 0.6
+  atitle 'log(HV/HV(0))' 'log(ADC/ADC(0))'
+  hplot/errors  xf yf xerr yfe 5 20 0.18
+  
+return
