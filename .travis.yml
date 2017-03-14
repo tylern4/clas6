@@ -4,7 +4,8 @@ services:
   - docker
 
 before_install:
-  - docker build -t clas6:test .
+  - docker build -t rootv5:test rootv5/.
+  - docker build -t clas6:test clas/.
 
 script:
   - docker images clas6:test

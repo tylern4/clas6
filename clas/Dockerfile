@@ -68,7 +68,9 @@ ENV CERN_LIB $CERN_ROOT/lib
 ENV CERN_BIN $CERN_ROOT/bin
 ENV LD_LIBRARY_PATH $ROOTSYS/lib
 
-RUN cp -r $CERN_LIB $CERN && ln -s /lib64/mysql/* /lib64/
+RUN ln -s $CERN_LIB $CERN \
+  && ln -s /lib64/mysql/* /lib64/ \
+  && ln -s /usr/include/mysql/* /usr/include/
 
 #RUN cd $CERN_ROOT \
 #  && mkdir -p build bin lib build/log \
