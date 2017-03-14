@@ -4,7 +4,7 @@ ENV MYSQLINC /usr/include/mysql
 ENV MYSQLLIB /usr/lib64/mysql
 
 RUN mkdir -p /usr/local/cernlib
-COPY ../cernlib /usr/local/cernlib
+COPY cernlib /usr/local/cernlib
 
 # This is using the cernlib copied from jlab ifarm
 ENV CERN /usr/local/cernlib/x86_64_rhel7
@@ -17,7 +17,7 @@ ENV CERN_BIN $CERN_ROOT/bin
 ENV LD_LIBRARY_PATH $ROOTSYS/lib
 RUN ln -s $CERN_LIB $CERN
 
-COPY ../clas-software /clas_software
+COPY clas-software /clas_software
 
 RUN cd /clas_software && scons -j$(nproc)
 
