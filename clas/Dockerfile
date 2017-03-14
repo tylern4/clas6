@@ -1,10 +1,9 @@
-FROM tylern4/rootv5:latest
+FROM tylern4/docker-root:rootv5
 
 ENV MYSQLINC /usr/include/mysql
 ENV MYSQLLIB /usr/lib64/mysql
 
 RUN mkdir -p /usr/local/cernlib
-
 COPY cernlib /usr/local/cernlib
 
 # This is using the cernlib copied from jlab ifarm
@@ -16,7 +15,6 @@ ENV PATH $CERN/$CERN_LEVEL/src:$PATH
 ENV CERN_LIB $CERN_ROOT/lib
 ENV CERN_BIN $CERN_ROOT/bin
 ENV LD_LIBRARY_PATH $ROOTSYS/lib
-
 RUN ln -s $CERN_LIB $CERN
 
 COPY clas-software /clas_software
