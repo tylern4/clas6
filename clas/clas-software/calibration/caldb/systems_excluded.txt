@@ -1,3 +1,0 @@
-DC_CHANNEL
-DOCA.jl.temp
-g6Bnormalisation

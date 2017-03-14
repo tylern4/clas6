@@ -1,5 +1,0 @@
-macro utilSetupGlobals
-
-  global/cre colormode 0 'Identifier of colormap'
-  
-return

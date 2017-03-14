@@ -1,7 +1,0 @@
-macro utilSetupVectors
-
-  message utilSetupVectors
-
-*  vec/cre nlev(1) i
-  
-return

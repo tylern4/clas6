@@ -1,2 +1,0 @@
-      INTEGER*4 MLUN
-      PARAMETER (MLUN=200)
