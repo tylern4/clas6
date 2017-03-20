@@ -1,20 +1,6 @@
 from build_system import environment
 
-# import the base environment created in
-# the sconstruct file
-#Import('simulationEnv')
-simulationEnv = environment.env(deps=['clas6'])
-simulationEnv.load_dependency('clas6')
-
-# we don't need to add any include directories
-# for the aao programs in general (hence inc_dirs=[])
-#aaoEnv = environment.init_clone(simulationEnv, inc_dirs = [])
-
-# no changes are needed for aaoEnv so merely pass it along.
-#Export('aaoEnv')
-
-# calls sconscript file inside each directory listed
-#dir_list = Split('aao_rad aao_norad')
-#aaoEnv.sconstruct(dir_list)
-simulationEnv.sconstruct('aao_rad'.split())
-#simulationEnv.sconstruct('aao_rad aao_norad'.split())
+aaoEnv = environment.env(deps='clas6 cern')
+aaoEnv.load_dependency('clas6 cern')
+#aaoEnv.sconstruct('aao_rad aao_norad')
+aaoEnv.sconstruct('elast_gen aao_rad'.split())
