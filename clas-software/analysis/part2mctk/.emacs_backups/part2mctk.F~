@@ -1,0 +1,144 @@
+      program smearbos
+      implicit none
+
+c     smearbos adds Fermi smearing to the output of the MAID generator
+c     aao_rad by processing the output BOS file.  Additionally, the
+c     primary bank written to is changed from the PART bank to the MCTK
+c     bank since gsim expects output to be there.
+c     
+c     smearbos needs to be built with the CLAS Make System (CMS), so it
+c     should be built on JLAB computers unless one installs all relevant
+c     JLAB software locally.
+
+#include "bcs.inc"
+
+      character * (100) infilename
+      character * (100) outfilename
+      integer nargs
+      integer ierr
+
+      integer smear
+      
+      character*132 ddl_file
+
+      integer jw(Nbcs)
+      real rjw(Nbcs)
+      equivalence (jw(1),rjw(1))
+      integer i, j, event_number
+
+      real mp, mn, md
+      parameter (mp=0.9383,mn=0.9396,md=1.8756)
+
+      real target(4), spectator(4)
+      integer target_type
+      integer spectator_p
+
+      real beam                 ! beam energy in GeV
+
+      namelist /args/ infilename, outfilename, target_type, beam,
+     +     spectator_p
+      
+      target_type=0           ! default value
+      spectator_p=0             ! default value
+
+      event_number = 1
+      i = 0
+      j = 0
+
+c     Initialize RNG, program start time should be good enough for this
+c     Monte Carlo
+      call srand(ieor(time(),int(getpid())))
+
+c     Handle arguments
+      nargs = command_argument_count()
+      if(nargs .ne. 0) then
+         write(0,*) "Usage: smearbos"
+         write(0,*) ""
+         write(0,*) "Arguments should be fed into standard input."
+         write(0,*) "Fortran namelist is used, so check test.inp"
+         write(0,*) "for information on arguments and example."
+         goto 1
+      endif
+
+c$$$      write(*,*) "Input file name? "
+c$$$      read(*,*) infilename
+c$$$      write(*,*) "Output file name? "
+c$$$      read(*,*) outfilename
+c$$$      write(*,*) "Particle Type? "
+c$$$      write(*,*) "0 for neutron"
+c$$$      write(*,*) "1 for proton"
+c$$$      write(*,*) "? "
+c$$$      read (*,'(i10)') target_type
+c$$$      if(target_type .ne. 0 .and. target_type .ne. 1) then
+c$$$         write(0,*) "Error: particle type must be 0 or 1."
+c$$$         goto 1
+c$$$      endif
+c$$$      write(*,*) "Beam Energy (GeV)? "
+c$$$      read(*,'F') beam
+c$$$      write(*,*) "Write spectator to output? "
+c$$$      write(*,*) "0 for no spectator"
+c$$$      write(*,*) "1 for spectator"
+c$$$      write(*,*) "? "
+c$$$      read(*,'i10') spectator_p
+c$$$      if(spectator_p .ne. 0 .and. spectator_p .ne. 1) then
+c$$$         write(0,*) "Error: spectator must be 0 or 1."
+c$$$         goto 1
+c$$$  endif
+
+      read(*,nml=args)
+      write(*,nml=args)
+
+c     Initialize BOS
+      call bnames(1000)
+      call bos(iw,nbcs)
+      call bos(jw,nbcs)
+      call revinm('CLAS_PARMS','clasbanks.ddl',ddl_file)
+      call txt2bos(ddl_file)
+
+      write (*,*) ''
+      write(*,*) infilename
+      write (*,*) ''
+      write (*,*) 'OPEN bosinput UNIT=33' //
+     &     ' FILE="'//infilename//'" ACTION=READ'
+      write (*,*) ''
+      write (*,*) infilename
+      write (*,*) ''
+      
+c     Open files
+      call fparm('OPEN bosinput UNIT=33' //
+     &     ' FILE="'//infilename//'" ACTION=READ')
+
+      call fparm('OPEN bosoutput UNIT=34' //
+     &     ' FILE="'//outfilename//
+     &     '" RECL=32760 STATUS=NEW ACTION=WRITE FORM=BINARY')
+
+c     set output banks:
+      call blist(jw,'E=','HEADMCTKMCVX')
+
+c     Loop over all banks
+
+c     call fparm('FILECOPY bosinput TO bosoutput ALL')
+ 2    call frbos(iw,33,'E',ierr)
+      if(ierr.eq.-1) goto 3     ! end of file
+c     Begin Event Loop
+      call throw_fermi(target_type,target,spectator)
+c     no need to track event_number since input HEAD has it
+      ierr = smear(target_type,beam,spectator_p,target,spectator,jw,rjw)
+c     End Event Loop
+      call fwbos(jw,34,'E',ierr)
+      call bdrop(iw,'E')
+      call bgarb(iw)
+      call bdrop(jw,'E')
+      call bgarb(jw)
+      event_number = event_number+1
+      goto 2
+c     Close all files
+ 3    call fparm('CLOSE bosinput')
+
+      call bosta
+
+      call fwbos(jw,34,'0',ierr)
+      call fparm('CLOSE bosoutput UNIT=34 STATUS=KEEP')
+
+ 1    stop
+      end
