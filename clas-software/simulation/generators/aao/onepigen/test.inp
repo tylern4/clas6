@@ -1,0 +1,60 @@
+! Make sure to keep the &args and the final /, this is parsed using
+! Fortran's namelist I/O
+&args
+ nmax = 100        ! number of events to throw/simulate
+ th_opt = 5        ! (1=A0, 2=daresbury, 3=hlee pi0, 4=MAID98, 5=MAID2000, 6=MAID2003, 7=MAID2007) (MAID2007 not functional currently)
+ flag_ehel = 0     ! electron helicity flag (1 for polarized, 0 for unpolarized)
+ epirea = 3        ! reaction channel (1=pi0, 2=pi-, 3=pi+)
+ radeffects = 1    ! radiative effects switch (1=rad, 0=norad)
+ mm_cut = 0.2      ! a limit on the error in (mm)**2 (GeV^2)
+ reg1 = 0.20       ! integration region sizes
+ reg2 = 0.12       ! ||
+ reg3 = 0.20       ! ||
+ reg4 = 0.20       ! ||
+ t_targ = 2.0      ! target cell length/thickness (cm)
+ r_targ = 0.6      ! target cell radius (cm)
+ vertex_x = 0.0    ! x-coordinate of beam position (cm)
+ vertex_y = 0.0    ! y-coordinate ||  ||     ||     ||
+ vz = -0.4         ! z-coordiante ||  ||     ||     ||
+ beam_energy = 2.039 ! beam energy (GeV)
+ q2_min = 0.2      ! Q^2 minimum (GeV^2)
+ q2_max = 1.9      ! Q^2 maximum (GeV^2)
+ w_min = 1.        ! W minimum (GeV)
+ w_max = 2.        ! W maximum (GeV)
+! Add W limits once that functionality is added to onepigen.  Make
+! sure to add a note to this file that tells the user that W > 1.7 GeV
+! is potentially unsafe.
+ ep_min = 0.3      ! minimum scattered electron energy (GeV)
+ ep_max = 1.8      ! maximum     ||       ||      ||     ||
+ delta = 0.005     ! minimum photon energy for integration (GeV)
+ fmcall = 0.       ! multiplication factor for sigr_max
+ sigr_max = 0.005  ! sigr_max
+! END OF ORIGINAL AAO_RAD OPTIONS
+!     fermi_motion is an integer variable for controlling Fermi smearing
+!     behavior:
+!
+!     fermi_motion = 0: Normal aao_rad behavior
+!     fermi_motion = 1: Deuterium target, CD-Bonn target Fermi momentum
+!     (BELOW OPTION INOPERABLE)
+!     fermi_motion = 2: Deuterium target, Paris target Fermi momentum
+ fermi_motion = 0
+
+!     fermi_energy is an integer variable for controlling how the energy
+!     component of the Fermi-moving target is handled for calculating
+!     the boost; there is a fixed value for conserving energy and
+!     momentum later in the calculations:
+!
+!     fermi_energy = 0: On-mass shell
+!     fermi_energy = 1: Constantly the hadron mass - 2 MeV
+!     fermi_energy = 2: Virtuality is shared equally by the nucleons,
+!                       i.e. energy = m + T + virtuality,
+!                       virtuality = 0.5*(md - mp + mn + Tp + Tn)
+!     
+ fermi_energy = 0
+
+! POTENTIAL FUTURE OPTIONS
+! target_type = 1   ! target particle type, 0 for neutron, 1 for proton
+! offshellness = 0  ! 0 for nucleon on-shell, 1 for electron on-shell, 2 for 50% virtuality to each nucleon
+! spectator_p = 1/  ! 1 for spectator in output, 0 for no
+
+/
