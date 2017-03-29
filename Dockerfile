@@ -15,6 +15,7 @@ ENV PATH $CERN/$CERN_LEVEL/src:$PATH
 ENV CERN_LIB $CERN_ROOT/lib
 ENV CERN_BIN $CERN_ROOT/bin
 ENV LD_LIBRARY_PATH $ROOTSYS/lib
+ENV CLAS_PARMS /clas/parms
 RUN ln -s $CERN_LIB $CERN
 
 COPY clas-software /clas_software
