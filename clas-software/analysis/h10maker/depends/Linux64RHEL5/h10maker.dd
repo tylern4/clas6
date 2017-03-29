@@ -1,0 +1,7 @@
+./depends/Linux64RHEL5/.dd /home/ghollis/lib/Linux64RHEL5/.o:  /group/clas/builds/PRODUCTION/packages/include/ntypes.h \
+ /group/clas/builds/PRODUCTION/packages/include/bostypes.h \
+ /group/clas/builds/PRODUCTION/packages/include/bosddl.h \
+ /group/clas/builds/PRODUCTION/packages/include/utility.h \
+ /group/clas/builds/PRODUCTION/packages/include/makebanks.h \
+ /group/clas/builds/PRODUCTION/packages/include/trip.h \
+ /group/clas/builds/PRODUCTION/packages/include/vertex.h
