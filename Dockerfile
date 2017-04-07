@@ -1,4 +1,5 @@
-FROM tylern4/docker-root:rootv5
+FROM tylern4/rootv5:centos6
+LABEL maintainer "tylern@jlab.org"
 
 ENV MYSQLINC /usr/include/mysql
 ENV MYSQLLIB /usr/lib64/mysql
