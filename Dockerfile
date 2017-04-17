@@ -21,10 +21,18 @@ RUN ln -s $CERN_LIB $CERN
 
 COPY clas-software /clas_software
 
-RUN cd /clas_software && scons -j$(nproc) \
+RUN cd /clas_software && scons -j$(nproc) 2> /dev/null \
     && scons install
 
 ENV PATH /clas_software/build/bin:$PATH
 
+ENV CLAS_PARMS /clas/parms
+COPY parms /clas/parms
+ENV PATH /clas_software/build/bin:$PATH
+COPY bashrc /root/.bashrc
+
+WORKDIR /root/code
+
 EXPOSE 22
-ENTRYPOINT cd $ROOTSYS && source bin/thisroot.sh && cd && /bin/bash
+ENTRYPOINT ["/bin/bash"]
+#ENTRYPOINT ["/bin/bash","/root/code/sim.sh"]
