@@ -19,20 +19,20 @@ ENV LD_LIBRARY_PATH $ROOTSYS/lib
 ENV CLAS_PARMS /clas/parms
 RUN ln -s $CERN_LIB $CERN
 
-COPY clas-software /clas_software
+COPY clas-software /clas-software
 
-RUN cd /clas_software && scons -j$(nproc) 2> /dev/null \
+RUN cd /clas-software && scons -j$(nproc) 2> /dev/null \
     && scons install
 
-ENV PATH /clas_software/build/bin:$PATH
+ENV PATH /clas-software/build/bin:$PATH
 
 ENV CLAS_PARMS /clas/parms
 COPY parms /clas/parms
-ENV PATH /clas_software/build/bin:$PATH
+ENV PATH /clas-software/build/bin:$PATH
 COPY bashrc /root/.bashrc
+COPY env.sh /clas-software
 
 WORKDIR /root/code
 
-EXPOSE 22
 ENTRYPOINT ["/bin/bash"]
 #ENTRYPOINT ["/bin/bash","/root/code/sim.sh"]
