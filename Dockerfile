@@ -32,7 +32,14 @@ ENV PATH /clas-software/build/bin:$PATH
 COPY bashrc /root/.bashrc
 COPY env.sh /clas-software
 
+#Build clas-tool
+ENV CLASTOOL /clas-software/analysis/ClasTool
+ENV OS_NAME Linux
+RUN yum install -y mlocate \
+    && source /root/.bashrc \
+    && cd /clas-software/analysis/ClasTool \
+    && make 
+
 WORKDIR /root/code
 
 ENTRYPOINT ["/bin/bash"]
-#ENTRYPOINT ["/bin/bash","/root/code/sim.sh"]

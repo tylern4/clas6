@@ -18,6 +18,6 @@ ioCaldbMapLibs = ioEnv.sconstruct('caldb/Map caldb/C clasutil'.split())
 ioC_sqlLibs = ioEnv.sconstruct('c_sql')
 #ioEnv.library('io_c_sql', ioC_sqlLibs)
 
-ioEnv.sconstruct(['countbos', 'bosdump', 'part2gamp', 'txtEvent', 'catbos', 'evtSelect'])
+ioEnv.sconstruct(['countbos', 'bosdump', 'part2gamp', 'txtEvent', 'catbos', 'evtSelect', 'gamp2txt'])
 
 #ioEnv.return_from_sconstruct(ioLib)

@@ -12,7 +12,7 @@ help:
 	@echo 'Did you setup ROOT with: use root/2.22 (or higer)?'
 
 docs:
-	root.exe Make_HTML.C
+	@echo root.exe Make_HTML.C
 
 clean:
 	rm -rf *.html *.ps *.pdf *.h src html examples *.root
