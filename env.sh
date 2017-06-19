@@ -14,6 +14,7 @@ export LD_LIBRARY_PATH=$ROOTSYS/lib
 
 source $ROOTSYS/bin/thisroot.sh
 
-export CLAS_CALDB_HOST="127.0.0.1"
+#export CLAS_CALDB_HOST="127.0.0.1"
+export CLAS_CALDB_HOST=$CLASDB_PORT_3306_TCP_ADDR
 export CLAS_CALDB_PASS=""
 export CLAS_CALDB_USER="root"

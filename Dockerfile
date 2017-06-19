@@ -21,9 +21,6 @@ RUN ln -s $CERN_LIB $CERN
 
 COPY clas-software /clas-software
 
-RUN cd /clas-software && scons -j$(nproc) 2> /dev/null \
-    && scons install
-
 ENV PATH /clas-software/build/bin:$PATH
 
 ENV CLAS_PARMS /clas/parms
@@ -35,10 +32,12 @@ COPY env.sh /clas-software
 #Build clas-tool
 ENV CLASTOOL /clas-software/analysis/ClasTool
 ENV OS_NAME Linux
-RUN yum install -y mlocate \
-    && source /root/.bashrc \
+RUN source /root/.bashrc \
     && cd /clas-software/analysis/ClasTool \
-    && make 
+    && make
+
+RUN cd /clas-software && scons -j$(nproc) 2> /dev/null \
+    && scons install
 
 WORKDIR /root/code
 
