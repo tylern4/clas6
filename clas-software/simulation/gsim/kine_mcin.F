@@ -64,7 +64,7 @@ c  ----------------
       character*8 cunit
       logical first_time,noevent
       data first_time /.true./
-      character*200 crmess      
+      character*200 crmess
       integer skip,primary_vertex_id,i
 	real primary_vertex(3),v(3)
       integer spin,jspin
@@ -84,7 +84,7 @@ c  reserve unit
          if(iret.eq.-1)call recmes(crname,'F',
      1        '?unable to reserve fortran unit')
          write(cunit,'(i8)')mcin_unit
-         
+
 c  get filename
          call get_param(gsim_mcin_flag,gsim_mcin_env,
      1        mcin_filename,iflag)
@@ -102,7 +102,7 @@ c  get filename
 
 c  get daname
          mcin_daname='MCIN'
-         
+
 c  open file
          write(crmess,'(''opening BOS MCIN file on unit: '',i2,
      1        '', filename: '',a,'', daname: '',a)')
@@ -122,7 +122,7 @@ c  stop if error
          call fermes(crmess,0)
          if(lenocc(crmess).gt.0)call recmes(crname,'I',
      1        'FPARM: '//crmess)
-         
+
 c  select only HEAD,MCPA,MCVX,MCTK, and PART banks
 c  SELECT not implemented in bosio: use bank list for bos
          call BLIST(iw,'T=','HEADMCHDMCPAMCVXMCTKPARTSPINTAGRTGBI')
@@ -135,19 +135,19 @@ c     1        '?FPARM: '//crmess)
 c         call fermes(crmess,0)
 c         if(lenocc(crmess).gt.0)call recmes(crname,'I',
 c     1        'FPARM: '//crmess)
-         
+
 
 c  initialize skip variable
 
          skip = skip_ff
 
       endif
-      
+
 c  initialization done----------------------------------------
-      
+
 c  read INPUT (either PART of MCVX+MCTK) data from BOS file until eof reached
 c  close file and end run upon eof
-      
+
       noevent=.true.
       do while(noevent)
          call frbos(jw,mcin_unit,'T',ierr)
@@ -164,7 +164,7 @@ c	call examinedata()
             call recmes(crname,'F','?error reading ' //
      1           mcin_filename(1:lenocc(mcin_filename)))
          endif
-         
+
 c Skip events at the beginning of the file according to the -skip flag
 
          if(skip.gt.0) then
@@ -175,8 +175,8 @@ c Skip events at the beginning of the file according to the -skip flag
 
 c First see if the (newer) PART bank exists. If it does, we give it
 c priority over the MCVX and MCTK banks.
-         
-         
+
+
              j_part=mlink(jw,'PART',0)
              jmchd=mlink(jw,'MCHD',0)
              jmcvx=mlink(jw,'MCVX',0)
@@ -188,7 +188,7 @@ c
 c Error if no PART and either no MCVX or no MCTK
 c
              noevent=(j_part.le.0).and.((jmcvx.le.0).or.(jmctk.lt.0))
-         
+
              if(noevent)then
                 call recmes(crname,'I',
      1            '?no PART, MCVX or MCTK bank in input record')
@@ -198,10 +198,10 @@ c
          endif
       enddo                     !noevent loop
 C
-C Indexes into to the PART BOS bank. 
+C Indexes into to the PART BOS bank.
 C
 C Input banks are in the JW and RJW arrays.
-C 
+C
 #define PART_NCOL jw(j_part-5)
 #define PART_NROW jw(j_part-4)
 #define PART_PID(i)    jw(j_part+ PART_NCOL*(i-1)+1)
@@ -250,7 +250,7 @@ C  smear vertex position (different procedures for electron/photon beam)
 		 primary_vertex(i)=v(i) + vx_off(i)
 	      enddo
 
-     
+
       if(tg_e2)call vert_e2(vx_off)
 
       if(tg_type_ff.EQ.5)call vert_e5(vx_off)
@@ -258,12 +258,12 @@ C  smear vertex position (different procedures for electron/photon beam)
       if(tg_type_ff.EQ.18)call vert_e2b(vx_off)
 
       if(tg_type_ff.EQ.19)call vert_e6a(vx_off)
-      
+
       if(tg_type_ff.EQ.26)call vert_eg2(vx_off)
 
       if(tg_type_ff.EQ.27)call vert_eg6(vx_off)
 c
-C Process the PART bank: loop over particles: 
+C Process the PART bank: loop over particles:
 C store kine and vertex info for each particle
 
       if(j_part.gt.0)then
@@ -277,14 +277,14 @@ C store kine and vertex info for each particle
          endif
          buf2(1)=1
          call gskine(PART_PX(1),PART_PID(1),vtx_id(1),buf2,1,tknum)
-      
+
          do it=2,PART_NROW
             PART_X(it) = PART_X(it) + vx_off(1)
             PART_Y(it) = PART_Y(it) + vx_off(2)
             PART_Z(it) = PART_Z(it) + vx_off(3)
             call gsvert(PART_X(it),0,0,0,0,vtx_id(it))
             buf2(1)=it
-            call gskine(PART_PX(it),PART_PID(it),vtx_id(it),buf2,1,tknum)
+            !call gskine(PART_PX(it),PART_PID(it),vtx_id(it),buf2,1,tknum)
          enddo  ! particle loop.
 
       else
@@ -301,8 +301,8 @@ c  get number of vertices and tracks
             call bgarb(jw)
             return
          endif
-         
-         
+
+
 c  error if too many vertices
          if(nrow_mcvx.gt.max_vtx)then
             call recmes(crname,'i','?too many vertices...event skipped')
@@ -311,7 +311,7 @@ c  error if too many vertices
             return
          endif
 
-         
+
 c  store vertices, id's, and tof
          itrk0 = 0
          do ivtx=1,nrow_mcvx
@@ -327,7 +327,7 @@ c  real/virtual photon track (incl. info for Q2,Energy)
                   do it=1,nrow_mctk
                      ivx1=MCTK_VX1(it)
                      ivx2=MCTK_VX2(it)
-                     if(MCTK_PID(it).EQ.22 .AND. ivx1.LE.0 .AND. 
+                     if(MCTK_PID(it).EQ.22 .AND. ivx1.LE.0 .AND.
      &                      ivx2.GT.0 .AND. ivx2.LE.nrow_mcvx) then
                         buf(1)=MCTK_M(it)
                         buf(2)=MCTK_P(it)
@@ -346,7 +346,7 @@ c  real/virtual photon track (incl. info for Q2,Energy)
                call gsvert(MCVX_X(ivtx),0,0,0,0,vtx_id(ivtx))
             endif
 C
-C This is a method of accessing the GEANT data structure: "JVERTX" 
+C This is a method of accessing the GEANT data structure: "JVERTX"
 C (See GEANT manual KINE100 and KINE199)
 C Position 4 is TOF, which is not filled through a subroutine call.
 C It's usually zero, for a real event, but may be different if
@@ -356,7 +356,7 @@ C
             Q(jv+4)=MCVX_TOF(ivtx) + vx_off(3)/clight
 
          enddo
-         
+
 c  store track data in Zebra if track has legal beginning vtx, no ending vtx
          do it=1,nrow_mctk
             ivx1=MCTK_VX1(it)
@@ -370,7 +370,7 @@ c  store track data in Zebra if track has legal beginning vtx, no ending vtx
                call gskine(buf,id,vtx_id(ivx1),buf2,1,tknum)
             endif
          enddo
-         
+
       endif  ! Test for PART bank.
 
 c  delete jw banks and return if no bos output
@@ -379,27 +379,27 @@ c  delete jw banks and return if no bos output
          call bgarb(jw)
          return
       endif
-c  create new spin bank in normal BOS common   
+c  create new spin bank in normal BOS common
       if(jspin.gt.0) then
         spin=mbank(iw,'SPIN',0,jw(jspin-5),jw(jspin-4))
-        call ucopy(jw(jspin+1),iw(spin+1),jw(jspin))    
+        call ucopy(jw(jspin+1),iw(spin+1),jw(jspin))
       endif
 
-c  create new TGBI bank in normal BOS common   
+c  create new TGBI bank in normal BOS common
       if(jtgbi.gt.0) then
         tgbi=mbank(iw,'TGBI',0,jw(jtgbi-5),jw(jtgbi-4))
-        call ucopy(jw(jtgbi+1),iw(tgbi+1),jw(jtgbi))    
+        call ucopy(jw(jtgbi+1),iw(tgbi+1),jw(jtgbi))
       endif
 
-c  create new tagr bank in normal BOS common   
+c  create new tagr bank in normal BOS common
       if(jtagr.gt.0) then
         itagr=mbank(iw,'TAGR',0,jw(jtagr-5),jw(jtagr-4))
-        call ucopy(jw(jtagr+1),iw(itagr+1),jw(jtagr))    
+        call ucopy(jw(jtagr+1),iw(itagr+1),jw(jtagr))
       endif
 
       if(jmchd.GT.0) then
         mchd=MBANK(IW,'MCHD',0,MCHD_NCOL,1)
-        call ucopy(JW(jmchd+1),IW(mchd+1),MCHD_NCOL)    
+        call ucopy(JW(jmchd+1),IW(mchd+1),MCHD_NCOL)
       endif
 c
       if(j_part.gt.0)then
@@ -407,10 +407,10 @@ c
          call ucopy(jw(j_part+1),iw(mpart+1),jw(j_part))
          call ucopy(jw(j_part+1),iw(mpart+1),jw(j_part))
       else
-c  create new MCVX,MCTK banks in normal BOS common      
+c  create new MCVX,MCTK banks in normal BOS common
          mcvx=mbank(iw,'MCVX',0,MCVX_NCOL,nrow_mcvx)
          mctk=mbank(iw,'MCTK',0,MCTK_NCOL,nrow_mctk)
-c         
+c
 c  copy data into new banks
 c
          call ucopy(jw(jmcvx+1),iw(mcvx+1),jw(jmcvx))
@@ -422,7 +422,5 @@ c  delete banks in jw
 c
       return
       end
-      
+
 c------------------------------------------------------------------------------
-
-

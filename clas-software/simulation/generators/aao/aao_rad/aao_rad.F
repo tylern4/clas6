@@ -22,7 +22,7 @@ c     should be done with a second program that can operate on the n-tuple
 c     and make a new version.
 
       implicit none
-      
+
 #include "bcs.inc"
 #include "mc.inc"
 #include "names.inc"
@@ -31,7 +31,7 @@ c     and make a new version.
       common /radcal/T0,es,ep,ps,pp,rs,rp,u0,pu,uu,cst0,snt0,csths,csthp
      * ,snths,snthp,pdotk,sdotk
       common /random/idum
-      
+
       real*8 ek,Tk,delta
       real*8 alpha,pi,mp,mpi,mel,wg,T0
       real*8 es,ep,ps,pp,rs,rp,u0,pu,uu,pdotk,sdotk
@@ -147,7 +147,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer*4 idum
       integer*4 ntries
-      
+
       real cfac,asig
 
 c     Parameters for the n-tuple, which is named func1 and contains
@@ -157,7 +157,7 @@ c     15 elements per event.
       integer h,n,nevent,nmax,lrecl,istat,icycle
       parameter (n=32)
       real*4 ntp(n)
-      
+
 c     tag is the an array of names for the variables in the n-tuple.
 
 c     character*1 ich1
@@ -212,50 +212,50 @@ c
 
       print *, 'Enter 1 for polarized electron, 0 for unpolarized electron'
       read(5,*) flag_ehel
-c      
+c
       print *, flag_ehel
       res_opt = 0
-      
+
       print *, 'Input the sizes of the integration regions'
       read(5,*)reg1,reg2,reg3,reg4
-      
+
       reg2 = reg1 + reg2
       reg3 = reg2 + reg3
       reg4 = reg3 + reg4
-      
+
       if (reg4 .gt. .95) then
         write(6,*)' The sum of the region sizes must be less than .95'
         go to 14
       endif
-      
+
       alpha = 1/137.
 
 c     set up parameters for bos bank input to GSIM
 
       print *, ' Input 2 for two charged particles in the bos bank'
-      print *, ' Input 4 to get the neutral hadron and photon as well'              
+      print *, ' Input 4 to get the neutral hadron and photon as well'
       read(5,*)npart
-      
+
       if (npart .ne. 4) npart=2
 
       q(1) 	= -1
       id(1)	= 3	!Geant ID, e-
       pdgid(1)  = 11	!PDG ID, e-
-      
+
       if (npart .eq. 4)then
          q(4)	   = 0
          id(4)     = 1	!Geant ID, photon
          pdgid(4)  = 22	!PDG ID, photon
       endif
-c   
+c
 c     Choose whether a neutral or charged pion is made in the reaction
 
  5    print *, ' Input epirea (1 for pi0, 3 for pi+)'
       read(5,*)epirea
-      
+
       print *, ' Input a limit on the error in (mm)**2'
       read(5,*)mm_cut
-      
+
       IF(epirea.eq.1)then
          MPI	= MPI0
          mm_exp = MPI0**2
@@ -281,7 +281,7 @@ c     Choose whether a neutral or charged pion is made in the reaction
       else
          go to 5
       endif
-      
+
       if (epirea .eq. 3)filerz(13:13)='p'
 
 c     Set single precision version of pion mass
@@ -291,7 +291,7 @@ c     Calculate the minimum hadronic mass for pion production:
       wg	= mp + mpi + .0005
 
       write(6,*)' Input the target thickness (cm)'
-      read(5,*)t_targ            
+      read(5,*)t_targ
       write(6,*)' Input the target radius, (cm)'
       read(5,*)r_targ
 
@@ -304,27 +304,27 @@ c     Calculate the minimum hadronic mass for pion production:
 
       bfac		= 4./3.
       hydrogen_rad 	= 865 		! hydrogen radiation length (cm)
-      t_targ 		= bfac * t_targ / hydrogen_rad 
+      t_targ 		= bfac * t_targ / hydrogen_rad
 
       write(6,*)' Input the incident electron energy (GeV)'
       read(5,*)ebeam
-      
+
 c     calculate the incident momentum
 
       es	= ebeam
       ps	= sqrt(es**2-mel**2)
       rs	= ps/es
-      
+
 c     cut off q2 at the value for 90 degree elastic scattering
 
       s		= 0.5
       q2max	= 4.*ebeam**2*s/(1.+2.*ebeam*s/mp)
-      
+
 c     Choose two limits for Q**2
 
       write(6,*)'Input lower and upper limit for Q**2'
       read(5,*)q2_min,q2_max
-      
+
       if (q2_max .gt. q2max) q2_max = q2max
       uq2_min	= 1/q2_max
       uq2_max	= 1/q2_min
@@ -334,9 +334,9 @@ c     Set the limits on the range of scattered electron energies
 
       write(6,*)'Input lower and upper limit for scat e- energy(GeV).'
       read(5,*)ep_min,ep_max
-      
+
       epmax	= es - (wg**2 + q2_min - mp**2)/2./mp
-      
+
       if (ep_max .lt. epmax)epmax=ep_max
       eprng	= epmax - ep_min
 
@@ -349,12 +349,12 @@ c     Select the number of events desired in the rz file
 
       write(6,*)' Input the desired number of events in the ntuple'
       read(5,*)nmax
-      
+
       nprint	= nmax/25
 
       write(6,*)' Input a multiplication factor for sigr_max'
       read(5,*)fmcall
-      
+
       if (fmcall .eq. 0.)then
          write(6,*)' Input sigr_max'
          read(5,*)sigr_max
@@ -369,17 +369,17 @@ c     Use the internal clock to initialize the random number generator
       call timex(itime1)
       call getunixtime(idum)
       call getasciitime(idum,ctime)
-      
+
       idum	= -idum
       month 	= ctime(5:7)
       day   	= ctime(9:10)
       year  	= ctime(23:24)
-      
+
       if (day(1:1).eq. ' ')then
         ir1=48
         day(1:1)=char(ir1)
       endif
-      
+
       write(6,*)'seed:',idum,' from start time ',ctime
       cstk	= myran(idum)
 
@@ -396,16 +396,16 @@ c     filerz=aaoradgen-pi0-1.6-0811.rz.0, for example.
       open(unit=12,file=file_out)
 
 c     Initialize BOS
-     
+
       bosout 	= file_bos
       recname 	= 'MCEVENT'
-     
+
       call bos_ini(recname)
-  
+
 c     set up the ntuple file
 
       lrecl	= 1024
-      
+
       call hlimit(5000000)
       call hropen(1,'aaoradgen',filerz,'n',lrecl,istat)
       call hbookn(10,'func1',n,'aaoradgen',1000,tag)
@@ -473,37 +473,37 @@ c     calculate kinematic quantities needed for the Mo and Tsai calculation
       cstk1	= (es - ep*cst0)/(sqrt(es**2 + ep**2 - 2*es*ep*cst0))
       cstk2	= (es*cst0 - ep)/(sqrt(es**2 + ep**2 - 2*es*ep*cst0))
       csrnge	= csrng
-      
+
       if ((1.-cstk1) .lt. csrnge)       csrnge = 1.-cstk1
       if ((cstk1-cstk2) .lt. 2.*csrnge) csrnge = 0.5*(cstk1-cstk2)
-      
+
       csrngb	= csrng/40.
-      
+
       if (csrngb .gt. csrnge/5.) csrngb = csrnge/5.
-      
+
       delphi	= pi/9.
       phik	= (myran(idum)-0.5)*delphi
       mpfac	= delphi/2./pi
 
       ek	= delta
-      
+
       jacob	= exp(kexp*ek)/kexp*(q2**2/(2*es*ep))
 c
-      ehel = 0   
-      if(flag_ehel.eq.1) ehel = 1    
-c    
+      ehel = 0
+      if(flag_ehel.eq.1) ehel = 1
+c
       do i=1,10000
         csthcm	= 2.*(myran(idum)-0.5)
         phicm	= 360.*myran(idum)
 
         csran	= myran(idum)
-        
+
         if (csran .gt. .3) then
             cstk = 2.*csrngb*(myran(idum)-0.5) + cstk1
         else
             cstk = 2.*csrngb*(myran(idum)-0.5) + cstk2
         endif
-        
+
         mcfac	= csrngb /reg1
         phik	= (myran(idum)-0.5)*delphi
         mpfac	= delphi/2./pi
@@ -515,7 +515,7 @@ c
 
         sigr	= sigma(ek,Tk,csthcm,phicm,ehel)
         sigr	= sigr*mcfac*mpfac
-        sigr	= sigr*jacob      
+        sigr	= sigr*jacob
         if (sigr .gt. sigr_max) then
            sigr_max	= sigr
            ek_max	= ek
@@ -523,50 +523,50 @@ c
            csthcm_max	= csthcm
            phicm_max	= phicm
         endif
-        
+
       enddo
 
       write(6,*)'sigr_max,ek_max,tk_max,csthcm_max,phicm_max',
      * sigr_max,ek_max,tk_max,csthcm_max,phicm_max
       write(12,*)'sigr_max,ek_max,tk_max,csthcm_max,phicm_max',
      * sigr_max,ek_max,tk_max,csthcm_max,phicm_max
-     
+
       sigr_max	= sigr_max*fmcall
-      
+
  25   write(6,*) ' sigr_max changed to ',sigr_max
       write(12,*)' sigr_max changed to ',sigr_max
 
 c   %%%%%%%%%%%%%%%%%%% Main Calculation  %%%%%%%%%%%%%%%%%%%%%%%
 c     Use a Monte-Carlo to calculate a distribution of nmax events
 c     distributed according to the Mo-Tsai integrand.
-      ehel = 0      
+      ehel = 0
  20   continue
       ntries	= ntries+1
       if(flag_ehel.eq.1) ehel = get_spin(idum)
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       hel       = ehel
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc  
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     calculate the energy of the electron at the scattering point
 c     after making its way through the target.  First, randomly
 c     choose the interaction point.
-      
+
 c     Change from units of r.l. to cm
-      t_targ 	=  hydrogen_rad * t_targ / bfac 
+      t_targ 	=  hydrogen_rad * t_targ / bfac
       targs	= t_targ*myran(idum)
 
 c     Change into proper coordinate system
       vertex_z	= vz + targs - t_targ / 2.0
- 
+
 c     calculates the distance that the electron stays in the target
       targp	= r_targ/sin(T0)
       temp	= (t_targ - targs)/cos(T0)
-      
+
       if (temp .lt. targp) targp = temp
-      
-c     Back to units of r.l.      
-      t_targ 	=  bfac * t_targ / hydrogen_rad 
+
+c     Back to units of r.l.
+      t_targ 	=  bfac * t_targ / hydrogen_rad
       targs  	=  bfac * targs / hydrogen_rad
-      targp  	=  bfac * targp / hydrogen_rad      
+      targp  	=  bfac * targp / hydrogen_rad
 
 c     Now calculate the radiation loss
 
@@ -574,15 +574,15 @@ c     Now calculate the radiation loss
       eloss	= xs**(1./targs)
       gxs	= 1.-eloss
       xtest	= myran(idum)
-      
+
       if (xtest.gt.gxs) go to 22
-      
+
       es	= ebeam*(1.-eloss)
-      
+
 c     Cut off the incident energy at e_s=ebeam/4.
 
       if (es .lt. ebeam/4.) go to 20
-      
+
       ps	= sqrt(es**2-mel**2)
       rs	= ps/es
 
@@ -593,7 +593,7 @@ c     calculate the energy and momentum of the scattered electron,
 c     and calculate Q**2
 
       ep	= epmax-eprng*myran(idum)
-      
+
 c     check to see if the scattered electron energy is below the
 c     detector threshold
 
@@ -601,73 +601,73 @@ c     detector threshold
 
       q0	= es-ep
       s		= q2/4/es/ep
-      
+
 c     cut off scattering at 90 degree
 
       if (s .gt. .5)go to 20
-      
+
       th0	= 2.*asin(sqrt(s))
       theta	= th0*180./pi
       T0	= th0
       snt0	= sin(th0)
       cst0	= cos(th0)
-      
+
 c     check to see if the scattered electron energy is above
 c     the pion threshold for this angle.
 
       ep_test	= (mp**2 + 2*mp*es - wg**2)/2./(mp + 2.*es*s)
-      
+
       if (ep .gt. ep_test)go to 20
-      
+
       pp	= sqrt(ep**2-mel**2)
       rp	= pp/ep
       qsq	= q2
-      
+
       if (qsq .le. 0.)then
          write(6,*)' Main-1:, qsq =',qsq
          go to 20
       endif
-      
+
       qvecx	=     -pp*sin(th0)
       qvecz	= ps - pp*cos(th0)
 
       w2	= mp**2 + 2*mp*q0 - q2
-      
+
       if (w2 .lt. mp**2)go to 20
-      
+
       epw	= sqrt(w2)
-      
+
       if (epw .lt. wg+0.002)go to 20
-      
+
 c     calculate kinematic quantities needed for the Mo and Tsai calculation
 
       u0	= es - ep + mp
       pu	= ps**2 + pp**2 - 2*ps*pp*cst0
-      
+
       if (pu .le. 0.)then
          write(6,*)' Main-2, pu**2 =',pu
          go to 20
       endif
-      
+
       pu	= sqrt(pu)
       uu	= u0**2 - pu**2
       csths	= (ps - pp*cst0)/pu
       csthp	= (ps*cst0 - pp)/pu
       snths	= 1.-csths**2
-      
+
       if (snths**2 .le. 0.)then
          write(6,*)' Main-3: snths =',snths
          go to 20
       endif
-      
+
       snths	= sqrt(snths)
       snthp	= 1.-csthp**2
-      
+
       if (snthp .le. 0.)then
          write(6,*)' Main-4: snthp**2 =',snthp
          go to 20
       endif
-      
+
       snthp	= sqrt(snthp)
       ts	= acos(csths)
       tp	= acos(csthp)
@@ -676,38 +676,38 @@ c     calculate kinematic quantities needed for the Mo and Tsai calculation
       cstk1	= csths
       cstk2	= csthp
       csrnge 	= csrng
-      
+
       if (cstk1 .lt. cstk2)then
          cstmp=cstk1
          cstk1=cstk2
          cstk2=cstmp
       endif
-      
+
       if ((1.-cstk1) .lt. csrnge)       csrnge=1.-cstk1
       if ((cstk1-cstk2) .lt. 2.*csrnge) csrnge=0.5*(cstk1-cstk2)
-      
+
       csrngb	= csrng/40.
-      
+
       if (csrngb .gt. csrnge/5.) csrngb=csrnge/5.
-      
+
       csran	= myran(idum)
       rn1	= myran(idum)
-      
+
       if (rn1 .gt. 0.5)then
         rn1=1.
       else
         rn1=-1.
       endif
-      
+
       rn2	= myran(idum)
       delphi	= ps*cstk1*csrngb/pp/sqrt(1.-cst0**2)/sqrt(1.-cstk1**2)
-      
+
       if (delphi .lt. pi/9.) delphi=pi/9.
       if (delphi .gt. 2.*pi) delphi=2.*pi
       if (cstk1 .gt. .995)   delphi=2.*pi
-      
+
       delphi	= pi/9.
-       
+
       if (csran .lt. reg1)then
          intreg	= 1
          cstk	= cstk1+(2.*rn2-1.)*csrngb
@@ -740,7 +740,7 @@ c     calculate kinematic quantities needed for the Mo and Tsai calculation
      &       abs(cstk-cstk2) .lt. csrnge) then
          if(abs(phik).lt. delphi/2.) go to 45
         endif
-           
+
 c     combine mcfac and mpfac into one factor and set mpfac=1
 
         mcfac=(1.-csrnge*delphi/pi)/(1.-reg4)
@@ -749,7 +749,7 @@ c     combine mcfac and mpfac into one factor and set mpfac=1
 
       Tk	= acos(cstk)
       sntk	= sin(Tk)
-      
+
 c     change the following on Jan. 19, 1999
 c      phran=myran(idum)
 c      if (phran .lt. .2)then
@@ -761,44 +761,44 @@ c      endif
 c     end of jan 19, 1999 correction
 
       ekmax	= 0.5*(uu - wg**2)/(u0 - pu*cstk)
-      
+
       if (ekmax .gt. ebeam)then
         write(6,*)' Main-5: ekmax =',ekmax
         ekmax=ebeam
       endif
-      
+
 c     choose ek by making a change of variables
 
  78   uek	= myran(idum)
- 
+
       if (uek .lt. 0.1E-20)then
         write(6,*)' Main-6: uek =',uek
         go to 20
       endif
-      
+
       ek	= -alog(uek)/kexp
-      
+
       if (ek .gt. ekmax)go to 20
 
       csthcm	= -1.+2.*myran(idum)
       phicm	= 360.*myran(idum)
-      
-c********************************** Ek < Delta ****************************************      
+
+c********************************** Ek < Delta ****************************************
 
       if (ek .lt. delta)then
         intreg=6
-        
+
 c      print *, th0,qsq,epw,csthcm,phicm
 c     calculate the non-radiative cross section
 
         call dsigma(th0,qsq,epw,csthcm,phicm,th_opt,epirea,res_opt,sigma0
      * ,sigu,sigt,sigl,sigi,sigip,asym_p,ehel)
-     
+
         if (sigma0.le.0.) go to 20
-        
+
 c       print *, 'AAO_RAD:',sigma0,sigu,sigl,sigt,sigi
-     
-c      if (abs(epw-1.232).lt.0.010.and.abs(qsq-0.35).lt.0.1) then 
+
+c      if (abs(epw-1.232).lt.0.010.and.abs(qsq-0.35).lt.0.1) then
 c      print *, qsq,epw,csthcm,phicm
 c      print *, 'AO:',sigma0,sigu,sigl,sigt,sigi
 c      call dsigma(th0,qsq,epw,csthcm,phicm,4,epirea,res_opt,sigma0
@@ -813,15 +813,15 @@ c     the kinematic factors included. To convert them to the
 c     form needed for the above problem we must use
 
         epeps	= 1. + 2.*(1 + q0**2/qsq)*s/(1-s)
-      
+
         if (epeps .le. 1.)then
            write(6,*)' Main-6: epeps-inv =',epeps
            go to 20
         endif
-        
+
         epeps	= 1./epeps
         kfac	= (w2 - mp**2)/2./mp
-        
+
 c        cfac=1/Gamma_T
 c        cfac=2*pi**2*qsq*(es/ep)*(1-epeps)/kfac/alpha
 c        sigu=sigu*cfac
@@ -846,10 +846,10 @@ c     the dependence on the center of mass phi decay angle.  I try
 c     the following:
 
         nu	= (w2 + qsq - mp**2)/2/mp
-        
+
         f = (1./(2*pi**2*alpha*mp))*(kfac/(1.+nu**2/qsq))*(sigu+sigl)
         g = mp/(2*pi**2*alpha) * kfac * sigu
-        
+
         fkt = (w2-mp**2+mpi**2)/2./epw
         fkt = sqrt(fkt**2-mpi**2)*2.*epw/(w2-mp**2)
         f   = f*fkt
@@ -859,10 +859,10 @@ c     Calculate the non-radiative cross section
 
         signr = 2*(alpha*ep/qsq)**2
      &   * (f*mp*cos(th0/2)**2+2*g*sin(th0/2)**2/mp)
-     
+
 c        asig = fkt*(sigu+epeps*sigl)/cfac
-c        print *, 'Compare x-sections',signr,asig 
-     
+c        print *, 'Compare x-sections',signr,asig
+
 c     Modulate the cross section with the polarization and interference terms
 
         signr = signr * (1.+(epeps*sigt*cos(phicm*pi/90.)
@@ -885,24 +885,24 @@ c     up to photon energies of delta.
         x2	= (es-ep)/es
         s1	= spence(x1)
         s2	= spence(x2)
-        
+
         deltar	= -(alpha/pi)*(28./9. -(13./6.)*dlog(2.*sp/mel**2)
      &   -s1-s2)
         delinf	= -(alpha/pi)*dlog(es*ep/delta**2)*(dlog(2.*sp/mel**2)-1.)
-      
+
         sigr1	= signr*(1.+deltar)*exp(delinf)
-        
+
 c	calculate average differential cross section in the region
 c	from ek=0 to delta, and from cos(thetak)=-1 to 1.
 
 	sigr	= sigr1/delta/4./pi
-	
+
         if (sigr .gt. 0.) then
           go to 28
         else
           go to 20
         endif
-        
+
 c       end of section for calculation with ek < delta.
 c       Normally, go to statement 28
 
@@ -912,16 +912,16 @@ c       Normally, go to statement 28
       pdotk = ep*ek - pp*ek*cstk*csthp - pp*ek*sntk*snthp*cos(phik)
 
       sigr	= sigma(ek,Tk,csthcm,phicm,ehel)
-      
+
       if (sigr .le. 0.) go to 20
-      
+
 28    jacob	= exp(kexp*ek)/kexp/(2*es*ep)*q2**2
       sigr	= sigr*jacob
-      
+
       call missm(ebeam,es,ep,th0,ek,cstk,phik,mpi_s,
      *  ppx,ppy,ppz,eprot,ppix,ppiy,ppiz,epi,ekx,eky,ekz,
      *  csthcm,phicm,wreal,mm2)
-     
+
       if (abs(mm2-mm_exp) .gt. mm_cut)go to 20
 
 c     Compare sigr to the sigr_max to determine whether to generate
@@ -930,16 +930,16 @@ c     an event.
       sigr	= mcfac*mpfac*sigr
       sig_ratio	= sigr/sigr_max
       sig_tot	= sig_tot + sigr
-      
+
 c     Choose the number of times, mcall, to call the routine used
 c     to calculate kinematic quantities for the n-tuple.
 
       rtest	= myran(idum)
       mcall	= sig_ratio
       stest	= sig_ratio - mcall
-      
+
       if (stest .gt. rtest)mcall = mcall + 1
-       
+
       if (mcall .gt. mcall_max) mcall_max=mcall
       if (mcall .gt. 10)then
          write(6,*)' mcall =',mcall,' intreg=',intreg
@@ -952,7 +952,7 @@ c     to calculate kinematic quantities for the n-tuple.
          csdotk	= cstk*csths+sntk*snths*cos(phik)
          cpdotk	= cstk*csthp+sntk*snthp*cos(phik)
          cqdotk	= (ps*csdotk-pp*cpdotk)/sqrt(ps**2+pp**2-2*ps*pp*cos(th0))
-         
+
          write(6,*)'es,ep,ek',es,ep,ek
          write(6,*)'cstk,phik,csdotk,cpdotk'
      +   ,cstk,phik,csdotk,cpdotk
@@ -964,7 +964,7 @@ c     to calculate kinematic quantities for the n-tuple.
      +   ,cstk,phik,csdotk,cpdotk
          write(12,*)'cqdotk',cqdotk
       endif
-      
+
 c     If mcall .gt. 0 generate mcall n-tuple events
 
       if (mcall .eq. 0)go to 30
@@ -985,9 +985,9 @@ c     Calculate the radiation loss for the electron leaving the target
          eloss	= xs**(1./targp)
          gxs	= 1.-eloss
          xtest	= myran(idum)
-         
+
          if (xtest.gt.gxs)go to 222
-         
+
          ep	= ep_sav*(1.-eloss)
 
 c     correct the following section on Jan. 23, 1999
@@ -996,7 +996,7 @@ c     correct the following section on Jan. 23, 1999
             sig_tot = sig_tot-sigr_max
             go to 24
          endif
-         
+
 c     end of correction
 
          call missm(ebeam,es,ep,th0,ek,cstk,phik,mpi_s,
@@ -1039,7 +1039,7 @@ c     Calculate the members of the n-tuple and ouput it to the rz file.
          ntp(27)= vertex_x
          ntp(28)= vertex_y
          ntp(29)= vertex_z
-         ntp(30)= qsq                  
+         ntp(30)= qsq
          ntp(31)= ehel
          ntp(32)= asym_p
 
@@ -1051,13 +1051,13 @@ c     Calculate the members of the n-tuple and ouput it to the rz file.
            v(jj,2) = vertex_y
            v(jj,3) = vertex_z
          enddo
-         
+
 c     rotate all the momenentum by a random angle around the beam line
 
          phir	= 2.*pi*myran(idum)
          rotc	= cos(phir)
          rots	= sin(phir)
-          
+
 c     momentum of scattered electron:
 
          px 	=  ep*sin(theta*pi/180.)
@@ -1066,7 +1066,7 @@ c     momentum of scattered electron:
          p(1,2) = py*rotc-px*rots
          p(1,3) = ep*cos(theta*pi/180.)
          p(1,4) = ep
-         
+
 c     momentum of charged hadron
 
          if (epirea .eq. 1)then
@@ -1074,7 +1074,7 @@ c     momentum of charged hadron
              p(2,2) = ppy*rotc-ppx*rots
              p(2,3) = ppz
              p(2,4) = eprot
-             
+
 c     momentum of scattered pion
 
              if (npart .eq. 4)then
@@ -1083,29 +1083,29 @@ c     momentum of scattered pion
                 p(3,3) = ppiz
                 p(3,4) = epi
              endif
-             
+
          else
-         
+
 c     momentum of scattered pion
 
              p(2,1) = ppix*rotc+ppiy*rots
              p(2,2) = ppiy*rotc-ppix*rots
              p(2,3) = ppiz
              p(2,4) = epi
-             
+
              if (npart .eq. 4)then
                 p(3,1) = ppx*rotc+ppy*rots
                 p(3,2) = ppy*rotc-ppx*rots
                 p(3,3) = ppz
                 p(3,4) = eprot
              endif
-             
+
          endif
 
 c     momentum of radiated photon
 
          if (npart .eq. 4)then
-         
+
 c     suppress radiated photons when E-gamma is less than delta
 
            if (ek .le. delta)then
@@ -1120,8 +1120,8 @@ c     suppress radiated photons when E-gamma is less than delta
              p(4,4) = ek
              endif
          endif
-         
-         call bos_out	! Pack the BOS banks and write out to file        
+
+         call bos_out	! Pack the BOS banks and write out to file
 
  24      continue
        enddo
@@ -1129,17 +1129,17 @@ c     suppress radiated photons when E-gamma is less than delta
 c     Talk to the user every now and then
 
        ntell	= nevent/nprint-ntold
-       
+
        if (ntell .gt. 0)then
           write(6,*)' ntries, nevent, mcall_max: '
      *    ,ntries,nevent,mcall_max
           write(12,*)' ntries, nevent, mcall_max: '
      *    ,ntries,nevent,mcall_max
-     
+
          events	= nevent
          tries	= ntries
          sig_int= events/tries
-         
+
 c     photon phase space = 4*pi*delta-omega=4*pi (after change of variables)
 c     hadron phase space = 4*pi
 c     electron phase space =2*pi*ucrng*eprng
@@ -1157,21 +1157,21 @@ c     electron phase space =2*pi*ucrng*eprng
      *    ,' seconds'
 
           call timex(itime2)
-          
+
           t_elapse	= t_elapse+INT(itime2-itime1)
           itime1	= itime2
-          
+
           write(6,*)' Elapsed CPU time = ',t_elapse/60,' minutes'
           write(12,*)' Elapsed CPU time = ',t_elapse/60,' minutes'
-          
+
           ntold	= ntold+1
-          
+
        endif
 
 c     Do we have enough events in the n-tuple?
 
        if (nevent .gt. nmax)go to 50
-       
+
  30    go to 20
 
 c     Close out the n-tuple file
@@ -1183,7 +1183,7 @@ c     Close out the n-tuple file
       close(12)
 
       open(unit=14,file=file_sum)
-      
+
       write(14,*)' AO Calculation of Single Pion Production'
       write(14,*)' Starting time: ',ctime
       write(14,*)' Epirea (1 for pi0, 3 for pi+) =',epirea
@@ -1277,7 +1277,7 @@ c
       ffac1=-(mel/pdotk)**2*(2.*es*(ep+ek)+qq/2)
       ffac2=-(mel/sdotk)**2*(2.*ep*(es-ek)+qq/2)
       ffac3=-2.
-      ffac4=2/sdotk/pdotk*(mel**2*(sp-ek**2)+sp*(2*es*ep-sp+ek*(es-ep)))       
+      ffac4=2/sdotk/pdotk*(mel**2*(sp-ek**2)+sp*(2*es*ep-sp+ek*(es-ep)))
       ffac5=(2*(es*ep+es*ek+ep*ep)+qq/2-sp-mel**2)/pdotk
       ffac6=-(2*(es*ep-ep*ek+es*es)+qq/2-sp-mel**2)/sdotk
       ffac=ffac1+ffac2+ffac3+ffac4+ffac5+ffac6
@@ -1312,7 +1312,7 @@ c      call dsigma(th0,qsq,epw,epcos,epphi,4,epirea,res_opt,sigma0
 c     * ,sigu,sigt,sigl,sigi,sigip,asym_p,ehel)
 c      print *, 'MAID:',sigma0,sigu,sigt,sigl,sigi
 c      print *, ''
-     
+
       if (sigma0 .le. 0.)then
          sigma = 0.0
          return
@@ -1386,7 +1386,7 @@ c     ?????????????????????????
       if (sigf .gt. 0.)go to 122
 c        print *, 'SIGMA:',th0,qsq,epw,epcos,epphi,theory_opt
 c        write(6,*)' sigma-3: ffac, gfac, f, g,sigu,sigl, sigf ='
-c     *  ,ffac,gfac,f,g,sigu,sigl,sigf       
+c     *  ,ffac,gfac,f,g,sigu,sigl,sigf
         sigma=0.1e-30
         return
 
@@ -1492,7 +1492,7 @@ c         epi = pion energy
 c         wreal = true hadronic invariant mass
 c         mm2 = experimental missing mass
 
-         
+
 c     Choose the hadronic decay angles randomly and calculate the
 c     missing mass, the proton momenta and pion momenta.
 
@@ -1612,7 +1612,7 @@ c     Lab frame
          snthcm=0.0000001
       endif
       snthcm=sqrt(snthcm)
-      
+
 
 c     Calculate cos and sin of phicm
       csphi=cos(phicm*pi/180.)
@@ -1827,7 +1827,7 @@ C----------------------------------------------------------------------
       implicit none
 	  integer get_spin
 	  integer iseed
-      real    random, myran 
+      real    random, myran
 
 	  random = myran(iseed)
       random = 0.5 - myran(iseed)
