@@ -284,7 +284,7 @@ C store kine and vertex info for each particle
             PART_Z(it) = PART_Z(it) + vx_off(3)
             call gsvert(PART_X(it),0,0,0,0,vtx_id(it))
             buf2(1)=it
-            !call gskine(PART_PX(it),PART_PID(it),vtx_id(it),buf2,1,tknum)
+            call gskine(PART_PX(it),PART_PID(it),vtx_id(it),buf2,1,tknum)
          enddo  ! particle loop.
 
       else
