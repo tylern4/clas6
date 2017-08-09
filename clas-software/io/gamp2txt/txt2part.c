@@ -111,7 +111,7 @@ int main(int argc,char *argv[]){
   if(OutputUnitNo){
     fprintf(stderr,"Output file: %s\n",BOSoutfile);
     unlink(BOSoutfile);
-    sprintf(out, "OPEN AUTOOUTPUT UNIT=7 FILE=\"%s\" READWRITE STATUS=NEW RECL=3600", BOSoutfile);
+    sprintf(out, "OPEN AUTOOUTPUT UNIT=7 FILE=\"%s\" WRITE STATUS=NEW RECL=3600", BOSoutfile);
     if (!fparm_c(out)) {
       fprintf(stderr,"%s: Unable to open file \'%s\': %s\n\n",argv[0], out, strerror(errno));	 
       exit(1);
