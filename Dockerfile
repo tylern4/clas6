@@ -34,6 +34,8 @@ ENV CLASTOOL /clas-software/analysis/ClasTool
 ENV OS_NAME Linux
 RUN source /root/.bashrc \
     && cd /clas-software/analysis/ClasTool \
+    && make -j$(nproc) \
+    && cd Utils \
     && make
 
 RUN cd /clas-software && scons -j$(nproc) 2> /dev/null \
