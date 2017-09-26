@@ -1,11 +1,9 @@
 sudo: required
 language: cpp
-before_install:
-  - eval "$(curl -sL https://raw.github.com/fniephaus/travis-remote-shell/master/run.sh)"
 services:
 - docker
 script:
 - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-- docker build -t tylern4/clas6 clas6/.
+- docker build -t tylern4/clas6 .
 - docker images -a
 - docker push tylern4/clas6
