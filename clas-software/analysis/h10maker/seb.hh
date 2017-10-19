@@ -11,6 +11,7 @@ extern "C" {
   struct hevt_nt_ {
     int npart;
     int evstat;
+    int intt;
     int evntid;
     int evtype;
     int evclas;
@@ -21,6 +22,7 @@ extern "C" {
     float tr_time;
     float rf_time1;
     float rf_time2;
+    
   };
   extern struct hevt_nt_ hevt_nt_;
 
@@ -34,6 +36,7 @@ extern "C" {
     int sc[Maxparticles];
     int ec[Maxparticles];
     int lec[Maxparticles];
+    int ccst[Maxparticles];
     float p[Maxparticles];
     float m[Maxparticles];
     int q[Maxparticles];
@@ -76,16 +79,16 @@ extern "C" {
     int dc_sect[Maxparticles];
     int dc_trk[Maxparticles];
     int dc_stat[Maxparticles];
+    float dc_vx[Maxparticles];
+    float dc_vy[Maxparticles];
+    float dc_vz[Maxparticles];
+    float dc_vr[Maxparticles];
     float dc_xsc[Maxparticles];
     float dc_ysc[Maxparticles];
     float dc_zsc[Maxparticles];
     float dc_cxsc[Maxparticles];
     float dc_cysc[Maxparticles];
     float dc_czsc[Maxparticles];
-    float dc_xec[Maxparticles];
-    float dc_yec[Maxparticles];
-    float dc_zec[Maxparticles];
-    float dc_thcc[Maxparticles];
     float dc_c2[Maxparticles];
   };
   extern struct dcpb_nt_ dcpb_nt_;
@@ -124,6 +127,7 @@ extern "C" {
     int lec_hit[Maxparticles];
     int lec_stat[Maxparticles];
     float lec_etot[Maxparticles];
+    float lec_ein[Maxparticles];
     float lec_t[Maxparticles];
     float lec_r[Maxparticles];
     float lec_x[Maxparticles];

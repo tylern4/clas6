@@ -13,11 +13,14 @@
 	INTEGER evntclas2	  ! Reads TRGPRS from bos file
         REAL Q_l                  ! Live gated FC
         REAL T_l                  ! Live time
-        REAL tr_time              ! trigger time
+        REAL tr_time            ! trigger time
         REAL rf_time1             ! RF time
-        REAL rf_time2             ! RF time		
-      COMMON/HEVT_NT/npart,evstat,evntid,evtype,evclas
-     +,evthel,evntclas2,q_l,t_l,tr_time,rf_time1,rf_time2
+        REAL rf_time2             ! RF time
+        INTEGER intt              ! Interrupt time
+      COMMON/HEVT_NT/npart,evstat,intt,evntid,evtype,evclas,
+     +evthel,evntclas2,q_l,t_l,tr_time,rf_time1,
+     +rf_time2
+
 
         INTEGER ID(Maxparticles)  ! Final PID (PDG ID)
         REAL P(Maxparticles)      ! Particle momentum (GeV/c)
@@ -35,9 +38,11 @@
         INTEGER SC(Maxparticles)  ! Status of SC (>0 SCST structure ID, =0 no SC is involved)
         INTEGER EC(Maxparticles)  ! Status of EC (>0 ECST structure ID, =0 no EC is involved)
         INTEGER LEC(Maxparticles) ! Status of EC (>0 ECST structure ID, =0 no EC is involved)
+        INTEGER CCST(Maxparticles)
         INTEGER STAT(Maxparticles)! Status of hits/track matching 
-      COMMON/EVNT_NT/gpart,id,stat,dc,cc,sc,ec,lec,
-     +p,m,q,b,cx,cy,cz,vx,vy,vz
+        COMMON/EVNT_NT/gpart,id,stat,dc,cc,sc,ec,lec,
+     +       ccst,
+     +       p,m,q,b,cx,cy,cz,vx,vy,vz
 
         INTEGER ec_part              ! Nuber of EC contained particles 
         REAL etot(Maxparticles)      ! Total deposited energy (GeV)
@@ -67,17 +72,18 @@
         REAL dc_ZSC(Maxparticles)     ! Z coordinate  ! with SC plane.
         REAL dc_CXSC(Maxparticles)    ! X direction cosine ! at the 
         REAL dc_CYSC(Maxparticles)    ! Y direction cosine ! intersection point
-        REAL dc_CZSC(Maxparticles)    ! Z direction cosine ! with SC plane.
-        REAL dc_XEC(Maxparticles)     ! X coordinate  ! of the 
-        REAL dc_YEC(Maxparticles)     ! Y coordinate  ! intersection point
-        REAL dc_ZEC(Maxparticles)     ! Z coordinate  ! with EC plane.
-        REAL dc_THCC (Maxparticles)   ! strait line theta from orgn to int.point
+        REAL dc_CZSC(Maxparticles) ! Z direction cosine ! with SC plane.
+        REAL dc_VX(Maxparticles)     ! DOCA X coordinate 
+        REAL dc_VY(Maxparticles)     ! DOCA Y coordinate ! to the beam line Z coordinate 
+        REAL dc_VZ(Maxparticles)     ! DOCA Z coordinate
+        REAL dc_VR(Maxparticles)     ! Distance from the beam line 
         REAL dc_c2 (Maxparticles)     ! Chisquar of track fitting
         INTEGER DC_trk(Maxparticles)  ! DC track ID
         INTEGER DC_STAT(Maxparticles) ! Status word
       COMMON/dcpb_nt/dc_part,dc_sect,dc_trk,dc_stat,
+     +dc_vx,dc_vy,dc_vz,dc_vr,
      +dc_xsc,dc_ysc,dc_zsc,dc_cxsc,dc_cysc,dc_czsc,
-     +dc_xec,dc_yec,dc_zec,dc_thcc,dc_c2
+     +dc_c2
 
         INTEGER sc_part            ! number of SC hits involved in particles 
         REAL EDEP(Maxparticles)          ! Energy deposited in SC (GeV)
@@ -103,7 +109,8 @@
      +nphe,cc_t,cc_r,cc_c2
 
         INTEGER lac_part            ! Nuber of EC contained particles 
-        REAL lec_etot(Maxparticles)      ! Total deposited energy (GeV)
+        REAL lec_etot(Maxparticles) ! Total deposited energy (GeV)
+        REAL lec_ein(Maxparticles)  ! Inner energy (GeV)
         REAL lec_t(Maxparticles)      ! Time (ns)
         REAL lec_X(Maxparticles)     ! X coordinate of the hit
         REAL lec_Y(Maxparticles)     ! Y coordinate of the hit
@@ -114,7 +121,7 @@
         INTEGER lEC_sect(Maxparticles)  ! LAC hit sector
         INTEGER lEC_stat(Maxparticles)  ! LAC hit status
       COMMON/lecpart_nt/lac_part,lec_sect,lec_hit,lec_stat,
-     +lec_etot,lec_t,lec_r,lec_x,lec_y,lec_z,lec_c2
+     +lec_etot,lec_ein,lec_t,lec_r,lec_x,lec_y,lec_z,lec_c2
 
         INTEGER st_part                       ! number of ST hits
         INTEGER ST_SECTOR(MaxST)       ! ST hit sector (Not in the N-tuple)
