@@ -14,32 +14,31 @@ ENV CERN_ROOT $CERN/$CERN_LEVEL
 ENV CVSCOSRC $CERN/$CERN_LEVEL/src
 ENV PATH $CERN/$CERN_LEVEL/src:$PATH
 ENV CERN_LIB $CERN_ROOT/lib
+RUN ln -s $CERN_LIB $CERN
 ENV CERN_BIN $CERN_ROOT/bin
 ENV LD_LIBRARY_PATH $ROOTSYS/lib
 ENV CLAS_PARMS /clas/parms
-RUN ln -s $CERN_LIB $CERN
-
-COPY clas-software /clas-software
-
-ENV PATH /clas-software/build/bin:$PATH
-
-ENV CLAS_PARMS /clas/parms
 COPY parms /clas/parms
-ENV PATH /clas-software/build/bin:$PATH
+
+RUN mkdir -p /usr/local/cernlib
+RUN mkdir -p /usr/local/clas-software
 COPY bashrc /root/.bashrc
-COPY env.sh /clas-software
+COPY env.sh /usr/local/clas-software
+COPY clas-software /usr/local/clas-software
+
+RUN cd /usr/local/clas-software && scons -j$(nproc) 2> /dev/null \
+    && scons install
 
 #Build clas-tool
-ENV CLASTOOL /clas-software/analysis/ClasTool
+ENV CLASTOOL /usr/local/clas-software/analysis/ClasTool
 ENV OS_NAME Linux
 RUN source /root/.bashrc \
-    && cd /clas-software/analysis/ClasTool \
+    && cd /usr/local/clas-software/analysis/ClasTool \
     && make -j$(nproc) \
     && cd Utils \
     && make
 
-RUN cd /clas-software && scons -j$(nproc) 2> /dev/null \
-    && scons install
+ENV PATH /usr/local/clas-software/build/bin:$PATH
 
 WORKDIR /root/code
 
