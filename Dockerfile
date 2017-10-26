@@ -1,4 +1,4 @@
-FROM tylern4/rootv5:centos6
+FROM tylern4/rootv5:latest
 LABEL maintainer "tylern@jlab.org"
 
 ENV MYSQLINC /usr/include/mysql
@@ -24,6 +24,7 @@ RUN mkdir -p /usr/local/cernlib
 RUN mkdir -p /usr/local/clas-software
 COPY bashrc /root/.bashrc
 COPY env.sh /usr/local/clas-software
+COPY env.csh /usr/local/clas-software
 COPY clas-software /usr/local/clas-software
 
 RUN cd /usr/local/clas-software && scons -j$(nproc) 2> /dev/null \
