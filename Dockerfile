@@ -1,4 +1,4 @@
-FROM tylern4/rootv5:latest
+FROM tylern4/rootv5:centos
 LABEL maintainer "tylern@jlab.org"
 
 ENV MYSQLINC /usr/include/mysql
@@ -35,7 +35,7 @@ ENV CLASTOOL /usr/local/clas-software/analysis/ClasTool
 ENV OS_NAME Linux
 RUN source /root/.bashrc \
     && cd /usr/local/clas-software/analysis/ClasTool \
-    && make -j$(nproc) \
+    && make \
     && cd Utils \
     && make
 
