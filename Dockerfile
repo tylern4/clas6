@@ -27,17 +27,16 @@ COPY env.sh /usr/local/clas-software
 COPY env.csh /usr/local/clas-software
 COPY clas-software /usr/local/clas-software
 
-RUN cd /usr/local/clas-software && scons -j$(nproc) 2> /dev/null \
-    && scons install
-
-#Build clas-tool
 ENV CLASTOOL /usr/local/clas-software/analysis/ClasTool
 ENV OS_NAME Linux
-RUN source /root/.bashrc \
+
+RUN cd /usr/local/clas-software && scons -j$(nproc) 2> /dev/null \
+    && scons install \
+    && source /root/.bashrc \
     && cd /usr/local/clas-software/analysis/ClasTool \
     && make \
     && cd Utils \
-    && make
+    && make 
 
 ENV PATH /usr/local/clas-software/build/bin:$PATH
 
