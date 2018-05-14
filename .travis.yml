@@ -3,7 +3,7 @@ language: cpp
 services:
 - docker
 script:
-- mkdir parms
+- mkdir -p parms
 - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 - docker build -t tylern4/clas6 .
 - docker images -a
