@@ -1,11 +1,7 @@
-
 *.o
-
 *.pyc
 clas-software/build_system/.svn*
 *.svn-base
 *.svn
 *.db
-
 nanocernlib/
-parms/
