@@ -1,0 +1,24 @@
+;; -*- mode: text; -*-
+Key: - Completed
+     + Todo
+     * General info
+     % Inapplicable, though similar thoughts might be resolvable later
+     c Currently
+
++ Fix mpintp.inc so that MAID 2003 and 2007 can be used without
+  recompiling the entire project.
+
+  How to do this:
+
+  +1. Use very large numbers for mpintp.inc's NVAR1 and NVAR2 wherever
+      they are used to create arrays.  Just has to be large enough to
+      fit any possible format.
+      
+  +2. Set NVAR1 and NVAR2 from the input option.  Should be done in
+      one of the MAID functions.
+
+  +3. Add MAID 2003 and MAID2007 options to the maid_lee.F file.
+
+  +4. Use NVAR1  = 81 , NVAR2 = 91 for MAID2000 and MAID2003
+
+  +5. Use NVAR = 101, NVAR2 = 93 for MAID2007

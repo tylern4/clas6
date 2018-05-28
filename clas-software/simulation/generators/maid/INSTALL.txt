@@ -1,0 +1,7 @@
+To install this software, simply type
+
+make
+
+and copy the file maid.h into a location where you can #include it
+from your project, which can be your local include directory or (not
+recommended but does work) copied into your software project directly.
