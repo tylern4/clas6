@@ -1,7 +1,7 @@
 BOS = bos
 NOBOS = nobos
-CXX           = g++ -O2 -Wno-write-strings -Wno-pragmas -I$(CLAS_BUILD)/packages/include -I$(PWD)/interpol -I$(PWD)/get_xsect -I$(PWD)
-CXX_BOS       = g++ -DBOS -O2 -Wno-write-strings -Wno-pragmas -I$(CLAS_BUILD)/packages/include -I$(PWD)/interpol -I$(PWD)/get_xsect -I$(PWD)
+CXX           = g++ -O3 -Wno-write-strings -Wno-pragmas -I$(CLAS_BUILD)/packages/include -I$(PWD)/interpol -I$(PWD)/get_xsect -I$(PWD)
+CXX_BOS       = g++ -DBOS -O3 -Wno-write-strings -Wno-pragmas -I$(CLAS_BUILD)/packages/include -I$(PWD)/interpol -I$(PWD)/get_xsect -I$(PWD)
 ObjSuf        = o
 ObjSuf_BOS        = o
 SrcSuf        = cxx

@@ -121,7 +121,7 @@ int main(int argc, char** argv)
 
   //Setup output file and TTree:
   TFile out(outfile.c_str(),"RECREATE");
-
+  out.SetCompressionSettings(404);
   TTree tree("h10","h10");
   if(partp) part_branches(&tree);
   if(mctkp) {
