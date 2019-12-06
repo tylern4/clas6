@@ -17,8 +17,8 @@ ENV CERN_LIB $CERN_ROOT/lib
 RUN ln -s $CERN_LIB $CERN
 ENV CERN_BIN $CERN_ROOT/bin
 ENV LD_LIBRARY_PATH $ROOTSYS/lib
-ENV CLAS_PARMS /clas/parms
-COPY parms /clas/parms
+ENV CLAS_PARMS=/group/clas/parms
+COPY parms /group/clas/parms
 
 RUN mkdir -p /usr/local/cernlib
 RUN mkdir -p /usr/local/clas-software
@@ -40,6 +40,6 @@ RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
 
 ENV PATH /usr/local/clas-software/build/bin:$PATH
 
-WORKDIR /root/code
+WORKDIR /work
 
 ENTRYPOINT ["/bin/bash"]

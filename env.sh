@@ -1,7 +1,7 @@
 export ROOTSYS=/usr/local/root
 export MYSQLINC=/usr/include/mysql
 export MYSQLLIB=/usr/lib64/mysql
-export CLAS_PARMS=/clas/parms
+export CLAS_PARMS=/group/clas/parms
 export CLAS6=/usr/local/clas-software/build
 export PATH=$CLAS6/bin:$PATH
 export CERN=/usr/local/cernlib/x86_64_rhel6
@@ -18,7 +18,3 @@ export LD_LIBRARY_PATH=$ROOTSYS/lib:$CLAS_TOOL/slib/Linux:$CLAS6/lib
 
 source $ROOTSYS/bin/thisroot.sh
 
-#export CLAS_CALDB_HOST="127.0.0.1"
-export CLAS_CALDB_HOST=$CLASDB_PORT_3306_TCP_ADDR
-export CLAS_CALDB_PASS=""
-export CLAS_CALDB_USER="root"
