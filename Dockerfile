@@ -38,16 +38,6 @@ RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
     && cd Utils \
     && make
 
-COPY Hybrid-Baryons /usr/local/Hybrid-Baryons
-ENV data_dir_2pi /usr/local/
-RUN cd /usr/local/Hybrid-Baryons/2pi_event_generator \
-    && make bos \
-    && make nobos \
-    && cp twopeg_bos.exe /usr/local/bin/twopeg_bos \
-    && cp twopeg_nobos.exe /usr/local/bin/twopeg_lund \
-    && cp -r data /usr/local/data
-
-
 ENV PATH /usr/local/clas-software/build/bin:$PATH
 
 WORKDIR /root/code

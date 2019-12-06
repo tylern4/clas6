@@ -622,11 +622,18 @@ fqfile_(char *dnam, char *fnam, char *hnam, int par[30], int *ier, int l1, int l
 /*     average length of logical record on input
       IF(INFU(IRSTA+6,LUNFP).NE.0) LUNPAR(14) =
      +  LUNPAR(10)*1000.0 / INFU(IRSTA+6,LUNFP)*/
-      par[13] = (BIOS_NPHYSREC*BIOS_RECL)/BIOS_NLOGREC;
+      if( BIOS_NLOGREC != 0) {
+        par[13] = (BIOS_NPHYSREC*BIOS_RECL)/BIOS_NLOGREC;
+        par[14] = (BIOS_NPHYSREC*BIOS_RECL)/BIOS_NLOGREC;
+      } else {
+        par[13] = 0;
+        par[14] = 0;
+        printf("\n\nerror with par[13/14]??\n\n");
+      }
 
 /*     average length of logical records written
       IF(LUNPAR(9).NE.0) LUNPAR(15) = LUNPAR(11)*1000.0 / LUNPAR(9)*/
-      par[14] = (BIOS_NPHYSREC*BIOS_RECL)/BIOS_NLOGREC;
+    //par[14] = (BIOS_NPHYSREC*BIOS_RECL)/BIOS_NLOGREC;
 
 /*     number of data blocks read
       LUNPAR(16) = INFU(IRSTA+5,LUNFP)*/
