@@ -30,7 +30,6 @@ COPY clas-software /usr/local/clas-software
 ENV CLASTOOL /usr/local/clas-software/analysis/ClasTool
 ENV OS_NAME Linux
 
-#2> /dev/null \
 RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
     && scons install \
     && source /root/.bashrc \
