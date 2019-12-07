@@ -41,5 +41,6 @@ RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
 ENV PATH /usr/local/clas-software/build/bin:$PATH
 
 WORKDIR /work
+ENV RECSIS_RUNTIME=/recsis
 
 ENTRYPOINT ["/bin/bash"]

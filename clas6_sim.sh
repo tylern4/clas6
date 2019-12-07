@@ -1,22 +1,3 @@
-
-[![Build Status](https://travis-ci.com/tylern4/clas6.svg?token=Hour3TGGb984zn33pgvC&branch=master)](https://travis-ci.com/tylern4/clas6)
-
-# Basic build sequence
-* To build the clas6 docker image, while in clas6 folder:
-```
-docker build -t clas6:latest .
-```
-* To run the image and mount the current working directory to the work directory of the container run:
-```
-docker run -v $PWD:/work clas6:latest
-```
-
-
-## Using the container on the farm
-
-I have a prebuilt singularity container on the farm. There is also a slurm script availible which goes through all the steps needed to run a simulation from generator to user\_ana.
-
-```
 #!/bin/bash
 
 #INPUT Sequences file
@@ -95,5 +76,3 @@ echo "Time for $HOSTNAME: $(($ENDTIME-$STARTTIME))"
 
 ########=========== Copy all the files to Work for output ===========########
 cp -r /scratch/${USER}/${SLURM_JOB_ID}/${SLURM_ARRAY_TASK_ID} /work/clas/clase1/${USER}/simulations
-```
-
