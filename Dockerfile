@@ -8,6 +8,9 @@ RUN mkdir -p /usr/local/cernlib
 COPY cernlib /usr/local/cernlib
 
 # This is using the cernlib copied from jlab ifarm
+ENV RECSIS_RUNTIME=/recsis
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH}:/usr/local/root/lib/root
+ENV PATH /usr/local/clas-software/build/bin:$PATH
 ENV CERN /usr/local/cernlib/x86_64_rhel6
 ENV CERN_LEVEL 2005
 ENV CERN_ROOT $CERN/$CERN_LEVEL
@@ -38,9 +41,14 @@ RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
     && cd Utils \
     && make
 
-ENV PATH /usr/local/clas-software/build/bin:$PATH
+
+ENV data_dir_2pi=/usr/local/2pi_event_generator/data/
+COPY Hybrid-Baryons/2pi_event_generator /usr/local/2pi_event_generator
+WORKDIR /usr/local/2pi_event_generator
+RUN make -f Makefile.docker bos \
+	&& cp twopeg_bos.exe /usr/local/bin
+
 
 WORKDIR /work
-ENV RECSIS_RUNTIME=/recsis
 
 ENTRYPOINT ["/bin/bash"]
