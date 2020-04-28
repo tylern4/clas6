@@ -1,0 +1,3 @@
+[submodule "Hybrid-Baryons"]
+	path = Hybrid-Baryons
+	url = https://github.com/JeffersonLab/Hybrid-Baryons.git
