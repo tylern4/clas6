@@ -35,9 +35,9 @@ ENV CLASTOOL /usr/local/clas-software/analysis/ClasTool
 ENV OS_NAME Linux
 
 #RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc)
-
 RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
     && scons install \
+    && cp /usr/local/clas-software/simulation/generators/fsgen/lund_upd.dat /usr/local/clas-software/build/bin \
     && source /root/.bashrc \
     && cd /usr/local/clas-software/analysis/ClasTool \
     && make \
@@ -50,7 +50,6 @@ COPY Hybrid-Baryons/2pi_event_generator /usr/local/2pi_event_generator
 WORKDIR /usr/local/2pi_event_generator
 RUN make -f Makefile.docker bos \
 	&& cp twopeg_bos.exe /usr/local/bin
-
 
 WORKDIR /work
 
