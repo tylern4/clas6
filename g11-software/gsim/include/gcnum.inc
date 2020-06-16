@@ -1,0 +1,9 @@
+c  from patch gcdes in file /usr/site3/cern/hp700_ux90/94a/src/car/geant321.car on Thu Nov 10 11:00:38 EST 1994
+c  this is seq: GCNUM
+      COMMON/GCNUM/NMATE ,NVOLUM,NROTM,NTMED,NTMULT,NTRACK,NPART
+     +            ,NSTMAX,NVERTX,NHEAD,NBIT
+      COMMON /GCNUMX/ NALIVE,NTMSTO
+C
+      INTEGER      NMATE ,NVOLUM,NROTM,NTMED,NTMULT,NTRACK,NPART
+     +            ,NSTMAX,NVERTX,NHEAD,NBIT ,NALIVE,NTMSTO
+C

@@ -1,0 +1,54 @@
+macro gsim action=0 opt1 opt2
+
+  if [action].eq.0 then
+    message 'Purpose: Draw CLAS detector views in Geant Interactive'
+    message '  Usage: gsim action opt1 opt2 list '
+    message ' action: move draw trig (display options)'
+    message '   opt1: on off (toggles hidden line: dopt hide opt1)'
+    message '   opt2: on off (toggles shading:     dopt shad opt2)'
+    message '   list: list of detector volumes'
+    message 'Allowed detector volumes: all,fc,beam,torus,ring,mini,baff,ec,sc,cc'
+    message '                          scin,ecal,ecui,ecvi,ecwi,ecuo'
+    message '                          ecwo,ccmir1,ccmir2,ccvo,ccpmt'
+    message '                          dc1,dc2,dc3,ec1,ecsl' 
+    message 'Example of drawing volumes  - gsim draw on on ccmir1 ecal '
+    message 'Example of reorienting view - gsim move off off ecal '
+    message 'Example of triggering event - gsim trig on on mini torus ec'
+    exitm
+  endif  
+
+  dopt hide [opt1]
+  dopt shad [opt2]
+  
+  shift;shift;shift;alias/cre list [*]
+  
+  exec gsimSetupColor
+  exec gsimPickDet list
+  
+  alias/del list
+  
+  case [action] in
+    (trig) exec gsimDraw dcut y 0
+           trig 1
+           exec gsimDrawHits
+    (draw) exec gsimDraw draw
+           exec gsimDrawHits
+    (dcut) exec gsimDraw dcut y 0 
+           exec gsimDrawHits
+    (move) message 'Use left button to pick move option, move mouse up and down'
+           message 'to change view, click right button anywhere on screen'
+           message 'to quit option, click OFF to return to GEANT'
+           move clas sth
+    (zoom) zoom zfu=0
+           exec gsimDraw draw
+           exec gsimDrawHits 
+zoom:      message 'Press left button to size zoom box, press again to finish'
+           message 'to quit option, click right button'
+           zoom isel=1
+           exec gsimDraw dcut y 0
+           exec gsimDrawHits
+           go to zoom
+  endcase
+         
+  
+return

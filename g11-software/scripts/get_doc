@@ -1,0 +1,53 @@
+#!/usr/local/bin/perl
+
+#  get_doc
+
+#  Perl script extracts documentation from source files
+
+#  usage:   get_doc [-b begin_flag] [-e end_flag] file1 file2 ...
+
+#  Note:  begin/end flags are not case sensitive, and must start at the beginning of line
+#         defaults are c_begin_doc and c_end_doc
+
+#  still to do:
+
+#  Elliott Wolin, College of William and Mary, 18-oct-94
+
+
+#  Perl code:
+#  ----------
+
+$line = " ".join(" ",@ARGV)." ";     # pad line with whitespace
+
+if( (!$ARGV[0]) || ($line=~m/\s+-help\s+/) || ($line=~m/\s+-h\s+/) ){
+    die "\n usage:   get_doc [-b begin_flag] [-e end_flag] file1 file2 ...\n\n";}  
+
+#  default begin/end flags if not specified on command line
+$begin_doc = "c_begin_doc";
+$end_doc  = "c_end_doc";
+
+#  check command line for -b and -e flags
+($begin_doc=$1) if ($line =~ s/-b\s*(\S*)//i);		#begin doc flag
+($end_doc  =$1) if ($line =~ s/-e\s*(\S*)//i);		#end doc flag
+
+
+#  dump doc for each input file specified on command line
+foreach $file (split(" ",$line)){
+	if(!open(FILE,$file)){warn "\n?get_doc...unable to open file $file\n\n"; next;}
+
+	print ("\n  ============Begin documentation for file: $file ============\n\n");
+
+	$doc_on="";
+	while(<FILE>){
+		print if ($doc_on = ($doc_on || /^$begin_doc/i));
+		$doc_on="" if (/^$end_doc/i);
+	}
+
+	print ("\n  =============End documentation for file: $file ==============\n\f");
+}
+
+
+
+
+
+

@@ -1,0 +1,28 @@
+#
+
+if ("`uname`" == "HP-UX") then
+
+ alias make_HP  "remsh jlabh3 -n 'cd $PWD; make \!* >&\! hp.log'"
+ alias make_SUN "remsh jlabs2 -n 'cd $PWD; make \!* >&\! sun.log'"
+ alias make_AIX "remsh jlaba1 -n 'cd $PWD; make \!* >&\! aix.log'"
+
+else if ("`uname`" == "AIX") then
+
+ alias make_HP  "rsh jlabh3 -n 'cd $PWD; make \!* >&\! hp.log'"
+ alias make_SUN "rsh jlabs2 -n 'cd $PWD; make \!* >&\! sun.log'"
+ alias make_AIX "rsh jlaba1 -n 'cd $PWD; make \!* >&\! aix.log'"
+
+else 
+
+ alias make_HP  "rsh -n jlabh3 'cd $PWD; make \!* >&\! hp.log'"
+ alias make_SUN "rsh -n jlabs2 'cd $PWD; make \!* >&\! sun.log'"
+ alias make_AIX "rsh -n jlaba1 'cd $PWD; make \!* >&\! aix.log'"
+
+endif
+
+
+
+
+
+
+

@@ -1,0 +1,42 @@
+Variables in SEB that are under TCL control.
+
+Quality of geometrical matching of track with hits in EC,SC,CC-
+trkcc_match  -  (Default = 3.)  (A_cc-A_trk)**2/dA**2 <= trkcc_match**2(A=th)
+trksc_match  -  (Default = 25.) ABS(Z_sc-Z_trk) <= trksc_match
+trkec_match  -  (Default = 3.)  (A_ec-A_trk)**2/dA**2 <= trkec_match**2(A=xyz)
+Used in trk_2_cc.F, trk_2_sc.F and trk_2_ec.F, respectively.
+
+Quality of geometrical matching of EC hits with SC and CC for neutrals -
+eccc_match  -  (Default = 3.)  (A_cc-A_ec)**2/dA**2 <= eccc_match**2(A=th)
+ecsc_match  -  (Default = 30.)  ABS(Z_sc-Z_ec) <= ecsc_match
+ecec_match  -  (Default = 3.)  (A_ec-A_ec)**2/dA**2 <= ecec_match**2(A=xyz)
+Used in ec_do_match.F.
+
+Showere identification in EC -
+sampl_frac  -  (Default = 0.272)  Assumed sampling fraction
+sigma_etrk  -  (Default = 0.01)   Assumed tracking momentum resolution
+m2_ecel_cut  -  (Default = 1200.) Cut on shower transverse size
+m3_ecel_cut  -  (Default  = 5000.) Cut on shower transverse shape
+etot_ecel_cut  -  (Default  = 3.) Cut on total energy deposition 
+eio_ecel_cut  -  (Default  = 3.) Cut on shower longithudinal distribution
+Used in el_cut.F.
+ 
+Maximum number of found electrons for trigger (always one that has the largest 
+momenta is taken as a trigger) -
+maxel  -  (Default = 2)
+Used in trig_time.F.
+
+Time coincidence between the hits of EC,CC and SC in the same group for PID- 
+CUT_T_SCCC  -  (Default = 50.ns)  |
+CUT_T_SCEC  -  (Default = 50.ns)  |-->  ABS(T1-T2)<CUT_T_12
+CUT_T_ECCC  -  (Default = 50.ns)  |
+Used in define_id.F.
+
+Cuts on bettas for PID (temporary) -
+CUT_B_SC  -  (Default = 1.)   For particle identification with SC time
+CUT_B_EC  -  (Default = 1.)   For particle identification with EC time
+Used in define_id.F.
+
+Photon -
+st_tagger_match - (Default = 5 ns)  Cut on match between Start Counter and Tagger times
+

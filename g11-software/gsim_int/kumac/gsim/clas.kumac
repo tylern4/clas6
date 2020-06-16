@@ -1,0 +1,15 @@
+macro clas axis=0 zoom=0.1 x=10 y=10 z=0 erase=1
+
+  if [axis].eq.0 then
+    message Usage: clas axis zoom x y
+    message Default: clas y 0.1 10 10
+    exitm
+  endif  
+
+  case [erase] in
+    (1) next
+  endcase
+  
+  dcut clas [axis] [z] [x] [y] su=[zoom] sv=[zoom]
+  
+return

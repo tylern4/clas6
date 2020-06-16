@@ -1,0 +1,116 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+
+ifdef USEBOSIO
+BOSLIB = -lbosio$(ADD_DEBUG)
+else
+BOSLIB = -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG)
+endif
+
+ifdef DBG
+CCFLAGS := $(CCFLAGS) -g
+CFLAGS := $(CFLAGS) -g
+endif
+
+RECLIB = -L$(CLAS_LIB) -litape$(ADD_DEBUG) -lclasutil$(ADD_DEBUG)  -lc_bos_io$(ADD_DEBUG) -lmapmanager$(ADD_DEBUG)  -lrecutl$(ADD_DEBUG) -lonline_dummy$(ADD_DEBUG) -lc_cern$(ADD_DEBUG) -lclasutil$(ADD_DEBUG) $(BOSLIB) -litape$(ADD_DEBUG)
+
+#use the newest cern library
+CERNPATH= $(CERN_ROOT)/lib
+CERNLIB= -L$(CERNPATH) -lpacklib 
+
+INCLUDE := -I.   -I$(CLAS_PACK)/inc_derived $(INCLUDE)
+
+
+MISCLIB_SunOS :=  -L/usr/lib -lm -lc -lnsl -lsocket
+MISCLIB_HP-UX :=  -L/usr/lib -lm -lc -lf
+MISCLIB_AIX :=  -L/usr/lib -lxlf90 -lm -lc 
+MISCLIB_Linux :=  -L/usr/lib  -lm -lc /usr/lib/libf2c.a
+MISCLIB_OSF1 :=  -L/usr/lib -lm -lc -lfor -lUfor
+ 
+MISCLIB := $(MISCLIB_$(OS_NAME))
+
+XLIB= -L/lib 
+RPCLIB= -L/usr/lib -lrpcsvc
+TCLLIB= -L/usr/local/lib -ltcl
+
+EXELIBS= $(STDLIBS) $(RECLIB) $(CERNLIB) $(FLIB) $(MISCLIB) 
+FSRCS:= 
+
+SRCS:= crc.c data.c dataIO.c disIO.c endianConverter.c esend.c itape.c tapeIO.c tapeIoctl.c mtime.c
+
+FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+CSRCS= bos2itape.cc
+COBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(CSRCS))
+
+DSRCS= pbanks.cc
+DOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(DSRCS))
+
+ESRCS= itape2bos.cc
+EOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(ESRCS))
+
+HSRCS= bos2Disp.cc
+HOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(HSRCS))
+
+GSRCS= Disp2bos.cc
+GOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(GSRCS))
+
+
+
+
+
+EXE_default:=
+EXE_IRIX:= $(EXE_default)
+EXE_SunOS:= $(EXE_default)
+EXE_HP-UX:= $(EXE_default)
+EXE_AIX:= $(EXE_default)
+EXE_Linux = $(EXE_default)
+
+EXE:= $(EXE_$(OS_NAME))
+ifndef EXE
+EXE:= $(EXE_default)
+endif
+all: lib
+exe: $(EXE)
+LIBS= $(CLAS_LIB)/libitape$(ADD_DEBUG).a
+lib: $(LIBS)
+$(LIBS): $(OBJS) $(FOBJS)
+	$(VDIR) $(CLAS_LIB)
+	ar rv $@ $?
+
+
+bos2itape: $(COBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(EXELIBS)
+
+pbanks: $(DOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(EXELIBS)
+
+
+itape2bos: $(EOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(EXELIBS)
+
+bos2Disp: $(HOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(EXELIBS)
+
+Disp2bos: $(GOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(EXELIBS)
+
+install: bos2itape
+	mv -f mkitape $(CLAS_BIN)
+env:
+	@echo EXE $(EXE)
+	@echo EXELIBS $(EXELIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo INCLUDE $(INCLUDE)

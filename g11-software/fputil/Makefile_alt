@@ -1,0 +1,43 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+FSRCS:= bbins.F bbnin.F errlog.F fbtst1.F fbtst2.F fbtst3.F fbtst4.F fbtst5.F fbtst6.F fftoit.F fitoft.F fmtcmp.F fmtdec.F fmtdef.F fmtexp.F frbos.F fseqe.F fseqh.F fseqp.F fseqr.F fseqs.F fseqst.F fseqw.F fwbos.F fwbosk.F getnwd.F nxtfmt.F squeez.F unsqez.F 
+
+SRCS:= 
+
+FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+EXE_default:=
+EXE_IRIX:= $(EXE_default)
+EXE_SunOS:= $(EXE_default)
+EXE_HP-UX:= $(EXE_default)
+EXE_AIX:= $(EXE_default)
+EXE_Linux = $(EXE_default)
+
+EXE:= $(EXE_$(OS_NAME))
+ifndef EXE
+EXE:= $(EXE_default)
+endif
+all: lib
+exe: $(EXE)
+LIBS= $(CLAS_LIB)/libfputil$(ADD_DEBUG).a
+lib: $(LIBS)
+$(LIBS): $(OBJS) $(FOBJS)
+	$(VDIR) $(CLAS_LIB)
+	ar rv $@ $?
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo INCLUDE $(INCLUDE)

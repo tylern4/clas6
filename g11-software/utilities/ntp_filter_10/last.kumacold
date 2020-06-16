@@ -1,0 +1,108 @@
+*** Begin of history file: Fri Oct 29 12:00:20 2004
+Ntuple/Plot //LUN2/10.run_num ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.evntid ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.evstat ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.evntrip ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.l1bit ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.evntrip ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.tr_time ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.rf_time ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.L1bit_v ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.gpart ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.gpart ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.dc_part ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.dc_part ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.dc_trk ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.ec_part ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.sc_part ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.sc_part ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.sc_sect ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.sc_hit ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.sc_stat ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.edep ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.edep ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.st_sector ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.st_ihit ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.st_trkno ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.st_time ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.st_time ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.E_gamma ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.E_gamma ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.tag_stat ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.dt_st_tag ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.dt_st_tag ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.secST ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.idST ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.TDCST ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.ADCST ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.nSTR ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.idSTR ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.STR_trk ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.STR_l ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.STR_l ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.STR_z ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.STRstat ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN1/10.STR_t ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.STR_l ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.st_rtrk ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.taggoodhit ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.c13TBER ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.c15TBER ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.c25TBER ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.c45TBER ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.nPRT ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.pidPART ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.nTBID ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.sce ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.scx ! 9015 1 9016 ' ' 1000000
+Ntuple/Plot //LUN2/10.nschit ! 9015 1 9016 ' ' 1000000
+Ntuple/Cuts $0 -
+Ntuple/Cuts $1 gpart>0
+Ntuple/Cuts $2 q(1)<>0
+Ntuple/Cuts $3 dc(1)>0
+Ntuple/Plot //LUN1/10.dc_stat(dc(i))%stat(i) $1.AND.$2.AND.$3 9015 1 9016 ' ' 1000000
+Ntuple/Cuts $0 -
+Ntuple/Cuts $1 gpart>0
+Ntuple/Cuts $2 q(1)<>0
+Ntuple/Cuts $3 dc(1)>0
+Ntuple/Plot //LUN1/10.dc_stat(dc(1))%stat(1) $1.AND.$2.AND.$3 9015 1 9016 ' ' 1000000
+Ntuple/Cuts $0 -
+Ntuple/Cuts $1 gpart>0
+Ntuple/Cuts $2 q(1)<>0
+Ntuple/Cuts $3 dc(1)>0
+Ntuple/Plot //LUN1/10.dc_stat(dc(1))%stat(1) $1.AND.$2.AND.$3 9015 1 9016 'BOX  ' 1000000
+Ntuple/Cuts $0 -
+Ntuple/Cuts $1 gpart>0
+Ntuple/Cuts $2 q(1)<>0
+Ntuple/Cuts $3 dc(1)>0
+Ntuple/Cuts $4 dc_stat(dc(1))<0
+Ntuple/Plot //LUN1/10.stat(1) $1.AND.$2.AND.$3.AND.$4 9015 1 9016 ' ' 1000000
+Ntuple/Cuts $0 -
+Ntuple/Cuts $1 gpart>0
+Ntuple/Cuts $2 q(1)<>0
+Ntuple/Cuts $3 dc(1)>0
+Ntuple/Plot //LUN1/10.stat(1) $1.AND.$2.AND.$3 9015 1 9016 ' ' 1000000
+Ntuple/Cuts $0 -
+Ntuple/Cuts $1 gpart>1
+Ntuple/Cuts $2 q(2)<>0
+Ntuple/Cuts $3 dc(2)>0
+Ntuple/Plot //LUN1/10.stat(2) $1.AND.$2.AND.$3 9015 1 9016 ' ' 1000000
+Ntuple/Cuts $0 -
+Ntuple/Cuts $1 gpart>1
+Ntuple/Cuts $2 q(2)<>0
+Ntuple/Cuts $3 dc(2)>0
+Ntuple/Cuts $4 dc_stat(dc(2))<0
+Ntuple/Plot //LUN1/10.stat(2) $1.AND.$2.AND.$3.AND.$4 9015 1 9016 ' ' 1000000
+Ntuple/Cuts $0 -
+Ntuple/Cuts $1 gpart>1
+Ntuple/Cuts $2 q(2)<>0
+Ntuple/Cuts $3 dc(2)>0
+Ntuple/Cuts $4 dc_stat(dc(2))<0
+Ntuple/Plot //LUN3/10.stat(2) $1.AND.$2.AND.$3.AND.$4 601572 1 601573 ' ' 1000000
+Ntuple/Cuts $0 -
+Ntuple/Cuts $1 gpart>1
+Ntuple/Cuts $2 q(2)<>0
+Ntuple/Cuts $3 dc(2)>0
+Ntuple/Cuts $5 stat(2)>0
+Ntuple/Plot //LUN3/10.dc_stat(dc(2)) $1.AND.$2.AND.$3.AND.$5 601572 1 601573 ' ' 1000000
+*** End   of history file: Fri Oct 29 13:16:36 2004

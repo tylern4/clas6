@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# smake
+#
+# Description:
+#
+#   Does a CLAS-like make from the current directory on a remote node at
+#   JLab via ssh.
+#
+# Usage notes:
+#
+#   Text output from make comes back on stdout.
+#   Uses ssh to access the remote node.
+#
+# Command-line arguments:
+#   1       : Name of target host
+#   2,3,... : Options used by make
+#
+# Example:
+#
+#   1) smake ifarml1 lib DEBUG=true
+#
+#   Does a make in the current working directory on ifarml1, building a debug
+#   version of the lib target.
+#
+#   2) cd $CLAS_PACK
+#      smake jlabs1
+#
+#   Does a make of the entire CLAS offline tree, non-debug version, on jlabs1
+#
+# RCS ID:
+#   $Id: smake,v 1.17 2002/07/17 18:43:23 claslib Exp $
+#
+host=$1
+shift
+ssh -2 -n $host \
+    "cd $PWD ; make $*"
+exit

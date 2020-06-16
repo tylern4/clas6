@@ -1,0 +1,179 @@
+      SUBROUTINE ST_EVNT(trk_level)
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: st_evnt.F,v 1.11 2001/11/30 15:53:37 pasyuk Exp $
+c
+c  Documentation for subroutine ST_EVNT
+c
+c  Purpose:  ST supplied EVENT processing routine, called once per event
+c  --------
+c
+c  Input Parameters:  NONE
+c  ----------------
+c
+c  Output Parameters: NONE
+c  -----------------
+c
+c  Called from:
+c  ------------
+c
+c  Other routines:
+c  ---------------
+c
+c  Notes:
+c  ------
+c
+c  Author:   Francois Roudot      Created:  Thu Jun 19 12:00:00 EST 1997
+c  -------
+c
+c  Major revisions:
+c  ----------------
+c     - added st_guess_nhits call  :Burin Feb98
+c
+c_end_doc
+c
+      IMPLICIT NONE
+      SAVE
+c
+c_begin_inc
+c  include files :
+c  ---------------------
+c BOS common block  uncomment the next line for BOS include file
+#include "bcs.inc"
+#include "sttcl.CMN"
+#include "st_general.PAR"
+#include "sthit.CMN"
+c_end_inc
+c
+c_begin_var
+c  input/output variables:
+c  -----------------------
+c
+       logical ok
+       integer trk_level
+c
+c  Local pre-defined variables:
+c  ---------------------------
+c  RCS information: 
+      CHARACTER*132  CFILE, CREVIS, CSTATE, CDATE, CAUTHO, CRCSID 
+      PARAMETER ( CFILE = '$RCSfile: st_evnt.F,v $')
+      PARAMETER ( CREVIS = '$Revision: 1.11 $')
+      PARAMETER ( CSTATE = '$State: Exp $')
+      PARAMETER ( CDATE = '$Date: 2001/11/30 15:53:37 $')
+      PARAMETER ( CAUTHO = '$Author: pasyuk $')
+      DATA CRCSID/
+     1'$Id: st_evnt.F,v 1.11 2001/11/30 15:53:37 pasyuk Exp $
+     3'/
+c  Module information:
+      CHARACTER*132  CRNAME, CRAUTH
+      PARAMETER (CRNAME='ST_EVNT')
+      PARAMETER (CRAUTH='Francois Roudot')
+c
+c  Local St defined variables:
+c  ---------------------------
+       character*4 trk_result_BOS_name
+       character*132 crmess
+       integer nwrite
+c_end_var
+c
+c  executable code for routine ST_EVNT:
+c  -------------------------------------
+c
+      IF (NWRITE .LT. 1) THEN
+        NWRITE = NWRITE + 1
+        CRMESS='This is a ST_EVNT routine, this message written once'
+        CALL RECMES(CRNAME,'I',CRMESS)
+      ENDIF
+
+      if (trk_level.eq.HIT_BASED) then
+         trk_result_BOS_name='HDPL'
+      else
+         trk_result_BOS_name='TDPL'
+      endif
+
+	call st_reset_arrays
+
+c
+c	extract from BOS bank, tdc & adc. Store them in stdata common block
+c
+       call stRead_from_BOS(OK)
+c
+c
+       if(.NOT.OK) then
+c            CRMESS='Unable to correctly read ST bank'
+c            call RECMES(CRNAME,'W',CRMESS)
+            RETURN
+       EndIf
+c     perform time conversion based on the calibration
+c
+       if(StType.eq.0) then
+          call st_calibrate(OK)
+       else
+          call stn_calibrate(OK)
+       endif
+       
+       if(.NOT.OK) then
+            CRMESS='not able to convert raw tdcs to time'
+             call RECMES(CRNAME,'W',CRMESS)
+            RETURN
+       EndIf
+c
+c  store for further processing information that has been succesfully converted
+c 
+        call stItm_fetch_to_BOS(OK)
+c
+c  extract from HDPL BOS bank how many tracks are in one pair 
+c  as seen by the drift chamber
+         call st_find_trk(OK,trk_result_BOS_name)
+c
+c
+       if(.NOT.OK) then
+c             CRMESS='Unable to extract info from HDPL BOS banks'
+c             call RECMES(CRNAME,'W',CRMESS)
+            RETURN
+       EndIf
+c
+c  use info from ST+TRK to determine how many hits in each pair
+c
+       call st_guess_nhits
+c       
+       call st_time_walk
+
+c
+c
+c       if(.NOT.OK) then
+c            crmess = 'problem during '
+c            call RECMES(CRNAME,'W',CRMESS)
+c            RETURN
+c       EndIf
+c
+c	perform the final diagnostic of the start counter
+c
+       call st_fit(OK)
+c
+c
+       if(.NOT.OK) then
+             crmess = 'Not able to fit'
+             call RECMES(CRNAME,'W',CRMESS)
+            RETURN
+       EndIf
+c
+c	store fit results into the start counter result bank
+       call st_fetch_to_BOS(OK, TRK_LEVEL)
+c
+c
+       if(.NOT.OK) then
+             crmess = 'Could not put STR to BOS'
+             call RECMES(CRNAME,'W',CRMESS)
+            RETURN
+       EndIf
+c
+       RETURN
+       END
+c
+c----------------------------------------------------------------------
+
+
+
+

@@ -1,0 +1,9 @@
+#! /usr/local/bin/perl
+
+open(C,"ls -1 /mss/clas/e1b/data/clas_00*.A00 | sort -r |")  || die "could not execute\n";
+
+while(<C>) {
+    if (/.*clas_00(\d+).A.*/) {
+	print $1,"\n";
+    }
+}

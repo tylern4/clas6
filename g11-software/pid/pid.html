@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.07 [en] (X11; U; SunOS 5.6 sun4u) [Netscape]">
+   <TITLE>&lt;h1>PID&lt;/h1></TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000">
+
+<CENTER>
+<H1>
+PID - C Implementation Particle ID and Utilities</H1></CENTER>
+
+<CENTER><IMG SRC="blue-line2.gif" ></CENTER>
+
+<H1>
+Introduction</H1>
+The pid set of routines is intended to provide a set C language tools to
+select events of interest for later analysis. As such, it provides several
+easy to call routines which can be placed in data filtering programs, that
+skim interesting events off of the cooked data. As such, most cuts made
+in pid are intended to be "loose" and particle identification should be
+taken as only a suggestion. PID is not meant to be the final word in particle
+id, ulitimate data selection cuts are the responsiblility of the individual
+experimenters.
+<H1>
+Structure</H1>
+The PID package is located in <FONT COLOR="#CC0000">packages/pid</FONT>,
+primarlily the pid software produces three banks, HBID, TBID and PART.
+The pid master header file <A HREF="http://www.cebaf.gov/~manak/packages/include/pid.h">packages/include/pid.h
+</A>contains the template for the HBID/TBID data structure, constructor
+subroutines, and some of the utilities for the BID and PART banks. For
+more details on working with BOS banks in C please consult the
+<A HREF="http://www.cebaf.gov/~manak/packages/c_bos_io/c_bos_io.html">c_bos_io
+library </A>.
+<H1>
+HBID/TBID banks</H1>
+The <A HREF="http://www.cebaf.gov/~manak/packages/bankdefs/hbid.ddl">HBID</A>
+and <A HREF="http://www.cebaf.gov/~manak/packages/bankdefs/tbid.ddl">TBID</A>
+banks (Hit Based particle ID) contain identical data structures (clasBID_t)
+which contain matching infomation (match_t) of tracks to the hits on various
+detectors.&nbsp; The clasBID_t data structure is shown below:
+<P><B>/*generic structure for HBID and TBID banks */</B><B></B>
+<P><B>typedef struct {</B>
+<BR><B>&nbsp; int stat;&nbsp; <FONT COLOR="#FF6600">/*&nbsp; status of
+hit matching */</FONT></B>
+<BR><B>&nbsp; int id;&nbsp;&nbsp;&nbsp;<FONT COLOR="#FF6600"> /*&nbsp;
+Fortran style pointer to bank */</FONT></B>
+<BR><B>&nbsp; float time;&nbsp;&nbsp;&nbsp;<FONT COLOR="#FF6600"> /* time
+for this track at detector plane */</FONT></B>
+<BR><B><FONT COLOR="#FF6600">&nbsp;</FONT><FONT COLOR="#330000"> float
+qual;&nbsp;&nbsp;&nbsp;</FONT><FONT COLOR="#FF6600"> /* quality factor
+*/</FONT></B>
+<BR><B><FONT COLOR="#FF6600">&nbsp; </FONT><FONT COLOR="#330000">float
+vtime;&nbsp;</FONT><FONT COLOR="#FF6600">&nbsp;&nbsp; /*&nbsp; time at
+vertex using time */</FONT></B>
+<BR><B><FONT COLOR="#FF6600">&nbsp; </FONT><FONT COLOR="#330000">float
+beta;&nbsp;</FONT><FONT COLOR="#FF6600">&nbsp;&nbsp; /*&nbsp; Beta as calculated
+from time*/</FONT></B>
+<BR><B><FONT COLOR="#330000">} match_t;</FONT></B><B><FONT COLOR="#330000"></FONT></B>
+<P><B><FONT COLOR="#330000">typedef struct {</FONT></B>
+<BR><B><FONT COLOR="#330000">&nbsp; int track;&nbsp;</FONT><FONT COLOR="#FF6600">&nbsp;&nbsp;
+/*&nbsp; Track Candidate (ptr to H/TBTR) */</FONT></B>
+<BR><B><FONT COLOR="#FF6600">&nbsp; </FONT><FONT COLOR="#330000">int sec;&nbsp;&nbsp;</FONT><FONT COLOR="#FF6600">&nbsp;
+/*&nbsp; Sector track is in */</FONT></B>
+<BR><B><FONT COLOR="#FF6600">&nbsp; </FONT><FONT COLOR="#330000">float
+beta;&nbsp;&nbsp;</FONT><FONT COLOR="#FF6600">&nbsp; /*&nbsp; Beta of the
+track in units of c */</FONT></B>
+<BR><B><FONT COLOR="#FF6600">&nbsp;</FONT><FONT COLOR="#330000"> float
+vtime; </FONT><FONT COLOR="#FF6600">/*vertex time for track */</FONT></B>
+<BR><B>&nbsp; match_t sc;</B>
+<BR><B>&nbsp; match_t cc;</B>
+<BR><B>&nbsp; match_t ec;</B>
+<BR><B>&nbsp; match_t st;</B>
+<BR><B>&nbsp; match_t lac;</B>
+<BR><B>} bid_t;</B><B></B>
+<P><B>typedef struct {</B>
+<BR><B>&nbsp; bankHeader_t bank;</B>
+<BR><B>&nbsp; bid_t bid[1];</B>
+<BR><B>} clasBID_t;</B>
+<P>There is one row in the bank for each hit track. The rows in the HBID/TBID
+bank are then sorted such that the track that is most likely to have generated
+the trigger is the first row in the bank. For each detector there is a
+status word describing whether or not a match occured and a pointer to
+the repective reconstruction bank from which the status word arrived. For
+instance ec.id is a fortran index into the ECHB bank hit which matched
+to the track. A time in ns of the hit is provided as well as a qualitiy
+factor indicating the distance of the hit from the track on the detector
+plane.
+<H1>
+PART bank</H1>
+The <A HREF="http://www.cebaf.gov/~manak/packages/bankdefs/part.ddl">PART</A>
+bank is a general purpose data structure used to contain a particle id
+number, a vertex and a 4-vector. Routines have been written to construct
+a part bank from the TBID bank <A HREF="http://www.cebaf.gov/~manak/packages/pid/makePART.c">(makePART.c)
+</A>. Code also exists to contruct a part bank from SEB particle id. Several
+utilities have been written that use the PART/TBID particle id to generate
+histograms and ntuples, these programs include <A HREF="http://www.cebaf.gov/~manak/packages/utilities/pid_mon/pid_mon.c">packages/utilities/pid_mon.c</A>,
+<A HREF="http://www.cebaf.gov/~manak/packages/utilities/photon_mon/photon_mon.c">packages/utilities/photon_mon.c</A>.
+In addition, calibration code has been written using this package in
+<A HREF="http://www.cebaf.gov/~manak/packages/utilities/cc_mon/cc_mon.c">packages/utilities/cc_mon.c</A>.
+<H1>
+PID Bank Initialization Routines</H1>
+
+<MENU>
+<LI>
+<B><FONT COLOR="#AF0000">int ConfigEvent(int RunNo, int pid_flag)</FONT></B></LI>
+
+<MENU><B>Initialize all detector packages (except tracking) and run control
+banks, everything you need for particle id, used in montioring/calibration
+program event main event loops. The argument pid_flag tells the routine
+whether or not to initialize the detector reconstruction code (0=false,
+1 = true). Located in pid/make_pid.c</B></MENU>
+
+<LI>
+<B><FONT COLOR="#AF0000">int initPID(int runno)</FONT></B></LI>
+
+<MENU><B>Initialize all detector packages (except tracking) everything
+you need for particle id (requires a RUNC bank for use), called by ConfigEvent.
+Located in pid/make_pid.c</B></MENU>
+</MENU>
+
+<H1>
+PID Bank Construction Routines</H1>
+
+<MENU>
+<LI>
+<B><FONT COLOR="#AF0000">clasBID_t *make_PID_banks(int number);</FONT></B></LI>
+
+<MENU><B>Re-Build all detector banks (except tracking) and contruct a TBID
++ PART bank of the appropriate number, ONLY call this routine if all the
+detectors have been initialized by ConfigEvent (pid_flag=1).</B></MENU>
+
+<LI>
+<B><FONT COLOR="#AF0000">clasBID_t *make_TBID_group(int number);</FONT></B></LI>
+
+<MENU><B>Create a TBID bank, and return a pointer to the bank. The number
+is the number of the TBID bank created, typically 0.</B></MENU>
+
+<LI>
+<B><FONT COLOR="#AF0000">clasPART_t *make_PART_group(int number);</FONT></B></LI>
+
+<MENU><B>Create a PART bank from the TBID bank with the appropriate number,
+and return a pointer to the bank. The number is also the number of the
+PART bank created, typically 0.</B></MENU>
+
+<LI>
+<B><FONT COLOR="#AF0000">int make_HBID_bank();</FONT></B></LI>
+
+<MENU><B>Create a HBID bank with number 0.</B></MENU>
+
+<LI>
+<B><FONT COLOR="#AF0000">int make_trks_banks_();</FONT></B></LI>
+
+<MENU><B>Create the TRKS (time based tracking start time) banks from the
+contents of HBID.</B></MENU>
+</MENU>
+
+<H1>
+PID in Reconstruction Codes</H1>
+To create the PID bank in a1 turn on the TBID/HBID process flag switches.
+To construct the PID banks in RECSIS turn on the tcl variable lhbid_do.
+In addition several skim and histogramming programs are capable of re-doing
+the PID particle id (/packages/utilities/e_filter, g_filter, photon_mon,
+pid_mon etc...).&nbsp;
+<HR><A HREF="http://www.cebaf.gov/~manak/offline_libs.html"><IMG SRC="cebaf.old.gif" BORDER=0 ></A>
+<HR>
+<ADDRESS>
+For comments or questions: <A HREF="mailto:manak@cebaf.gov">manak@cebaf.gov</A></ADDRESS>
+
+</BODY>
+</HTML>

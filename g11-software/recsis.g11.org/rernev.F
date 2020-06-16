@@ -1,0 +1,89 @@
+      SUBROUTINE RERNEV(IRN,IEV,IREC)
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: rernev.F,v 1.1 1997/03/28 20:58:15 marki Exp $
+c
+c  Documentation for subroutine RERNEV
+c
+c  Purpose: Returns the current RUN and EVENT number found in clasmdl.inc
+c  --------
+c
+c  Calling Sequence:
+c  ----------------
+c
+c  Input Parameters: NONE 
+c  ----------------
+c
+c  Output Parameters:  IRN - I - CURRENT RUN NUMBER
+c  -----------------   IEV - I _ CURRENT EVENT NUMBER
+c                      IREC - I - TOTAL NUMBER OF RECORDS READ/WRITTEN
+c  Called from:
+c  ------------
+c
+c  Other routines:
+c  ---------------
+c
+c  Notes:
+c  ------
+c
+c  Author:   Arne Freyberger      Created:  Sun Mar 19 14:24:47 EST 1995
+c  -------
+c
+c  Major revisions:
+c  ----------------
+c     
+c
+c_end_doc
+c
+      IMPLICIT NONE
+      SAVE
+c
+c_begin_inc
+c  include files :
+c  ---------------------
+c BOS common block  uncomment the next line for BOS include file
+#include "clasmdl.inc"
+c_end_inc
+c
+c_begin_var
+c  input/output variables:
+c  -----------------------
+c
+c  Local pre-defined variables:
+c  ---------------------------
+c  RCS information: 
+      CHARACTER*132  CFILE, CREVIS, CSTATE, CDATE, CAUTHO, CRCSID 
+      PARAMETER (CFILE=  '$RCSfile: rernev.F,v $')
+      PARAMETER (CREVIS= '$Revision: 1.1 $')
+      PARAMETER (CSTATE= '$State: Exp $')
+      PARAMETER (CDATE=  '$Date: 1997/03/28 20:58:15 $')
+      PARAMETER (CAUTHO= '$Author: marki $')
+      DATA CRCSID/
+     1'$Id: rernev.F,v 1.1 1997/03/28 20:58:15 marki Exp $'
+     3/
+c  Module information:
+      CHARACTER*(*)  CRNAME, CRAUTH
+c      CHARACTER*100  CRMESS
+      PARAMETER (CRNAME='RERNEV')
+      PARAMETER (CRAUTH='Arne Freyberger')
+c
+c  Local User defined variables:
+c  -----------------------------
+      INTEGER IRN, IEV, IREC
+c_end_var
+c
+c  executable code for routine RERNEV:
+c  -------------------------------------
+c
+      IRN = NCCRUN
+      IEV = NEVENT
+      IREC = TREC
+      RETURN
+      END
+c
+c------------------------------------------------------------------------------
+
+
+
+

@@ -1,0 +1,47 @@
+c      include file st_hit.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: sthit.CMN,v 1.4 2004/05/25 20:59:53 devita Exp $
+c
+c  Documentation for include file st_hit
+c
+c  Purpose:  
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   T. Auger     Created:  Mon Jun 03 10:11:52 EST 1997
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file st_hit:
+c  -----------------------------------
+c  
+c*************ST BOS common file************
+
+	integer StFastbus_data(St_max_pair,St_TDC1:St_ADC2)
+	integer StFoundHit(St_max_hit)
+	integer StSecHit(St_max_hit)
+	integer StNHits
+	integer Nhit_ST(St_max_pair), iside_ST(St_max_pair)
+	integer Ntrk_hit_ST(St_max_pair,2)
+c
+c_end_var
+c	
+	common /sthit/ StNHits,StFastbus_data,StSecHit,
+     1                 StFoundHit,Nhit_ST,iside_ST,Ntrk_hit_ST	
+	
+c----6----------------------------------------------------------------72
+
+
+
+

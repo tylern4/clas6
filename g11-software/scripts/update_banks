@@ -1,0 +1,14 @@
+#!/usr/local/bin/perl
+# run in bankdefs directroy
+# does very little - should still commit manually
+# see packages/bankdefs/HOW_TO_ADD_A_BANK
+# feel free to modify and improve...
+
+system("cat \`ls ?.ddl ??.ddl ???.ddl ????.ddl\` > clasbanks.ddl");
+
+system("ddl2h clasbanks.ddl > ../include/bosddl.h");
+
+#system("cd ../include; cvs commit -m \"update of bosddl.h" bosddl.h");
+
+
+

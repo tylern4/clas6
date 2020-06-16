@@ -1,0 +1,275 @@
+<HEAD>
+<title>The SCAT User Guide </title>
+</head>
+<body>
+<h1>The SCAT user guide </h1>
+<h2>Introduction</h2>
+
+<hr>
+The following are a few simple programs to demonstrate how to use
+SCAT. The first, just sends a string to all the processes displaying a
+scat address on the network. The next program queries the EventStore
+for a complete dump of information. The final program registers with the
+network and echoes any messages it receives on its stdout. 
+<p>
+
+<hr>
+This sends messages out to any scat enabled process it finds on the
+supplied host.<p>
+<pre>
+#include <stdio.h>
+#include <scat.h>
+
+char *theMsg = "hello world";
+
+/* no body will be able to send to me
+ * oh well. I just know how to send a message.
+ */
+int defults = 1; 
+
+main (int argc, char *argv[])
+{
+  char chbuf[1024];
+  int handle, n;
+
+  /*
+   * Must do this first - before using scat.
+   * Hand it a character buffer of a few hundred 
+   * bytes in length - I write the version and 
+   * compile date of scat in this buffer.
+   */
+  Scat_Initialize (charBufr);
+  /* 
+   * Init a handle for your self. If you know what to do 
+   * then this handle can be used by other scat programs.
+   * I just set things to dummy values and use scat to 
+   * fill things in later.
+   *
+   * Then, for the hostname supplied on the command
+   * line, probe the network for processes that are using
+   * scat. For each one, send it a message. 
+   *
+   * Notice that all the data you need to connect to 
+   * a scat process is contained in the things 
+   * returned from Scat_Probe. I use scat_conn_xxx functions
+   * to return the values as needed.
+   */
+  handle = Scat_Init (argv[1], defults, defults);
+  /*
+   * argv[1] = the hostname where you want to look for 
+   * scat processes.
+   */
+  wargs = Scat_Probe (argv[1]);
+  while (wargs[n]) {
+    printf ("%s\n", wargs[n]);
+    Scat_Conn_NodeName(wargs[n], b1) ;
+    z = Scat_InitHandle (b1, Scat_Conn_PgmNo (wargs[n]), 
+	                 Scat_Conn_VerNo (wargs[n]));
+    Scat_SendMsgNr (handle, theMsg);
+
+    n++;
+  }
+
+}
+</pre>
+</hr>
+<p>
+<hr>
+The next example dumps info from an EventStore. The EventStore accepts
+ascii strings like tcl/tk. The EventStore language is limited to
+adding and removing objects and a few maintance type things.
+<pre>
+#include <stdio.h>
+#include "scat.h"
+
+char *theMsg = "configuration";
+
+void main (int argc, char *argv[1])
+{
+  int    defults = 1, handle, n, number;  
+  char   chbufr[1024];
+  char   *wargs[100];
+  Event  *ptr;
+
+  /* 
+   * Must call this before using scat.
+   */
+  Scat_Initialize (chBufr);
+  /*
+   * Give yourself a handle - even if it is dummy.
+   */
+  handle = Scat_Init ("dummy", defults, defults);
+  /*
+   * scan for EventStores on host argv[1] 
+   * ... display as a list.
+   */
+  wargs = Scat_Probe (argv[1]);
+  printf ("list of scat programs on host[%s]\n\n", argv[1]);
+  n = 0;
+  while (wargs[n]) {
+    printf ("%d. %s\n", (n+1), wargs[n]);
+    n++;
+  }
+  while (1) {
+    printf ("\nChoose a command....\n0. exit   1. through %d. connect to that program\n");
+    scanf ("%d", &number);
+    if (number == 0) exit (0);
+    if (number > n) continue;
+    if (number < 0) continue;
+    break;
+  }
+  /* connect and ask for current config ... */
+
+  Scat_Conn_NodeName(wargs[number], chbufr) ;
+  handle = Scat_InitHandle (chbufr, Scat_Conn_PgmNo (wargs[number]), 
+		       Scat_Conn_VerNo (wargs[number]));
+  ptr = Scat_SendMsg (handle, theMsg);
+  printf ("%s\n", ptr->s);
+}
+</pre>
+</hr>
+<hr>
+This example will register with the network and then echo any messages
+it receives.
+<p>
+ok, this is the deal ...
+<p>
+In order to display a scat interface for other
+programs to connect to you have to declare and fill
+in a few functions.
+This stuff is boiler plate from the tool rpcgen.
+I just put the parts in I want.
+
+For this application I'll allow programs to call
+three standard scat interfaces. The SCAT protocol 
+has 6 interface functions you can call in total.
+
+<p>
+<pre>
+#include "stdio.h"
+#include "scat.h"
+
+
+/* ====================================================== */
+/*
+ * All programs should implement this first call at a minimum.
+ * Nothing fancy, just copy this if you want.
+ */
+mstr * svcname_1_svc(void *argp, struct svc_req *rqstp)
+{
+  static mstr  result;
+  char banner[1024], nme[20] ;
+  char *un;
+
+  /* just a silly name - make it unique if possible */
+  strcpy (nme, "theTester");
+
+  un = getenv ("LOGNAME");
+  if (un != 0) {
+    /* 
+     * MUST have called Scat_Initialize 1st! 
+     */
+    sprintf (banner, "%s %s %s %ld %ld ", un, 
+	     nme, svt->uts.nodename, svt->program, svt->vers);
+  }
+  
+  result = banner;
+  return &result;
+}
+/* ====================================================== */
+/*
+ * This function will allow a program to send you a message
+ * but you'll never respond. YOU HAVE TO RETURN A POINTER TO
+ * AN INTEGER FOR THE COMMUNICATIONS TO WORK!!!!!!! 
+ *
+ * If you don't BOTH sender and receiver will hang.
+ */
+int * msgnoreply_1_svc(Event *argp, struct svc_req *rqstp)
+{
+  static int theReturn;
+
+  /*
+   * I'll just echo the message string part.
+   */
+  printf ("%s\n", argp->s);
+
+  return &theReturn;
+}
+/* ===================================================== */
+/*
+ * Same as the above. Notice in this one I return 
+ * different thing.
+ */
+Event * msgwreply_1_svc(Event *argp, struct svc_req *rqstp)
+{
+  static Event        result;
+
+  /*
+   * I'll just echo the message string part.
+   */
+  printf ("%s\n", argp->s);
+
+  return &result;
+}
+/* ===================================================== */
+/*
+ * This is straight from the rpcgen tool. I don't use it
+ * here.
+ */
+int * browcreate_1_svc(Event *argp, struct svc_req *rqstp)
+{
+  static int  result;
+
+  result = 0;
+  return &result;
+}
+/* ===================================================== */
+/*
+ * This is straight from the rpcgen tool. I don't use it
+ * here.
+ */
+int * browdestroy_1_svc(Event *argp, struct svc_req *rqstp)
+{
+
+	static int  result;
+
+
+	return(&result);
+}
+/* ===================================================== */
+/*
+ * This is straight from the rpcgen tool. I don't use it
+ * here.
+ */
+Event * browfilter_1_svc(Event *argp, struct svc_req *rqstp)
+{
+
+  static Event        result;
+  return &result;
+}
+/* ===================================================== */
+/*
+ * Initialize Scat
+ * Register your self.
+ *
+ * run...
+ */
+void main (int argc, char *argv[1])
+{
+  int defults = 1, handle, n, number;  
+  char chbufr[1024];
+  char *wargs[100];
+
+  j = Scat_Initialize (b);
+  if (j == 0) {
+    printf ("something went wrong with scat_init...\n");
+    exit (0);
+  }
+  (void)Scat_Register ("MrMagoo");
+
+  Scat_SvcRun ();
+
+}
+</pre>
+</hr>
+</body>

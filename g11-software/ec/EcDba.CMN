@@ -1,0 +1,13 @@
+***************** begin: EcDba.CMN **********************************
+*- length of a side- (axis,layer,sector)
+      real  Ec_edge_L(Ec_u:Ec_w, whole:cover, 1:MAXsectors)
+c      real  Ec_edge_L(19:21, 9:12, 1:6)
+*
+      real EcBsc_r,EcBsc_a,EcBsc_v    ! distance and angle
+      real EcBsc_d(whole:outer)       ! depth of inner and outer
+      real EcBsc_H1(whole:outer)
+*
+      COMMON/EcDba/EcBsc_r,EcBsc_a,EcBsc_v,EcBsc_d,
+     &  EcBsc_H1,Ec_edge_L
+*
+******************* end: EcDba_geometry.CMN **********************************

@@ -1,0 +1,62 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+
+ifdef USEBOSIO
+BOSLIB= -lbosio$(ADD_DEBUG)
+else
+BOSLIB = -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG)
+endif
+
+STDLIBS= -L$(LOCAL_LIB) -L$(CLAS_LIB) -lclasEvent$(ADD_DEBUG) -lplib$(ADD_DEBUG) -lpid$(ADD_DEBUG) -lec$(ADD_DEBUG) -lcc$(ADD_DEBUG) -lsc$(ADD_DEBUG) -ltrk$(ADD_DEBUG) -ldc$(ADD_DEBUG) -leloss$(ADD_DEBUG) -llac$(ADD_DEBUG) -lst$(ADD_DEBUG)  -lpid$(ADD_DEBUG) -ltag$(ADD_DEBUG) -lscaler$(ADD_DEBUG) -lvertex$(ADD_DEBUG) -lbankdefs$(ADD_DEBUG) -lclasutil$(ADD_DEBUG)   -lc_bos_io$(ADD_DEBUG) -lrecutl$(ADD_DEBUG) -litape$(ADD_DEBUG) $(BOSLIB) -lc_bos_io$(ADD_DEBUG) -lmapmanager$(ADD_DEBUG)  -lonline_dummy$(ADD_DEBUG) -lc_cern$(ADD_DEBUG) -lpp -lpwaUtil$(ADD_DEBUG)
+
+#use the newest cern library
+CERNPATH= $(CERN_ROOT)/lib
+CERNLIB= -L$(CERNPATH) -lpacklib
+MATHLIB= -lm
+
+FINCLUDE := $(FINCLUDE) -I./include
+INCLUDE := $(INCLUDE) -I./include
+
+CCSRCS:=  tag_cpp_wrapper.cc 
+
+FSRCS:= tag_analysis.F tag_bin.F tag_brun.F tag_brun_normalisation.F tag_brun_scaler.F tagcal_read_file.F tagcal_read_from_BOS.F tagcal_read_local_file.F tagcal_read_map.F tagcal_reset.F tag_coincidence.F tag_debug.F tag_deltae.F tag_DSD_debug.F tag_erun.F tag_erun_warnings.F tag_E_T_binning.F tag_E_T_geom_match.F tag_E_T_time_match.F tag_evnt.F tag_fetch_to_BOS.F tag_filter_out.F tag_filter_out_NOLR.F tag_filter_translate.F tag_filter_translate_NOLR.F tag_get_runcontrol.F tag_get_TAGE_mode.F tag_init.F tag_int_fetch_to_BOS.F tag_last.F tag_make_PCO.F tag_make_PSO.F tag_make_TACO.F tag_make_TAGRI.F tag_nbc_bin.F tag_PC_fetch_to_BOS.F tag_PC_process.F tag_PC_T_match.F tag_process_TAGR.F tag_PS_analysis.F tag_PS_fetch_to_BOS.F tag_PS_process.F tag_PS_T_match.F tag_raw_2_BOS.F tag_read_bounds.F tag_read_from_BOS.F tag_read_PC_BOS.F tag_read_PS_BOS.F tag_read_RF_BOS.F tag_read_TAC_BOS.F tag_reset_arrays.F tag_RF_T_correction.F tag_scaler.F tag_sort_array.F tag_TAC_fetch_to_BOS.F tag_TAC_process.F tag_TAC_T_match.F tag_T_alone_analysis.F tagtcl_init.F tagtcl_set_def.F tag_T_norm_analysis.F tag_unbin.F 
+
+SRCS:= 
+
+FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+CCOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(CCSRCS))
+
+all: lib 
+
+LIBS= $(LOCAL_LIB)/libtag$(ADD_DEBUG).a
+lib: $(LIBS)
+
+$(LIBS): $(OBJS) $(FOBJS) $(CCOBJS)
+	$(VDIR) $(LOCAL_LIB)
+	ar rv $@ $?
+install: 
+	$(VDIR) $(LOCAL_BIN)
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo FFLAGS $(FFLAGS)
+	@echo CCLAGS $(CCFAGS)
+	@echo INCLUDE $(INCLUDE)
+	@echo LOCAL_LIB $(LOCAL_LIB)
+	@echo LOCAL_BIN $(LOCAL_BIN)
+	@echo LOCAL_INCLUDE $(LOCAL_INCLUDE)
+	@echo OBJDIR $(OBJDIR)

@@ -1,0 +1,48 @@
+***************** begin: EcDrv_general.CMN **********************************
+*
+*- Ec derived information
+*
+*- hits
+      integer EcDrv_Nhit( inner: outer, MAXsectors)
+      real EcDrv_hit( Ec_x: last_par, MAXhits,
+     &                       inner: outer, MAXsectors)
+      integer EcDrv_hit_Npeak( Ec_u: Ec_w, MAXhits,
+     &                       inner: outer, MAXsectors)
+      integer EcDrv_hit_peak( MAXpeaks, Ec_u: Ec_w, MAXhits,
+     &                       inner: outer, MAXsectors)
+      integer EcDrv_hit_Npixel( MAXhits,
+     &                       inner: outer, MAXsectors)
+      integer EcDrv_hit_pixel( MAXpixels, MAXhits,
+     &                       inner: outer, MAXsectors)
+*
+*- showers
+      integer EcDrv_Nshower( MAXsectors)
+      real EcDrv_shower( Ec_x: last_par, MAXshowers, MAXsectors)
+      integer EcDrv_shower_Nhit( inner: outer,
+     &                             MAXshowers, MAXsectors)
+      integer EcDrv_shower_hit( MAXhits, inner: outer,
+     &                             MAXshowers, MAXsectors)
+*
+*- unreconstructed energy
+      integer EcDrv_Nunrecon( inner: outer, MAXsectors)
+      real EcDrv_unrecon( near: highest, Ec_x: last_par,
+     &                MAXunrecon, inner: outer, MAXsectors)
+      integer EcDrv_unrecon_Nstrip( Ec_u:Ec_w, MAXunrecon,
+     &                inner: outer, MAXsectors)
+      integer EcDrv_unrecon_strip( MAXstrips, Ec_u: Ec_w,
+     &                MAXunrecon, inner: outer, MAXsectors)
+*
+*
+*- global information
+      real EcDrv_sum_energy( inner: outer, MAXsectors)
+*
+      COMMON /EcDrv_general/ EcDrv_Nhit,EcDrv_hit,
+     &                       EcDrv_hit_Npeak,EcDrv_hit_peak,
+     &                       EcDrv_hit_Npixel,EcDrv_hit_pixel,
+     &                       EcDrv_Nshower,EcDrv_shower,
+     &                       EcDrv_shower_Nhit,EcDrv_shower_hit,
+     &                       EcDrv_Nunrecon,EcDrv_unrecon,
+     &                       EcDrv_unrecon_Nstrip,EcDrv_unrecon_strip,
+     &                       EcDrv_sum_energy
+*
+******************* end: EcDrv_general.CMN **********************************

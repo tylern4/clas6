@@ -1,0 +1,46 @@
+#!/bin/sh
+#chkdsk -- a utility to find the CLAS work space (/work/clas/diskn)
+#          with the most free space.  Outputs the name of the disk
+#          and the amount of free space on it.
+#  John Price  1/10/98
+#  Modification history:
+#  1/14/98 (JWP): added code for AIX and HP platforms.
+max=0
+for disk in `ls -d /work/clas/disk*`
+do
+  if [ $OSNAME = "AIX" ]
+  then
+    dir=$PWD
+    cd $disk
+    temp=`df -k . \
+        | sed -n /:/p \
+        | awk '{ print $3 }'`
+    cd $dir
+  elif [ $OSNAME = "SunOS" ]
+  then
+    temp=`df -k $disk \
+        | sed -n /%/p \
+        | awk '{ print $4 }'`
+  elif [ $OSNAME = "Linux" ]
+  then
+    if [ -d $disk ]
+    then
+      temp=`df -k $disk \
+          | sed -n /%/p \
+          | awk '{ print $3 }'`
+    else
+      temp=0
+    fi
+  elif [ $OSNAME = "HP-UX" ]
+  then
+    temp=`df -k $disk \
+        | sed -n /free/p \
+        | awk '{ print $1 }'`
+  fi
+  if [ $temp -gt $max ]
+  then
+    max=$temp
+    bestdisk=$disk
+  fi
+done
+echo $bestdisk $max

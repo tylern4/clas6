@@ -1,0 +1,116 @@
+Getting the RF signal information from the CL01 bank for Photon Runs
+====================================================================
+
+Elton Smith
+Sep 24, 1998
+
+Summary of Changes
+==================
+The purpose of this work is to update the tagger code to use of the RF signal
+routines and CL01 bank which are used for electron beam running.
+Two routines have been modified and checked into the CVS repository:
+
+/utilities/sc/rf_evnt.F                     creates RF bank
+/tag/tag_RF_T_correction.F                  returns RF-corrected times for T-counters
+
+Map entries have been modified -with one exception- so that the constants used for RF 
+corrections now correspond to the execution of previous code with previous map constants. 
+The one update beyond previous use, adjusts the RF signals by 0.305 ns to align the tagger 
+with RF for run 11757. If this adjustment is not universal, then the RF_OFFSETS/offset 
+can be modified. The constant which corresponds to the previous calibrations is 
+RF_OFFSETS/offset=1.002 (half the RF period). The present value is set to 
+RF_OFFSETS/offset = 1.002-0.305 = 0.697. In summary, as far as I can tell, with 
+RF_OFFSETS/offset=1.002, the previous results are reproduced with the current changes 
+to the code and updates to the constants.
+
+Algorithm for Computation of RF signal
+======================================
+
+The following code from /st/makeCL01.c is used to compute the "good rf" signal:
+
+    if ((cl01.rf1 != NO_CL01_HIT) || ( cl01.rf2!= NO_CL01_HIT)) {
+      if(cl01.rf1>= bounds.low && cl01.rf1<= bounds.high){
+        cl01.rf = cl01.rf1 + rf_offset;  
+      }
+      else{ 
+        if(cl01.rf1 > cl01.rf2){
+          cl01.rf = cl01.rf2 + rf_offset + diffs.diff1;  
+        }
+        else{
+          cl01.rf = cl01.rf2 + rf_offset + diffs.diff2;
+        }
+      }
+
+This code contains two additional constants compared to the original FORTRAN (rf_offset
+and diffs.diff2; diffs.diff1 substitutes for rf2rf1Offset). 
+
+
+Changes to Map Entries
+======================
+
+Relevant to our purpose the following entries are now in place:
+
+Constant                               Run 9595           Run 10101       Run 10895
+-----------
+RF_OFFSETS/offset/value                1.002              0.697           0.697
+RF_OFFSETS/rf_diff/rf1_gt_rf2          40.31              40.31          41.90
+RF_OFFSETS/rf_diff/rf1_lt_rf2          -39.85             -39.85          -38.26  
+RF_OFFSETS/rf_range/high               170.               78.             78.
+RF_OFFSETS/rf_range/low                35.                15.             15.
+
+CALL_CALIB/RFoffset/rf2rf1Offset(*)    0.23               0.23            1.82     
+CALL_CALIB/T0/value(6)                 0.                 0.              0.
+CALL_CALIB/T0/value(7)                 0.                 0.              0.
+CALL_CALIB/T1/value(6)                 0.049060           0.049060        0.049060
+CALL_CALIB/T1/value(7)                 0.049060           0.049060        0.049060
+CALL_CALIB/T2/value(6)                 0.                 0.              0.
+CALL_CALIB/T2/value(7)                 0.                 0.              0.
+
+(*) New code no longer uses this constant and should be phased out. rf_diff entries
+replace this constant with equivalent values + multiples of the RF period.
+
+Map Histories
+
+Map: /group/clas/parms/Maps/RF_OFFSETS.map
+        Subsystem: offset,      nitems: 1
+                Item: value,    length: 1,      type: float,    narray:19
+                 INF <-- 10101 <--  9595 <--  9489 <--  9479 <--  9453 <--  9416 <--  9301 
+                 <--  9291 <--  9213 <--  9178 <--  9150 <--  8937 <--  8882 <--  8793 
+                 <--  8500 <--  7948 <--  7600 <--  7500 <--  1 <--  UNDEF
+        Subsystem: rf_diff,     nitems: 2
+                Item: rf1_gt_rf2,       length: 1,      type: float,    narray:5
+                 INF <-- 10895 <--  10000 <--  9595 <--  7500 <--  1 <--  UNDEF
+                Item: rf1_lt_rf2,       length: 1,      type: float,    narray:5
+                 INF <-- 10895 <--  10000 <--  9595 <--  7500 <--  1 <--  UNDEF
+        Subsystem: rf_range,    nitems: 2
+                Item: high,     length: 1,      type: float,    narray:3
+                 INF <-- 10000 <--  7500 <--  1 <--  UNDEF
+                Item: low,      length: 1,      type: float,    narray:3
+                 INF <-- 10000 <--  7500 <--  1 <--  UNDEF
+
+
+
+Map: /group/clas/parms/Maps/CALL_CALIB.map
+        Subsystem: RFoffset,    nitems: 1
+                Item: rf2rf1Offset,     length: 1,      type: float,    narray:4
+                 INF <-- 10865 <--  9595 <--  1 <--  UNDEF
+        Subsystem: T0,  nitems: 2
+                Item: unc,      length: 10,     type: float,    narray:5
+                 INF <-- 10000 <--  8500 <--  8328 <--  7250 <--  1 <--  UNDEF
+                Item: value,    length: 10,     type: float,    narray:6
+                 INF <-- 10101 <--  10000 <--  8500 <--  8328 <--  7250 <--  1 <--  UNDEF
+        Subsystem: T1,  nitems: 2
+                Item: unc,      length: 10,     type: float,    narray:4
+                 INF <-- 8385 <--  8328 <--  7250 <--  1 <--  UNDEF
+                Item: value,    length: 10,     type: float,    narray:4
+                 INF <-- 9595 <--  7250 <--  100 <--  1 <--  UNDEF
+        Subsystem: T2,  nitems: 2
+                Item: unc,      length: 10,     type: float,    narray:5
+                 INF <-- 10000 <--  8500 <--  8328 <--  7250 <--  1 <--  UNDEF
+                Item: value,    length: 10,     type: float,    narray:5
+                 INF <-- 10000 <--  8500 <--  8328 <--  7250 <--  1 <--  UNDEF
+        Subsystem: pedestals,   nitems: 2
+                Item: unc,      length: 10,     type: float,    narray:1
+                 INF <-- 1 <--  UNDEF
+                Item: value,    length: 10,     type: float,    narray:1
+                 INF <-- 1 <--  UNDEF

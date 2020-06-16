@@ -1,0 +1,57 @@
+#! /usr/bin/perl
+
+
+$np = 30;
+@arr = ();
+
+for (@ARGV) {
+    print;
+    print "\n";
+    if (/^-n(\d+)/) {
+	$np= $1;
+    }
+    else {
+	push(@arr,($_));
+    }
+}
+
+@ARGV = @arr;
+$pat = $ARGV[0];
+shift;
+print "N: $np\tPATTERN: $pat\n";
+
+
+$n = 0;
+@arr = ();
+$k = 0;
+while (<>) {
+  if ($k) {
+       	$nl++;
+	print "$nl ",$_;
+	$k--;
+
+}
+else {
+	push(@arr,($_));
+	if ($n > $np) {
+		shift @arr;
+	}
+	else {
+		$n++;
+	}
+
+
+	if (/.*$pat.*/) {
+		$nl = -$np - 1;
+		foreach $l (@arr) {
+			$nl++;
+			print "$nl: $l";
+		}
+		$k = $np;
+
+	
+	}
+}
+}
+
+	

@@ -1,0 +1,21 @@
+macro target p=3.0
+
+  exec clas x 0.2 10 10 
+  kine 3 3 [p] [p] 0 0 0 0  0 0 -10.
+  tit = Firing 100 [p] GeV/c electrons through target
+  text 2. 6. [tit] 0.3
+  trig 100
+  
+return
+
+macro protonsweep
+
+  exec clas y 0.03 5 2
+  
+  do p = 1.0,0.2,-0.1
+    kine 3 14 [p] [p] 10. 10.  0 0
+    trig 10
+  enddo
+  
+return
+  

@@ -1,0 +1,12 @@
+******************** begin: EcFitEdge_controls.DTE ****************************
+*
+*- minimum threshold for strips to be significant
+      data EcFitEdge_strip_threshold/0.001/      !GeV
+*
+*- minimum threshold for peaks to be significant
+      data EcFitEdge_peak_threshold/0.003/       !GeV
+*
+*- minimum threshold for hits to be significant
+      data EcFitEdge_hit_threshold/0.010/        !GeV
+*
+*********************** end: EcFitEdge_controls.DTE ****************************

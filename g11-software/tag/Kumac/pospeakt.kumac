@@ -1,0 +1,138 @@
+*  size of the window checked in ns
+max = 60
+*  number of bin (resolution)
+bin = 230
+*  statistic we accept for determining the position of the peak
+stat = 5
+
+vec/cr oldpostpeakl(61) R
+vec/cr oldpostpeakr(61) R
+vec/cr statisticl(61) I
+vec/cr statisticr(61) I
+vec/cr postpeakl(61) R
+vec/cr postpeakr(61) R
+vec/cr posmeanl(2) R 0 0
+vec/cr posmeanr(2) R 0 0
+vec/cr vect([bin])
+vec/cr data(3) R
+
+message 'Old peak position file :'
+read filenameold
+
+* read old values
+
+vec/read data [filenameold] 'F4.0,F8.2,F8.2' 'O'
+vec/copy data(2) oldpostpeakl(1)
+vec/copy data(3) oldpostpeakr(1)
+do i=2,60
+vec/read data [filenameold] 'F4.0,F8.2,F8.2' ' '
+vec/copy data(2) oldpostpeakl([i])
+vec/copy data(3) oldpostpeakr([i])
+enddo
+vec/read data [filenameold] 'F4.0,F8.2,F8.2' 'C'
+vec/copy data(2) oldpostpeakl(61)
+vec/copy data(3) oldpostpeakr(61)
+
+message 'Output (New) peak position file :'
+read filename
+zone 1 2
+
+do l=1,61
+i=2*[l]-1
+h/cr/1d 1000 'pos peak TL '[l] [bin] -[max] [max]
+n/proj 1000 1.time_l t_id=[i]
+h/pl 1000
+
+h/cr/1d 1001 'pos peak TR '[l] [bin] -[max] [max]
+n/proj 1001 1.time_r t_id=[i]
+h/pl 1001
+
+h/get/cont 1000 vect
+
+sigma lmax = lvmax(vect)
+
+* if we have enough statistic
+if vect(lmax)>[stat] then
+vec/input statisticl([l]) 1
+sigma chmax = [max]*(-1 + 2*lmax/[bin])
+vec/copy chmax postpeakl([l])
+vadd oldpostpeakl([l]) posmeanl(1) posmeanl(1)
+vadd postpeakl([l]) posmeanl(1) posmeanl(1)
+vbias posmeanl(2) 1 posmeanl(2)
+endif
+
+*if we don't have enough statistic
+if vect(lmax)<=[stat] then
+vec/input statisticl([l]) 0
+endif
+
+h/get/cont 1001 vect
+sigma lmax = lvmax(vect)
+
+* if we have enough statistic
+if vect(lmax)>[stat] then
+vec/input statisticr([l]) 1
+sigma chmax = [max]*(-1 + 2*lmax/[bin])
+vec/copy chmax postpeakr([l])
+vadd oldpostpeakr([l]) posmeanr(1) posmeanr(1)
+vadd postpeakr([l]) posmeanr(1) posmeanr(1)
+vbias posmeanr(2) 1 posmeanr(2)
+endif
+
+*if we don't have enough statistic
+if vect(lmax)<=[stat] then
+vec/input statisticr([l]) 0
+endif
+
+h/del 1000
+h/del 1001
+enddo
+
+vdiv posmeanl(1) posmeanl(2) posmeanl(1)
+vdiv posmeanr(1) posmeanl(2) posmeanr(1)
+* to obtain the mean value we divide the sum by the number of entries
+
+* Correct the old values by the measured shift
+
+vadd postpeakl oldpostpeakl postpeakl
+vadd postpeakr oldpostpeakr postpeakr
+
+do i=1,61
+* if we don't have enough statistic we take for the peak position the mean value.
+if statisticl([i])=0 then
+message 'not enough statistic for T '[i]' left'
+vec/copy posmeanl(1) postpeakl([i])
+endif
+if statisticr([i])=0 then
+message 'not enough statistic for T '[i]' right'
+vec/copy posmeanr(1) postpeakr([i])
+endif
+enddo
+
+* write new values in the new file
+
+vec/input data(1) 1 
+vec/copy postpeakl(1) data(2)
+vec/copy postpeakr(1) data(3)
+vec/write data [filename] 'F4.0,F8.2,F8.2' 'O'
+do i=2,61
+vec/input data(1) [i]
+vec/copy postpeakl([i]) data(2)
+vec/copy postpeakr([i]) data(3)
+vec/write data [filename] 'F4.0,F8.2,F8.2' ' '
+enddo
+vec/input data(1) 500 
+vec/copy posmeanl(1) data(2)
+vec/copy posmeanr(1) data(3)
+vec/write data [filename] 'F4.0,F8.2,F8.2' 'C'
+
+vec/del oldpostpeakl
+vec/del oldpostpeakr
+vec/del statisticl
+vec/del statisticr
+vec/del postpeakl
+vec/del postpeakr
+vec/del posmeanl
+vec/del posmeanr
+vec/del vect
+vec/del data

@@ -1,0 +1,55 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(itape.cc)
+
+AC_CANONICAL_HOST
+
+dnl Checks for programs.
+AC_CHECK_PROGS(NOWEAVE,noweave,no)
+if test "$NOWEAVE" = no; then
+  AC_MSG_WARN(documentation cannot be built since notangle is not found)
+fi
+AC_CHECK_PROGS(NOTANGLE,notangle,no)
+if test "$NOTANGLE" = no; then
+  AC_MSG_ERROR(nothing can be built since notangle is not found)
+fi
+AC_CHECK_PROGS(F77,f77 g77 f2c,no)
+if test "$F77" = no; then
+  AC_MSG_ERROR(nothing can be built since no fortran compiler was found)
+fi
+AC_PROG_INSTALL
+AC_PROG_CXX
+AC_PROG_MAKE_SET
+
+dnl Checks for libraries.
+dnl Replace `main' with a function in -lm:
+AC_CHECK_LIB(m, main)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+
+AC_LANG_CPLUSPLUS
+AC_MSG_CHECKING(compiler flags for exceptions)
+cxx_exceptions_flag=null;
+AC_TRY_COMPILE(,[throw "xxx";],
+cxx_exceptions_flag=none)
+if test $cxx_exceptions_flag = null; then
+CXXFLAGS=-fhandle-exceptions
+AC_TRY_COMPILE(,[throw "xxx";],
+cxx_exceptions_flag=-fhandle-exceptions)
+fi
+AC_MSG_RESULT($cxx_exceptions_flag)
+if test $cxx_exceptions_flag = none; then
+cxx_exceptions_flag=" "
+fi
+AC_SUBST(cxx_exceptions_flag)
+
+dnl Checks for library functions.
+
+srcs=`mains $srcdir/*.cc`
+AC_SUBST(srcs)
+
+AC_OUTPUT(Makefile)
+

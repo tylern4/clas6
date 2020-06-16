@@ -1,0 +1,192 @@
+#!/usr/local/bin/perl
+
+#  call_tree
+
+#  Perl script to make fortran subroutine call tree
+
+# usage:
+#   call_tree [-p prune_file] [-r root] [-f output_file] [-i nindent] [-m max_depth] file1.F file2.F ...
+
+#  notes:  
+#	Prune_file contains (whitespace separated) list of leaves to prune off call tree.
+#	If [-r root] specified, only graphical list of root call tree generated.
+#	Doesn't handle function calls, but does handle function definitions.
+#	Attempts to handle legal fortran and mortran, the latter giving all the problems!
+#	Entry statements in subroutine listed but not considered separate routines.
+#       In case of duplicate routine names, the first is taken.
+
+#	Default output file is "call_tree.txt".
+
+#  warning:
+#	It is VERY easy to fool this program...strings with the word "call" will in 
+#           general generate extraneous entries in the call tree.
+#	Basically, I'd need to implement a fortran syntax parser to get this correct
+
+#  still to do:
+
+#  E.Wolin, College of William and Mary, 29-jun-95
+
+
+#  Perl code:
+#  ----------
+
+$line = " ".join(" ",@ARGV)." ";     # pad line with whitespace
+
+if( (!$ARGV[0]) || ($line=~m/\s+-help\s+/) || ($line=~m/\s+-h\s+/) ){
+  die "\n usage:  call_tree [-p prune] [-r root] [-f outfile] [-i indent] [-m mx_depth] file1.F ...\n\n";} 
+
+#  defaults
+$call_tree="call_tree.txt";	# file name
+$nindent=4;			# number of spaces to indent
+$max_depth=50;			# max depth level
+
+#  check command line for flags
+($prune_file    =$1) if ($line =~ s/-p\s*(\S*)//i);
+($call_tree     =$1) if ($line =~ s/-f\s*(\S*)//i);
+($root          =$1) if ($line =~ s/-r\s*(\S*)//i);
+($nindent       =$1) if ($line =~ s/-i\s*(\d*)//i);
+($max_depth =    $1) if ($line =~ s/-m\s*(\d*)//i);
+
+
+#  generate list of leaves to prune
+if($prune_file){
+    open(PRUNE,"<$prune_file") || die "\n ?call_tree...unable to open prune file $prune_file ***\n\n";
+    while (<PRUNE>){
+	chop;
+	$prune_list .= " " . $_ . " "
+    }
+    close(PRUNE);
+}
+
+
+#  collect call dependencies and entry list
+print "\n";
+foreach $file (split(" ",$line)){
+    if(!open(FILE,$file)){warn "\n?call_tree...unable to open file $file\n\n"; next;}
+    $count=1;
+    $duplicate=0;
+    $sub="main$count($file)";
+    
+    while(<FILE>){
+	if((/^\s*subroutine\s+(\w*)/i)         || 
+	   (/^\s*program\s+(\w*)/i)            ||
+	   (/^\s*function\s+(\w*)/i)           ||
+	   (/^\s*integer\s+function\s+(\w*)/i) ||
+	   (/^\s*real\s+function\s+(\w*)/i)){
+	    ($sub=$1)=~tr/A-Z/a-z/;
+	    if(!$call_list{$sub}){
+		$duplicate=0;
+		$call_list{$sub} = " ";
+	    }else{
+		warn "ignoring duplicate subroutine name $sub in file $file\n";
+		$duplicate=1;
+	    }
+	}elsif (/^\s*entry\s+(\w*)/i){
+	    ($entry=$1)=~tr/A-Z/a-z/;
+	    if(!($entry_list{$sub}=~m/\b$entry\b/)){$entry_list{$sub} .= ($entry . " ");}
+
+	}elsif( (/^\s*end\s*[\"\!\;\n\r]/i)){
+	    $count++;
+	    $sub="main$count($file)";
+	    $duplicate=0;
+
+	}elsif(($duplicate==0) && (/^[^c*!\"].*call\s+(\w*)/i)){
+	    ($name=$1)=~tr/A-Z/a-z/;
+	    if(!(  $caller{$name}=~m/\b$sub\b/) ){$caller{$name}   .= ($sub  . " ");}
+	    if(!($call_list{$sub}=~m/\b$name\b/)){$call_list{$sub} .= ($name . " ");}
+	}
+    }
+}
+
+
+
+#  open file and generate various reports, all in the same file
+open(REPORT,">$call_tree");
+
+#  print call tree for specified root only
+if($root){
+    $sub=$root;
+    print REPORT "\n\nReport on $sub tree----\n";
+    &print_sub_tree($sub,0,1);
+    print REPORT "\n";
+    print "\n *** call_tree...generating tree for routine $root *** \n";
+}    
+
+
+#  indented call tree...roots are routines which aren't called by anyone
+if(!$root){
+    foreach $sub (sort(keys(%call_list))){
+	if(!$caller{$sub}){
+	    print REPORT "\n\nReport on $sub tree----\n";
+	    &print_sub_tree($sub,0,1);
+	    print REPORT "\n";
+	}
+    }
+}
+
+
+#  list routines called in each subroutine
+if(!$root){
+    print REPORT "\n\n\n\n\n";
+    print REPORT "List of routines called by each subroutine:\n";
+    print REPORT "-------------------------------------------\n\n";
+    foreach $sub (sort(keys(%call_list))){
+	$list=$call_list{$sub};
+	print REPORT "\n$sub calls the following subroutines:\n";
+	foreach $name (sort(split(" ",$list))){
+	    print REPORT "    $name\n";
+	}
+    }
+}
+
+
+#  list of who calls each routine
+if(!$root){
+    print REPORT "\n\n\n\n\n";
+    print REPORT "List of callers of each subroutine:\n";
+    print REPORT "-----------------------------------\n\n";
+    foreach $name (sort(keys(%caller))){
+	$list=$caller{$name};
+	print REPORT "\n$name is called by the following subroutines:\n";
+	foreach $sub (sort(split(" ",$list))){
+	    print REPORT "    $sub\n";
+	}
+    }
+}
+
+close(REPORT);
+
+#  done
+die "\n *** call tree done...output in $call_tree ***\n\n";
+
+
+
+#  subroutine prints sub-tree call tree and entry list, called recursively
+#  checks prune list and does nothing if routine in list
+sub print_sub_tree {
+    local($sub,$indent,$level)=@_;	# create local variables from arguments
+    local($i,$list,$entries);
+
+#  exit if sub in prune list
+#    return if (index($prune_list,$sub)!=-1);
+    return if ($prune_list=~m/\b$sub\b/);
+
+#  check for max depth level
+    if($level>=$max_depth){
+	die "\n ?call_tree..exceeded max depth level: $max_depth\n\n";}
+
+#  indent and print routine name
+    for ($i=1; $i<=$indent; $i++) {print REPORT " ";}
+    if($entry_list{$sub}){
+	chop($list=$entry_list{$sub});
+	$entries="  (entries: $list)";
+    }else{
+	$entries="";
+    }
+    print REPORT "$sub$entries\n";
+
+#  print sub tree for each routine called by this one, with extra indent
+    foreach $name (split(" ",$call_list{$sub})){
+	&print_sub_tree($name,$indent+$nindent,$level+1);
+    }
+}

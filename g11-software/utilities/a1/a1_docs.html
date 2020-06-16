@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.07 [en] (X11; U; SunOS 5.6 sun4u) [Netscape]">
+   <TITLE>CLAS Offline - Stand Alone Software</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000">
+
+<CENTER>
+<H1>
+a1 Documentation</H1></CENTER>
+
+<CENTER><IMG SRC="blue-line2.gif" ></CENTER>
+
+<H1>
+Overview</H1>
+a1 is the program shell used to create the processed (Cooked) data files.
+a1 has no facility to create histograms, or ntuples - the data processing
+philosophy in CLAS is to produce files of reconstruction BOS banks which
+can then be examined by other programs to produce plots of physics interest.
+a1 uses the same reconstruction libraries as RECSIS but in a C program
+shell without an interactive tcl command line or input file. Because of
+the lack of a tcl interface all software packages are run with their default
+values - while this might seem like a disadvantage - it is always unambiguous
+as to which library module parameters were used to process a data file.
+Presumably, the defaults in each module are the best numbers available.
+<P>a1 is meant to be easy to use, the only arguments required to operate
+a1 are an output file name and a list of input BOS files. The only environment
+variable that needs to be set for a1 is the CLAS_PARMS environment variable
+which tells the program where to find the calibration constants for each
+detector subsystem. A typical a1 command might look something like this:
+<BR>jlabs3> <B>a1pro-1-3 -otest datafile</B>
+<P>This command runs the production version 1.3 of a1 (a1pro-1-3) on a
+file of bos banks called <B>datafile</B>, and it produces an output file
+of reconstructed BOS banks called <B>test</B>. This command will attempt
+to perform all the reconstruction it can on the BOS input file and result
+in the creation of a very large output file.
+<H1>
+Command Line Help</H1>
+Command line help can be obtained by simply typing the program name at
+the prompt ex:
+<BR>jlabs3> <B>a1pro-1-3</B>
+<P>or by typing the program name with the <B>-h </B>command line option
+ex:
+<BR>jlabs3> <B>a1pro-1-3 -h</B>
+<P>a copy of the a1 program can be found in $CLAS_BIN/ usually under the
+name a1c or the name a1pro-X-Y where X-Y indicates the version number.
+<H1>
+Process Flags</H1>
+The <B>-P </B>switch in a1 turns on an off various packages the <B>-P</B>
+is followed by a bit flag usually in the form of a hexadecimal number.
+An up-to-date list of the process bit flag is given on the command line
+help. Listed below is a partial list of the process flags:
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x1&nbsp;&nbsp;&nbsp;&nbsp; Hit-based tracking (HBTR)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x2&nbsp;&nbsp;&nbsp;&nbsp; Time-of-Flight&nbsp; (SC)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x4&nbsp;&nbsp;&nbsp;&nbsp; Hit-based particle id (HBID)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x8&nbsp;&nbsp;&nbsp;&nbsp; Electromagnetic Calorimeter (EC)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x10&nbsp;&nbsp;&nbsp; Cerenkov Counter (CC)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x20&nbsp;&nbsp;&nbsp; Time-based tracking (TBTR)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x40&nbsp;&nbsp;&nbsp; CALL bank analysis (CL01, RF)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x80&nbsp;&nbsp;&nbsp; Time-based particle id (TBID, PART)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x100&nbsp;&nbsp; Simple Event Builder analysis (SEB)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x200&nbsp;&nbsp; LAC analysis
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x400&nbsp;&nbsp; Tagger analysis
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x800&nbsp;&nbsp; Start Counter analysis
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x1000&nbsp; Construct TRKS from HBID
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x2000&nbsp; Construct TRKS from TBID (re-does TB)
+<P>by default all flags are turned <B>ON</B>. For example to configure
+a1 to perform only Hit Based, Time-of-Flight and EC analysis one would
+type the command:
+<P>jlabs3> <B>a1pro-1-3 -otest -P0xe data</B><B></B>
+<P>where <B>0x2 + 0x4 + 0x8 = 0xe</B>.
+<P><B><FONT SIZE=+3>Drop Flags</FONT></B><B></B>
+<P>a1 also has an option not to write out some of the various banks produced
+during reconstruction using the so called Drop flags. The Drop flags work
+in a similar fashion to the Process flags except that the remove various
+banks from the output. A partial list of Drop flags is shown below:
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x1&nbsp;&nbsp;&nbsp;&nbsp; Drop RC00->16 Banks
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x2&nbsp;&nbsp;&nbsp;&nbsp; Drop DC0 Bank
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x4&nbsp;&nbsp;&nbsp;&nbsp; Drop DC1 Bank
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x8&nbsp;&nbsp;&nbsp;&nbsp; Drop HBLA Bank
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x10&nbsp;&nbsp;&nbsp; Drop TBLA Bank
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x20&nbsp;&nbsp;&nbsp; Drop HBTB Bank
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x40&nbsp;&nbsp;&nbsp; Drop SC Banks
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x80&nbsp;&nbsp;&nbsp; Drop EC Banks
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x100&nbsp;&nbsp; Drop HBID Bank
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x200&nbsp;&nbsp; Drop CL01 Bank
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x400&nbsp;&nbsp; Drop SEB Banks
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x800&nbsp;&nbsp; Drop TBID,PART Bank
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x1000&nbsp; Drop HDPL Bank
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x2000&nbsp; Drop LAC Banks
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x4000&nbsp; Drop CC Banks
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0x8000&nbsp; Drop ST Banks
+<P>by default <B>NO</B> banks are dropped (all Drop flags are <B>OFF</B>).&nbsp;
+For example if one wished to perform all reconstruction but only write
+out the Tracking related and PID reconstruction banks one would type:
+<P>jlabs3> <B>a1pro-1-3 -otest -D0xc6c1 datafile</B><B></B>
+<P>where <B>0x1 + 0x80 + 0x40 + 0x200 + 0x400 +&nbsp;0x4000 + 0x8000 =
+0xc6c1</B>.
+<H1>
+Examples</H1>
+Some examples of using a1 to process data are shown below.
+<MENU>
+<LI>
+Production Processing of E1 data</LI>
+
+<MENU><B>a1pro-1-3 -i -F -O -Nprod13 -p/work/clas/disk3/feb98 -se -D0xf3fd
+-P0x3fb clas_009305.A00</B></MENU>
+
+<LI>
+Analysis of e1 Monte Carlo data</LI>
+
+<MENU><B>a1pro-1-3 -ct3375 -cm6000 -P0x3bb -ogsim_test_4.0GeV.cooked -X0
+-T0 -E4000 -R1 ../costy/test/gsim_4GeV_test.dat</B></MENU>
+<LI>
+Analysis of g1 Monte Carlo data (PROD-1-5) [add -cp0 for prod-1-6 version]</LI>
+
+<MENU><B>a1c -ct1950 -cm0 -P0x18ff -D0xf2fc -otest.gsim.a1c -X0 -T1 -E2.445 -R1 test.gsim</B></MENU>
+</MENU>
+
+<HR><A HREF="http://www.cebaf.gov/~manak/offline.html"><IMG SRC="cebaf.old.gif" BORDER=0 ></A>
+<HR>
+<ADDRESS>
+For comments or questions: <A HREF="mailto:manak@cebaf.gov">manak@cebaf.gov</A></ADDRESS>
+
+</BODY>
+</HTML>

@@ -1,0 +1,54 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+
+ifdef USEBOSIO
+BOSLIB= -lbosio$(ADD_DEBUG)
+else
+BOSLIB = -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG)
+endif
+
+STDLIBS= -L$(LOCAL_LIB) -L$(CLAS_LIB)  -lpid$(ADD_DEBUG) -lec$(ADD_DEBUG) -lcc$(ADD_DEBUG) -lsc$(ADD_DEBUG) -llac$(ADD_DEBUG) -lst$(ADD_DEBUG)  -lpid$(ADD_DEBUG) -ltag$(ADD_DEBUG) -lscaler$(ADD_DEBUG) -lclasutil$(ADD_DEBUG)   -lc_bos_io$(ADD_DEBUG) -lrecutl$(ADD_DEBUG) -litape$(ADD_DEBUG) $(BOSLIB) -lc_bos_io$(ADD_DEBUG) -lmapmanager$(ADD_DEBUG)  -lonline_dummy$(ADD_DEBUG) -lc_cern$(ADD_DEBUG) -lpp -lpwaUtil$(ADD_DEBUG)
+
+#use the newest cern library
+CERNPATH= $(CERN_ROOT)/lib
+CERNLIB= -L$(CERNPATH) -lpacklib
+MATHLIB= -lm
+
+FINCLUDE := $(FINCLUDE) -I./include
+INCLUDE := $(INCLUDE) -I./include
+
+CCSRCS:=  
+
+FSRCS:= ana_fit.F ana_link.F ana_lramb.F ana_mvprod.F ana_mxinv.F ana_prfit.F ana_segm.F ana_statb.F ana_stati.F ana_trfit.F get_xxtr.F make_dc1_digi.F mfm_brubz.F mfm_brun.F mfm_dusp.F mfm_ellipt.F mfm_field.F mfm_get27.F mfm_getmf.F mfm_inuli.F mfm_ptgfield.F mfm_tcl_init.F mfm_torfield.F ran.F read_trk_banks.F sda_dinit.F sda_flags.F sda_gcubs.F sda_helix.F sda_icyl.F sda_ipln.F sda_minit.F sda_ptrk.F sda_ridge.F sda_rotds.F sda_snake.F sda_snake_pt.F sda_swim.F sda_torus.F sda_trmat.F sda_xmm55.F setup_anapatt.F sgaus.F sran.F store_bank.F tbt_segm.F trk_brun.F trk_calc_wire.F trk_calc_wire_mod.F trk_clmerge.F trk_dcam.F trk_delete.F trk_dtime.F trk_dtime_retbla.F trk_erun.F trk_evnt_hbt.F trk_evnt_tbt.F trk_fill_banks.F trk_fill_banks_per_sect.F trk_fill_dtrk.F trk_geom.F trk_icyl.F trk_ipln.F trk_last.F trk_link.F trk_lramb.F trk_p2p.F trk_read_bank.F trk_read_banks.F trk_reg1_init.F trk_reg1_last.F trk_reg1_set_def.F trk_region1.F trk_set_def.F trk_set_stat.F trk_stati.F trk_swim2pln.F trktcl_init.F 
+
+SRCS:=  ana_lramb_c.c  calc_line.c  dc_begin_run.c  get_hber_info.c  get_lramb_info.c  get_lramb_pts.c  get_tber_info.c  hber2hbtr.c  line_fit.c  lramb_init.c  make_HBTR.c  make_TBTR.c  make_vert.c  process_trk.c  process_trk_alt.c  resolve_lramb.c  sort_fits.c  sorts.c  tber2tbtr.c  trk_dcam_c.c  trk_makebanks.c  trk_makelink.c  trk_maputil.c  trk_redoca.c  trk_rehit.c  trk_remake_swim_banks.c  trk_run_control.c  trk_swim.c  weed_known_amb.c  weed_lramb.c  
+
+FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+CCOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(CCSRCS))
+
+all: lib 
+
+LIBS= $(CLAS_LIB)/libtrk$(ADD_DEBUG).a
+lib: $(LIBS)
+
+$(LIBS): $(OBJS) $(FOBJS) $(CCOBJS)
+	$(VDIR) $(CLAS_LIB)
+	ar rv $@ $?
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo INCLUDE $(INCLUDE)

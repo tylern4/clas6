@@ -1,0 +1,43 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+FSRCS:= achi.F closef.F cnvr12.F cnvr13.F cnvr14.F cnvr21.F cnvr23.F cnvr24.F cnvr31.F cnvr32.F cnvr34.F cnvr41.F cnvr42.F cnvr43.F fchact.F fclos.F fclpa.F fclpr.F fclup.F fcnvr.F fcop11.F fcopy.F fcopy1.F fdtkey.F fermes.F ffprev.F fgclas.F ficlos.F finitl.F fiparm.F fipcop.F flogo.F fnclos.F fnddir.F fnres.F fnrwnd.F fparm.F fparmr.F fpcktp.F fpclix.F fpclos.F fpcpix.F fpcprk.F fpcust.F fpdown.F fpemsg.F fpfind.F fpflsh.F fpfstn.F fpgth.F fphide.F fpinfu.F fpiopen.F fpkenc.F fpkidx.F fpkunc.F fplock.F fplockn.F fpnxtn.F fpnxtv.F fpopen.F fppriop.F fprfls.F fprkey.F fprpth.F fpsclo.F fpsidx.F fpsope.F fpsrch.F fpstat.F fpsupr.F fpsync.F fpunlk.F fpwait.F fpwids.F fpwmsg.F fpwrix.F fqcond.F fqdupl.F fqfile.F fqxnam.F frconv.F frdat.F frdato.F frdir.F freser.F frhdr.F frhdro.F frkec.F frkex.F frkey.F frkey2.F frname.F frnet.F frp.F frpair.F frposb.F frposf.F frqkey.F frrec.F frrecx.F frseq.F frseqx.F frspec.F frtabc.F frunit.F frwdir.F frwkec.F frwnet.F frword.F frwseq.F frwsp.F fsclai.F fsclas.F fselcf.F fselcr.F fselct.F fswap.F ftctoi.F fthtoi.F ftitoc.F ftitoh.F fuclos.F fuclox.F fuparm.F furwnd.F fwdat.F fwdato.F fwdel.F fwdir.F fwend.F fwendx.F fweod.F fwhdr.F fwkec.F fwkex.F fwkey.F fwkidx.F fwkupd.F fwname.F fwnet.F fwparm.F fwrec.F fwseq.F fwspec.F fwtest.F fwunit.F hltotx.F icha.F ichkdx.F idebcd.F idxchk.F ifbuse.F ifocur.F ifpfxp.F ifptrb.F ifpwnm.F ifrst.F inchck.F indxa.F indxb.F indxc.F indxe.F jscan.F kbackf.F kdelf.F keyswap.F kreadf.F krewf.F kwritf.F laclos.F lacopy.F lacpix.F laopen.F larwnd.F lasele.F laself.F laselr.F latist.F lenb.F lfexec.F linein.F logerror.F mkclos.F mkixop.F mknxop.F mkopen.F numtag.F numtg3.F openf.F pnve.F pnvf.F pnvg.F pnvi.F pnvz.F readf.F rewinf.F stmtll.F stmtnu.F stmtpr.F stmtst.F stopsf.F strnum.F strtxt.F text32.F textd.F texto.F timcnv.F timuyh.F tindex.F trakey.F txtohl.F ucase.F writef.F 
+
+SRCS:= cclose.c cdummy.c cget.c closec.c copen.c cploc.c cput.c cpwait.c crewnd.c cskip.c cstat.c fpgthc.c kbackc.c kdelc.c kreadc.c krewc.c kwritc.c lcase.c openc.c readc.c rewinc.c stopsc.c utime.c writec.c xfsync.c xlock.c xunlock.c 
+
+FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+EXE_default:=
+EXE_IRIX:= $(EXE_default)
+EXE_SunOS:= $(EXE_default)
+EXE_HP-UX:= $(EXE_default)
+EXE_AIX:= $(EXE_default)
+EXE_Linux = $(EXE_default)
+
+EXE:= $(EXE_$(OS_NAME))
+ifndef EXE
+EXE:= $(EXE_default)
+endif
+all: lib
+exe: $(EXE)
+LIBS= $(CLAS_LIB)/libfpack$(ADD_DEBUG).a
+lib: $(LIBS)
+$(LIBS): $(OBJS) $(FOBJS)
+	$(VDIR) $(CLAS_LIB)
+	ar rv $@ $?
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo INCLUDE $(INCLUDE)

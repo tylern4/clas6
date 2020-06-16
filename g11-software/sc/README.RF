@@ -1,0 +1,97 @@
+I commited the RF routines this afternoon,
+They are in sc packages,
+but the calls are done from recsis.
+
+
+I put a new tcl switch in recsis (lrf_do) (default is true) to be abble 
+to switch off the RF processing (for whateever reason)
+I added a special tcl swith inside the rf routines, called (rf_get_cal)
+default = 0 = read the calibration constants in the Map Manager
+( 1 = read the calibration constants in a local file called rfcal.dat, 
+to allow people to play with those constants if they want or need to)
+
+
+new files:
+
+    README.RF (this file)
+
+    rftcl.CMN (define rf_get_cal)
+    rftcl_init.F (define rf_get_cal)
+    rftcl_set_def.F (define rf_get_cal)
+
+    bankdefs/rf.ddl ( new RF bank)
+
+    rf_brun.F (calls the 2 routines below accoding to the switch 
+    rfcal_read_file.F (gets the constants from the local file)
+    rfcal_read_map.F (gets the constants from the map manager)
+    rfcal.CMN  (calibration constant common)
+   
+    rf_evnt.f (read the CALL bank, converts to nano second, pick up the right RF, 
+                      write the RF banks)
+    rf_evnt_from_raw.F (this routine is called from the previous one, 
+                        in the case when the CALL bank dos not exist
+                        to get the RF signal directly from the raw bank RC13 
+                        - this is a patch to allow analysis
+                        last september photon runs.)
+            
+
+    
+modified files:
+
+    recsis/rntcl_init.F  (definition of lrf_do)
+    recsis/retcl_init.F (call to rftcl_init)
+    recsis/rebgrn.F     (call to rf_brun)
+    recsis/recevt.F     (call to rf_evnt)
+  
+    include/run_control.inc (definition of lrf_do)
+    
+the definition of the RF bank is:
+
+!
+!-----------------------------------------------------------------------
+!       BANKname BANKtype      ! Comments
+ TABLE  RF     ! RF result bank 
+!
+!   ATTributes:
+!   -----------
+!COL ATT-name FMT Min    Max   ! Comments
+!
+  1  RF        F    0.  2.004  ! Best RF value in ns
+  2  RF1       F    0.  200.   ! RF1 in ns
+  3  RF2       F    0.  200.   ! RF2 in ns
+!
+ END TABLE
+
+
+The calibration constants are in the map manager, 
+in the map CALL_CALIB.map 
+subsystem T1, item value, values #6 and 7 
+for the RF1 & RF2 TDC slopes
+subsystem RFoffset, item rf2rf1Offset, 
+for the offset between rf1 and rf2 
+
+saclays1:Maps> get_map_float -mCALL_CALIB.map -sT1 -ivalue -t7250
+0.049189 
+0.049992 
+0.049981 
+0.049654 
+0.049504 
+0.049060 
+0.048860 
+0.050000 
+0.050000 
+0.050000 
+
+saclays1:Maps> get_map_float -mCALL_CALIB.map -sRFoffset -irf2rf1Offset -t1
+0.451000 
+
+when reading those parameters from the local file rfcal.dat, the format should be:
+
+0.04906 ! rf1channelW (ns) (comments string)
+0.04906 ! rf2channelW (ns)
+0.45100 ! rf2rf1Offset (ns)
+
+
+cheers
+
+eric

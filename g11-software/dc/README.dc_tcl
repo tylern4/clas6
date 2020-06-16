@@ -1,0 +1,46 @@
+TCL variables that decleared in DC but used mostly in TRK package.
+
+Estimated resolutions for superlayers 1 to 6 that used in ana_docam and 
+ana_trfit to scale chi2 of fits (in cm)- 
+dc_Sigma_doca(1)  -  (Default = 0.04D0)  Superlayer 1 Region 1			
+dc_Sigma_doca(2)  -  (Default = 0.04D0)  Superlayer 2 Region 1
+dc_Sigma_doca(3)  -  (Default = 0.05D0)  Superlayer 3 Region 2
+dc_Sigma_doca(4)  -  (Default = 0.05D0)  Superlayer 4 Region 2
+dc_Sigma_doca(5)  -  (Default = 0.07D0)  Superlayer 5 Region 3
+dc_Sigma_doca(6)  -  (Default = 0.07D0)  Superlayer 6 Region 3
+
+
+Adjustment of time delays between DC & SC/Trig (DC 6 sectors x SC 4 panels) - 
+dc_trig_time - After 2/24/98 this is the only parametr to adjust time offset 
+between DC & SC
+
+
+Choose a function for the T-->D and D-->T algorithms -
+dc_xvst_choice  -  (Default = 0)   linear with the slope dc_xvst_default_slope
+
+Slope if choice linear T->D dependance -
+dc_xvst_default_slope  -  (Default = 0.005)
+
+The power of t/tmax if choice = 1 (curve used)
+dc_xvst_n_power  -  (Default = 1.32)
+dc_xvst_m_power  -  (Default = 7.50)
+
+
+Not used at all -
+dc_efficiency = 0.98D0
+
+==============NOT IN USE==============================  
+dc_trig_time(1,1)  -  (Default = -13.5) SC_P1 - DC_S1
+dc_trig_time(1,2)  -  (Default = -13.4) SC_P1 - DC_S2
+dc_trig_time(1,3)  -  (Default = -6.4) SC_P1 - DC_S3
+dc_trig_time(1,4)  -  (Default = -4.4) SC_P1 - DC_S4
+dc_trig_time(1,5)  -  (Default =  0.0) SC_P1 - DC_S5
+dc_trig_time(1,6)  -  (Default = -4.9) SC_P1 - DC_S6
+Since only first SC panel is involved in the trigger time determination in 
+the electron experiments then only dc_trig_time(1,*) are significant. 
+Rest is =0 (with SC other pannels)
+
+
+
+
+

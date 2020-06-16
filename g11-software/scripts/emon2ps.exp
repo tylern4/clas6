@@ -1,0 +1,86 @@
+#!/usr/local/bin/expect
+
+#
+# $Id : $
+#        S. McAleer,  J. Manak
+#        Florida State University
+#        December 12, 1997
+#
+
+# This script takes as input a cooked file name, a name for that elastic_moned file, and a final
+# postscript file name. The script takes the cooked file and submits it to elastic_mon. It then 
+# takes the output of elastic_mon and opens paw. It runs J. Manak's kumac emon_print to
+# produce a postscript version of the histograms. 
+
+# For error checking 
+# log_file -a out
+
+proc help {} {
+    send "\nUsage: emon_aut.exp -c {cooked_file} -r {Run Number} \n\n"
+}
+
+set args [split $argv " "]
+
+set i 0
+set cooked_file ""
+set ps_file ""
+set emon_file ""
+
+while {$i < [llength $args]} {
+    switch -- [lindex $args $i] \
+	"-c" {
+	    incr i
+	    set cooked_file [lindex $args $i]
+	} "-r" {
+	    incr i
+	    set runno [lindex $args $i]
+	} "-h" {
+	    help
+	    exit 0
+	}
+    incr i
+}
+
+
+if {$cooked_file == ""} {
+    send "\nA name for the cooked file needs to be specified.\n"
+    help
+    exit -1;
+}
+if {$runno == ""} {
+    send "\nIndicate the run number of the file to be processed\n"
+    help
+    exit -1;
+}
+
+set emon_file "emon$runno.hb4"
+send "emon file: $emon_file, cooked file: $cooked_file\n"
+set emon_command "elastic_mon -S -o$emon_file $cooked_file"
+send "\nRunning: $emon_command\n"
+catch {exec elastic_mon -S -o$emon_file $cooked_file } ecode
+
+# For error checking
+send "$ecode\n"
+
+
+# Begin PAW interace
+
+set timeout -1
+
+spawn pawX11
+expect " Workstation type (?=HELP) <CR>=1 :"
+send "\r"
+expect "PAW >"
+send "hi/file 1 $emon_file\r"
+expect "PAW >"
+send "exec emon_print $runno\r"
+expect "PAW >"
+send "quit\r"
+send "\r"
+
+
+
+
+
+
+

@@ -1,0 +1,8 @@
+default '.,kumac/gsim,kumac/util' option=a
+swit 1 2
+exec gsimSetupAlias
+global/cre gsim.tar 0
+read gsim.tar 'Enter 1,2,3,4 for (pol,fk,saclay,polfk) target: '
+
+exec clas y 0.01 10 10
+exec clas

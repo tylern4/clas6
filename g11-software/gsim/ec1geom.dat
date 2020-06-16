@@ -1,0 +1,48 @@
+
+      PBSTHI = 0.20  ! Thickness of lead 
+      SCSTHI = 1.50  ! Thickness of scintillator
+      NPBL = 32  ! a number of Pb layers (# of PS l.=NPBL+1) (side)
+0.2  1.5  32 
+      HS1 = 217.5/2.  ! half of short side of input surface (side)
+      HB1 = 401.2/2.  ! half of long side of input surface (side)
+      HS2 = 240.0/2.  ! half of short side of output surface (side)
+      HB2 = 442.0/2.  ! half of long side of output surface (side)
+      HWOSEC = 55.9/2.   ! half of calorimeter thickness (side)
+108.75 200.6 120.0 221.0 27.95
+      STS1 = 0.4 ! Length of St.Steel layer down
+      STS2 = 0.4 ! Length of St.Steel layer up
+      AIR1 = 0.4 ! Length of Air layer down
+      AIR2 = 0.4 ! Length of Air layer up
+0.4 0.4 0.4 0.4
+C       LAEC blocks are at 9-11 position with
+      TEX1=90.0  ! block at 11 Theta LAEC X to CLAS Z axis
+      FIX1=150.0  ! block at 11 Phi        X to CLAS X axis
+      TEY1=15.0   ! block at 11 Theta      Y to CLAS Z axis
+      FIY1=240.0   ! block at 11 Phi        Y to CLAS X axis
+      TEZ1=75.0  ! block at 11 Theta      Z to CLAS Z axis
+      FIZ1=60.0   ! block at 11 Phi        Z to CLAS X axis
+90.0 150.0 15.0 240.0 75.0 60.0
+      XC1=233.22 !  Center of LAEC at 11 Xo=Xo_9*cos(60) in CLAS system 
+      YC1=403.94 !  Center of LAEC at 11 Yo=Xo_9*sin(60) in CLAS system
+      ZC1=261.24 !  Center of LAEC at 11 Zo=Zo_9 in CLAS system
+233.22 403.94 261.24
+      TEX2=90.0  ! block at 9 Theta LAEC X to CLAS Z axis
+      FIX2=90.0  ! block at 9 Phi        X to CLAS X axis
+      TEY2=15.0  ! block at 9 Theta      Y to CLAS Z axis
+      FIY2=180.0 ! block at 9 Phi        Y to CLAS X axis
+      TEZ2=75.0  ! block at 9 Theta      Z to CLAS Z axis
+      FIZ2=0.0   ! block at 9 Phi        Z to CLAS X axis
+90.0 90.0 15.0 180.0 75.0 0.0
+      XC2=466.43 ! (R+HWOSEC)*sin(TEZ2)-(D+0.5(HS1+HS2))*sin(TEY2) Center of LAEC at 9 Xo in CLAS system
+      YC2=0       ! Center of LAEC Yo      in CLAS system
+      ZC2=261.24  ! (R+HWOSEC)*cos(TEZ2)+(D+0.5(HS1+HS2))*cos(TEY2) Center of LAEC Zo      in CLAS
+466.43 0.0 261.24
+end
+The attenuation length and lumi tables
+READ(12,100,ERR=101,END=102) LAC_PART,NLAYER,NSTRIP,ATLNG,LUMI
+
+
+
+
+
+

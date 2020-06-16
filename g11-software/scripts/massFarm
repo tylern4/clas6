@@ -1,0 +1,56 @@
+#! /usr/local/bin/perl
+require "ctime.pl";
+
+$suffix = "remote";
+$exec = 1;
+
+
+$cmd = $ARGV[0];
+shift;
+$out = $ARGV[0];
+#unlink($out);
+shift;
+
+$n = $#ARGV;
+
+$nxt = $ARGV[0];
+for ($i = 0; $i <= $n; $i++) { 
+# Process this file
+    $file = $ARGV[$i];
+    $file =~  /.*\/(\S+)/;
+    $sb = "jget$suffix $file $1";
+     print "$sb\n";  
+    &logit("submit: $sb \n");
+    if ($exec) {
+     system($sb);
+    } 
+   &logit("complete: $sb \n");
+    $csub = "$cmd $1 -a$out";   
+    print "$csub\n"; 
+   &logit("submit: $csub \n");
+    if ($exec) { 
+     system($csub);
+    } 
+  &logit("complete: $csub \n");
+    if ($exec) {
+	unlink($1);
+    }
+	 &logit("unlink $1\n");
+    print "unlink $1\n";
+     
+
+}
+
+
+sub logit {
+    $t = time();
+    $end_time = &ctime($t);
+    chop($end_time);
+    $home = $ENV{"HOME"};
+    $logfile = ">> $home/clas/offline/massFarm.log";
+    open(L,$logfile) || die "could not open logfile $logfile\n";
+    print L "$end_time - $_[0]";
+    close(L);
+}
+
+

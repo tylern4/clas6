@@ -1,0 +1,207 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; SunOS 5.6 sun4u) [Netscape]">
+   <title>trk_mon program</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+
+<center>
+<h1>
+trk_mon Documentation</h1></center>
+
+<center><img SRC="../../../docs/icons/blue-line2.gif" ></center>
+
+<h1>
+Overview</h1>
+The trk_mon program was written by John McNabb and Joe Manak, this program
+generates a variety of diagnostic histrograms based on the output of the
+TBTR and TBER banks as well as an ASCII text report printed to standard
+output. These histograms and numerical quantities are useful for assessing
+the quanlity of the results of time based tracking. To use trk_mon in its
+simplest mode you must have a BOS file with TBTR, TBER and TBLA banks in
+it. For example if one typed:
+<p>jlabs3> <b>trk_mon -otest datafile</b>
+<p>This command would run trk_mon on a file of bos banks called <b>datafile</b>,
+and it will produce an output file of hbook histograms called <b>test</b>.
+This command will run through the entire bos file. Multiple input files
+can be provided. trk_mon can also be run on a file that <b><font color="#FF0000">does
+not</font></b> contain the TBLA bank so long as the TBER bank exists and
+the <b>-R</b> switch is used. For more details see below.
+<h1>
+Command Line Help</h1>
+As always command line help can be obtained by simply typing the program
+name with a <b>-h </b>command line option ex:
+<p>jlabs3> <b>trk_mon -h</b>
+<p>a copy of the trk_mon program can be found in $CLAS_BIN/
+<br>&nbsp;
+<h1>
+<b>Interperting the text based report (ASCII)</b></h1>
+An example of the ASCII file produced by trk_mon is shown below:
+<pre><b><font face="Courier New,Courier">
+trk_mon&nbsp;report&nbsp;for&nbsp;run:&nbsp;11808
+Number&nbsp;of&nbsp;events&nbsp;processed:&nbsp;12786
+photon&nbsp;beam
+beam:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type:&nbsp;1&nbsp;4-vector:&nbsp;2.487&nbsp;0.000&nbsp;0.000&nbsp;2.487
+magnets:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;torus:&nbsp;1921.4&nbsp;A&nbsp;minitorus:&nbsp;&nbsp;0.0&nbsp;A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tagger:&nbsp;829.3&nbsp;A
+target:&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4-vector:&nbsp;0.938&nbsp;0.000&nbsp;0.000&nbsp;0.000
+
+
+sector&nbsp;&nbsp;&nbsp;&nbsp;hbt/evnt&nbsp;&nbsp;&nbsp;tbt/evnt&nbsp;&nbsp;&nbsp;tbt/hbt&nbsp;&nbsp;&nbsp;Nhits/tbt
+&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.295&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.269&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.910&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.911
+&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.280&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.251&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.897&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29.494
+&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.302&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.270&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.896&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.577
+&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.291&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.265&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.908&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.161
+&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.295&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.265&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.895&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29.314
+&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.286&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.254&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.888&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29.155
+&nbsp;all&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.749&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.572&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.899&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29.093
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SL_RMS
+sector&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6
+&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;0.0876&nbsp;&nbsp;0.0876&nbsp;&nbsp;0.0755&nbsp;&nbsp;0.0850&nbsp;&nbsp;0.0835&nbsp;&nbsp;0.0921&nbsp;
+&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;0.0845&nbsp;&nbsp;0.0872&nbsp;&nbsp;0.0794&nbsp;&nbsp;0.0812&nbsp;&nbsp;0.0852&nbsp;&nbsp;0.0867&nbsp;
+&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;0.0827&nbsp;&nbsp;0.0871&nbsp;&nbsp;0.0766&nbsp;&nbsp;0.0746&nbsp;&nbsp;0.0864&nbsp;&nbsp;0.0893&nbsp;
+&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;0.0810&nbsp;&nbsp;0.0880&nbsp;&nbsp;0.0764&nbsp;&nbsp;0.0789&nbsp;&nbsp;0.0813&nbsp;&nbsp;0.0795&nbsp;
+&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;0.0773&nbsp;&nbsp;0.0872&nbsp;&nbsp;0.0761&nbsp;&nbsp;0.0781&nbsp;&nbsp;0.0955&nbsp;&nbsp;0.0854&nbsp;
+&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;0.0805&nbsp;&nbsp;0.0860&nbsp;&nbsp;0.0761&nbsp;&nbsp;0.0858&nbsp;&nbsp;0.0879&nbsp;&nbsp;0.0896&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SL_DOCA_FLATNESS
+sector&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6
+&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32.46&nbsp;&nbsp;&nbsp;&nbsp;1.97&nbsp;&nbsp;&nbsp;&nbsp;1.64&nbsp;&nbsp;&nbsp;&nbsp;2.30&nbsp;&nbsp;&nbsp;&nbsp;1.96&nbsp;&nbsp;&nbsp;&nbsp;1.76&nbsp;
+&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29.88&nbsp;&nbsp;&nbsp;&nbsp;2.05&nbsp;&nbsp;&nbsp;&nbsp;2.17&nbsp;&nbsp;&nbsp;&nbsp;2.60&nbsp;&nbsp;&nbsp;&nbsp;2.18&nbsp;&nbsp;&nbsp;&nbsp;1.97&nbsp;
+&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;37.12&nbsp;&nbsp;&nbsp;&nbsp;1.83&nbsp;&nbsp;&nbsp;&nbsp;1.92&nbsp;&nbsp;&nbsp;&nbsp;2.08&nbsp;&nbsp;&nbsp;&nbsp;2.10&nbsp;&nbsp;&nbsp;&nbsp;3.70&nbsp;
+&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31.55&nbsp;&nbsp;&nbsp;&nbsp;1.74&nbsp;&nbsp;&nbsp;&nbsp;1.10&nbsp;&nbsp;&nbsp;&nbsp;1.71&nbsp;&nbsp;&nbsp;&nbsp;1.90&nbsp;&nbsp;&nbsp;&nbsp;2.60&nbsp;
+&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;57.75&nbsp;&nbsp;&nbsp;&nbsp;2.11&nbsp;&nbsp;&nbsp;&nbsp;1.54&nbsp;&nbsp;&nbsp;&nbsp;2.25&nbsp;&nbsp;&nbsp;&nbsp;2.03&nbsp;&nbsp;&nbsp;&nbsp;2.93&nbsp;
+&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25.47&nbsp;&nbsp;&nbsp;&nbsp;2.28&nbsp;&nbsp;&nbsp;&nbsp;1.40&nbsp;&nbsp;&nbsp;&nbsp;2.14&nbsp;&nbsp;&nbsp;&nbsp;1.73&nbsp;&nbsp;&nbsp;&nbsp;2.35&nbsp;
+
+number&nbsp;of&nbsp;3&nbsp;track&nbsp;events:&nbsp;1534
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;&nbsp;X&nbsp;&nbsp;&nbsp;&nbsp;,&nbsp;&nbsp;&nbsp;Y&nbsp;&nbsp;&nbsp;&nbsp;,&nbsp;&nbsp;&nbsp;Z&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;beam&nbsp;position&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;0.0140&nbsp;,&nbsp;-0.1599,&nbsp;-0.5526
+&nbsp;&nbsp;&nbsp;beam&nbsp;fit&nbsp;sigma&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;0.7115&nbsp;,&nbsp;&nbsp;0.7140,&nbsp;&nbsp;6.9400
+&nbsp;&nbsp;&nbsp;beam&nbsp;fit&nbsp;chi2/dof&nbsp;:&nbsp;&nbsp;1.0935&nbsp;,&nbsp;&nbsp;0.9963,&nbsp;&nbsp;1.2341
+</font></b></pre>
+<font face="Times New Roman,Times">The substance of the report consists
+of four tables. The first table has four columns indicating</font>
+<br><font face="Times New Roman,Times">the average number of hit based
+tracks per event, average number of time based tracks per event,</font>
+<br><font face="Times New Roman,Times">the ratio of hit based tracks over
+time based tracks and the average number of wire hits per time based track.
+Each of these quantities is listed by sector and for the sum of all sectors
+(all). The second table indicates the RMS of the residuals by sector(rows)
+and superlayer(columns), the residuals are the difference between the fit
+DOCA (Distance Of Closest Approach) and the calculateed DOCA, i..e.</font>
+<p><b><font face="Times New Roman,Times">&nbsp;&nbsp;&nbsp; residual =
+time_based_fit_doca - time_based_calculated_doca</font></b>
+<p><font face="Times New Roman,Times">the units of the residual are in
+cm.</font>
+<p><font face="Times New Roman,Times">The third table is called SL_DOCA_FLATNESS
+the numbers in this table attempt to measure the flatness of the&nbsp;
+fit doca distribution about a typical wire. The numbers in the table are
+the Chi-sqared of a straight-line fit to the DOCA distribution for each
+superlayer. These numbers are dimensionless.</font>
+<p><font face="Times New Roman,Times">The fourth table contains information 
+about the beam position as measured by three track events using the 
+<a href="http://www.phys.cmu.edu/~mcnabb/physics/vertex.html#MVRT"> 
+MVRT</a> banks from the multi-track vertex fitting routines written by 
+John&nbsp;McNabb.  Included is the number of events used for the measurement
+, and the information from gaussian fits to the vertex distribution.  </font>
+<br>&nbsp;
+<h1>
+<font face="Times New Roman,Times">Histogram file</font></h1>
+<font face="Times New Roman,Times">The file of histograms is organized
+by sector and superlayer, six plots are generated for each sector and superlayer.
+The historgam id is given by:</font>
+<p><font face="Times New Roman,Times">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>histogram
+id = 10000*sector + 1000*superlayer + histogram id number</b></font>
+<p><font face="Times New Roman,Times">the six histogram types are listed
+below:</font>
+<br>&nbsp;
+<li>
+<font face="Times New Roman,Times">&nbsp;&nbsp;&nbsp; id 1: wire number
+vs. residual</font></li>
+
+<li>
+<font face="Times New Roman,Times">&nbsp;&nbsp;&nbsp; id 2: drift time
+vs. fit DOCA</font></li>
+
+<li>
+&nbsp;&nbsp;&nbsp; id 3: drift time vs. residual</li>
+
+<li>
+&nbsp;&nbsp;&nbsp; id 4: fit DOCA</li>
+
+<li>
+&nbsp;&nbsp;&nbsp; id 5: wire vs. time residual</li>
+
+<li>
+&nbsp;&nbsp;&nbsp; id 6: drift time vs. time residual</li>
+
+<li>
+&nbsp;&nbsp;&nbsp; id 7: hits per time-based track</li>
+
+<br>&nbsp;
+<p>&nbsp;where the time residual is defined as:<b><font face="Times New Roman,Times"></font></b>
+<p><b><font face="Times New Roman,Times">&nbsp;&nbsp;&nbsp; time residual
+= abs(time_based_fit_doca) - abs(time_based_calculated_doca)</font></b>
+
+<p>
+<font face="Times New Roman,Times">  The histograms used to do 
+the vertex fits are located in histograms of the form: 
+<p><font face="Times New Roman,Times">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>histogram
+id = 1000 + 100*NTRK + HID</b></font>
+<p>
+where NTRK is the number of charged tracks, and hid ranges from 
+1-3 for 1-d projections of the vertex distribution, and 4-6 for 2-d projections
+(for example two track event distributions are in histograms 1201-1206) <br>
+
+<br>
+Histograms 2001-2006 are chi-squared/degree of freedom distributions by sector.
+
+
+</font>
+<h1>
+<b>Reconstruction of the TBLA bank</b></h1>
+One of the most useful options in trk_mon is the <b>-R </b>option which
+allows one to rebuild the TBLA (Time Based Layer Bank) from the TBER (Time
+Based ERror) bank. The engine for this option is the routine trk_remake_tbla
+bank wiritten by Rob&nbsp;Feuerbach and John&nbsp;McNabb. This routine re-swims tracks from
+the vertex to the various drift chamber surfaces. Because it re-swims tracks
+it will use some CPU time it also requires that the tracking code be initialized,
+if map values have changed from when the TBER&nbsp;bank was orginally generated
+erroneous results may occur.
+<br>
+
+
+<h1><b>DC calibration Ntuples</b></h1>
+A set of 6 ntuples can optionally be created using trk_mon via the -N switch
+(see trk_mon -h for details).  The ntuple code should (basically) all reside
+in tm_ntuples.c. These ntuples are "in the style" of those generated by SSLT
+and can therefore be used by 
+<a href="http://www.jlab.org/~davidl/dc_calib/dc_calib_check/index.html">
+dc_calib_check</A> for calibrating the drift chambers for a given run. The big
+benefit here is that trk_mon can re-build the TBLA banks which contain the
+information neccessary for calibration (e.g. fit DOCAs and drift times for every
+layer).
+
+<br><br>
+
+
+
+
+<hr><a href="../../../docs/offline.html"><img SRC="../../../docs/icons/cebaf.old.gif" BORDER=0 ></a>
+<hr>
+<address>
+For comments or questions: <a href="mailto:manak@cebaf.gov">manak@cebaf.gov</a></address>
+
+</body>
+</html>
+
+
+
+
+
+

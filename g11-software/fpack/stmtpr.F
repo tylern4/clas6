@@ -1,0 +1,31 @@
+*CMZ :  1.00/00 16/12/94  17.00.00  by  Pavel Binko
+*-- Author :    Volker Blobel   16/12/94
+      SUBROUTINE STMTPR
+*
+*KEEP,CTEXTIR.
+*     one statement up to 5280 = 66 * 80 characters
+      PARAMETER (LSTMT=5280)
+      CHARACTER STMT*(LSTMT),ERRMES*72,NORMES*72
+      PARAMETER (NDIMIT=640)
+      REAL RTX(4,NDIMIT)
+      COMMON/CTXTIR/NST,MST,KST,INU,NTX,ITX(4,NDIMIT)
+      COMMON/CTXTST/STMT,ERRMES,NORMES
+      EQUIVALENCE (ITX(1,1),RTX(1,1))
+      SAVE/CTXTIR/,/CTXTST/
+*KEND.
+*
+      DO 10 I=1,NTX
+      IF(ITX(3,I).EQ.0) GOTO 10
+      JA=ITX(1,I)
+      JB=ITX(2,I)
+      IF(ITX(3,I).NE.6) THEN
+         WRITE(6,101) (ITX(J,I),J=1,4),STMT(JA:JB)
+      ELSE
+         WRITE(6,102) (ITX(J,I),J=1,3),RTX(4,I),STMT(JA:JB)
+      END IF
+   10 CONTINUE
+*
+  100 RETURN
+  101 FORMAT(10X,3I8,I12,3X,A)
+  102 FORMAT(10X,3I8,G12.4,3X,A)
+      END

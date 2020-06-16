@@ -1,0 +1,90 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+host = @host@
+host_os = @host_os@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+libdir = @libdir@
+includedir = @includedir@
+INSTALL = @INSTALL@
+NOWEAVE = @NOWEAVE@
+NOTANGLE = @NOTANGLE@
+FC = @F77@
+CXX	= g++
+srcs = @srcs@
+
+CPPFLAGS = -I. -I$(srcdir) -I$(includedir) -I$(includedir)/../include
+CXXFLAGS = -Wall -g @cxx_exceptions_flag@
+LIBFLAGS = -L$(libdir) -lpp -litape
+FFLAGS = -g
+TEX = latex
+
+lib_srcs  = $(srcs);
+lib_objs = $(lib_srcs:.cc=.o)
+
+include $(CLAS_CMS)/Rules.make
+
+LIB = libitape.a
+EXE = bos2itape
+EXE2 = itape2bos
+
+
+RECLIB = -L$(TOP_DIR)/lib/$(OS_NAME) -L$(CLAS_LIB) -lscaler$(ADD_DEBUG) -lpid$(ADD_DEBUG) -ltag$(ADD_DEBUG) -llac$(ADD_DEBUG) -lseb$(ADD_DEBUG) -lst$(ADD_DEBUG) -lclasutil$(ADD_DEBUG) -lsc$(ADD_DEBUG) -lc_bos_io$(ADD_DEBUG)  -ldc$(ADD_DEBUG) -lec$(ADD_DEBUG) -lcc$(ADD_DEBUG) -ltrk$(ADD_DEBUG)  -ldc$(ADD_DEBUG)  -lc_bos_io$(ADD_DEBUG) -lsc$(ADD_DEBUG)  -lmapmanager$(ADD_DEBUG)  -lfputil$(ADD_DEBUG) -lfpack$(ADD_DEBUG) -lrecutl$(ADD_DEBUG) -lonline_dummy$(ADD_DEBUG) -lc_cern$(ADD_DEBUG) -lclasutil$(ADD_DEBUG)  -lbos$(ADD_DEBUG)  -lfpack$(ADD_DEBUG) -ldata$(ADD_DEBUG)
+
+
+all: $(LIB) $(EXE) $(EXE2)
+
+$(LIB): $(lib_objs)
+	ar rv $@ $(lib_objs)
+
+$(EXE):bos2itape.o
+	$(CXX) -o bos2itape $(CPPFLAGS) $(CXXFLAGS) $(LIBFLAGS) $(RECLIB) $(CERNLIB) $(FLIB) $(MISCLIB) 
+
+$(EXE2):$(o_objs)
+	$(CXX) -o omega $(o_objs) $(CPPFLAGS) $(CXXFLAGS) $(LIBFLAGS)
+
+
+clean:
+	@rm -f $(objs) *.aux *.log *.toc *.tex *.dvi *.ps *.html
+
+distclean: clean
+	@rm -f config.cache config.log config.status Makefile
+
+install: installdirs
+	$(INSTALL) $(LIB) $(libdir)/
+	for header_file in $(h_sources); do \
+		$(INSTALL) $$header_file $(includedir)/ ;\
+	done;
+
+
+installdirs: mkinstalldirs
+	$(srcdir)/mkinstalldirs $(libdir) $(includedir)
+
+debug:
+	@echo srcs $(srcs)
+	@echo srcdir $(srcdirs)
+	@echo CXXFLAGS $(CXXFLAGS)
+
+
+# dependancies that cannot be done automatically
+
+# implicit rules, put into rules.make
+%.h: %.nw
+	$(NOTANGLE) -L -R$@ $^ | cpif $@
+
+%.cc: %.nw
+	$(NOTANGLE)  -L -R$@ $^ | cpif $@
+
+%.f: %.nw
+	$(NOTANGLE)  -R$@ $^ | cpif $@
+
+%.tex: %.nw
+	$(NOWEAVE) -index -option longchunks -option smallcode  $^ | cpif $@
+
+%.html: %.nw
+	$(NOWEAVE)  -index -html -filter l2h  $^ | htmltoc | cpif $@
+
+%.ps: %.dvi
+	dvips $^ -o $@

@@ -1,0 +1,28 @@
+
+
+ifndef MYSQL_INCLUDE_PATH
+MYSQL_INCLUDE_PATH = /apps/mysql/include/mysql
+endif
+
+OS_NAME:=$(shell $(CLAS_CMS)/uname_clas)
+#CREATED_C = trk_mon.c
+LOCAL_INCLUDES =  -I. -I../../include -I../../inc_derived -I$(MYSQL_INCLUDE_PATH) -I/apps/mysql/include/mysql
+
+BOSLIB = fputil bos fpack
+
+#CLAS_LIBS = trk_mon trk pid dc sc ec cc st lac tag vertex scaler recutl c_bos_io bankdefs itape $(BOSLIB) c_cern online_dummy c_sql
+CLAS_LIBS = trk_mon_lite dc c_bos_io bankdefs itape $(BOSLIB) c_cern online_dummy
+CLAS_LIBS += caldbMap clasutil
+
+#SHARED_LIBS += -ltcl$(TCL_VERSION)
+
+
+LIBNAMES += $(addsuffix $(ADD_DEBUG), $(CLAS_LIBS))
+LIBNAMES += mysqlclient tcl z dl nsl stdc++
+LIBNAMES += packlib kernlib
+
+LIB_PATH += /apps/gcc/lib /apps/mysql/lib/mysql
+#LIB_PATH += /usr/lib/gcc-lib/i386-redhat-linux/3.2.2
+
+include $(CLAS_CMS)/Makefile
+

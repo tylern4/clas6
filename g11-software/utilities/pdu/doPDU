@@ -1,0 +1,12 @@
+#!/usr/local/bin/perl
+
+$Dir="/group/clasdev/clas/src/prod-1-2/packages/utilities/pdu";
+
+if($ARGV[0]) {
+    $InFile=$ARGV[0];
+    $cmd = "$Dir/pdu -n50000 $InFile";
+    system($cmd)
+    }
+else {
+    print "doPDU needs a file name as input argument\n";
+}

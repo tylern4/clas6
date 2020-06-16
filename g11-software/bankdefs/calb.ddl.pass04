@@ -1,0 +1,118 @@
+!-----------------------------------------------------------------------
+!       BANKname BANKtype      !Comments
+ TABLE   CALB   B32   ! create write display delete ! Monhist fit results for mySQL
+!
+!COL ATT-name FMT Min    Max   !Comments
+   1 meanRFgoodtag  F   -2.       2. ! RF offset - all photons 
+   2 sigmaRFgoodtag F    0.      20. ! Time resolution - best photon (RF)
+   3 meanRFalltag   F   -2.       2. ! RF offset - all photons 
+   4 sigmaRFalltag  F    0.      20. ! Time resolution - all photons (RF)
+   5 meanRFprot     F   -2.       2. ! Mean of dt distribution for protons
+   6 sigmaRFprot    F    0.      20. ! Time resolution for protons
+   7 meanRFpip      F   -2.       2. ! Mean of dt distribution for protons
+   8 sigmaRFpip     F    0.      20. ! Time resolution for positive pions
+   9 meanRFpim      F   -2.       2. ! Mean of dt distribution for protons
+  10 sigmaRFpim     F    0.      20. ! Time resolution for negative pions
+  11 meanSTpip      F   -2.       2. ! Mean of dt distribution for protons
+  12 sigmaSTpip     F    0.      20. ! Time resolution for positive pions
+  13 meanSTpim      F   -2.       2. ! Mean of dt distribution for protons
+  14 sigmaSTpim     F    0.      20. ! Time resolution for negative pions
+  15 sigmaECt       F    0.      20. ! Time resolution of EC, tEC(e)-tSC(e) 
+  16 xbeam          F   -5.       5. ! centroid in x of beam position from MVRT
+  17 ybeam          F   -5.       5. ! centroid in y of beam position from MVRT
+  18 sig_xbeam      F    0.       5. ! sigma of x distribution from MVRT
+  19 sig_ybeam      F    0.       5. ! sigma of y distribution from MVRT
+  20 mm_p_pip       F    0.      20. ! pi- peak position from (p pi+) missing mass
+  21 smm_p_pip      F    0.      20. ! sigma of the pi- peak from (p pi+) missing mass
+  22 mm_pip_pim     F    0.      20. ! proton peak position from (pi+ pi-) missing mass
+  23 smm_pip_pim    F    0.      20. ! sigma of the proton peak from (pi+ pi-) missing mass
+  24 mm_kp_lambda   F    0.      20. ! Lambda peak position from the (K+) missing mass
+  25 smm_kp_lambda  F    0.      20. ! sigma of the Lambda peak from the (K+) missing mass
+  26 mm_kp_sigma    F    0.      20. ! Sigma peak position from the (K+) missing mass
+  27 smm_kp_sigma   F    0.      20. ! sigma of the Sigma peak from the (K+) missing mass
+  28 ResSL1_ave     F    0.   10000. ! DC residuals in R1 (all sectors)
+  29 ResSL2_ave     F    0.   10000. ! DC residuals in R2 (all sectors)
+  30 ResSL3_ave     F    0.   10000. ! DC residuals in R3 (all sectors)
+  31 ResSL4_ave     F    0.   10000. ! DC residuals in R1 (all sectors)
+  32 ResSL5_ave     F    0.   10000. ! DC residuals in R2 (all sectors)
+  33 ResSL6_ave     F    0.   10000. ! DC residuals in R3 (all sectors)
+  34 ResSL1_sig     F    0.   10000. ! DC residuals in R1 (all sectors)
+  35 ResSL2_sig     F    0.   10000. ! DC residuals in R2 (all sectors)
+  36 ResSL3_sig     F    0.   10000. ! DC residuals in R3 (all sectors)
+  37 ResSL4_sig     F    0.   10000. ! DC residuals in R1 (all sectors)
+  38 ResSL5_sig     F    0.   10000. ! DC residuals in R2 (all sectors)
+  39 ResSL6_sig     F    0.   10000. ! DC residuals in R3 (all sectors)
+  40 ResSL1S1_ave   F    0.   10000. ! DC residuals in R1 (sector 1)
+  41 ResSL1S2_ave   F    0.   10000. ! DC residuals in R1 (sector 2)
+  42 ResSL1S3_ave   F    0.   10000. ! DC residuals in R1 (sector 3)
+  43 ResSL1S4_ave   F    0.   10000. ! DC residuals in R1 (sector 4)
+  44 ResSL1S5_ave   F    0.   10000. ! DC residuals in R1 (sector 5)
+  45 ResSL1S6_ave   F    0.   10000. ! DC residuals in R1 (sector 6)
+  46 ResSL1S1_sig   F    0.   10000. ! DC residuals in R1 (sector 1)
+  47 ResSL1S2_sig   F    0.   10000. ! DC residuals in R1 (sector 2)
+  48 ResSL1S3_sig   F    0.   10000. ! DC residuals in R1 (sector 3)
+  49 ResSL1S4_sig   F    0.   10000. ! DC residuals in R1 (sector 4)
+  50 ResSL1S5_sig   F    0.   10000. ! DC residuals in R1 (sector 5)
+  51 ResSL1S6_sig   F    0.   10000. ! DC residuals in R1 (sector 6)
+  52 ResSL2S1_ave   F    0.   10000. ! DC residuals in R2 (sector 1)
+  53 ResSL2S2_ave   F    0.   10000. ! DC residuals in R2 (sector 2)
+  54 ResSL2S3_ave   F    0.   10000. ! DC residuals in R2 (sector 3)
+  55 ResSL2S4_ave   F    0.   10000. ! DC residuals in R2 (sector 4)
+  56 ResSL2S5_ave   F    0.   10000. ! DC residuals in R2 (sector 5)
+  57 ResSL2S6_ave   F    0.   10000. ! DC residuals in R2 (sector 6)
+  58 ResSL2S1_sig   F    0.   10000. ! DC residuals in R2 (sector 1)
+  59 ResSL2S2_sig   F    0.   10000. ! DC residuals in R2 (sector 2)
+  60 ResSL2S3_sig   F    0.   10000. ! DC residuals in R2 (sector 3)
+  61 ResSL2S4_sig   F    0.   10000. ! DC residuals in R2 (sector 4)
+  62 ResSL2S5_sig   F    0.   10000. ! DC residuals in R2 (sector 5)
+  63 ResSL2S6_sig   F    0.   10000. ! DC residuals in R2 (sector 6)
+  64 ResSL3S1_ave   F    0.   10000. ! DC residuals in R3 (sector 1)
+  65 ResSL3S2_ave   F    0.   10000. ! DC residuals in R3 (sector 2)
+  66 ResSL3S3_ave   F    0.   10000. ! DC residuals in R3 (sector 3)
+  67 ResSL3S4_ave   F    0.   10000. ! DC residuals in R3 (sector 4)
+  68 ResSL3S5_ave   F    0.   10000. ! DC residuals in R3 (sector 5)
+  69 ResSL3S6_ave   F    0.   10000. ! DC residuals in R3 (sector 6)
+  70 ResSL3S1_sig   F    0.   10000. ! DC residuals in R3 (sector 1)
+  71 ResSL3S2_sig   F    0.   10000. ! DC residuals in R3 (sector 2)
+  72 ResSL3S3_sig   F    0.   10000. ! DC residuals in R3 (sector 3)
+  73 ResSL3S4_sig   F    0.   10000. ! DC residuals in R3 (sector 4)
+  74 ResSL3S5_sig   F    0.   10000. ! DC residuals in R3 (sector 5)
+  75 ResSL3S6_sig   F    0.   10000. ! DC residuals in R3 (sector 6)
+  76 ResSL4S1_ave   F    0.   10000. ! DC residuals in R4 (sector 1)
+  77 ResSL4S2_ave   F    0.   10000. ! DC residuals in R4 (sector 2)
+  78 ResSL4S3_ave   F    0.   10000. ! DC residuals in R4 (sector 3)
+  79 ResSL4S4_ave   F    0.   10000. ! DC residuals in R4 (sector 4)
+  80 ResSL4S5_ave   F    0.   10000. ! DC residuals in R4 (sector 5)
+  81 ResSL4S6_ave   F    0.   10000. ! DC residuals in R4 (sector 6)
+  82 ResSL4S1_sig   F    0.   10000. ! DC residuals in R4 (sector 1)
+  83 ResSL4S2_sig   F    0.   10000. ! DC residuals in R4 (sector 2)
+  84 ResSL4S3_sig   F    0.   10000. ! DC residuals in R4 (sector 3)
+  85 ResSL4S4_sig   F    0.   10000. ! DC residuals in R4 (sector 4)
+  86 ResSL4S5_sig   F    0.   10000. ! DC residuals in R4 (sector 5)
+  87 ResSL4S6_sig   F    0.   10000. ! DC residuals in R4 (sector 6)
+  88 ResSL5S1_ave   F    0.   10000. ! DC residuals in R5 (sector 1)
+  89 ResSL5S2_ave   F    0.   10000. ! DC residuals in R5 (sector 2)
+  90 ResSL5S3_ave   F    0.   10000. ! DC residuals in R5 (sector 3)
+  91 ResSL5S4_ave   F    0.   10000. ! DC residuals in R5 (sector 4)
+  92 ResSL5S5_ave   F    0.   10000. ! DC residuals in R5 (sector 5)
+  93 ResSL5S6_ave   F    0.   10000. ! DC residuals in R5 (sector 6)
+  94 ResSL5S1_sig   F    0.   10000. ! DC residuals in R5 (sector 1)
+  95 ResSL5S2_sig   F    0.   10000. ! DC residuals in R5 (sector 2)
+  96 ResSL5S3_sig   F    0.   10000. ! DC residuals in R5 (sector 3)
+  97 ResSL5S4_sig   F    0.   10000. ! DC residuals in R5 (sector 4)
+  98 ResSL5S5_sig   F    0.   10000. ! DC residuals in R5 (sector 5)
+  99 ResSL5S6_sig   F    0.   10000. ! DC residuals in R5 (sector 6)
+ 100 ResSL6S1_ave   F    0.   10000. ! DC residuals in R6 (sector 1)
+ 101 ResSL6S2_ave   F    0.   10000. ! DC residuals in R6 (sector 2)
+ 102 ResSL6S3_ave   F    0.   10000. ! DC residuals in R6 (sector 3)
+ 103 ResSL6S4_ave   F    0.   10000. ! DC residuals in R6 (sector 4)
+ 104 ResSL6S5_ave   F    0.   10000. ! DC residuals in R6 (sector 5)
+ 105 ResSL6S6_ave   F    0.   10000. ! DC residuals in R6 (sector 6)
+ 106 ResSL6S1_sig   F    0.   10000. ! DC residuals in R6 (sector 1)
+ 107 ResSL6S2_sig   F    0.   10000. ! DC residuals in R6 (sector 2)
+ 108 ResSL6S3_sig   F    0.   10000. ! DC residuals in R6 (sector 3)
+ 109 ResSL6S4_sig   F    0.   10000. ! DC residuals in R6 (sector 4)
+ 110 ResSL6S5_sig   F    0.   10000. ! DC residuals in R6 (sector 5)
+ 111 ResSL6S6_sig   F    0.   10000. ! DC residuals in R6 (sector 6)
+!
+ END TABLE

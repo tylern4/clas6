@@ -1,0 +1,198 @@
+#!/usr/local/bin/perl
+
+#  cmslog...sort of like DEC CMS "show xxx" 
+
+#  still to do:  must straighten out interaction of d,h,l,n,acl,etc. items
+#                  and make output prettier
+
+#  usage:  cmslog [-c -d -l -n -acl -a author-after date -ago ndays -notime -before date -today -name_only] [filename]
+
+#  notes:  not very tolerant of syntax errors
+#	   default filename is rcs/*
+
+#  ejw, W&M, 15-aug-95
+
+
+#  for date conversion
+require "ctime.pl";
+
+
+#  executable code:
+#  ----------------
+
+$line = " ".join(" ",@ARGV)." ";     # pad line with whitespace
+
+#  print usage message if no command line args or if -h or -help specified
+if( (!$ARGV[0]) || ($line=~m/\s+-help\s+/) || ($line=~m/\s+-h\s+/) ){
+    print "\n      Script to display rcs log information";
+    print "\n      -------------------------------------\n";
+    print "\nusage:  cmslog [-c -d -l -n -acl -a author -after date -before date\n";
+    print "                -today -ago nday -notime -name_only] [filename_list]\n";
+    print "\n";
+    print "where:\n";
+    print "\t-c   lists checkins\n";
+    print "\t-d   lists file descriptions\n";
+    print "\t-l   lists locks\n";
+    print "\t-n   lists names\n";
+    print "\t-acl lists access control list\n\n";
+    print "\tdate format is, e.g:  1995/08/01\n";
+    print "\tdefault filename is:  rcs/*\n\n";
+    print "\tuse -notime to suppress time field\n\n";
+    print "\tNote:  the RCS directory MUST be a sub-dir of the current directory\n";
+    die "\n";
+}
+
+#  get todays date in RCS format...what a pain!
+%months=
+	("Jan","01","Feb","02","Mar","03","Apr","04","May","05","Jun","06",
+	 "Jul","07","Aug","08","Sep","09","Oct","10","Nov","11","Dec","12");
+$now=time();
+($dum,$mon,$day,$tim,$edt,$year)=split(" ",&ctime($now));
+$mon=$months{$mon};
+$day=substr(" ".$day,-2,2);
+$todaydate="$year/$mon/$day";
+
+
+#  defaults
+$fwid=17;
+$awid=8;
+$cwid=132;
+$dwid=132;
+$lwid=132;
+
+#  get optional command line args
+($fwid        = $1) if ($line =~ s/-fwid\s+(\d*)//i);
+($awid        = $1) if ($line =~ s/-awid\s+(\d*)//i);
+($cwid        = $1) if ($line =~ s/-cwid\s+(\d*)//i);
+($dwid        = $1) if ($line =~ s/-dwid\s+(\d*)//i);
+($lwid        = $1) if ($line =~ s/-lwid\s+(\d*)//i);
+($acl         =  1) if ($line =~ s/-acl//i);
+($after       = $1) if ($line =~ s/-after\s+(\S*)//i);
+($before      = $1) if ($line =~ s/-before\s+(\S*)//i);
+($today       =  1) if ($line =~ s/-today//i);
+($ago         = $1) if ($line =~ s/-ago\s+(\d*)//i);
+($notime      =  1) if ($line =~ s/-notime//i);
+($name_only   =  1) if ($line =~ s/-name_only//i);
+($checkin     =  1) if ($line =~ s/-c//i);
+($locks       =  1) if ($line =~ s/-l//i);
+($names       =  1) if ($line =~ s/-n//i);
+($description =  1) if ($line =~ s/-d//i);
+($author      = $1) if ($line =~ s/-a\s+(\S*)//i);
+
+#  remove all leading spaces from line
+$line =~ s/\s*//;
+
+#  set before,after if today or ago specified
+if($today) { $after=$todaydate;  $before=$todaydate;}
+if($ago)   { 
+	($dum,$mon,$day,$tim,$edt,$year)=split(" ",&ctime($now-$ago*24*60*60));
+	$mon=$months{$mon};
+	$day=substr(" ".$day,-2,2);
+	$after="$year/$mon/$day";
+	$before=$todaydate;
+}
+
+#  set filename if none specified
+$line="rcs/*" if !$line;
+
+#  misc 
+for($ind=0; $ind < $fwid; $ind++){$fblank.=" ";}
+for($ind=0; $ind < $awid; $ind++){$ablank.=" ";}
+
+
+
+
+#  open pipe to rlog output
+open(RLOG,"rlog $line|");
+
+print "\n";		       
+while (<RLOG>) {
+    $previous=$rcsline;
+    $rcsline=$_;
+
+    if ( /^Working file:\s*(\S*)\s*/ ) {
+	$filename = $1;
+	$fname=substr($filename.$fblank,0,$fwid);
+		if($name_only && !$checkin){
+		    print "$filename\n";
+		}
+    }
+
+    if ( /^locks:/ && $locks) {
+	$out="";
+	while(($_=<RLOG>)=~/^\s+(.*)$/){
+	    print "$fname -> $1\n";
+	}
+    }
+
+    if ( /^head:\s*(\S*)/ ){
+	        $head=substr($1."    ",0,4);
+    }
+
+    if ( /^access list:/ && $acl){
+	$out="";
+	while(($_=<RLOG>)=~/^\s+(.*)$/){
+	    $out .= "\t$1\n";
+	}
+	if($out){
+	    print "\n\nAccess list for $filename:\n";
+	    print "$out\n";
+	}
+    }
+
+    if ( /^symbolic names:/ && $names){
+	$out="";
+	while(($_=<RLOG>)=~/^\s+(.*)$/){
+	    $out .=  "\t$1\n";
+	}
+	if($out){
+	    print "\nSymbolic names for $filename:\n";
+	    print "$out\n";
+	}
+    }
+
+    if ( /^description:/ ){
+	$desc=substr(<RLOG>,0,$dwid);
+	chop($desc);
+	if($description && !$checkin){
+	    print "$fname -> $desc\n";
+	}
+    }
+
+    if ( /^date:/ && $checkin) {
+	($dum1,$date,$time,$dum2,$auth) = split ( /\W*\s+\W*/ );
+	$autho=substr($auth.$ablank,0,$awid); # 
+	$time="" if $notime;	# 
+	$previous=~/revision\s*(\S*)/;
+	$revision=substr($1."  ",0,4); 
+	
+#  print if time,author match
+        if ( (!$after  || ($date ge $after )) &&
+	    (!$before || ($date le $before)) &&
+	    (!$author || ($author eq $auth)) ) {
+	    if($name_only){
+		print "$filename\n";
+	    }else{
+		$comment=substr(<RLOG>,0,$cwid);
+		chop($comment);
+		if($description){
+		    if($oldfname ne $fname){
+			$oldfname=$fname;
+			print "\n$fname $desc\n";
+		    }
+		    print "$fblank $revision    $date $time $autho $comment\n";
+		} else {
+		    if($oldfname ne $fname){
+			$oldfname=$fname;
+		    	print "$fname $revision -> $date $time $autho $comment\n";
+		    } else {
+		    	print "$fblank $revision -> $date $time $autho $comment\n";
+		    }
+		}
+	    }
+	}
+    }
+}
+
+close(RLOG);
+print "\n";		       

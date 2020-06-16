@@ -1,0 +1,41 @@
+This is a text file describing how to use the scripts: 
+scaler.tcl & add.tcl to fill the map.
+
+This is the help message from scaler.tcl:
+----------------------------------------------------------
+Use: scaler.tcl output_file_from_scaler_mon
+Options are: 
+        [-t<mapfile>]     Time to place array at    
+        [-d]              run in debug mode
+        [-n]              normalization run
+
+Note:
+The script scaler.tcl can be run on: AIX; SunOS, or HP-UX
+The script scalerl.tcl is to be run on Linux machines
+It is assumed that $CLAS_BIN is in your path
+---------------------------------------------------------
+
+The input can be several files & accepts wildcard characters.
+The script fills the maps: $CLAS_PARMS/Maps/SCALER.map & 
+$CLAS_PARMS/Maps/TAG_SCALER.map.
+
+
+This is the help message from add.tcl
+---------------------------------------------------------
+Use: add.tcl output_files_from_E_T_matrix 
+Options are: 
+        [-t<mapfile>]     Time to place array at    
+        [-d]              run in debug mode
+
+Note:
+The script add.tcl can be run on: AIX; SunOS, or HP-UX
+The script addl.tcl is to be run on Linux machines
+It is assumed that $CLAS_BIN is in your path
+---------------------------------------------------------
+The input can be several files & accepts wildcard characters.
+The script fills the map: $CLAS_PARMS/Maps/E_T_MATRIX.map
+
+NOTE: .../scalers/E_T_matrix can only process one file 
+at a time. This is the reason for the name of the script 
+to be add.tcl
+

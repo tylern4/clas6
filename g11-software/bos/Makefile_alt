@@ -1,0 +1,44 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+FSRCS:= babend.F bbfmt.F bbnot.F bbret.F bbspc.F bbufm.F bcallc.F bdcach.F bdrop.F bgarb.F bkfmt.F bkfrw.F bktow.F blist.F bos.F bosbk.F bosbl.F bosdp.F bosdum.F bosfm.F bosfmt.F bosio.F bosrpt.F bosta.F bprnt.F breadc.F bswap.F chaint.F cnvcha.F fprnn.F intcha.F mamind.F mbank.F mdrop.F mkfmt.F mlink.F mprnt.F mreadc.F mswap.F mxind.F namind.F nbank.F ndrop.F nlink.F nlist.F nprnt.F nswap.F nxind.F sortbl.F trfmt.F trfmtl.F wbank.F wdrop.F wgarb.F wprnt.F wswap.F 
+
+SRCS:= 
+
+FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+EXE_default:=
+EXE_IRIX:= $(EXE_default)
+EXE_SunOS:= $(EXE_default)
+EXE_HP-UX:= $(EXE_default)
+EXE_AIX:= $(EXE_default)
+EXE_Linux = $(EXE_default)
+
+EXE:= $(EXE_$(OS_NAME))
+ifndef EXE
+EXE:= $(EXE_default)
+endif
+all: lib
+exe: $(EXE)
+LIBS= $(CLAS_LIB)/libbos$(ADD_DEBUG).a
+lib: $(LIBS)
+$(LIBS): $(OBJS) $(FOBJS)
+	$(VDIR) $(CLAS_LIB)
+	ar rv $@ $?
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo FINCLUDE $(FINCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo INCLUDE $(INCLUDE)

@@ -1,0 +1,47 @@
+#! /bin/bash
+
+# Extract the version of the gcc/g++ and g77 compilers
+# ----------------------------------------------------
+
+if [ $# -gt 0 -a $# -lt 2 ]
+then
+   case $1 in
+      gcc|g++)
+         if [ ! -e gcc_gpp_version.txt ]
+         then
+	    `g++ --version | awk -F- '{
+		   if(match($$1,"egcs")) {
+                      print $0 > "gcc_gpp_version.txt"
+                   } else {
+                      print version_number=("gcc-"$2) > "gcc_gpp_version.txt"
+                   }
+                }'`
+            `gcc -v >> gcc_gpp_version.txt 2>&1`
+	 fi
+         lib=`perl ${CLAS_CMS}/get_library_paths.pl gcc_gpp_version.txt`
+         rm gcc_gpp_version.txt 2>&1
+         ;;
+      g77)
+         if [ ! -e g77_version.txt ]
+         then
+            `g77 --version | awk 'NR == 1 {
+	           if (/GNU Fortran /){
+		      id_number=split($3,ver,".")
+		      if (n=3){
+		          patch_number=split(ver[3],subver,"-")
+		          if ((ver[1] >=0) && (ver[2] >=5) && (subver[1] >=23)){
+			      print version_number=("g77-"ver[1]"."ver[2]"."subver[1]) > "g77_version.txt"
+		          }
+                      }
+		   }
+             }'`
+             `g77 -v >> g77_version.txt 2>&1`
+	  fi
+          lib=`perl ${CLAS_CMS}/get_library_paths.pl g77_version.txt`
+	  rm g77_version.txt 2>&1
+
+	  ;;
+    esac
+fi
+/bin/echo ${lib}
+

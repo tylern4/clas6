@@ -1,0 +1,43 @@
+
+tagM package
+D. Lawrence 11/12/01
+
+
+This package is used to create the TAGM bank from information in
+the recently added (summer 2001) T-counter Multi-hit TDCs in the
+TAGE crate. Having multiple hits and a larger time range make these
+better suited for tagger rate calculations than the high resolution,
+single-hit 1872 TDC's.
+
+The structure here is pretty straight forward (I hope!). There are
+three top level routines:
+
+tagM_init() which does nothing right now
+tagM_brun() which reads in all the needed calibration constants
+tagM_evt()  which should be called from the event loop to produce
+            the TAGM bank.
+
+
+The other files:
+
+tagM_GetECounterHits.c    tagM_GetTCounterHits.c
+tagM_GetETCoincidences.c  tagM_GetEChannelHits.c
+tagM_GetTChannelHits.c    tagM_make_TAGM.c
+
+all contain routines called from tagM_evt.c
+
+
+These is also an include file tagM.h which lives in the include 
+directory.
+
+note on map/caldb entries
+Ji Li 5/22/2002
+
+2 new entries corresponding to TAGM package were added in TAG_CALIB.map:
+
+Sybsystem	Item
+
+tag_e		2t
+tag_t		dt_multihit
+
+as of now(5/22/2002), the calibration procedure for these entries are being developed.

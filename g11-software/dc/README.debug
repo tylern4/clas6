@@ -1,0 +1,72 @@
+
+
+README.dc_debug
+
+1/12/01 D. Lawrence
+
+
+For the purposes of diagnostics of the DC package, several environment
+variables have been defined as described below. Variables followed by
+a "#" require that they be set to some value. Those followed by [#] may
+be set to a value, but should still work if not. The remaining will
+be activated merely by the existence of the environment variable.
+
+
+DC_DEBUG_PRINT_VERSIONS         : print dclib and dc.h versions
+
+DC_DEBUG_PRINT_XVST_TABLE       : print xvst table, then exit
+
+DC_DEBUG_XVST_VERBOSE  [#]      : set verbose level for xvst function
+                                  # is 0=none ... 10=all diagnostic messages
+                                  default is #=1 (see below for table)
+
+DC_DEBUG_XVST_PARAMETERS #      : print xvst parameters for specified superlayer
+                                  and sector, then exit. # = sec*10 + sup
+
+DC_DEBUG_PRINT_TIMEWALK_TABLE   : print timewalk table
+
+DC_DEBUG_TIMEWALK_VERBOSE  [#]  : set verbose level for timewalk function
+                                  # is 0=none ... 10=all diagnostic messages
+                                  default is #=1
+ 
+DC_DEBUG_TIMEWALK_PARAMETERS   : print all timewalk parameters
+ 
+
+
+examples:
+
+1.)  To print the xvst table to the screen ...
+
+	>setenv DC_DEBUG_PRINT_XVST_TABLE
+	>a1c clas_020000.A00
+
+
+2.) To dump the map parameters for the timewalk function to the screen
+    for sector 5, superlayer 6 ....
+
+	>setenv DC_DEBUG_TIMEWALK_PARAMETERS 56
+	>a1c clas_020000.A00
+	
+
+3.) To print input arguments and return values for the xvst function for
+    every event ...
+
+	>setenv DC_DEBUG_XVST_VERBOSE 10
+	>a1c clas_020000.A00
+
+
+
+Verbose levels:
+The following table lists subroutines in the DC package and what the
+corresponding minimum value of DC_DEBUG_XVST_VERBOSE is for debugging
+information to be printed from it.
+
+dc_xvst_table() :  4
+  dc_xvst_fct() :  5
+    xvst_func() :  9
+
+
+Likewise for DC_DEBUG_TIMEWALK_VERBOSE
+
+dc_timewalk_table() : 4 
+

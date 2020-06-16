@@ -1,0 +1,12 @@
+#! /usr/local/bin/perl
+
+# This is a support routine to handle removing the database...
+
+$orig_dir = $ENV{"PWD"};
+
+if ( -e "$orig_dir/headers.db") {
+    $cmd = "rm headers.db";
+    system ($cmd);
+} else {
+    print STDERR "Database \"headers\" doesn't exist.\n";
+}

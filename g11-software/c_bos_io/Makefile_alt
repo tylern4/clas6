@@ -1,0 +1,54 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+
+ifdef USEBOSIO
+BOSLIB= -lbosio$(ADD_DEBUG)
+else
+BOSLIB = -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG)
+endif
+
+STDLIBS= -L$(LOCAL_LIB) -L$(CLAS_LIB)  -lpid$(ADD_DEBUG) -lec$(ADD_DEBUG) -lcc$(ADD_DEBUG) -lsc$(ADD_DEBUG) -llac$(ADD_DEBUG) -lst$(ADD_DEBUG)  -lpid$(ADD_DEBUG) -ltag$(ADD_DEBUG) -lscaler$(ADD_DEBUG) -lclasutil$(ADD_DEBUG)   -lc_bos_io$(ADD_DEBUG) -lrecutl$(ADD_DEBUG) -litape$(ADD_DEBUG) $(BOSLIB) -lc_bos_io$(ADD_DEBUG) -lmapmanager$(ADD_DEBUG)  -lonline_dummy$(ADD_DEBUG) -lc_cern$(ADD_DEBUG) -lpp -lpwaUtil$(ADD_DEBUG)
+
+#use the newest cern library
+CERNPATH= $(CERN_ROOT)/lib
+CERNLIB= -L$(CERNPATH) -lpacklib
+MATHLIB= -lm
+
+FINCLUDE := $(FINCLUDE) -I./include
+INCLUDE := $(INCLUDE) -I./include
+
+CCSRCS:=  vector3_o.cc  vector4_o.cc  
+
+FSRCS:= 
+
+SRCS:=  BosWriteFail.c  KineUtil.c  NumSL.c  PrintEvent.c  TrigSector.c  bid2btr.c  bosUtilities.c  btr2dpl.c  btr2vec4.c  clascoord.c  configure_banks.c  demux_roc.c  gauss.c  gottjack.c  linear_fit.c  lorentz.c  makeRUNC.c  nanCheck.c  printBOS.c  read_ddl.c  readbos.c  trackswim.c  vector3.c  vector4.c  
+
+FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+CCOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(CCSRCS))
+
+all: lib 
+
+LIBS= $(CLAS_LIB)/libc_bos_io$(ADD_DEBUG).a
+lib: $(LIBS)
+
+$(LIBS): $(OBJS) $(FOBJS) $(CCOBJS)
+	$(VDIR) $(CLAS_LIB)
+	ar rv $@ $?
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo INCLUDE $(INCLUDE)

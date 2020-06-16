@@ -1,0 +1,153 @@
+#
+# Individual package makefile, includes $CLAS_CMS/Makefile with the appropriate arguments
+#
+# TOP_DIR points to the final location of binary and library tree:
+# $(TOP_DIR)/$(OS_NAME)/bin/       $(TOP_DIR)/$(OS_NAME)/lib/
+#
+# USERS should set the enviroment TOP_DIR to a directory of their choice
+# to override the default relative path (default= /home/$USERNAME
+
+##################
+# ROOT   #########
+##################
+
+# To generate a shared library:
+# make shlib
+# or 
+# make lib SHARED=1
+#
+# to generate a shared object:
+#
+#make shexe
+# or
+#make exe SHARED=1
+#
+# to use ROOT include path, library path, and libraries:
+#
+# make ROOT=1
+# make lib ROOT=1
+# make exe ROOT=1
+# make exe SHARED=1 ROOT=1
+# make lib SHARED=1 ROOT=1
+#
+# to generate a Root dictionnary (which forces ROOT=1 and SHARED=1)
+# make lib ROOTDIC=1 
+# make exe ROOTDIC=1
+
+# CLAS_CMS points to the location of the included makefiles.  Default is to get this from the enviroment.
+
+ifndef CLAS_CMS
+ CLAS_CMS = ../
+endif
+
+# need to add -C flag for trk code, so it does optimize the code
+# into oblivion  this is only for SunOS
+
+ifeq ($(OS_NAME), SunOS)
+ FFLAGS += -C
+endif
+# define the link list
+
+# If you are using special library path, put it here (don't put a -L !!)
+LIB_PATH =
+
+# CLAS PACK libraries names ( no l before ) - (watch the order !)
+# typical those that can be compiled with the debug option:
+CLAS_LIBNAMES =
+
+# extern libraries names ( no l before ) - (watch the order !)
+# those that won't be recompiled
+LIBNAMES = mapmanager
+
+# Machine dependant base libraries: (no l before)
+MD_LIBNAMES =
+
+# CLAS PACK "Shared libraries" (no l before) that can be recompiled
+CLAS_SHARED_LIBS= 
+
+# extern "Shared libraries" (put a -l before - for backward compatibility)
+# that won't be recompiled
+SHARED_LIBS =
+
+# If this makefile doesn't stand in a first level directory of the PACK arborescence, set
+# the LOCAL_PACK variable to the path to use to get back to the local arborescence root
+# for exemple, if one is in clasroot/clasevent:
+# LOCAL_PACK = ../..
+# (Otherwise LOCAL_PACK is set automatically to "..")
+
+# CINT_INCLUDES : put here package path where to find include files needed by rootcint
+# Only path for user defined class are needed, if you put here path for system
+# includes, roocint will be bombed.
+CINT_INCLUDES= include
+
+# PACK_INCLUDES : Put here package path that contains include files needed for the compilation
+# besides those define in ROOTCINT_INCLUDES.
+PACK_INCLUDES= include
+
+#Put here the name of the file that contains your main routine, if is is in your local
+# directory: this file will be kept in your local lib directory.
+# put here
+
+CREATED_CC=
+CREATED_C=mapcreate.c mapdump.c mapf_disadd_float.c
+CREATED_F=
+
+#
+# Put here the header files, and link-def associated with the created objects
+# This is used by ROOT and ROOT Cint.
+
+ROOTCINT_CREATED_HEADERS = map_internal.h
+ROOTCINT_CREATED_LNKDF=
+
+# Put here the name of the file that contains your main routine, in case it is not in
+# your local directory
+
+#REQUIRED_OBJS = rootCERN.o
+
+# default options for this package:
+# SHARED=1  => shared lib & exe
+# ROOT=1    => Link with ROOT libs, and use default ROOT include path.
+# ROOTDIC=1 => Generate ROOT dictionnaries source to be include in lib & exe,
+#              (forces SHARED=1 & ROOT=1)
+
+ROOTDIC=1
+ROOT=1
+SHARED=1
+DEBUG=
+ONLINE=
+#HANDLE_EXCEPTION=1
+
+ 
+C_SOURCES= map_create.c map_add_item.c map_add_item1.c map_rem_item.c \
+          map_rem_sub.c \
+          map_next_sub.c map_next_item.c map_put_int.c map_put_float.c \
+          map_put_char.c \
+          map_get_int.c map_get_float.c map_get_char.c map_fnd_int.c \
+          map_fnd_float.c \
+          map_fillname.c map_find_pred.c \
+          map_error.c map_syserror.c map_warn.c map_log_mess.c \
+	  map_read.c map_read_buffer.c map_write.c map_write_buffer.c map_add_sub.c \
+          map_overwrite.c map_find_same.c map_time_pred.c map_dump.c \
+          map_find_item.c map_stat_item.c map_open_close.c \
+          map_find_sub.c map_fix_item.c map_fix_sub.c map_fix_head.c \
+	  map_stat_head.c map_rem_arr.c  map_endianConvert.c \
+          map_add_item_.c map_put_int_.c map_put_flo_.c map_get_int_.c \
+          map_get_flo_.c map_fnd_int_.c map_fnd_flo_.c map_stat_item_.c \
+          map_rem_item_.c map_rem_sub_.c map_rem_arr_.c map_dump_.c \
+          map_log_mess_.c \
+	  mapf_add_item.c mapf_get_float.c mapf_get_int.c mapf_put_float.c \
+	  mapf_put_int.c mapf_rem_item.c mapf_stat_item.c \
+	  mapf_get_char.c mapf_put_char.c map_conv_Fstring.c
+
+MAIN_DIRECTORY=mapmanager
+
+# get the generic Makefile and predefined link lists; 
+
+include $(CLAS_CMS)/dll.mk
+
+
+
+
+
+
+

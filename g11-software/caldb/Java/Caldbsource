@@ -1,0 +1,2296 @@
+::::::::::::::
+ArrayDataSource.java
+::::::::::::::
+//
+// jas example for time graph (to be fixed)
+//
+                import jas.hist.*;
+
+                class ArrayDataSource implements Rebinnable1DHistogramData
+                {
+                   ArrayDataSource(double[] data)
+                   {
+                      this(data,"Array Data Source");
+                   }
+                   ArrayDataSource(double[] data, String name)
+                   {
+                      this.data =   data;
+                      this.name =   name;
+                   }
+                   public double[][] rebin(int   rBins, double rMin,   double rMax, 
+                                     boolean   wantErrors,   boolean   hurry)
+                   {
+                      double[][] result =   { data };
+                      return result;
+                   }
+                   public String[]   getAxisLabels()   { return null; }
+                   public double getMin() { return   0; }
+                   public double getMax() { return   data.length; }
+                   public boolean isRebinnable() {   return false; }
+                   public int getBins() { return data.length; }
+                   public int getAxisType() { return DOUBLE; }
+                   public String getTitle() { return name;   }
+                             
+                   private   double[] data;
+                   private   String name;
+                }
+
+                class StringDataSource extends ArrayDataSource
+                {
+                   StringDataSource(double[] data, String[] mylabels )
+                   {
+                      super(data);
+		      labels = new String[data.length];
+	              for   (int i=0; i<labels.length; i++) 
+		       {
+                        labels[i] =   mylabels[i];//.substring(0,5);
+                       }
+                   }
+                   public int getAxisType() { return STRING; }
+                   public String[]   getAxisLabels()   { return labels; }   
+                   private   String[] labels;
+                }
+
+
+                class DateDataSource extends ArrayDataSource
+                {
+                   DateDataSource(double[]   data)
+                   {
+                      super(data);
+                      max   = System.currentTimeMillis()/1000; // now
+                      min   = max -   90*60; // 90 minutes ago
+                   }
+                   public int getAxisType() { return DATE;   }
+                   public double getMin() { return   min; }
+                   public double getMax() { return   max; }
+                   private   double min,   max;
+                }
+::::::::::::::
+Caldbjview.java
+::::::::::::::
+//********************************************************/
+//* H.Avagyan
+//* Date  : 2001-03-26
+//********************************************************/
+import java.awt.*;
+import jas.hist.*;
+import jas.plot.*;
+
+public class Caldbjview extends Frame
+{
+    public static final String DEFAULT_HOST = "clasdb";
+    public static final String DEFAULT_DBASE = "calib";
+
+	public Caldbjview()
+	{
+		setLayout(null);
+		setSize(450,600);
+		setVisible(false);
+		add(chSystems);
+		chSystems.setBounds(24,48,168,25);
+		add(chSubsystems);
+		chSubsystems.setBounds(204,48,168,25);
+		add(chItems);
+		chItems.setBounds(320,48,168,25);
+		textRunIndexTable.setText("RunIndex");
+		add(textRunIndexTable);
+		textRunIndexTable.setBounds(24,132,169,26);
+		textDate.setText("2037-1-1");
+		add(textDate);
+		textDate.setBounds(204,132,100,26);
+		textRunno.setText("14001");
+		add(textRunno);
+		textRunno.setBounds(320,132,100,26);
+		label1.setText("System");
+		add(label1);
+		label1.setBounds(24,22,80,22);
+		label2.setText("Subsystem");
+		add(label2);
+		label2.setBounds(204,22,80,22);
+		label3.setText("Item");
+		add(label3);
+		label3.setBounds(320,22,80,22);
+		label4.setText("RunIndexTable");
+		add(label4);
+		label4.setBounds(24,96,80,22);
+		label5.setText("Date");
+		add(label5);
+		label5.setBounds(204,96,80,22);
+		label6.setText("Runno");
+		add(label6);
+		label6.setBounds(320,96,168,22);
+		add(textAreaOut);
+		textAreaOut.setBounds(24,350,400,200);
+		buttonConstants.setLabel("Constants");
+		add(buttonConstants);
+		//		buttonConstants.setBackground(java.awt.Color.lightGray);
+		buttonConstants.setBounds(204,180,100,35);
+		add(chChannels);
+		chChannels.setBounds(24,314,100,26);
+		buttonTG.setLabel("Time Graph");
+		add(buttonTG);
+		//    buttonTG.setBackground(java.awt.Color.lightGray);
+		buttonTG.setBounds(204,314,100,27);
+
+		add(buttonDiff);
+		buttonDiff.setLabel("Difference");
+		//	buttonDiff.setBackground(java.awt.Color.lightGray);
+		buttonDiff.setBounds(320,314,100,27);
+
+		add(buttonExit);
+		buttonExit.setLabel("Exit");
+		//		buttonExit.setBackground(java.awt.Color.lightGray);
+		buttonExit.setBounds(24,560,400,27);
+
+
+
+
+		tch.setText("Channels");
+		add(tch);
+		tch.setBounds(24,288,168,22);
+
+		label7.setText("Date");
+		add(label7);
+		label7.setBounds(24,220,80,22);
+
+		textTGDate.setText("2037-1-1");
+		add(textTGDate);
+		textTGDate.setBounds(24,250,100,26);
+		label8.setText("Run Min");
+		add(label8);
+		label8.setBounds(204,220,100,22);
+		textTGRunMin.setText("8000");
+		add(textTGRunMin);
+		textTGRunMin.setBounds(204,250,100,26);
+		label9.setText("Run Max");
+		add(label9);
+		label9.setBounds(320,220,100,22);
+		textTGRunMax.setText("29000");
+		add(textTGRunMax);
+		textTGRunMax.setBounds(320,250,100,26);
+
+		//REGISTER_LISTENERS
+		SymWindow aSymWindow = new SymWindow();
+		this.addWindowListener(aSymWindow);
+		SymItem lSymItem = new SymItem();
+		chSystems.addItemListener(lSymItem);
+		chSubsystems.addItemListener(lSymItem);
+		SymAction lSymAction = new SymAction();
+		buttonConstants.addActionListener(lSymAction);
+		chItems.addItemListener(lSymItem);
+		buttonTG.addActionListener(lSymAction);
+		buttonExit.addActionListener(lSymAction);
+		buttonDiff.addActionListener(lSymAction);
+	}
+
+	public Caldbjview(String title)
+	{
+		this();
+		setTitle(title);
+	}
+
+    /**
+     * Shows or hides the component depending on the boolean flag b.
+     * @param b  if true, show the component; otherwise, hide the component.
+     * @see java.awt.Component#isVisible
+     */
+    public void setVisible(boolean b)
+	{
+		if(b)
+		{
+			setLocation(50, 50);
+		}
+		super.setVisible(b);
+	}
+
+	static public void main(String args[])
+	{  
+                String host;
+                String dbase=DEFAULT_DBASE;
+                if (args.length > 0 ) {
+		    host=args[0]+".jlab.org/";
+                }else{
+		    host=DEFAULT_HOST+".jlab.org/";
+                }
+                 if (args.length > 1) {
+		     dbase=args[1];
+                }
+
+        	Caldbjview f = new Caldbjview();
+		f.setTitle("Caldb Viewer      <"+host+dbase+">");
+		f.initCaldb(host,dbase);
+		f.initGUI();
+		f.setVisible(true);
+	}
+	
+      public static void usage() {
+        System.out.println("Usage: java Caldbview <hostname> ");
+        System.exit(0);
+      }    
+	
+	RSystemsCaldb caldb = new RSystemsCaldb();
+	
+	public void initCaldb(String host, String dbase) {
+	  try {
+	    caldb.setDriver("org.gjt.mm.mysql.Driver");
+	    caldb.setURL("jdbc:mysql://"+host+dbase);
+	    caldb.setUsername("clasuser");
+	    caldb.setPassword("");
+	    caldb.loadSystems();
+	  } catch (Exception e) {
+	    this.textAreaOut.appendText("ERROR "+e.getMessage()+e);
+	  }
+	
+	}
+	
+	public void initGUI() {
+	  try {
+         initSystems();
+         initSubsystems();
+         initItems();
+	  } catch (Exception e) {
+	    this.textAreaOut.appendText("ERROR "+e.getMessage()+e);
+	  }
+	
+	}
+	
+	
+    public void initSystems() {
+	  try {
+        String[] s = caldb.getSystems();
+        setChoicesEnabled(false);
+        for(int i=0;i<s.length;i++) this.chSystems.addItem(s[i]);
+	  } catch (Exception e) {
+	    this.textAreaOut.appendText("ERROR "+e.getMessage()+e);
+	  } finally {
+	    setChoicesEnabled(true);
+	  }
+	
+	}
+	
+	public void initSubsystems() {
+	  try {
+	    String sys = this.chSystems.getSelectedItem();
+        String[] s = caldb.getSybsystems(sys);
+        setChoicesEnabled(false);
+        this.chSubsystems.removeAll();
+        for(int i=0;i<s.length;i++) this.chSubsystems.addItem(s[i]);
+        initItems();
+	  } catch (Exception e) {
+	    this.textAreaOut.appendText("ERROR "+e.getMessage()+e);
+	  } finally {
+	    setChoicesEnabled(true);
+	  }
+	}
+	
+    public void initItems() {
+	  try {
+	    String sys = this.chSystems.getSelectedItem();
+	    String sub = this.chSubsystems.getSelectedItem();
+        String[] s = caldb.getItems(sys,sub);
+        setChoicesEnabled(false);
+        this.chItems.removeAll();
+        for(int i=0;i<s.length;i++) this.chItems.addItem(s[i]);
+        initChannels();
+	  } catch (Exception e) {
+	    this.textAreaOut.appendText("ERROR "+e.getMessage()+e);
+	  } finally {
+	    setChoicesEnabled(true);
+	  }
+	}
+	
+	 public void initChannels() {
+	  try {
+	    String systemname = this.chSystems.getSelectedItem();
+	    String subsystemname = this.chSubsystems.getSelectedItem();
+	    String itemname = this.chItems.getSelectedItem();
+	    RItem item = caldb.getItem(systemname,subsystemname,itemname);
+        String[] s = item.getAsArray();
+        setChoicesEnabled(false);
+        this.chChannels.removeAll();
+        for(int i=0;i<s.length;i++) this.chChannels.addItem(s[i]);
+	  } catch (Exception e) {
+	    this.textAreaOut.appendText("ERROR "+e.getMessage()+e);
+	  } finally {
+	    setChoicesEnabled(true);
+	  }
+	}
+	
+	
+	public void setChoicesEnabled(boolean b) {
+	   this.chSystems.setEnabled(b);
+	   this.chSubsystems.setEnabled(b);
+	   this.chItems.setEnabled(b);
+	   this.chChannels.setEnabled(b);
+	}
+	
+	
+	public void constantsGo() {
+	    try {
+	      String systemname = this.chSystems.getSelectedItem();
+	      String  subsystemname = this.chSubsystems.getSelectedItem();
+	      String itemname = this.chItems.getSelectedItem();
+	      String RunIndexTable = this.textRunIndexTable.getText();
+	      String date = this.textDate.getText();
+	      int runno = Integer.parseInt(this.textRunno.getText());
+	      RConstantSet set = caldb.getConstants(systemname,subsystemname,
+	                                       itemname,RunIndexTable,date,runno);
+	      this.textAreaOut.appendText(set.toString());
+	      // make a histo view
+	      HistoView view = new HistoView();
+	      JASHist plot = view.getPlot();
+	      double[] data1 = set.getAsDoubleArray();
+	        plot.addData(new ArrayDataSource(data1));
+		    JASHistData d2ata=plot.addData(new ArrayDataSource(data1));
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setShowErrorBars(false);
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setHistogramFill(false);
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setHistogramBarColor(Color.blue);
+            d2ata.show(true);
+            plot.setTitle("Calib. Const. for "+set.getParent().tableName4Constants());
+            plot.setDataAreaBorderType(plot.SHADOW);
+            plot.getYAxis().setLabel(itemname);
+            plot.getXAxis().setLabel("channel#  (Run "+runno+")");
+	      // show it
+	      view.setVisible(true);
+	    } catch (Exception e) {
+	      this.textAreaOut.appendText("ERROR "+e.getMessage()+e);
+	    }
+	}
+	
+	public void diffGo() {
+	    try {
+	      String systemname = this.chSystems.getSelectedItem();
+	      String  subsystemname = this.chSubsystems.getSelectedItem();
+	      String itemname = this.chItems.getSelectedItem();
+	      String RunIndexTable = this.textRunIndexTable.getText();
+	      String date = this.textTGDate.getText();
+	      int runnoMax = Integer.parseInt(this.textTGRunMax.getText());
+	      int runnoMin = Integer.parseInt(this.textTGRunMin.getText());
+	      RConstantSet set1 = caldb.getConstants(systemname,subsystemname,
+	                                       itemname,RunIndexTable,date,runnoMin);
+	      RConstantSet set2 = caldb.getConstants(systemname,subsystemname,
+	                                       itemname,RunIndexTable,date,runnoMax);
+	      double[] datadiff = getAsDoubleDiffArray(set1,set2);              
+ 
+              String v = ""; 
+              for(int j=1; j<=datadiff.length; j++){
+              v +="v_"+(j<1000 ? "0":"")+(j<100 ? "0":"")+(j<10 ? "0":"")+j+" "+datadiff[j-1]+"\n";
+	      }
+
+	      this.textAreaOut.appendText(v);
+
+	      //this.textAreaOut.appendText(set.toString());
+	      // make a histo view
+	      HistoView view = new HistoView();
+	      JASHist plot = view.getPlot();
+	        plot.addData(new ArrayDataSource(datadiff));
+		    JASHistData d2ata=plot.addData(new ArrayDataSource(datadiff));
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setShowErrorBars(false);
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setHistogramFill(false);
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setHistogramBarColor(Color.gray);
+            d2ata.show(true);
+            plot.setTitle("Calib. Const. for "+set1.getParent().tableName4Constants()+" Runs "+runnoMin+" vs "+runnoMax);
+            plot.setDataAreaBorderType(plot.SHADOW);
+            plot.getYAxis().setLabel("Diff #"+runnoMin +" #"+runnoMax);
+            plot.getXAxis().setLabel("channel#");
+	      // show it
+	      view.setVisible(true);
+	    } catch (Exception e) {
+	      this.textAreaOut.appendText("ERROR "+e.getMessage()+e);
+	    }
+	}
+	
+    public void channelGo() {
+	    try {
+	      String systemname = this.chSystems.getSelectedItem();
+	      String  subsystemname = this.chSubsystems.getSelectedItem();
+	      String itemname = this.chItems.getSelectedItem();
+	      String RunIndexTable = this.textRunIndexTable.getText();
+	      String date = this.textDate.getText();
+	      int runnoMax = Integer.parseInt(this.textTGRunMax.getText());
+	      int runnoMin = Integer.parseInt(this.textTGRunMin.getText());
+	      int j = this.chChannels.getSelectedIndex();
+	      String channel = "v_"+(j<1000 ? "0":"")+(j<100 ? "0":"")+(j<10 ? "0":"")+(j+1);
+	      RChannelData chdata = caldb.getChannelData(systemname,subsystemname,
+	                                       itemname,RunIndexTable,date,runnoMax,runnoMin,channel);
+	      this.textAreaOut.appendText(chdata.toString());
+	      // make a histo view
+	      HistoView view = new HistoView();
+	      JASHist plot = view.getPlot();
+	      double[] data2 = chdata.getAsDoubleArray();
+	      String[] data3 = chdata.getRunNoArrayAsString();
+                  plot.setAllowUserInteraction(false);
+                  plot.setTitle("Time dependence ");
+                  plot.setDataAreaBorderType(plot.SHADOW);
+                  plot.getYAxis().setLabel(channel);
+                  plot.getXAxis().setLabel("run# (from "+data3[0]+"  to "+data3[data3.length-1]+")");
+	          plot.addData(new ArrayDataSource(data2));//.show(true);
+		  //	          plot.addData(new StringDataSource(data2,data3));//.show(true);
+		  //	       JASHistData data=plot.addData(new StringDataSource(data2,data3));
+	       JASHistData data=plot.addData(new ArrayDataSource(data2));
+              ((JASHist1DHistogramStyle) data.getStyle()).setShowErrorBars(false);
+              ((JASHist1DHistogramStyle) data.getStyle()).setHistogramBarColor(Color.gray);
+	      ((JASHist1DHistogramStyle) data.getStyle()).setHistogramFill(false);
+               data.show(true);
+	      // show it
+	      view.setVisible(true);
+	    } catch (Exception e) {
+	      this.textAreaOut.appendText("ERROR "+e.getMessage()+e+"\n");
+	    }
+	}
+		
+	public void addNotify()
+	{
+	    Dimension d = getSize();
+	    
+		super.addNotify();
+
+		if (fComponentsAdjusted)
+			return;
+
+		Insets insets = getInsets();
+		setSize(insets.left + insets.right + d.width, insets.top + insets.bottom + d.height);
+		Component components[] = getComponents();
+		for (int i = 0; i < components.length; i++)
+		{
+			Point p = components[i].getLocation();
+			p.translate(insets.left, insets.top);
+			components[i].setLocation(p);
+		}
+		fComponentsAdjusted = true;
+	}
+
+	boolean fComponentsAdjusted = false;
+
+	//DECLARE_CONTROLS
+	java.awt.Choice chSystems = new java.awt.Choice();
+	java.awt.Choice chSubsystems = new java.awt.Choice();
+	java.awt.Choice chItems = new java.awt.Choice();
+	java.awt.Choice chChannels = new java.awt.Choice();
+
+	java.awt.Label label1 = new java.awt.Label();
+	java.awt.Label label2 = new java.awt.Label();
+	java.awt.Label label3 = new java.awt.Label();
+	java.awt.Label label4 = new java.awt.Label();
+	java.awt.Label label5 = new java.awt.Label();
+	java.awt.Label label6 = new java.awt.Label();
+	java.awt.Label tch = new java.awt.Label();
+	java.awt.Label label7 = new java.awt.Label();
+	java.awt.Label label8 = new java.awt.Label();
+	java.awt.Label label9 = new java.awt.Label();
+
+	java.awt.TextArea textAreaOut = new java.awt.TextArea();
+	java.awt.TextField textRunIndexTable = new java.awt.TextField();
+	java.awt.TextField textDate = new java.awt.TextField();
+	java.awt.TextField textRunno = new java.awt.TextField();
+	java.awt.TextField textTGRunMin = new java.awt.TextField();
+	java.awt.TextField textTGRunMax = new java.awt.TextField();
+	java.awt.TextField textTGDate = new java.awt.TextField();
+
+	java.awt.Button buttonConstants = new java.awt.Button();
+	java.awt.Button buttonTG = new java.awt.Button();
+	java.awt.Button buttonDiff = new java.awt.Button();
+	java.awt.Button buttonExit = new java.awt.Button();
+
+
+	class SymWindow extends java.awt.event.WindowAdapter
+	{
+		public void windowClosing(java.awt.event.WindowEvent event)
+		{
+			Object object = event.getSource();
+			if (object == Caldbjview.this)
+				Caldbjview_WindowClosing(event);
+		}
+	}
+	
+	void Caldbjview_WindowClosing(java.awt.event.WindowEvent event)
+	{
+		setVisible(false);		 // hide the Frame
+	}
+
+	class SymItem implements java.awt.event.ItemListener
+	{
+		public void itemStateChanged(java.awt.event.ItemEvent event)
+		{
+			Object object = event.getSource();
+			if (object == chSystems)
+				chSystems_ItemStateChanged(event);
+			else if (object == chSubsystems)
+				chSubsystems_ItemStateChanged(event);
+			else if (object == chItems)
+				chItems_ItemStateChanged(event);
+		}
+	}
+
+        double[] getAsDoubleDiffArray( RConstantSet set1, RConstantSet set2) {
+	      double[] data1 = set1.getAsDoubleArray();
+	      double[] data2 = set2.getAsDoubleArray();
+              int minLength=Math.min(data1.length,data2.length);
+              double[] data= new double[minLength];
+              for(int i=0;i<minLength;i++)  
+              {
+                data[i]=data2[i]-data1[i];
+	      }
+              return data;
+	}
+
+
+	void chSystems_ItemStateChanged(java.awt.event.ItemEvent event)
+	{
+		try {
+			this.initSubsystems();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+	void chSubsystems_ItemStateChanged(java.awt.event.ItemEvent event)
+	{
+		try {
+			this.initItems();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+	class SymAction implements java.awt.event.ActionListener
+	{
+		public void actionPerformed(java.awt.event.ActionEvent event)
+		{
+			Object object = event.getSource();
+			if (object == buttonConstants)
+				buttonConstants_ActionPerformed(event);
+			else if (object == buttonTG)
+				buttonTG_ActionPerformed(event);
+			else if (object == buttonDiff)
+				buttonDiff_ActionPerformed(event);
+			else if (object == buttonExit)
+				buttonExit_ActionPerformed(event);
+		}
+	}
+
+
+	void buttonConstants_ActionPerformed(java.awt.event.ActionEvent event)
+	{
+		try {
+			this.constantsGo();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+	void chItems_ItemStateChanged(java.awt.event.ItemEvent event)
+	{
+		try {
+			this.initChannels();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+	void buttonTG_ActionPerformed(java.awt.event.ActionEvent event)
+	{
+		try {
+			this.channelGo();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+	void buttonDiff_ActionPerformed(java.awt.event.ActionEvent event)
+	{
+		try {
+			this.diffGo();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+	void buttonExit_ActionPerformed(java.awt.event.ActionEvent event)
+	{
+                       System.exit(0); 
+	}
+
+
+
+}
+::::::::::::::
+DefaultComboBoxModelHack.java
+::::::::::::::
+import java.beans.*;
+import java.util.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+import java.io.Serializable;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.IOException;
+
+import javax.swing.event.*;
+import javax.swing.plaf.*;
+import javax.swing.border.*;
+
+import javax.accessibility.*;
+
+
+public class DefaultComboBoxModelHack extends AbstractListModel implements MutableComboBoxModel, Serializable {
+    Vector objects;
+    Object selectedObject;
+
+    /**
+     * Constructs an empty DefaultComboBoxModel object.
+     */
+    public DefaultComboBoxModelHack() {
+        objects = new Vector();
+    }
+
+    /**
+     * Constructs a DefaultComboBoxModel object initialized with
+     * an array of objects.
+     *
+     * @param items  an array of Object objects
+     */
+    public DefaultComboBoxModelHack(final Object items[]) {
+        objects = new Vector();
+	objects.ensureCapacity( items.length );
+
+        int i,c;
+	for ( i=0,c=items.length;i<c;i++ )
+	    objects.addElement(items[i]);
+
+	if ( getSize() > 0 ) {
+	    selectedObject = getElementAt( 0 );
+	}
+    }
+
+    /**
+     * Constructs a DefaultComboBoxModel object initialized with
+     * a vector.
+     *
+     * @param v  a Vector object ...
+     */
+    public DefaultComboBoxModelHack(Vector v) {
+	objects = v;
+
+	if ( getSize() > 0 ) {
+	    selectedObject = getElementAt( 0 );
+	}
+    }
+
+    // implements javax.swing.ComboBoxModel
+    public void setSelectedItem(Object anObject) {
+        selectedObject = anObject;
+	fireContentsChanged(this, -1, -1);
+    }
+
+    // implements javax.swing.ComboBoxModel
+    public Object getSelectedItem() {
+        return selectedObject;
+    }
+
+    // implements javax.swing.ListModel
+    public int getSize() {
+        return objects.size();
+    }
+
+    // implements javax.swing.ListModel
+    public Object getElementAt(int index) {
+        if ( index >= 0 && index < objects.size() )
+	    return objects.elementAt(index);
+	else
+	    return null;
+    }
+
+    /**
+     * Returns the index-position of the specified object in the list.
+     *
+     * @param anObject  
+     * @return an int representing the index position, where 0 is 
+     *         the first position
+     */
+    public int getIndexOf(Object anObject) {
+        return objects.indexOf(anObject);
+    }
+
+    // implements javax.swing.MutableComboBoxModel
+    public void addElement(Object anObject) {
+        objects.addElement(anObject);
+	fireIntervalAdded(this,objects.size()-1, objects.size()-1);
+        if ( objects.size() == 1 && selectedObject == null && anObject != null ) {
+	    setSelectedItem( anObject );
+	}
+    }
+
+    // implements javax.swing.MutableComboBoxModel
+    public void insertElementAt(Object anObject,int index) {
+        objects.insertElementAt(anObject,index);
+	fireIntervalAdded(this, index, index);
+    }
+
+    // implements javax.swing.MutableComboBoxModel
+    public void removeElementAt(int index) {
+        if ( getElementAt( index ) == selectedObject ) {
+	    if ( index == 0 ) {
+	        setSelectedItem( getSize() == 1 ? null : getElementAt( index + 1 ) );
+	    }
+	    else {
+	        setSelectedItem( getElementAt( index - 1 ) );
+	    }
+	}
+
+	objects.removeElementAt(index);
+
+	fireIntervalRemoved(this, index, index);
+    }
+
+    // implements javax.swing.MutableComboBoxModel
+    public void removeElement(Object anObject) {
+        int index = objects.indexOf(anObject);
+	if ( index != -1 ) {
+	    removeElementAt(index);
+	}
+    }
+
+    /**
+     * Empties the list.
+     */
+    public void removeAllElements() {
+        int firstIndex = 0;
+	int lastIndex = objects.size()-1;
+	objects.removeAllElements();
+	selectedObject = null;
+	fireIntervalRemoved(this, firstIndex, lastIndex);
+    }
+    
+    public void setObjects(Vector v) {
+        objects = v;
+        selectedObject = null;
+        fireIntervalAdded(this,0, objects.size()-1);
+    }
+    
+    public void setObjects(String items[]) {
+        objects = new Vector();
+	    objects.ensureCapacity( items.length );
+        int i,c;
+	    for ( i=0,c=items.length;i<c;i++ )
+	                objects.addElement(items[i]);
+	    if ( getSize() > 0 ) {
+	       selectedObject = getElementAt( 0 );
+	    }
+    }
+    
+    
+}
+::::::::::::::
+HistoView.java
+::::::::::::::
+//********************************************************/
+//* H.Avagyan
+//* Date  : 2001-03-05
+//********************************************************/
+
+import java.awt.*;
+import javax.swing.*;
+import jas.hist.*;
+import jas.plot.PrintHelper;
+//import jas.hist.test.MemoryDataSource;
+import jas.plot.*;
+
+public class HistoView extends javax.swing.JFrame
+{
+	public HistoView()
+	{
+		getContentPane().setLayout(new BorderLayout(0,0));
+		setSize(640,493);
+		setVisible(false);
+		panelHisto.setLayout(new BorderLayout(0,0));
+		getContentPane().add(BorderLayout.CENTER,panelHisto);
+		panelTop.setToolTipText("Right click on the plot for more options");
+		panelTop.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
+		getContentPane().add(BorderLayout.NORTH, panelTop);
+		labelHeader.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+		labelHeader.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+		labelHeader.setText("  ");
+		panelTop.add(labelHeader);
+		panelBottom.setToolTipText("Right click on the plot for more options");
+		panelBottom.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
+		getContentPane().add(BorderLayout.SOUTH, panelBottom);
+		buttonPrint.setText("Print");
+		buttonPrint.setActionCommand("jbutton");
+		panelBottom.add(buttonPrint);
+		buttonClose.setText("Close");
+		buttonClose.setActionCommand("jbutton");
+		panelBottom.add(buttonClose);
+
+        panelHisto.add(BorderLayout.CENTER,plot);
+       
+	
+		//REGISTER_LISTENERS
+		SymAction lSymAction = new SymAction();
+		buttonClose.addActionListener(lSymAction);
+		buttonPrint.addActionListener(lSymAction);
+	}
+
+    private JASHist  plot = new JASHist();
+    
+    public JASHist getPlot() {
+        return plot;
+    }
+    
+
+	public HistoView(String sTitle)
+	{
+		this();
+		setTitle(sTitle);
+	}
+
+	public void setVisible(boolean b)
+	{
+		if (b)
+			setLocation(50, 50);
+		super.setVisible(b);
+	}
+
+	static public void main(String args[])
+	{
+		(new HistoView()).setVisible(true);
+	}
+
+	public void addNotify()
+	{
+		// Record the size of the window prior to calling parents addNotify.
+		Dimension size = getSize();
+
+		super.addNotify();
+
+		if (frameSizeAdjusted)
+			return;
+		frameSizeAdjusted = true;
+
+		// Adjust size of frame according to the insets and menu bar
+		Insets insets = getInsets();
+		javax.swing.JMenuBar menuBar = getRootPane().getJMenuBar();
+		int menuBarHeight = 0;
+		if (menuBar != null)
+			menuBarHeight = menuBar.getPreferredSize().height;
+		setSize(insets.left + insets.right + size.width, insets.top + insets.bottom + size.height + menuBarHeight);
+	}
+
+	// Used by addNotify
+	boolean frameSizeAdjusted = false;
+
+	//CONTROLS
+	javax.swing.JPanel panelHisto = new javax.swing.JPanel();
+	javax.swing.JPanel panelTop = new javax.swing.JPanel();
+	javax.swing.JLabel labelHeader = new javax.swing.JLabel();
+	javax.swing.JPanel panelBottom = new javax.swing.JPanel();
+	javax.swing.JButton buttonPrint = new javax.swing.JButton();
+	javax.swing.JButton buttonClose = new javax.swing.JButton();
+
+
+    public void setHeaderText(String s) {
+        this.labelHeader.setText(s);
+    }
+
+	class SymAction implements java.awt.event.ActionListener
+	{
+		public void actionPerformed(java.awt.event.ActionEvent event)
+		{
+			Object object = event.getSource();
+			if (object == buttonClose)
+				buttonClose_actionPerformed(event);
+			else if (object == buttonPrint)
+				buttonPrint_actionPerformed(event);
+		}
+	}
+
+	void buttonClose_actionPerformed(java.awt.event.ActionEvent event)
+	{
+		try {
+			this.dispose();
+		} catch (java.lang.Exception e) {
+		}
+	}
+	void buttonPrint_actionPerformed(java.awt.event.ActionEvent event)
+	{
+		try {
+                       PrintHelper ph   = PrintHelper.instance();
+                       ph.printTarget(this);
+		} catch (java.lang.Exception e) {
+                       e.printStackTrace();
+		}
+	}
+}
+::::::::::::::
+JCaldbview.java
+::::::::::::::
+//********************************************************/
+//* H.Avagyan
+//* Date  : 2001-04-01
+//********************************************************/
+
+import javax.swing.*;
+import java.awt.*;
+import jas.hist.*;
+import jas.plot.*;
+
+
+public class JCaldbview extends JApplet
+{
+    public static final String DEFAULT_HOST = "clasdb";
+    public static final String DEFAULT_DBASE = "calib";
+    public static  int unique_on = 0;
+
+	public void init()
+	{
+		getContentPane().setLayout(new BorderLayout(0,0));
+		setSize(400,700);
+		JPanelMain.setLayout(null);
+		getContentPane().add(JPanelMain);
+		JPanelMain.add(chSystems);
+		chSystems.setBounds(24,48,156,27);
+		JLabel1.setText("System");
+		JPanelMain.add(JLabel1);
+		JLabel1.setBounds(24,24,129,21);
+		JLabel2.setText("Subsystem");
+		JPanelMain.add(JLabel2);
+		JLabel2.setBounds(192,24,129,21);
+		JPanelMain.add(chSubsystems);
+		chSubsystems.setBounds(192,48,156,27);
+		JLabel3.setText("Item");
+		JPanelMain.add(JLabel3);
+		JLabel3.setBounds(360,24,100,21);
+		JPanelMain.add(chItems);
+		chItems.setBounds(360,48,100,27);
+		JLabel4.setText("Run Index Table");
+		JPanelMain.add(JLabel4);
+		JLabel4.setBounds(24,96,144,24);
+		textRunIndexTable.setText("RunIndex");
+		JPanelMain.add(textRunIndexTable);
+		textRunIndexTable.setBounds(24,132,156,24);
+		JLabel5.setText("Date");
+		JPanelMain.add(JLabel5);
+		JLabel5.setBounds(192,96,144,24);
+		textDate.setText("2037-1-1");
+		JPanelMain.add(textDate);
+		textDate.setBounds(192,132,156,24);
+		JLabel6.setText("Run No");
+		JPanelMain.add(JLabel6);
+		JLabel6.setBounds(360,96,100,24);
+		textRunno.setText("14001");
+		JPanelMain.add(textRunno);
+		textRunno.setBounds(360,132,100,24);
+		buttonConstants.setText("Constants");
+		JPanelMain.add(buttonConstants);
+		buttonConstants.setBounds(180,180,168,24);
+		JLabel7.setText("Channels");
+		JPanelMain.add(JLabel7);
+		JLabel7.setBounds(24,288,168,22);
+		JPanelMain.add(chChannels);
+		chChannels.setBounds(24,314,100,26);
+
+		buttonTG.setText("Time Graph");
+		JPanelMain.add(buttonTG);
+		buttonTG.setBounds(160,314,120,27);
+                //checkTG.setText("");
+		JPanelMain.add(checkTG);
+		checkTG.setBounds(285,314,20,27);
+                checkTG.setSelected(false);
+
+		buttonDiff.setText("Difference");
+		JPanelMain.add(buttonDiff);
+		buttonDiff.setBounds(330,314,120,27);
+
+		buttonExit.setText("Exit");
+		JPanelMain.add(buttonExit);
+		buttonExit.setBounds(24,560,420,27);
+
+		JLabel8.setText("Date");
+		JPanelMain.add(JLabel8);
+		JLabel8.setBounds(24,220,80,22);
+		JLabel9.setText("Run Min");
+		JPanelMain.add(JLabel9);
+		JLabel9.setBounds(204,220,100,22);
+		JLabel10.setText("Run Max");
+		JPanelMain.add(JLabel10);
+		JLabel10.setBounds(350,220,100,22);
+		JPanelMain.add(JScrollPane1);
+		JScrollPane1.setBounds(24,350,420,200);
+		JScrollPane1.getViewport().add(textAreaOut);
+		textAreaOut.setBounds(0,0,420,200);
+		textTGDate.setText("2037-1-1");
+		JPanelMain.add(textTGDate);
+		textTGDate.setBounds(24,250,100,26);
+		textTGRunMin.setText("8000");
+		JPanelMain.add(textTGRunMin);
+		textTGRunMin.setBounds(204,250,100,26);
+		textTGRunMax.setText("29000");
+		JPanelMain.add(textTGRunMax);
+		textTGRunMax.setBounds(350,250,100,26);
+		
+		chSystems.setModel(new DefaultComboBoxModelHack());
+	    chSubsystems.setModel(new DefaultComboBoxModelHack());
+	    chItems.setModel(new DefaultComboBoxModelHack());
+	    chChannels.setModel(new DefaultComboBoxModelHack());
+	    
+	    // LISTENERS
+		SymItem lSymItem = new SymItem();
+		SymAction lSymAction = new SymAction();
+
+		chSystems.addItemListener(lSymItem);
+		chSubsystems.addItemListener(lSymItem);
+		buttonConstants.addActionListener(lSymAction);
+		chItems.addItemListener(lSymItem);
+		buttonTG.addActionListener(lSymAction);
+		checkTG.addActionListener(lSymAction);
+		buttonDiff.addActionListener(lSymAction);
+		buttonExit.addActionListener(lSymAction);
+
+  	    this.initCaldb();
+            this.initGUI();
+		
+	}
+	
+	javax.swing.JPanel JPanelMain = new javax.swing.JPanel();
+	javax.swing.JComboBox chSystems = new javax.swing.JComboBox();
+	javax.swing.JLabel JLabel1 = new javax.swing.JLabel();
+	javax.swing.JLabel JLabel2 = new javax.swing.JLabel();
+	javax.swing.JComboBox chSubsystems = new javax.swing.JComboBox();
+	javax.swing.JLabel JLabel3 = new javax.swing.JLabel();
+	javax.swing.JComboBox chItems = new javax.swing.JComboBox();
+	javax.swing.JLabel JLabel4 = new javax.swing.JLabel();
+	javax.swing.JTextField textRunIndexTable = new javax.swing.JTextField();
+	javax.swing.JLabel JLabel5 = new javax.swing.JLabel();
+	javax.swing.JTextField textDate = new javax.swing.JTextField();
+	javax.swing.JLabel JLabel6 = new javax.swing.JLabel();
+	javax.swing.JTextField textRunno = new javax.swing.JTextField();
+	javax.swing.JButton buttonConstants = new javax.swing.JButton();
+	javax.swing.JLabel JLabel7 = new javax.swing.JLabel();
+	javax.swing.JComboBox chChannels = new javax.swing.JComboBox();
+	javax.swing.JButton buttonTG = new javax.swing.JButton();
+	javax.swing.JCheckBox checkTG = new javax.swing.JCheckBox();
+	javax.swing.JButton buttonDiff = new javax.swing.JButton();
+	javax.swing.JButton buttonExit = new javax.swing.JButton();
+	javax.swing.JLabel JLabel8 = new javax.swing.JLabel();
+	javax.swing.JLabel JLabel9 = new javax.swing.JLabel();
+	javax.swing.JLabel JLabel10 = new javax.swing.JLabel();
+	javax.swing.JScrollPane JScrollPane1 = new javax.swing.JScrollPane();
+	javax.swing.JEditorPane textAreaOut = new javax.swing.JEditorPane();
+	javax.swing.JTextField textTGDate = new javax.swing.JTextField();
+	javax.swing.JTextField textTGRunMin = new javax.swing.JTextField();
+	javax.swing.JTextField textTGRunMax = new javax.swing.JTextField();
+	//}}
+	
+	
+	
+		
+	RSystemsCaldb caldb = new RSystemsCaldb();
+	
+	public void initCaldb() {
+	  try {
+	    caldb.setDriver("org.gjt.mm.mysql.Driver");
+	    caldb.setURL("jdbc:mysql://claspc24.jlab.org/calib");
+	    caldb.setUsername("clasuser");
+	    caldb.setPassword("");
+	    caldb.loadSystems();
+	  } catch (Exception e) {
+	    this.textAreaOut.setText("ERROR "+e.getMessage()+e);
+	  }
+	}
+	
+	public void initGUI() {
+	  try {
+         initSystems();
+         initSubsystems();
+         initItems();
+	  } catch (Exception e) {
+	    this.textAreaOut.setText("ERROR "+e.getMessage()+e);
+	  }
+	
+	}
+	
+	
+    public void initSystems() {
+	  try {
+        String[] s = caldb.getSystems();
+        setChoicesEnabled(false);
+        ((DefaultComboBoxModelHack)this.chSystems.getModel()).setObjects(s);
+        this.chSystems.repaint();
+
+        //for(int i=0;i<s.length;i++) this.chSystems.addItem(s[i]);
+	  } catch (Exception e) {
+	    this.textAreaOut.setText("ERROR "+e.getMessage()+e);
+	  } finally {
+	    setChoicesEnabled(true);
+	  }
+	
+	}
+	
+	public void initSubsystems() {
+	  try {
+	    String sys = (String)this.chSystems.getSelectedItem();
+        String[] s = caldb.getSybsystems(sys);
+        setChoicesEnabled(false);
+        ((DefaultComboBoxModelHack)this.chSubsystems.getModel()).setObjects(s);
+        this.chSubsystems.repaint();
+        
+        //this.chSubsystems.removeAllItems();
+        //for(int i=0;i<s.length;i++) this.chSubsystems.addItem(s[i]);
+        initItems();
+	  } catch (Exception e) {
+	    this.textAreaOut.setText("ERROR "+e.getMessage()+e);
+	  } finally {
+	    setChoicesEnabled(true);
+	  }
+	}
+	
+    public void initItems() {
+	  try {
+	    String sys = (String)this.chSystems.getSelectedItem();
+	    String sub = (String)this.chSubsystems.getSelectedItem();
+        String[] s = caldb.getItems(sys,sub);
+        setChoicesEnabled(false);
+        ((DefaultComboBoxModelHack)this.chItems.getModel()).setObjects(s);
+        this.chItems.repaint();
+
+        //this.chItems.removeAllItems();
+       //for(int i=0;i<s.length;i++) this.chItems.addItem(s[i]);
+        initChannels();
+	  } catch (Exception e) {
+	    this.textAreaOut.setText("ERROR "+e.getMessage()+e);
+	  } finally {
+	    setChoicesEnabled(true);
+	  }
+	}
+	
+	 public void initChannels() {
+	  try {
+	    String systemname = (String)this.chSystems.getSelectedItem();
+	    String subsystemname = (String)this.chSubsystems.getSelectedItem();
+	    String itemname = (String)this.chItems.getSelectedItem();
+	    RItem item = caldb.getItem(systemname,subsystemname,itemname);
+        String[] s = item.getAsArray();
+        setChoicesEnabled(false);
+       ((DefaultComboBoxModelHack)this.chChannels.getModel()).setObjects(s);
+       this.chChannels.repaint();
+      //  this.chChannels.removeAllItems();
+      //  for(int i=0;i<s.length;i++) this.chChannels.addItem(s[i]);
+	  } catch (Exception e) {
+	    this.textAreaOut.setText("ERROR "+e.getMessage()+e);
+	  } finally {
+	    setChoicesEnabled(true);
+	  }
+	}
+	
+	
+	public void setChoicesEnabled(boolean b) {
+	   this.chSystems.setEnabled(b);
+	   this.chSubsystems.setEnabled(b);
+	   this.chItems.setEnabled(b);
+	   this.chChannels.setEnabled(b);
+	}
+	
+	
+	public void constantsGo() {
+	    try {
+	      String systemname = (String)this.chSystems.getSelectedItem();
+	      String  subsystemname = (String)this.chSubsystems.getSelectedItem();
+	      String itemname = (String)this.chItems.getSelectedItem();
+	      String RunIndexTable = this.textRunIndexTable.getText();
+	      String date = this.textDate.getText();
+	      int runno = Integer.parseInt(this.textRunno.getText());
+	      RConstantSet set = caldb.getConstants(systemname,subsystemname,
+	                                       itemname,RunIndexTable,date,runno);
+	      this.textAreaOut.setText(set.toString());
+	      // make a histo view
+	      HistoView view = new HistoView();
+	      JASHist plot = view.getPlot();
+	      double[] data1 = set.getAsDoubleArray();
+	        plot.addData(new ArrayDataSource(data1));
+		    JASHistData d2ata=plot.addData(new ArrayDataSource(data1));
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setShowErrorBars(false);
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setHistogramFill(false);
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setHistogramBarColor(Color.blue);
+            d2ata.show(true);
+            plot.setTitle("Calib. Const. for "+set.getParent().tableName4Constants());
+            plot.setDataAreaBorderType(plot.SHADOW);
+            plot.getYAxis().setLabel(itemname);
+            plot.getXAxis().setLabel("channel#  (Run "+runno+")");
+	      // show it
+	      view.setVisible(true);
+	    } catch (Exception e) {
+	      this.textAreaOut.setText("ERROR "+e.getMessage()+e);
+	    }
+	}
+	
+	public void diffGo() {
+	    try {
+	      String systemname =  (String)this.chSystems.getSelectedItem();
+	      String  subsystemname =  (String)this.chSubsystems.getSelectedItem();
+	      String itemname =  (String)this.chItems.getSelectedItem();
+	      String RunIndexTable = this.textRunIndexTable.getText();
+	      String date = this.textTGDate.getText();
+	      int runnoMax = Integer.parseInt(this.textTGRunMax.getText());
+	      int runnoMin = Integer.parseInt(this.textTGRunMin.getText());
+	      RConstantSet set1 = caldb.getConstants(systemname,subsystemname,
+	                                       itemname,RunIndexTable,date,runnoMin);
+	      RConstantSet set2 = caldb.getConstants(systemname,subsystemname,
+	                                       itemname,RunIndexTable,date,runnoMax);
+	      double[] datadiff = getAsDoubleDiffArray(set1,set2);              
+ 
+              String v = ""; 
+              for(int j=1; j<=datadiff.length; j++){
+              v +="v_"+(j<1000 ? "0":"")+(j<100 ? "0":"")+(j<10 ? "0":"")+j+" "+datadiff[j-1]+"\n";
+	      }
+
+	      this.textAreaOut.setText(v);
+
+	      //this.textAreaOut.appendText(set.toString());
+	      // make a histo view
+	      HistoView view = new HistoView();
+	      JASHist plot = view.getPlot();
+	        plot.addData(new ArrayDataSource(datadiff));
+		    JASHistData d2ata=plot.addData(new ArrayDataSource(datadiff));
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setShowErrorBars(false);
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setHistogramFill(false);
+            ((JASHist1DHistogramStyle) d2ata.getStyle()).setHistogramBarColor(Color.gray);
+            d2ata.show(true);
+            plot.setTitle("Calib. Const. for "+set1.getParent().tableName4Constants()+" Runs "+runnoMin+" vs "+runnoMax);
+            plot.setDataAreaBorderType(plot.SHADOW);
+            plot.getYAxis().setLabel("Diff #"+runnoMin +" #"+runnoMax);
+            plot.getXAxis().setLabel("channel#");
+	      // show it
+	      view.setVisible(true);
+	    } catch (Exception e) {
+	      this.textAreaOut.setText("ERROR "+e.getMessage()+e);
+	    }
+	}
+	
+	
+    public void channelGo() {
+	    try {
+	      String systemname = (String)this.chSystems.getSelectedItem();
+	      String  subsystemname = (String)this.chSubsystems.getSelectedItem();
+	      String itemname = (String)this.chItems.getSelectedItem();
+	      String RunIndexTable = this.textRunIndexTable.getText();
+	      String date = this.textDate.getText();
+	      int runnoMax = Integer.parseInt(this.textTGRunMax.getText());
+	      int runnoMin = Integer.parseInt(this.textTGRunMin.getText());
+	      int j = this.chChannels.getSelectedIndex();
+	      String channel = "v_"+(j<1000 ? "0":"")+(j<100 ? "0":"")+(j<10 ? "0":"")+(j+1);
+	      RChannelData chdata = caldb.getChannelData(systemname,subsystemname,
+	                                       itemname,RunIndexTable,date,runnoMax,runnoMin,channel);
+	      this.textAreaOut.setText(chdata.toString());
+	      // make a histo view
+	      HistoView view = new HistoView();
+	      JASHist plot = view.getPlot();
+	      double[] data2 = chdata.getAsDoubleArray();
+	      String[] data3 = chdata.getRunNoArrayAsString();
+                  plot.setAllowUserInteraction(false);
+                  plot.setTitle("Time dependence ");
+                  plot.setDataAreaBorderType(plot.SHADOW);
+                  plot.getYAxis().setLabel(channel);
+                  plot.getXAxis().setLabel("run# (from "+data3[0]+"  to "+data3[data3.length-1]+")");
+	          plot.addData(new ArrayDataSource(data2));//.show(true);
+		  //	          plot.addData(new StringDataSource(data2,data3));//.show(true);
+		  //	       JASHistData data=plot.addData(new StringDataSource(data2,data3));
+	       JASHistData data=plot.addData(new ArrayDataSource(data2));
+              ((JASHist1DHistogramStyle) data.getStyle()).setShowErrorBars(false);
+              ((JASHist1DHistogramStyle) data.getStyle()).setHistogramBarColor(Color.gray);
+	      ((JASHist1DHistogramStyle) data.getStyle()).setHistogramFill(false);
+               data.show(true);
+	      // show it
+	      view.setVisible(true);
+	    } catch (Exception e) {
+	      this.textAreaOut.setText("ERROR "+e.getMessage()+e+"\n");
+	    }
+	}
+		
+
+	public void destroy () {
+	    this.caldb.shutdown();
+	}
+	
+	
+	class SymItem implements java.awt.event.ItemListener
+	{
+		public void itemStateChanged(java.awt.event.ItemEvent event)
+		{
+			Object object = event.getSource();
+			if (object == chSystems)
+				chSystems_ItemStateChanged(event);
+			else if (object == chSubsystems)
+				chSubsystems_ItemStateChanged(event);
+			else if (object == chItems)
+				chItems_ItemStateChanged(event);
+		}
+	}
+
+
+	void chSystems_ItemStateChanged(java.awt.event.ItemEvent event)
+	{
+		try {
+			this.initSubsystems();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+
+	void chSubsystems_ItemStateChanged(java.awt.event.ItemEvent event)
+	{
+		try {
+			this.initItems();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+	class SymAction implements java.awt.event.ActionListener
+	{
+		public void actionPerformed(java.awt.event.ActionEvent event)
+		{
+			Object object = event.getSource();
+			if (object == buttonConstants)
+				buttonConstants_ActionPerformed(event);
+			else if (object == buttonTG)
+				buttonTG_ActionPerformed(event);
+			else if (object == buttonDiff)
+				buttonDiff_ActionPerformed(event);
+			else if (object == buttonExit)
+				buttonExit_ActionPerformed(event);
+			else if (object == checkTG)
+				checkTG_ActionPerformed(event);
+		}
+	}
+
+
+	void buttonConstants_ActionPerformed(java.awt.event.ActionEvent event)
+	{
+		try {
+			this.constantsGo();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+
+	void chItems_ItemStateChanged(java.awt.event.ItemEvent event)
+	{
+		try {
+			this.initChannels();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+
+	void buttonTG_ActionPerformed(java.awt.event.ActionEvent event)
+	{
+		try {
+			this.channelGo();
+		} catch (java.lang.Exception e) {
+		}
+	}
+	
+
+
+	void buttonDiff_ActionPerformed(java.awt.event.ActionEvent event)
+	{
+		try {
+			this.diffGo();
+		} catch (java.lang.Exception e) {
+		}
+	}
+
+	void checkTG_ActionPerformed(java.awt.event.ActionEvent event)
+	{
+                       if( unique_on ==0 ) unique_on=1;
+                       else unique_on=0;
+	}
+
+	void buttonExit_ActionPerformed(java.awt.event.ActionEvent event)
+	{
+                       System.exit(0); 
+	}
+
+        double[] getAsDoubleDiffArray( RConstantSet set1, RConstantSet set2) {
+	      double[] data1 = set1.getAsDoubleArray();
+	      double[] data2 = set2.getAsDoubleArray();
+              int minLength=Math.min(data1.length,data2.length);
+              double[] data= new double[minLength];
+              for(int i=0;i<minLength;i++)  
+              {
+                data[i]=data2[i]-data1[i];
+	      }
+              return data;
+	}
+
+	
+    static public void main(String args[])
+	{
+                String host;
+                String dbase=DEFAULT_DBASE;
+                if (args.length > 0 ) {
+		    host=args[0]+".jlab.org/";
+                }else{
+		    host=DEFAULT_HOST+".jlab.org/";
+                }
+                 if (args.length > 1) {
+		     dbase=args[1];
+                }
+		JFrame f = new JFrame();
+		JCaldbview caldbGUI = new JCaldbview();
+		JCaldbview.instance = caldbGUI;
+		caldbGUI.init();
+		f.setSize(500,600);
+		f.setTitle("Caldb Viewer      <"+host+dbase+">");
+	    f.getContentPane().setLayout(new BorderLayout(0,0));
+		f.getContentPane().add("Center", caldbGUI);
+		f.setVisible(true);
+	    SymWindowF aSymWindow = new SymWindowF();
+		f.addWindowListener(aSymWindow);
+	}
+	
+	public static JCaldbview instance;
+	
+}
+
+   class SymWindowF extends java.awt.event.WindowAdapter
+	{
+		public void windowClosing(java.awt.event.WindowEvent event)
+		{
+			Object object = event.getSource();
+	        if(object instanceof JFrame) {
+	            JCaldbview.instance.destroy();
+	            ((JFrame)object).dispose();
+	            System.exit(0);
+	        }
+		}
+	}
+::::::::::::::
+JDBCDataSource.java
+::::::::::::::
+//********************************************************/
+//* H.Avagyan
+//* Date  : 2001-03-03
+//********************************************************/
+import java.util.*;
+import java.sql.*;
+
+public class JDBCDataSource {
+  
+  String url;
+  String username="";
+  String password="";
+  String drivername;
+  Connection connection;
+  
+  public Connection getConnection() throws Exception {
+    try {
+     if(connection!=null && !connection.isClosed())
+     return connection;
+    } catch (Exception e) {}
+     connect();
+     return connection;
+  }
+  
+  public Statement getStatement() throws Exception {
+    return getConnection().createStatement();
+  }
+  
+  public void connect() throws SQLException {
+       try {
+	   Class.forName(drivername).newInstance();
+       } catch (Exception e) {throw new SQLException(e.getMessage());}
+       connection = DriverManager.getConnection(getURL(),getUsername(),getPassword());
+  }
+  
+  public void setDriver(String s) {
+    drivername=s;
+  }
+
+  public String getDriver() {
+    return drivername;
+  }
+
+  public void setURL(String s) {
+    url = s;
+  }
+
+  public String getURL() {
+    return url;
+  }
+  
+  public void setUsername(String s) {
+    username = s;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+  
+  public void setPassword(String s) {
+    password = s;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void close() {
+   try {
+    if(connection!=null) connection.close();
+   } catch (Exception e) {}
+  }
+}
+::::::::::::::
+RChannelData.java
+::::::::::::::
+//********************************************************/
+//* H.Avagyan
+//* Date  : 2001-03-07
+//********************************************************/
+import java.util.*;
+import java.sql.*;
+
+
+public class RChannelData {
+    
+    private RItem parent;
+    
+    private int type;
+    private String channel;
+    
+    public RChannelData(RItem item, String channel) {
+        this.parent = item;
+        this.channel = channel;
+        type = item.getType();
+        if(type == Types.FLOAT) type = Types.DOUBLE;
+    }
+    
+    public int getType() {
+      return type;
+    }
+    
+    public String getChannel() {
+        return channel;
+    }
+    
+    public void init(String RunIndexTable, String date, int runnoMax,int runnoMin,Statement s)  throws Exception {
+        
+	  this.elementData = new Object[initialCapacity];
+	  String query = constructQuery(RunIndexTable,date,runnoMax,runnoMin);
+	  ResultSet results = null;
+      try {
+         results = s.executeQuery(query);     
+	     for(int j=0;results.next();j++) {
+	       Object[] o = new Object[2];
+	           if(type==Types.FLOAT) {
+                  o[0] = new Float(results.getFloat(1));
+               } else if(type==Types.INTEGER) {
+                  o[0] = new Integer(results.getInt(1));
+               } else {
+                  o[0] = new Double(results.getDouble(1));
+               }
+	       o[1] = results.getObject(2);
+	       elementCount++;
+	       ensureCapacity(elementCount+1);
+	       elementData[j]=o;
+	     }
+	    trimToSize();
+      } catch (Exception e) {
+          throw e;
+      } finally {
+          if(results!=null) try {results.close();} catch (Exception e) {}
+      }
+    }
+   
+    
+    private String constructQuery(String RunIndexTable, String date, int runnoMax,int runnoMin) {
+         int itemid = parent.getID();
+         String tablename = parent.tableName4Constants();
+         String tableList=RunIndexTable+","+tablename;
+         String fieldList= tablename+"."+getChannel()+",minRun";
+         String condList= RunIndexTable+".itemId = "+itemid+
+	                      " AND minRun <= "+runnoMax+" AND minRun >="+runnoMin+
+	                      " AND "+tablename+".time <= \" "+date+"\" AND "+RunIndexTable+".itemValueId="+tablename+".itemValueid"+
+	                      " ORDER BY "+RunIndexTable+".minRun ";
+         String query ="SELECT "+ fieldList+" FROM "+tableList+" WHERE "+condList;
+         return query;
+    }
+    
+    public int[] getRunNoArray() {
+        int[] ret = new int[getCount()];
+        for (int i=0;i<ret.length;i++) {
+          ret[i] = ((Integer)getElement(i)[1]).intValue();
+        }
+        return ret;
+    } 
+    
+    public String[] getRunNoArrayAsString() {
+        String[] ret = new String[getCount()];
+        for (int i=0;i<ret.length;i++) {
+          ret[i] = ""+((Integer)getElement(i)[1]).intValue();
+        }
+        return ret;
+    } 
+    
+    
+    public float[] getAsFloatArray() {
+        float[] ret = new float[getCount()];
+        for (int i=0;i<ret.length;i++) {
+          ret[i] = ((Float)getElement(i)[0]).floatValue();
+        }
+        return ret;
+    }
+    
+    public int[] getAsIntArray() {
+        int[] ret = new int[getCount()];
+        for (int i=0;i<ret.length;i++) {
+          ret[i] = ((Integer)getElement(i)[0]).intValue();
+        }
+        return ret;
+    }
+    
+    public double[] getAsDoubleArray() {
+        double[] ret = new double[getCount()];
+        for (int i=0;i<ret.length;i++) {
+          ret[i] = ((Double)getElement(i)[0]).doubleValue();
+        }
+        return ret;
+    }
+    
+    // dynamic array support section
+    
+     protected int elementCount=0;
+     protected int initialCapacity = 100;
+     protected int capacityIncrement = 10;
+     protected Object elementData[];
+    
+    
+    /**
+     * Trims the capacity of the array to be the arrays current
+     * size. An application can use this operation to minimize the
+     * storage.
+     *
+     */
+
+    public final void trimToSize() {
+	int oldCapacity = elementData.length;
+	if (elementCount < oldCapacity) {
+	    Object oldData[] = elementData;
+	    elementData = new Object[elementCount];
+	    System.arraycopy(oldData, 0, elementData, 0, elementCount);
+	}
+    }
+
+    /**
+     * Increases the capacity of array, if necessary, to ensure
+     * that it can hold at least the number of components specified by
+     * the minimum capacity argument.
+     *
+     * @param   minCapacity   the desired minimum capacity.
+     */
+
+    public final void ensureCapacity(int minCapacity) {
+	int oldCapacity = elementData.length;
+	if (minCapacity > oldCapacity) {
+	    Object oldData[] = elementData;
+	    int newCapacity = (capacityIncrement > 0) ?
+		(oldCapacity + capacityIncrement) : (oldCapacity * 2);
+    	    if (newCapacity < minCapacity) {
+		newCapacity = minCapacity;
+	    }
+	    elementData = new Object[newCapacity];
+	    System.arraycopy(oldData, 0, elementData, 0, elementCount);
+	}
+	}
+
+    public Object[] getElement(int i) {
+        return (Object[])elementData[i];
+    }
+
+    public int getCount() { return elementData.length;}
+
+    
+    
+    public String toString() {
+      String s = "System "+parent.getParent().getParent().getName()+"\n";
+      s+= "Subsystem "+parent.getParent().getName()+"\n";
+      s+= "Item "+parent.getName()+"\n";
+      s+= "Channel "+this.getChannel()+"\n";
+      for(int i=0;i<elementData.length;i++) s+= i+ "  Run "+getElement(i)[1]+" "+getElement(i)[0]+"\n";
+      return s;
+    }
+}
+::::::::::::::
+RConstantSet.java
+::::::::::::::
+//********************************************************/
+//* H.Avagyan
+//* Date  : 2001-03-03
+//********************************************************/
+import java.util.*;
+import java.sql.*;
+
+
+public class RConstantSet {
+    
+    private RItem parent;
+    private int ITEMVALUEID; 
+    private String AUTHOR;    
+    private Timestamp TIME; 
+    private long MINRUNSOURCE; 
+    private long MAXRUNSOURCE; 
+    private String COMMENT;
+    private Object constants; 
+    private int type;
+    
+    public RConstantSet(RItem item) {
+        this.parent = item;
+        type = item.getType();
+        if(type == Types.FLOAT) type = Types.DOUBLE;
+        // create the right structure
+        if(type==Types.FLOAT) {
+            float[] f = new float[item.getLength()];
+            constants = f;
+        } else if(type==Types.INTEGER) {
+            int[] i = new int[item.getLength()];
+            constants = i;
+        } else {
+            double[] d = new double[item.getLength()];
+            constants = d;
+        }
+    }
+    
+    public int getType() {
+      return type;
+    }
+    
+    public void init(String RunIndexTable, String date, int runno,Statement s) throws Exception {
+        String query = constructQuery(RunIndexTable,date,runno);
+        ResultSet rs = null;
+        try {
+          rs = s.executeQuery(query);
+          if(rs.next()) {
+            
+            ITEMVALUEID  = rs.getInt("itemValueId");
+            AUTHOR       = rs.getString("author");
+            TIME         = rs.getTimestamp("time");
+            MINRUNSOURCE = rs.getLong("minRunSource");
+            MAXRUNSOURCE = rs.getLong("maxRunSource");
+            COMMENT       = rs.getString("comment");
+            if(type==Types.FLOAT) {
+               readFloats(rs);
+            } else if(type==Types.INTEGER) {
+                readInts(rs);
+            } else {
+                readDoubles(rs);
+            }
+          }
+        } catch (Exception e) {
+          throw e;
+        } finally {
+          if(rs!=null) try {rs.close();} catch (Exception e) {}
+        }
+    }
+    
+    public void readFloats(ResultSet rs) throws SQLException {
+        float[] ff = (float[])constants;
+        String v = "";
+        for(int j=1; j<=ff.length; j++) {
+                         v="v_"+(j<1000 ? "0":"")+(j<100 ? "0":"")+(j<10 ? "0":"")+j;
+          ff[j-1] = rs.getFloat(v);
+        }
+    }
+    
+    public void readInts(ResultSet rs) throws SQLException {
+        int[] ii = (int[])constants;
+        String v = "";
+        for(int j=1; j<=ii.length; j++) {
+                         v="v_"+(j<1000 ? "0":"")+(j<100 ? "0":"")+(j<10 ? "0":"")+j;
+          ii[j-1] = rs.getInt(v);
+        }
+    }
+    
+    public void readDoubles(ResultSet rs) throws SQLException {
+        double[] dd = (double[])constants;
+        String v = "";
+        for(int j=1; j<=dd.length; j++) {
+                         v="v_"+(j<1000 ? "0":"")+(j<100 ? "0":"")+(j<10 ? "0":"")+j;
+          dd[j-1] = rs.getDouble(v);
+        }
+    }
+    
+    private String constructQuery(String RunIndexTable, String date, int runno) {
+         int itemid = parent.getID();
+         String tablename = parent.tableName4Constants();
+         String tableList = RunIndexTable+","+tablename;
+         String fieldList = tablename+".*";
+         String condList = RunIndexTable+".itemId = "+itemid+
+	                       " AND minRun <= "+runno+" AND maxRun >="+runno+
+	                       " AND "+tablename+".time <= '"+date+"' AND "+RunIndexTable+".itemValueId="+tablename+".itemValueid"+
+	                       " ORDER BY "+RunIndexTable+".time DESC LIMIT 1";
+         String query ="SELECT "+ fieldList+" FROM "+tableList+" WHERE "+condList;
+	 //	 System.out.println("RConstantSet constructQuery: "+query);          
+         return query;
+    }
+    
+    
+    public float[] getAsFloatArray() {
+        return (float[])constants;
+    }
+    
+    public int[] getAsIntArray() {
+        return (int[])constants;
+    }
+    
+    public double[] getAsDoubleArray() {
+        return (double[])constants;
+    }
+    
+    public RItem getParent() {
+      return this.parent;
+    }
+    
+    public String toString() {
+      String s = "System "+parent.getParent().getParent().getName()+"\n";
+      s+= "Subsystem "+parent.getParent().getName()+"\n";
+      s+= "Item "+parent.getName()+"\n";
+            if(type==Types.FLOAT) { // only float version ;)
+                float[] f = getAsFloatArray();
+                for(int i=0;i<f.length;i++) {
+                 s+= "v_"+(i<1000 ? "0":"")+(i<100 ? "0":"")+(i<10 ? "0":"")+(i+1)+"="+f[i]+"\n";
+		}
+            } else if(type==Types.INTEGER) {
+                int[] f = getAsIntArray();
+                for(int i=0;i<f.length;i++) {
+                 s+= "v_"+(i<1000 ? "0":"")+(i<100 ? "0":"")+(i<10 ? "0":"")+(i+1)+"="+f[i]+"\n";
+		}
+            } else {
+                double[] f = getAsDoubleArray();
+                for(int i=0;i<f.length;i++) {
+                 s+= "v_"+(i<1000 ? "0":"")+(i<100 ? "0":"")+(i<10 ? "0":"")+(i+1)+"="+f[i]+"\n";
+		}
+            } 
+      return s;
+    }
+    
+}
+::::::::::::::
+RItem.java
+::::::::::::::
+//********************************************************/
+//* H.Avagyan
+//* Date  : 2001-03-03
+//********************************************************/
+import java.util.*;
+import java.sql.*;
+
+public class RItem {
+    
+  private static String loaditems = "SELECT itemId,itemName,length,type,description FROM Item WHERE subsystemId = ";
+
+  public static String getQuery(int subsystemid) {
+      return loaditems+subsystemid;
+  }
+    
+    
+  private int ITEMID;
+  private String ITEMNAME;
+  private int LENGTH;
+  private String TYPE;
+  private String DESCRIPTION;
+
+  
+  public RItem(ResultSet rs) throws SQLException {
+        this.ITEMID = rs.getInt("itemId");
+        this.ITEMNAME = rs.getString("itemName");
+        this.LENGTH = rs.getInt("length");
+        this.TYPE = rs.getString("type");
+        this.DESCRIPTION = rs.getString("description");
+  }
+  
+    private RSubSystem parent;
+    
+    public void setParent(RSubSystem p) {
+        parent = p;
+    }
+    
+    public RSubSystem getParent() {
+        return parent;
+    }
+  
+    public String getName() {
+      return ITEMNAME;
+    }
+  
+    public void printout() {
+      System.out.println(ITEMNAME);
+    }
+  
+  
+    // do some data mapping
+    public int getType() {
+      if(this.TYPE.equalsIgnoreCase("float")) return Types.FLOAT;
+      else if(this.TYPE.equalsIgnoreCase("integer")) return Types.INTEGER;
+      else
+        return Types.DOUBLE;
+    }
+    
+    public int getLength() {
+      return LENGTH;
+    }
+    
+    public int getID() {
+      return ITEMID;
+    }
+    
+    public String tableName4Constants() {
+
+      return parent.getParent().getName()+"_"+parent.getName()+"_"+ITEMNAME;
+    }
+  
+    public RConstantSet getConstants(String RunIndexTable, String date, int runno,Statement s) throws Exception {
+       RConstantSet set = new RConstantSet(this);
+       set.init(RunIndexTable, date, runno, s);
+       return set;
+    }
+    public RChannelData getChannelData(String RunIndexTable, String date, int runnoMax,int runnoMin, String channel,Statement s) throws Exception {
+       RChannelData chdata = new RChannelData(this,channel);
+       chdata.init(RunIndexTable,date,runnoMax,runnoMin, s);
+       return chdata;
+    }
+    
+    
+    public String[] getAsArray() {
+        String[] ss = new String[LENGTH];
+        for (int i=0;i<ss.length;i++) {
+          ss[i] = "Channel "+(i+1);
+        }
+        return ss;
+    }
+}
+::::::::::::::
+RSubSystem.java
+::::::::::::::
+//********************************************************/
+//* H.Avagyan
+//* Date  : 2001-03-03
+//********************************************************/
+import java.util.*;
+import java.sql.*;
+
+public class RSubSystem {
+    
+    private static String loadsubsystems = "SELECT subsystemId,subsystemName,description FROM Subsystem WHERE systemId = ";
+
+    public static String getQuery(int systemid) {
+      return loadsubsystems+systemid;
+    }
+       
+    private int SUBSYSTEMID;
+    private String SUBSYSTEMNAME;
+    private String DESCRIPTION;
+    private Vector items = new Vector();
+    
+    
+    public RSubSystem(ResultSet rs) throws SQLException {
+        this.SUBSYSTEMID = rs.getInt("subsystemId");
+        this.SUBSYSTEMNAME = rs.getString("subsystemName");
+        this.DESCRIPTION = rs.getString("description");
+    }
+    
+    private RSystem parent;
+    
+    public void setParent(RSystem p) {
+        parent = p;
+    }
+    
+    public RSystem getParent() {
+        return parent;
+    }
+    
+    public String getName() {
+      return this.SUBSYSTEMNAME;
+    }
+    
+    public void loadItems(Statement s) throws Exception {
+
+       ResultSet rs = null;
+       try { 
+         s.executeQuery(RItem.getQuery(this.SUBSYSTEMID));
+         rs = s.getResultSet();
+         while(rs.next()) {
+           RItem item = new RItem(rs);
+           item.setParent(this);
+           items.addElement(item);
+         }
+       } catch (Exception e) {
+         throw e;
+       } finally {
+         if(rs!=null) try {rs.close();} catch (Exception e) {}
+       }
+    }
+    
+    
+    public RItem getItem4Name(String s) throws Exception {
+        for (Enumeration e = items.elements() ; e.hasMoreElements() ;) {
+         RItem item = (RItem)e.nextElement(); 
+         if(item.getName().equals(s)) return item;
+       }
+      throw new Exception("Item "+s+" not found.");
+    }
+    
+    
+    public String[] getAsArray() {
+        String[] ss = new String[items.size()];
+        int i=0;
+        for (Enumeration e = items.elements() ; e.hasMoreElements() ;i++) {
+          RItem item = (RItem)e.nextElement(); 
+          ss[i] = item.getName();
+        }
+        return ss;
+    }
+    
+     public void printout() {
+      System.out.println(SUBSYSTEMNAME);
+      for (Enumeration e = items.elements() ; e.hasMoreElements() ;) {
+        RItem r = (RItem)e.nextElement(); 
+        r.printout();
+      }
+    }
+}
+::::::::::::::
+RSystem.java
+::::::::::::::
+//********************************************************/
+//* H.Avagyan
+//* Date  : 2001-03-03
+//********************************************************/
+import java.util.*;
+import java.sql.*;
+
+public class RSystem {
+    
+    
+    private static String loadsystems = "SELECT systemId,systemName,description FROM System";
+    
+    public static String getQuery() {
+      return loadsystems;
+    }
+    
+    private int SystemID;
+    private String SystemNAME;
+    private String DESCRIPTION;
+    private Vector subsystems = new Vector();
+    
+    public RSystem(ResultSet rs) throws SQLException {
+        this.SystemID = rs.getInt("systemId");
+        this.SystemNAME = rs.getString("systemName");
+        this.DESCRIPTION = rs.getString("description");
+    }
+    
+    public String getName() {
+      return this.SystemNAME;
+    }
+    
+    public void loadSybsystems(Statement s) throws Exception {
+
+       ResultSet rs = null;
+       try { 
+         s.executeQuery(RSubSystem.getQuery(this.SystemID));
+         rs = s.getResultSet();
+         while(rs.next()) {
+           RSubSystem subsystem = new RSubSystem(rs);
+           subsystem.setParent(this);
+           subsystems.addElement(subsystem);
+         }
+       } catch (Exception e) {
+         throw e;
+       } finally {
+         if(rs!=null) try {rs.close();} catch (Exception e) {}
+       }
+       
+       for (Enumeration e = subsystems.elements() ; e.hasMoreElements() ;) {
+         RSubSystem subsystem = (RSubSystem)e.nextElement(); 
+         subsystem.loadItems(s);
+       }
+       
+    }
+    
+    public RSubSystem getSubSystem4Name(String s) throws Exception {
+        for (Enumeration e = subsystems.elements() ; e.hasMoreElements() ;) {
+         RSubSystem subsystem = (RSubSystem)e.nextElement(); 
+         if(subsystem.getName().equals(s)) return subsystem;
+       }
+      throw new Exception("Subsystem "+s+" not found.");
+    }
+    
+    public String[] getAsArray() {
+        String[] ss = new String[subsystems.size()];
+        int i=0;
+        for (Enumeration e = subsystems.elements() ; e.hasMoreElements() ;i++) {
+          RSubSystem subsystem = (RSubSystem)e.nextElement(); 
+          ss[i] = subsystem.getName();
+        }
+        return ss;
+    }
+    
+    
+    public void printout() {
+       System.out.println(SystemNAME); 
+       for (Enumeration e = subsystems.elements() ; e.hasMoreElements() ;) {
+         RSubSystem subsystem = (RSubSystem)e.nextElement(); 
+         subsystem.printout();
+       }
+      
+ 
+    }
+    
+}
+::::::::::::::
+RSystemsCaldb.java
+::::::::::::::
+//********************************************************/
+//* H.Avagyan
+//* Date  : 2001-03-03
+//********************************************************/
+import java.util.*;
+import java.sql.*;
+
+public class RSystemsCaldb {
+
+
+    private Vector systems = new Vector();
+    
+    
+    private JDBCDataSource datasource = new JDBCDataSource();
+    
+     public void setDriver(String s) {
+       datasource.setDriver(s);
+     }
+     
+     public void setURL(String s) {
+       datasource.setURL(s);
+     }
+    
+     public void setUsername(String s) {
+       datasource.setUsername(s);
+     }  
+  
+     public void setPassword(String s) {
+       datasource.setPassword(s);
+     }
+    
+    public void loadSystems() throws Exception {
+        Statement s = null;
+       try {
+         s = datasource.getStatement();
+         loadSystems(s);
+       } catch (Exception e) {
+         throw e;
+       } finally {
+         if(s!=null) try {s.close();} catch (Exception e) {}
+       }
+    }
+    
+    public void loadSystems(Statement s) throws Exception {
+       
+       ResultSet rs = null;
+       try { 
+         s.executeQuery(RSystem.getQuery());
+         rs = s.getResultSet();
+         while(rs.next()) {
+           RSystem system = new RSystem(rs);
+           systems.addElement(system);
+         }
+       } catch (Exception e) {
+         throw e;
+       } finally {
+         if(rs!=null) try {rs.close();} catch (Exception e) {}
+       }
+       
+       for (Enumeration e = systems.elements() ; e.hasMoreElements() ;) {
+         RSystem system = (RSystem)e.nextElement(); 
+         system.loadSybsystems(s);
+       }
+       
+    }
+    
+    public RSystem getSystem4Name(String s) throws Exception {
+        for (Enumeration e = systems.elements() ; e.hasMoreElements() ;) {
+         RSystem system = (RSystem)e.nextElement(); 
+         if(system.getName().equals(s)) return system;
+       }
+      throw new Exception("System "+s+" not found.");
+    }
+    
+    
+    public RConstantSet getConstants(String systemname,String  subsystemname,String itemname,
+                                     String RunIndexTable, String date, int runno) throws Exception {
+       Statement s = null;
+       RConstantSet set = null;
+       
+       try {
+         s = datasource.getStatement();
+         RItem item = getSystem4Name(systemname).getSubSystem4Name(subsystemname).getItem4Name(itemname);
+         set = item.getConstants(RunIndexTable,date,runno,s);
+         return set;
+       } catch (Exception e) {
+         throw e;
+       } finally {
+         if(s!=null) try {s.close();} catch (Exception e) {}
+       }                                 
+    }
+  
+    public RChannelData getChannelData(String systemname,String  subsystemname,String itemname,
+                                     String RunIndexTable, String date, int runnoMax,int runnoMin, String channel) throws Exception {
+       Statement s = null;
+       RChannelData chdata = null;
+       try {
+         s = datasource.getStatement();
+         RItem item = getSystem4Name(systemname).getSubSystem4Name(subsystemname).getItem4Name(itemname);
+         chdata = item.getChannelData(RunIndexTable,date,runnoMax,runnoMin,channel,s);
+         return chdata;
+       } catch (Exception e) {
+         throw e;
+       } finally {
+         if(s!=null) try {s.close();} catch (Exception e) {}
+       }                                 
+    }
+    
+    public RItem getItem(String systemname,String  subsystemname,String itemname) throws Exception {
+         RItem item = getSystem4Name(systemname).getSubSystem4Name(subsystemname).getItem4Name(itemname);
+         return item;
+    }
+  
+    public void printout() {
+      for (Enumeration e = systems.elements() ; e.hasMoreElements() ;) {
+        RSystem r = (RSystem)e.nextElement(); 
+        r.printout();
+      }
+    }
+    
+    public String[] getAsArray() {
+        String[] ss = new String[systems.size()];
+        int i=0;
+        for (Enumeration e = systems.elements() ; e.hasMoreElements() ;i++) {
+          RSystem system = (RSystem)e.nextElement(); 
+          ss[i] = system.getName();
+        }
+        return ss;
+    }
+    
+    public String[] getSystems()  throws Exception {
+        return getAsArray(); 
+    }
+    
+    public String[] getSybsystems(String system)  throws Exception  {
+        return getSystem4Name(system).getAsArray();
+    }
+    
+    public String[] getItems(String system,String subsystem)  throws Exception {
+        return getSystem4Name(system).getSubSystem4Name(subsystem).getAsArray();
+    }
+    
+    
+    public void shutdown() {
+      this.datasource.close();
+    }
+    
+    
+}

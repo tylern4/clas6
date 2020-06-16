@@ -1,0 +1,73 @@
+#!/usr/local/bin/perl
+
+#  dep_report
+
+#  Perl script to report on fortran include dependencies (cpp and fortran format)
+
+#  usage:   dep_report [-i inc_sum_name] [-f fil_sum_name] file1 file2 ...
+
+#  generates 2 reports with default names inc_summary.txt and file_summary.txt
+
+#  still to do:
+
+#  E.Wolin, College of William and Mary, 25-apr-95
+
+
+#  Perl code:
+#  ----------
+
+$line = " ".join(" ",@ARGV)." ";     # pad line with whitespace
+
+if( (!$ARGV[0]) || ($line=~m/\s+-help\s+/) || ($line=~m/\s+-h\s+/) ){
+   die "\n usage:  dep_report [-i inc_sum_name] [-f fil_sum_name] file1 file2 ...  \n\n";}  
+
+#  default report file names
+$inc_summary="inc_summary.txt";
+$fil_summary="file_summary.txt";
+
+#  check command line for flags
+($inc_summary =$1) if ($line =~ s/-i\s*(\S*)//i);
+($fil_summary =$1) if ($line =~ s/-f\s*(\S*)//i);
+
+
+#  collect inc dependencies by file and inc
+foreach $file (split(" ",$line)){
+	if(!open(FILE,$file)){warn "\n?dep_report...unable to open file $file\n\n"; next;}
+
+	while(<FILE>){
+		if( (/^\#include\s*\"\s*(\S*)\s*"/i)     ||
+		    (/^\s*include\s*\"\s*(\S*)\s*"/i)    ||
+		    (/^\s*include\s*\'\s*(\S*)\s*'/i) ){
+			$inc_file=$1;
+###			($inc_file=$1)=~tr/[A-Z]/[a-z]/;	...don't translate to lower case
+			$inc_dep{$inc_file} .= ($file . " ");
+			$fil_dep{$file}     .= ($inc_file . " ");
+		}
+	}
+}
+
+
+#  report files referencing each include
+open(REPORT,">$inc_summary");
+foreach $inc (sort(keys(%inc_dep))){
+	$file_list=$inc_dep{$inc};
+	print REPORT "\n$inc is referenced in the following files:\n";
+	foreach $file (sort(split(" ",$file_list))){
+		$name=substr($file,rindex($file,"/")+1);
+		print REPORT "    $name\n";
+	}
+}
+
+
+#  report includes used in each file
+open(REPORT,">$fil_summary");
+foreach $fil (sort(keys(%fil_dep))){
+	$inc_list=$fil_dep{$fil};
+	$name=substr($fil,rindex($fil,"/")+1);
+	print REPORT "\n$name uses the following include files:\n";
+	foreach $inc (sort(split(" ",$inc_list))){
+		print REPORT "    $inc\n";
+	}
+}
+
+

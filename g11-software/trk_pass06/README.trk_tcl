@@ -1,0 +1,153 @@
+Variables in the TRK package that are under TCL control.
+
+
+To selecte type of the magnetic field -
+ipar_trk_magtyp  -  (Default = 0)   (=0:  take table of magnetic field )
+                                  | (=1:  calculate field for torus )
+    Dos these was ever used ?  <==| (=2:  calculate field for mini torus )
+                                  | (=3:  calculate field for torus & mini 
+                                    (=4:  uniform field (along wire) of -3.0 kG)
+                                    (=5:  No magnetic field )
+
+
+
+Requested Level of Tracking -
+                               (=1:  only Segment&Cluster finding)
+			       (=2:  Hit Based Tracking)
+			       (=3:  Resolving LeftRight ambiguity)
+ipar_trk_level - (Default = 4) (=4:  Time Based Tracking)
+	    	               (=5:  Vertex reconstruction (not yet implemented)
+
+Requested min. number of hits per track segment in SuperLayers 1..6 -
+ipar_trk_minhits(1)=2  	SuperLayer 1  
+do i=2,6
+  ipar_trk_minhits(i)=3	SuperLayers 2 to 6
+enddo
+
+The maximum number of segments alowed in SuperLayers 2,3&5 to do link -
+ipar_trk_maxsegm  -  (Default = 30) 
+
+Start link the segments in the region - 
+		       (        = 0) Mikhail's JETNET routines (not yet implem.)
+ipar_trk_startlink  -  (Default = 1)    Jim's linking routine: start with SL1
+		       (        = 2,3) Franz's routine: start with Reg.2 or 3)
+
+
+Required minimum number of linked segments/SuperLayers for track -
+ipar_trk_minlinks  -  (Default = 5)
+
+Required minimum number of segments/SuperLayers in the track with resolved 
+LeftRight-ambig-
+ipar_trk_minlramb  -  (Default = 4) 
+
+
+Control for linking - 
+ipar_trk_make_prlink=0 ! write new templates for prlink dictionary
+                             ! (=0:  Read only (no update))
+                             ! (=1:  Write only (1-st time: generate new templets)
+                             ! (=2:  Read&Write (read and update templets))
+                             
+
+Control parameters for fitting -
+dpar_trk_prfit_chi2=50.D0    ! chi2 cut in pattern recogn. fit (level=2:HBT)
+dpar_trk_lrambfit_chi2=100.D0 ! chi2 cut in LR-amb. fit         (level=3)
+dpar_trk_tbtfit_chi2=200.D0   ! chi2 cut in final track fit  (level=4:TBT)
+dpar_trk_vx2fit_chi2=50.D0   ! chi2 cut in vertex fit for combination of 2 tracks
+dpar_trk_vxfit_chi2=50.D0    ! chi2 cut in vertex fit       (level=5)
+dpar_trk_zstep(1)=0.1D0   ! min. step size for trajectory propagation
+dpar_trk_zstep(2)=10.D0   ! max. step size for trajectory propagation
+dpar_trk_zangle=0.005D0   ! max. deflection angle per Step
+dpar_trk_Chi2diff=0.1     ! Chi2 Difference for convergence 
+
+
+Beam and trget positions - 
+dpar_targetLen=4.cm              Length of TargetCell
+dpar_TargetPos(1)=0. cm          Offset of Target Position (X) 
+dpar_TargetPos(2)=0. cm		 Offset of Target Position (Y)
+dpar_TargetPos(3)=0. cm		 Offset of Target Position (Z)
+dpar_BeamOff(1)=0. cm         	 Beam Position at Target: {x_Coord}
+dpar_BeamOff(2)=0. cm        	 Beam Position at Target: {y_Coord}
+dpar_BeamAngle(1)=0. cm       	 Beam Direction at Target: {Theta(x,z)}
+dpar_BeamAngle(2)=0. cm       	 Beam Direction at Target: {Phi(y,z)}
+dpar_SigmaBeam=0.03 cm           Sigma of BeamPosition
+
+
+Requairement for vertex constrain - 
+ipar_trk_vxconstr  -  (Default = 0    unconstrained)
+                      (        = 1    transverse constrained)
+                      (        = 2    long. constrained (along the beam))
+                      (        = 3    both (along & transverse) constrained)
+
+
+
+ipar_trk_electron_id=0  (=1: do geometrical matching of EC*CC*SC before segment
+                             finding)
+
+ipar_trk_maxiter=3    ! max.number of iterations (=0: no fit)
+
+ipar_trk_calcTM=1     	    ! Flag for calculating the Transport Matrix
+                            !(=0: not calculated [assume uniform magn.field along z-axis])
+                            !(=N: Transport Matrix is calculated 
+                            !     for the N first iterations)
+
+
+
+ipar_trk_sector=0        ! Sector# to be analyzed    (=0: all sectors)
+ipar_trk_mintracks=1     ! min. #tracks in final states (i.e. charged multiplicity)
+
+Some enviromental variables (should be optimised) - 
+spar_torus_bfield_name='bgrid_t.fpk'  Name of the main torus bfield file.
+spar_torus_bfield_loc='CLAS_PARMS'    Environment variable (location of
+                                      'spar_torus_bfield_name')
+spar_minitorus_bfield_name='bgrid_m.fpk' Name of the mini torus bfield file.
+spar_minitorus_bfield_loc='CLAS_PARMS'   Environment variable (location
+                                         of 'spar_minitorus_bfield_name')
+spar_poltarget_bfield_name='bgrid_ptg.fpk'  Name of the polar.target bfield file.
+spar_poltarget_bfield_loc='CLAS_PARMS'      Environment variable (location
+                                            of 'spar_poltarget_bfield_name')
+spar_prlink_loc='CLAS_PARMS'    Environment variable (location of 
+                                'spar_prlink_name')
+
+Multiple Scattering (not sure that we need this at all) 
+      ipar_trk_multscat=0   ! Multiple Scattering 
+                            !(=0: Multiple Scattering is OFF )
+                            !(=1: Multiple Scattering is ON : He & Air<Reg.1 & DC)
+                            !(=2: Multiple Scattering is ON : He & Air<Reg.1 & DC & ST counter)
+
+
+Variables to control print on stdout (LOGUNIT=6) (for debug purposes) -
+
+ipar_trk_statistics=1      (=1:  print statistics at End-of-Run)
+                           (=2:  print out some statistics for each event)
+ipar_trk_print(i)  -  (Default = 0) i=1,8; no printouts 
+
+
+Control variables for histograming (should be moved to ANA) - 
+ipar_trk_histo  -  (Default = 0)       	No histograms
+                   (	    = 1)  	Hit Based Tracking
+                   (	    = 2) 	Hit&Time Based Tracking
+                   (        = 3) 	Raw data & Hit Based Tracking)
+
+ipar_trk_ntuple    (Default = 0)     	fill tracking ntuples   
+
+
+
+The following variables are for calculation of magnetic field (was ever used?)- 
+      dpar_bfield_grid(1)=0.0D0		! control: 1=calculate
+      dpar_bfield_grid(2)=61.0D0	! Nx
+      dpar_bfield_grid(3)=41.0D0	! Ny
+      dpar_bfield_grid(4)=87.0D0	! Nz
+      dpar_bfield_grid(5)=-7.0D0	! Xmin
+      dpar_bfield_grid(6)=-6.0D0	! Ymin
+      dpar_bfield_grid(7)=-350.0D0	! Zmin
+      dpar_bfield_grid(8)=7.0D0		! Dx
+      dpar_bfield_grid(9)=6.0D0		! Dy
+      dpar_bfield_grid(10)=10.0D0	! Dz
+
+
+Variables that are NOT USED any where in the code -
+ipar_trk_bgridtyp  -  (Default = 1)     (=0:  no magnetic field)
+                                	(=1:  SDA bgrid (euclidian))
+                                	(=2:  Mikhails bgrid (radial))
+
+ipar_poltarget_current  -  (Default = 0)  current of the Polarized Target Coils

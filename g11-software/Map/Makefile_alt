@@ -1,0 +1,95 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+
+RW_SOURCES = map_create.c map_add_item.c map_add_item1.c map_rem_item.c \
+          map_rem_sub.c \
+          map_next_sub.c map_next_item.c map_put_int.c map_put_float.c \
+          map_put_char.c \
+          map_get_int.c map_get_float.c map_get_char.c map_fnd_int.c \
+          map_fnd_float.c \
+          map_fillname.c map_find_pred.c \
+          map_error.c map_syserror.c map_warn.c map_log_mess.c \
+	  map_read.c map_read_buffer.c map_write.c map_write_buffer.c map_add_sub.c \
+          map_overwrite.c map_find_same.c map_time_pred.c map_dump.c \
+          map_find_item.c map_stat_item.c map_open_close.c \
+          map_find_sub.c map_fix_item.c map_fix_sub.c map_fix_head.c \
+	  map_stat_head.c map_rem_arr.c  map_endianConvert.c \
+          map_add_item_.c map_put_int_.c map_put_flo_.c map_get_int_.c \
+          map_get_flo_.c map_fnd_int_.c map_fnd_flo_.c map_stat_item_.c \
+          map_rem_item_.c map_rem_sub_.c map_rem_arr_.c map_dump_.c \
+          map_log_mess_.c \
+	  mapf_add_item.c mapf_get_float.c mapf_get_int.c mapf_put_float.c \
+	  mapf_put_int.c mapf_rem_item.c mapf_stat_item.c \
+	  mapf_get_char.c mapf_put_char.c map_conv_Fstring.c
+
+RO_SOURCES = map_next_sub.c map_next_item.c \
+          map_get_int.c map_get_float.c map_get_char.c map_fnd_int.c \
+          map_fnd_float.c \
+          map_fillname.c map_find_pred.c \
+          map_error.c map_syserror.c map_warn.c map_log_mess.c \
+	  map_read.c map_read_buffer.c  map_endianConvert.c \
+          map_find_same.c map_time_pred.c map_dump.c \
+          map_find_item.c map_stat_item.c \
+#     map_open_close_ro.c \
+          map_find_sub.c \
+	  map_stat_head.c \
+          map_get_int_.c \
+          map_get_flo_.c map_fnd_int_.c map_fnd_flo_.c map_stat_item_.c \
+          map_dump_.c map_log_mess_.c \
+	  mapf_get_float.c mapf_get_int.c \
+	  mapf_stat_item.c map_readonly_stub.c \
+	  mapf_get_char.c mapf_put_char.c map_conv_Fstring.c
+
+LIBRARY1 = $(CLAS_LIB)/libmapmanager$(ADD_DEBUG).a
+LIBRARY2 = $(CLAS_LIB)/libmapmanager_ro$(ADD_DEBUG).a
+
+
+all: lib
+
+
+ROBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(RO_SOURCES))
+WOBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(RW_SOURCES))
+
+EXE_default:=
+EXE_IRIX:= $(EXE_default)
+EXE_SunOS:= $(EXE_default)
+EXE_HP-UX:= $(EXE_default)
+EXE_AIX:= $(EXE_default)
+EXE_Linux = $(EXE_default)
+
+EXE:= $(EXE_$(OS_NAME))
+ifndef EXE
+EXE:= $(EXE_default)
+endif
+all: lib
+exe: $(EXE)
+LIBS= $(LIBRARY1) $(LIBRARY2)
+
+
+$(LIBRARY1): $(WOBJS)
+	$(VDIR) $(CLAS_LIB)
+	ar rv $@ $?
+
+$(LIBRARY2): $(ROBJS)
+	$(VDIR) $(CLAS_LIB)
+	ar rv $@ $?
+
+lib: $(LIBS)
+
+
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo INCLUDE $(INCLUDE)

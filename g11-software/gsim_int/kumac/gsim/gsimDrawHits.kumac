@@ -1,0 +1,11 @@
+macro gsimDrawHits
+
+  dxyz
+  dhits
+  exec gsimDrawPart 7 10 0.3
+  message '  '
+  message 'Use left button to pick hits--click right button to quit' 
+  khits
+  
+return
+  

@@ -1,0 +1,476 @@
+CLAS Linux software distribution:
+
+Abstract:
+For the cost of a mid-range PC you can have all the tools you need to 
+contribute to the CLAS OFF-LINE software development.  GSIM, RECSIS and FDUMP
+have all been ported to Linux and more CLAS software ports are in progress.
+It is hoped that within the next month a complete distribution will be 
+possible.
+
+OFF-SITE NON-Linux developers may also be interested in this port 
+since it builds without having to build the CLAS code management system (CMS) 
+first. With the execution of "make bin" ALL the libraries (except FPACK) will
+be generated and RECSIS, GSIM_BAT and FDUMP will be linked as well.
+
+This README covers a lot of ground:
+
+Section one:     Hardware and software requirements
+Section two:     Directory structure
+Section three:   Install procedure
+Section four:    Makefile scheme
+Section five:    Non-Linux ports
+Section five-a:  What to do when it doesn't work
+Section six:     benchmarks (1000 bucks buys you fast system)
+Section seven:   running the code/enviroment variables
+Section eight:   future plans (you can help!)
+Appendix A:      using this Make system on JLAB with present CMS system
+Appendix B:      Remote building via remsh
+Appendix C:      code staleness
+
+*******************************************************************
+**      Section One: Hardware and software requirements:         **
+*******************************************************************
+
+Linux: Hardware
+        Kernal:   Version 2.0 but I think lower version should also work
+	   CPU:   486 or higher processor
+        Memory:   16Mbytes RAM/ 16Mbytes swap (MINIMUM!!) 
+                 (32Mbytes RAM STRONGLY recommended)
+
+          Disk:  6Mbytes   Source
+                12Mbytes   Libraries
+                10Mbytes   Calibration constants (B-field maps)
+                14Mbytes   Binaries
+
+                42Mbytes   Total
+
+Linux: Software (all this is FREE!!!!)
+	   g77:   Fortran compiler, version 0.5.18 or higher
+           gcc:   you can't have Linux without it (I have version 2.7.2)
+      gnu-make:   "
+	   sed:   "
+           tcl:   RECSIS needs this
+             X:   Xlibs are required to link GSIM_BAT
+       cernlib:   get this from the CERN ASIS site (VERY BIG FILE!!)
+
+NON-Linux platforms:  Software needed for Makefile system
+
+      gnu-make:  Makefile written using gnu-make extensions
+           gcc:  for dependency generation
+           sed:  every platform probably has this
+           
+         a C compiler either "cc" or "gcc" will suffice
+         a FORTRAN compiler, f77 or fort77....
+
+NON-Linux platforms: Software needed for CLAS code with this port:
+       
+       cernlib:  get it from the CERN ASIS site
+           tcl:  free software available off the web
+             X:  you gotta have this....
+         fpack:  This port comes with a FPACK for Linux...so don't try
+                 to build it on non-Linux boxes.  HOWEVER, this version
+                 of FPACK code "may" work on DEC-Alpha workstations.
+                 DEC-Alpha's and INTEL CPU's are little endian (90% of
+                 all computers) whereas the rest of the world are big
+                 endian.  (Please let me know if it does work on DEC-Alpha's!)
+
+*******************************************************************
+**     Section two:   Directory structure                        **
+*******************************************************************
+
+The Linux port contains a directory structure that is different from that
+of the CLAS directory structure on the JLAB machines.  Given the choice 
+between porting the CLAS CodeManagementSystem with its directory structure
+or learning "gnu-make" and developing a truly portable build system, I choose 
+the later.   
+
+The directory system is as shown below, where  TOP is some arbitrary directory:
+
+                               TOP
+                                |
+   -----------------------------------------------------------------
+   |            |            |                   |         |       |
+  bin          lib          parms           packages     data     run
+   |            |                               |
+--------       --------          -------------------------------------------
+|      |       |      |          |       |        |         | .....        |
+Linux SunOS   Linux  SunOS    recsis   gsim     fpack    cms              user
+                                |       |         |        |                |
+                             ------    -------  --------   |          --------
+                             |    |    |     |  |      |   *.mk       |      |
+                         depends  s  depends s depends s          depends    s
+                            |          |        |                   |
+                        -------     -------    -------          -------
+                        |     |     |     |    |     |          |     |
+                     Linux  SunOS Linux SunOS Linux SunOS    Linux  SunOS
+
+NOTE:  The bin and lib areas are created automatically for you.  The resulting
+libraries and binaries are placed in subdirectories (also created 
+automatically) of lib and bin based on the operating system name (OSNAME,
+which is assigned via the "uname" command within the Makefile).  
+The reason for this is in case the source code resides on a disk that is 
+shared by two different OS's.  Like the JLAB CUE system, where one's 
+home directory is seen by HP's, Sun's and IBM's.  With this scheme 
+one can invoke the same command ("make bin" or "make lib") in the same 
+directory on different machines and the resulting output will be deposited 
+in the correct directory.  
+
+Details of what directories hold:
+
+bin/Linux :  executables for the Linux platform
+lib/Linux :  libraries for the Linux platform
+parms     :  calibration constants needed to run GSIM and RECSIS
+data      :  where you may want to store some CLAS DATA
+run       :  directory to execute GSIM and RECSIS
+packages  :  source code (*.F *.c) and Makefiles (*.mk) to build the 
+             libraries and binaries.
+
+packages/cms : contains the makefiles needed to build the system.
+packages/LIBNAME/s : source code and includes
+packages/LIBNAME/depends/OSNAME : dependencies for each source file, the
+                                  typical user should never have to look
+                                  into the depends area.  These directories
+                                  and files are also created automatically.
+
+*******************************************************************
+**      Section three: Install procedure                         **
+*******************************************************************
+
+There are several files you can FTP to your box:
+
+These files are found in:  /site/clas/u1/clastemp/LINUX
+
+clas_source.tar.gz : contains just the "packages" branch of the directory
+                     structure.  You should be able to build everything
+                     from this file.  (1Mbyte file)
+
+clas_parms.tar.gz : contains the "parms" and "data" branch so you can run 
+                    the code once you have it compiled. (5Mbyte file)
+
+clas_binaries_linux.tar.gz : contains the "lib" and "bin" branch for those
+                             too chicken to do a complete build. (3Mbyte)
+
+
+How to install and build:
+
+Create a directory you wish to be the "top", I'll call it TOP in this
+example.  
+
+1)  get CERNLIB and unpack it in some arbitrary directory.
+2)  define CERN_ROOT environment variable to so that $CERN_ROOT/lib points
+    to the directory that contains the CERN libraries.
+3)  copy/ftp  clas_source.tar.gz and clas_parms.tar.gz  into the TOP directory
+4)  gunzip clas_source.tar.gz        ! unzip it
+5)  tar -xovf clas_source.tar        ! untar it
+6)  cd packages                      ! change directories to "packages"
+7)  make bin                         ! start the build process
+
+This takes a while, 50min so go grab a beer and/or some bourbon, put on the
+Coltrane, Dylan or Rage against the Machine CD and relax.
+
+The lines spewing forth on your screen consist of commands that "make"
+is invoking to create the dependency files and to compile the source.
+Since "make" is running four library builds in parallel you will often
+see source names from different packages adjacent to each other.  On
+a Linux box with a "normal" installation everything should work fine.
+
+*******************************************************************
+**    Section four:  Makefile scheme                             **
+*******************************************************************
+
+The Makefile scheme used is that described by Richard Stallman and
+Roland McGrath in the GNU Make manual, with some ideas also from
+the "Managing Project with make" by Andrew Oram and Steve Talbott.
+I recommend that you get these two documents (the GNU Make manual
+is on the web and its FREE!).  
+
+The Makefile scheme centers on ONE makefile, packages/cms/generic.mk,
+which contains the core code to build libraries and binaries.  It is
+executed over and over again as each library is built.  (You may have
+noticed that there are NO Makefiles in the package source sub-directories.)
+
+Look in packages/cms/bin.mk and packages/cms/lib.mk to see how it
+invokes generic.mk to do these builds.  Below is a snippet of these
+files:
+
+Library build (lib.mk):
+
+fpack: $(FORCE)
+        cd fpack; $(MAKE)  -f ../cms/generic.mk lib
+
+Binary build (bin.mk):
+
+recsis: $(FORCE)
+        cd recsis; $(MAKE) -f ../cms/generic.mk exe CREATED_F=recsis.F \
+                                LIBNAMES="$(RECSIS_LIBS) $(RECSIS_MD_LIBS)" \
+                                SHARED_LIBS="$(RECSIS_SHARED_LIBS)"
+
+generic.mk needs three other "sub-make" files to work:
+
+flags.OSNAME.mk, link.mk, link.OSNAME.mk   (OSNAME= Linux, SunOS, HP-UX, AIX)
+
+flags.OSNAME.mk contains the compile flags that usually vary from
+                machine to machine.
+
+link.mk         contains the link list needed to make GSIM_BAT RECSIS
+                and FDUMP, it is separated out so that one needs to only
+                change one file to alter the link list for all platforms.
+
+link.OSNAME.mk  contains the MACHINE DEPENDENT parts of the link list.
+         
+
+Most of the customization should be in "flags.OSNAME.mk" and "link.OSNAME.mk"
+as locations of the X libraries may vary from machine to machine as well as
+the compile options.
+
+I've tried to comment "generic.mk" as much as possible so that user feel
+comfortable using and modifying it.  Please take a look at it
+and get a feel for what it is doing, that way you'll be in better
+shape to recover when things go wrong.  
+
+Dependency generation:  Every time you modify a source file, include file
+or the flags.OSNAME.mk file the dependency files are automatically updated.
+What this means is that you no longer have to invoke a special command
+"make depends" to update dependencies.  Your dependencies are updated
+every time you modify your code.  This causes a slight cost in CPU
+during the build process, but once the complete build is over, the
+CPU cost becomes minimal. (The CPU cost is present in the other make systems
+as well since the first command you need to invoke is "make depends".)
+
+Also note that since ALL the source has flags.OSNAME.mk as a dependency,
+touching or editting this file will cause a complete build.  So if you
+change a compile flag, all libraries will be remade as well as the
+executibles.
+
+As machine dependent problems arise I try to first fix them with a 
+cludge and then later try to smooth out the fix.  Two of such cludges
+have yet to be worked out.  One is dealing with shared libraries and
+the other is the -WF prefix for includes on AIX.
+
+*******************************************************************
+**    Section five:  Non-Linux ports                             **
+*******************************************************************
+
+For NON-Linux systems, you need to make a "top" directory, I'll use
+TOP as an example:
+
+1) get/ftp clas_source.tar.gz into TOP
+2) gunzip clas_source.tar.gz
+3) tar -xovf clas_source.tar.gz
+4) cd packages
+5) make lib
+6) copy/ftp the appropriate libfpack.a into TOP/lib/OSNAME
+7) make bin
+8) watch to see where the Makefile is getting confused and edit
+   flags.OSNAME.mk or link.OSNAME.mk to fix the problem.
+
+NOTE:  Since the compiling of libraries does not require any environment
+variables or location of exotic libraries, you should be able to build
+ALL the libraries without a hitch.  Linking the executables will involve
+getting the location of "libtcl" "libX11" and other libraries correct
+for your system.  
+
+I have tested this system successfully on the Sun, HP, AIX systems
+at Jefferson Lab.  
+
+ADDING new platforms:
+
+Makefiles exist for SUN, IBM, HP and Linux platforms.  If you are
+trying to build on a SGI, DEc-alpha or other platform, you will
+have to create TWO files in packages/cms.
+
+Suppose you are on a system in which the response to the "uname"
+command is: SGI.  That is OSNAME=SGI...then in packages/cms do the
+following:
+
+                 cp flags.SunOS.mk flags.SGI.mk
+                 cp link.SunOS.mk  link.SGI.mk
+
+Now edit these two files, place in the appropriate FORTRAN and C 
+compile flags for SGI.  And for the machine depenpendent link list
+you might want to start off by trying to build with ALL the
+variables in link.SGI.mk set to blanks.... That is all that
+needs to be done (I hope).
+
+
+*******************************************************************
+**           Section five-a What to do when things don't work    **
+*******************************************************************
+
+I have tested this system on my Linux Box, Cole Smith's Linux box,
+JLAB Sun's, JLAB AIX and JLAB HP
+machines.  But I know outside users will run into problems.  DO NOT EXPECT
+ME OR ANY JLAB STAFF TO LOG INTO YOUR MACHINE TO SOLVE YOUR PROBLEMS.
+This is NOT an official CLAS software activity and cannot be supported
+at the same level as CLAS software.
+
+For what it is worth the port to Cole Smith's machine went flawlessly!
+
+But here are some suggestions if the procedure above did not work:
+
+a) make the libraries first:
+                               make lib
+
+   The only errors one should get during this process is missing include
+   files.  The include file that gives this system the most trouble is
+   <tcl.h> usually found in /usr/include or /usr/local/include.
+   Edit the TCL_INC variable in flags.OSNAME.mk to the correct 
+   location of <tcl.h>
+
+b) Make the fdump executible next:
+                                   make -f bin.mk fdump
+
+   Since this program does not use TCL or X it compiles rather painlessly.
+   The only reason this link will fail is if the CERN_ROOT enviroment 
+   variable is incorrectly set.
+
+c) Now try to make recsis:
+                                   make -f bin.mk recsis
+
+   You may have to tell make where <libtcl.a> resides, via the
+   TCL_LIB variable in flags.OSNAME.mk.  You may have further
+   problems if your system contains shared tcl libraries,
+   libtcl.so....If this is the case you will have to remove the
+   
+        RECSIS_LIBS += tcl
+
+   line in link.mk and ADD
+
+        RECSIS_SHARED_LIBS = /lib/libdl.so.1 /usr/lib/libtcl.so 
+                                             ^^^^^^^^^^^^^^^^^^
+   in the link.Linux.mk file, then try to relink RECSIS.
+
+d) Now try the beast known as gsim_bat:
+
+                                   make -f bin.mk gsim_bat
+
+   Here you will have to deal with X libraries....
+
+*******************************************************************
+**  Section six:   benchmarks (1000 bucks buys you fast system)  **
+*******************************************************************
+
+below are some timings for different processors.
+
+Machine     100Mhz   133Mhz  JLABS3    CLAS02 JLABA1 JLABH1 
+            pentium  pentium sun-ultra HP735  AIX
+
+gsim_bat    23.8338  14.4292  9.3275   8.0553 11.2391  7.200   seconds/event
+recsis      53.470   38.360  67.140   26.270  19.440  14.840  mseconds/event
+
+gsim_bat was executed on all machines with default cards
+recsis was executed with default settings on the same file, data/benchmark.evt
+
+The compile optimization level of -O was used on ALL platforms.
+
+The performance of JLABS3 is very puzzling, and may reflect the load
+of this machine or may indicate a problem within the RECSIS code.
+
+*******************************************************************
+**   Section seven: running the code/enviroment variables        **
+*******************************************************************
+
+Before running the executibles, you will get/need to unpack the 
+clas_parms.tar.gz file.  
+
+cd TOP; gunzip clas_parms.tar.gz; tar -xovf clas_parms.tar
+
+In order to run RECSIS and GSIM_BAT you will need to define some
+enviroment variables.  Here is the list that works for me, where TOP
+is this mythical "top" directory.
+
+setenv CLAS           TOP
+setenv CLAS_DATA      $CLAS/data
+setenv CLAS_PARMS     $CLAS/parms
+setenv CLAS_DOC       $CLAS/parms
+setenv RECSIS_RUNTIME $CLAS/parms
+setenv CLAS_LIB       $CLAS/lib/Linux
+setenv CLAS_BIN       $CLAS/bin/Linux
+setenv CLAS_SOURCE    $CLAS/packages
+setenv RECSIS         $CLAS/packages/recsis
+setenv CTEST_EXE      $CLAS/lib/Linux
+#
+setenv CERN /usr/home/cernlib/cern
+setenv CERN_LEVEL 96a
+setenv CERN_ROOT $CERN/$CERN_LEVEL
+setenv CERN_LIB $CERN_ROOT/lib
+setenv CERN_BIN $CERN_ROOT/bin
+
+Okay now you are ready to test drive the binaries.
+Make a directory you wish to run in, for example RUN.
+
+1) cd RUN
+2) ../bin/Linux/recsis -t $RECSIS/tcl/newinit.tcl    ! run recsis
+3) ../bin/Linux/gsim_bat -noffread -trig 10          ! run gsim_bat 10 events
+4) ../bin/Linux/fdump ../data/benchmark.evt          ! run fdump
+
+*******************************************************************
+**    Section eight: future plans (you can help!)                **
+*******************************************************************
+
+This distribution has several large holes: 
+
+1) No support for SCAT, EventStore and SWISH which allow RECSIS to
+   to communicate to CED and the tcl/tk GUI.
+2) No CED, Dave Heddle is working on this....
+3) GSIM_INT because it will probably require a memory upgrade....
+4) ber
+5) distributed revision control
+6) FPACK for other systems, this will require someone (NOT ME!) to
+   convert FPACK from CMZ to   source and include files  so Make can
+   be used to properly build FPACK on different platforms.
+7) Convienient method to build DEBUG libraries.
+8) Celeg, CLAS event generator---I don't even know where the source is
+   for this package.
+9) better diagnositics and structured output so that debugging the
+   build system is more straight forward.
+
+The plan is to adiabatically include these portions of code as my time
+becomes more available.
+
+*******************************************************************
+**    Appendix A: Using this Make system on JLAB with CLAS code  **
+*******************************************************************
+
+This system can be easily adapted to work with the existing CLAS 
+CMS tree and RCS.  Details will be coming soon.
+
+*******************************************************************
+**              Appendix B:    Remote Building via remsh         **
+*******************************************************************
+
+It is straight forward to build executibles and libraries on remote
+nodes that share the source disk.  For example on the JLAB CUE
+system one can invoke the following commands from a single session
+to build on all three unix platforms.  
+
+Assuming that you are in the TOP/packages directory:
+
+remsh -n jlaba1 "cd $PWD; make bin >&! jlaba1.output" &
+remsh -n jlabs3 "cd $PWD; make bin >&! jlabs3.output" &
+remsh -n clas02 "cd $PWD; make bin >&! clas02.output" &
+
+For this to work all enviroment variables that Make uses must be
+defined in your .cshrc file.  This includes CERN_ROOT...You also
+must include those nodes in your ".rhosts" files so you can 
+"remsh" to those machines.
+
+In this manner compiling, linking and checking your code on multiple 
+platforms  is straight forward and does not require a dedicated session
+on all three machines.  
+
+*******************************************************************
+**              Appendix C:    code staleness                    **
+*******************************************************************
+
+I will not guarantee that the source distributed in these packages is
+up to date.  But it will provide a base from which to start your
+off-site development.  If you decide to work on a piece of existing 
+software you MUST do the following:
+
+1) get the most recent and COMPLETE source code for the particular package you
+   are working on from the CLAS tree
+2) check out and LOCK those routines that you are modifying.
+
+Please try to be swift and check your code back in so other people can work
+on it.

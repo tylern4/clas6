@@ -1,0 +1,61 @@
+#! /usr/bin/env perl
+@arr = ();
+$negate = 0;
+    for (@ARGV) {
+        if (/^-n/) {
+            $negate = 1;
+        } 
+	else {
+                push(@arr,($_));
+        }
+
+      }
+
+@ARGV = @arr;
+
+
+$view = $ARGV[0];
+shift;
+
+if ($#ARGV >= 0) {
+
+while (@ARGV) {
+	$name = $ARGV[0];
+	shift;
+	open(FILE,$name);
+	while (<FILE>) {
+	if (/^$view(.+)$/) {
+	  if (!$negate) {
+		print $1,"\n";
+	  }
+	}
+	else {
+	  if ($negate) {
+	    print;
+	  }
+	}
+      }
+      }
+}
+else {	
+	while (<STDIN>) { 
+	if (/^$view(.+)$/) {
+	  if (!$negate) {
+		print $1,"\n";
+	  }
+	}
+	else {
+	  if ($negate) {
+	    print;
+	  }
+	}
+      }
+
+}
+
+
+exit(0);
+
+
+
+# end file

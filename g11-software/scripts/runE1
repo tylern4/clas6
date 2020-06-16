@@ -1,0 +1,153 @@
+#! /usr/local/bin/perl
+require "ctime.pl";
+$host = $ENV{"HOSTNAME"};
+$home = $ENV{"HOME"};
+$os = $ENV{"OSNAME"};
+
+# set the CLAS_PARMS environment to production dec'97
+
+$ENV{'CLAS_PARMS'} = "/group/clasdev/clas/src/prod_dec97/parms";
+
+# Get the run number
+
+$run = $ARGV[0];
+shift;
+
+#fix to handle permissions screwup
+$cmd="chmod +r *";
+print "$cmd\n";
+system($cmd);
+
+open(X,"ls -l  |")  || die "Could not execute ls command\n";
+
+while (<X>) {
+    print;
+}
+
+
+open(C,"ls -1 clas*$run* |")  || die "Could not execute ls command\n";
+
+while (<C>) {
+	chop;
+	push(@files,($_));
+}
+
+
+$cmd = "/group/clasdev/clas/src/prod_dec97/bin/$os/a1dec97 "; 
+
+foreach $a (@ARGV) {
+	$cmd = $cmd." ".$a;
+}
+
+foreach $file (@files) {
+    $cmd = $cmd." ".$file;
+}
+
+
+print "Processing run $run\n";
+open(L,">> /group/clasdev/clas/dec97/database/process.log") || die "Could not open log file: /group/clasdev/clas/database/process.log\n";
+
+
+$t = time();
+
+$start_time = &ctime($t);
+print L "Process $cmd on $host run $files[0] at ",  $start_time;
+chop($start_time);
+($doweek, $month, $day, $time, $zone, $year) = split(/\s+/, $start_time);
+
+dbmopen(%RUN, $files[0], 0644) || print L "Could not open database for offline\n";
+
+close(L);
+
+$RUN{"Host Node"} = $host;
+$RUN{"Command Line"} = $cmd;
+$RUN{"Start Time"} = $time;
+$RUN{"Start Date"} = "$month $day, $year";
+
+print "$cmd\n";
+
+open(A1C, "$cmd 2>&1 |");
+
+while (<A1C>) {
+    if ($_ =~ /^# of events:\s*(\d+)/) {
+	$RUN{"# of events"} = $1;
+    } 
+    elsif ($_ =~ /^# of events written:\s*(\d+)/) {
+	$RUN{"# of events written"} = $1;
+    }    
+    elsif ($_ =~ /^total current ([\d.]+).*/) {
+	$RUN{"total charge"} = $1;
+    }
+    print $_; 
+}
+
+close(A1C);
+
+$cmd2 = "ls -1 run*|";
+
+open(E,$cmd2) || die "Could not execute ls command\n";
+print "EXECUTE: $cmd2\n";
+
+$ifirst = 1;
+while (<E>) {
+    print;
+    chop;
+    if ($ifirst) {
+	$first = $_;
+	$ifirst = 0;
+    }
+    $jput = "jputremote  $_  /mss/clas/e1a/production/$_  |";
+    open(F,$jput) || die "Could not $jput \n";
+
+    $RUN{"Output files"} = "/mss/clas/e1a/production/$_ , $RUN{'Output files'}";
+    while (<F>) {
+	print;
+    }
+}
+
+
+open(D,$cmd2) || die "Could not execute ls command\n";
+while (<D>) {
+    print;
+}
+
+
+open(L,">> /group/clasdev/clas/dec97/database/process.log") || die "Could not open log file: /group/clasdev/clas/dec97/database/update.log\n";
+$t = time();
+$end_time = &ctime($t);
+print L "Finish $cmd $host run $files[0] at ",  $end_time;
+close(L);
+
+chop($end_time);
+($doweek, $month, $day, $time, $zone, $year) = split(/\s+/, $end_time);
+
+$RUN{"End Time"} = $time;
+$RUN{"End Date"} = "$month $day, $year";
+
+dbmclose(%RUN);
+
+if (-e "$files[0].dir") {
+    $cmd = "mv $files[0].dir /group/clasdev/clas/dec97/database/$files[0].dir";
+    system($cmd);
+}
+
+if (-e "$files[0].pag") {
+    $cmd = "mv $files[0].pag /group/clasdev/clas/dec97/database/$files[0].pag";
+    system($cmd);
+}
+
+if (-e "$files[0].db") {
+    $cmd = "mv $files[0].pag /group/clasdev/clas/dec97/database/$files[0].db";
+    system($cmd);
+}
+
+
+open(L,">> /group/clasdev/clas/dec97/database/process.log") || die "Could not open log file: /group/clasdev/clas/dec97/database/update.log\n";
+$t = time();
+$end_time = &ctime($t);
+print L "Follow-up processing: $host run $files[0] at ",  $end_time;
+close(L);
+
+
+
+

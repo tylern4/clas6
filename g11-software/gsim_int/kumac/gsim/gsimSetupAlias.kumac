@@ -1,0 +1,8 @@
+macro gsimSetupAlias
+
+  alias/cre cut1 'box * -1000 0 0 1000 -1000 1000'
+  alias/cre cut2 'box * 0 1000 0 1000 -1000 1000'
+  alias/cre cut3 'box * 0 1000 -1000 0 -1000 1000'
+  alias/cre cut4 'box * -1000 0 -1000 0 -1000 1000'
+  
+return

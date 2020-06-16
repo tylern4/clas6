@@ -1,0 +1,44 @@
+c      include file st_fit.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: stfit.CMN,v 1.7 2004/06/22 00:18:22 devita Exp $
+c
+c  Documentation for include file st_fit
+c
+c  Purpose:  
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   T. Auger     Created:  Mon Jun 03 10:11:52 EST 1997
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file st_fit:
+c  -----------------------------------
+c
+	real    StFit_pos_indep_time(St_max_hit)
+	integer StFit_sector(St_max_hit), TrkNum(St_max_hit), StNfit
+	real    StFit_length(St_max_hit), StFit_Position(St_max_hit), StFit_Energy(St_max_hit)
+	integer StrStatus(St_max_hit), StFit_paddle(St_max_hit), StFit_where(St_max_hit)
+c
+c_end_var
+c
+c*************Fit common************
+
+	common /stfit/StFit_pos_indep_time,StFit_sector, StFit_paddle,StFit_length,
+     +  	StNfit,TrkNum,StFit_Position,StFit_Energy,StrStatus, StFit_where
+	
+
+
+c----6----------------------------------------------------------------72
+

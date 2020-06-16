@@ -1,0 +1,3 @@
+source /usr/local/g11/env.sh
+
+export PS1="[docker-g11:\w]$ "

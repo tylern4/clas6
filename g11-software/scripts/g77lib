@@ -1,0 +1,28 @@
+#! /usr/local/bin/perl
+
+$libs = "";
+$files = "";
+
+$cmd = "g77 -v 2>&1 |";
+
+open(A,$cmd);
+
+while (<A>) {
+	if (/ld/) {
+# I have the ld command: capture all -l and -L
+		@words = split(' ',$_);
+	foreach $word (@words) {
+		if ($word =~ /^-L/) {
+			$libs = $libs . " " . $word;
+		}
+		elsif ($word =~ /^-l/) {
+			$files = $files . " " . $word;
+		}
+	}
+	
+}
+}
+
+print $libs;
+print " $files\n";
+

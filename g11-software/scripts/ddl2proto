@@ -1,0 +1,37 @@
+#!/usr/local/bin/perl
+# Written by Chris A. Hamilton on 07/03/97
+
+$def = 0;
+$i = 0;
+while(<>){
+
+# If the line contains a ! then leave it alone
+
+	if(/^!.*/) {
+	chop;
+	}
+
+# If the line contains TABLE, print out comment and beginning of first
+# function
+
+	elsif (/\s*TABLE\s+(\w+)\s+(.*)$/) {
+	    $name = $1;
+            
+            if($name eq "CC") {
+                $name = "CC0";
+            }
+            $t = "clas". $name ."_t";
+            $nn_l = $name;	
+	    $nn_l =~ tr/A-Z/a-z/;
+	    $nn_u = $nn_l;
+	    $nn_u =~ tr/a-z/A-Z/;
+	    print "void p$nn_u(FILE *fp, $nn_l","_t *$nn_l);\n"; 
+	    print "void print$nn_u","bank(FILE *fp, clas$nn_u","_t *$nn_l);";
+	    print "\n";
+	}
+	    
+}	
+
+
+
+
