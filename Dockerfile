@@ -6,10 +6,11 @@ ENV MYSQLLIB /usr/lib64/mysql
 
 RUN mkdir -p /usr/local/cernlib
 COPY cernlib /usr/local/cernlib
+RUN ln -s /usr/local/root/lib/root/* /usr/local/root/lib 
 
 # This is using the cernlib copied from jlab ifarm
 ENV RECSIS_RUNTIME=/recsis
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH}:/usr/local/root/lib/root
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/root/lib/root
 ENV PATH /usr/local/clas-software/build/bin:$PATH
 ENV CERN /usr/local/cernlib/x86_64_rhel6
 ENV CERN_LEVEL 2005
@@ -33,6 +34,8 @@ COPY clas-software /usr/local/clas-software
 ENV CLASTOOL /usr/local/clas-software/analysis/ClasTool
 ENV OS_NAME Linux
 
+#RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc)
+
 RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
     && scons install \
     && source /root/.bashrc \
@@ -42,7 +45,7 @@ RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
     && make
 
 
-ENV data_dir_2pi=/usr/local/2pi_event_generator/data/
+ENV data_dir_2pi=/usr/local/2pi_event_generator/
 COPY Hybrid-Baryons/2pi_event_generator /usr/local/2pi_event_generator
 WORKDIR /usr/local/2pi_event_generator
 RUN make -f Makefile.docker bos \

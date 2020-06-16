@@ -14,7 +14,7 @@ export CERNLIB=$CERN_ROOT/lib
 export CERN_BIN=$CERN_ROOT/bin
 export CLAS_TOOL=/usr/local/clas-software/analysis/ClasTool
 export PATH=$PATH:$CLAS_TOOL/bin/Linux
-export LD_LIBRARY_PATH=$ROOTSYS/lib:$CLAS_TOOL/slib/Linux:$CLAS6/lib
+export LD_LIBRARY_PATH=$ROOTSYS/lib/root:$ROOTSYS/lib:$CLAS_TOOL/slib/Linux:$CLAS6/lib
 
-source $ROOTSYS/bin/thisroot.sh
+#source $ROOTSYS/bin/thisroot.sh
 
