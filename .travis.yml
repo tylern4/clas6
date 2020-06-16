@@ -6,5 +6,6 @@ script:
 - mkdir -p parms
 - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 - docker build -t tylern4/clas6 .
+- docker build -t tylern4/clas6:g11 -f g11.Dockerfile .
 - docker images -a
 - docker push tylern4/clas6
