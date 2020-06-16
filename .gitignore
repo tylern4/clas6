@@ -5,3 +5,5 @@ clas-software/build_system/.svn*
 *.svn
 *.db
 nanocernlib/
+.vscode
+build

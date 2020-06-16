@@ -48,8 +48,9 @@ RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
 ENV data_dir_2pi=/usr/local/2pi_event_generator/
 COPY Hybrid-Baryons/2pi_event_generator /usr/local/2pi_event_generator
 WORKDIR /usr/local/2pi_event_generator
+COPY Makefile.docker .
 RUN make -f Makefile.docker bos \
-	&& cp twopeg_bos.exe /usr/local/bin
+    && cp twopeg_bos.exe /usr/local/bin
 
 WORKDIR /work
 
