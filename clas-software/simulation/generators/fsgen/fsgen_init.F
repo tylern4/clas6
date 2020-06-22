@@ -48,7 +48,7 @@ C
 c     - Read new data format
 c     
 c      call lulist(12)
-      OPEN (unit=77,file='lund_upd.dat',status='OLD')
+      OPEN (unit=77,file='/usr/local/clas-software/simulation/generators/fsgen/lund_upd.dat',status='OLD')
       call luupda(2,77)
       close(77)
 c      call lulist(12)

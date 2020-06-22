@@ -21,7 +21,7 @@ C
       integer ierr,ifile,llb,lenocc,llenb
       external lenocc
 C
-      CALL t2b('celeg.ddl')
+      CALL t2b('/usr/local/clas-software/simulation/generators/fsgen/celeg.ddl')
       IF(bin.eq.0)THEN
          evin='bosin'
          ierr=0
