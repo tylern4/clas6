@@ -40,6 +40,8 @@ ENV PATH $TOP_DIR/bin/$OS_NAME:$PATH
 ENV CLAS_LIB /usr/local/g11/lib/$OS_NAME
 ENV CLAS_CALDB_RUNINDEX calib_user.RunIndexg11a
 
+## Build g11 software
+
 WORKDIR /usr/local/g11-software
 
 RUN cd ana \
