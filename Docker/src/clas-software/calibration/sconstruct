@@ -1,0 +1,11 @@
+from build_system import environment
+
+calibrationEnv = environment.env(deps = 'clas6 root'.split())
+
+prog_dirs = 'tag_calib dc3 sc_calib stn_calib gpid_mon ec1_calib pdu dc_cal'.split() 
+
+#if calibrationEnv["alignbits"] == '64':
+#	for prog in 'ec_time ecGammaCal sc_calib'.split():
+#		prog_dirs.remove(prog)
+
+calibrationEnv.sconstruct(prog_dirs)

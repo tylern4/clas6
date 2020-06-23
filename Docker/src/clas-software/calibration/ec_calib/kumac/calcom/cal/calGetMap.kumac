@@ -1,0 +1,46 @@
+macro calGetMap  det var run 
+
+  global/import mappath
+  
+  case [det] in
+    (ec) case [var] in
+                (ped) mapfile = EC_PEDESTALS.map
+               (gain) mapfile = EC_GAIN.map
+                (att) mapfile = EC_ATTEN.map
+         endcase
+    (sc) case [var] in
+           (ped,gain) mapfile = SC_CALIB.map
+         endcase
+    (cc) case [var] in
+           (ped,gain) mapfile = CC_CALIB.map
+         endcase
+  endcase 
+
+  vec/cre [det][var][run]([det]vecdim)
+     
+  case [det] in  
+    (ec) exec mapGet [mappath]/[mapfile] inner u 216 [run] tmp.vec
+         vec/read [det][var][run](:,1,:) tmp.vec
+         exec mapGet [mappath]/[mapfile] inner v 216 [run] tmp.vec
+         vec/read [det][var][run](:,2,:) tmp.vec
+         exec mapGet [mappath]/[mapfile] inner w 216 [run] tmp.vec
+         vec/read [det][var][run](:,3,:) tmp.vec
+         exec mapGet [mappath]/[mapfile] outer u 216 [run] tmp.vec
+         vec/read [det][var][run](:,4,:) tmp.vec
+         exec mapGet [mappath]/[mapfile] outer v 216 [run] tmp.vec
+         vec/read [det][var][run](:,5,:) tmp.vec
+         exec mapGet [mappath]/[mapfile] outer w 216 [run] tmp.vec
+         vec/read [det][var][run](:,6,:) tmp.vec         
+    (sc) exec mapGet [mappath]/[mapfile] pedestals left  [run] tmp.vec
+         vec/read [det][var][run](:,1,:) tmp.vec
+         exec mapGet [mappath]/[mapfile] pedestals right [run] tmp.vec
+         vec/read [det][var][run](:,2,:) tmp.vec
+    (cc) exec mapGet [mappath]/[mapfile] pedestals mean 216 [run] tmp.vec
+         vec/cre cc1(ccvecdim); vec/cre cc2(2,18,6); vec/read cc2 tmp.vec
+         call kumac/calcom/cal/fun/ccrotate.f77(2)
+         vec/copy cc1 [det][var][run];vec/del cc1,cc2    
+ endcase
+ 
+ shell rm tmp.vec
+         
+return

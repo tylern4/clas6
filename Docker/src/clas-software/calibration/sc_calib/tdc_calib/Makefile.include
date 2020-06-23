@@ -1,0 +1,49 @@
+ifdef USEBOSIO
+BOSLIB= -lbosio$(ADD_DEBUG)
+else
+BOSLIB = -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG)
+endif
+
+STDLIBS= -L$(LOCAL_LIB) -L$(CLAS_LIB) -lpid$(ADD_DEBUG) -lec$(ADD_DEBUG) -lcc$(ADD_DEBUG) -lsc$(ADD_DEBUG) -ltrk$(ADD_DEBUG) -ldc$(ADD_DEBUG) -llac$(ADD_DEBUG) -lst$(ADD_DEBUG)  -lpid$(ADD_DEBUG) -ltag$(ADD_DEBUG) -lscaler$(ADD_DEBUG) -lvertex$(ADD_DEBUG) -lbankdefs$(ADD_DEBUG) -lclasutil$(ADD_DEBUG)   -lc_bos_io$(ADD_DEBUG) -lrecutl$(ADD_DEBUG) -litape$(ADD_DEBUG) $(BOSLIB) -lc_bos_io$(ADD_DEBUG) -lonline_dummy$(ADD_DEBUG) -lc_cern$(ADD_DEBUG)  
+
+INCLUDE += -I$(MYSQL_INCLUDE_PATH)
+
+ifndef MAP
+	STDLIBS += -lcaldbMap$(ADD_DEBUG) -lclasutil$(ADD_DEBUG) -L$(MYSQL_LIB_PATH) -lmysqlclient  -ldl
+else
+	STDLIBS += -lmapmanager$(ADD_DEBUG)	
+endif
+
+
+ifeq "$(OS_NAME)" "LinuxRH6"
+STDLIBS +=  -lz -lnsl -ltcl
+endif
+
+ifeq "$(OS_NAME)" "LinuxRH7"
+STDLIBS +=  -lz -lnsl -ltcl$(ADD_DEBUG)
+endif
+
+ifeq "$(OS_NAME)" "SunOS"
+OTHER = /usr/local/lib
+STDLIBS += -lsocket -lnsl -L$(OTHER)/ -ltcl 
+endif	
+
+
+#use the newest cern library
+CERNPATH= $(CERN_ROOT)/lib
+CERNLIB= -L$(CERNPATH) -lpacklib 
+MATHLIB= -lm
+
+FINCLUDE := $(FINCLUDE) -I./include
+INCLUDE := $(INCLUDE) -I./include
+
+CCSRCS:= 
+
+FSRCS:= 
+
+SRCS:=  
+
+#FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+#OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+#CCOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(CCSRCS))
+

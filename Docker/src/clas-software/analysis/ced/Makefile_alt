@@ -1,0 +1,375 @@
+#---------------------------------------------------------------------
+# Define the OS Name
+#---------------------------------------------------------------------
+
+
+        ifndef OS_NAME
+           OS_NAME = $(shell uname)
+        endif
+
+
+#CLASUTIL = /net/fs1/site/clas/u1/clsrc/clasutil
+CLASUTIL = .
+
+
+HVLIBDIR = $(TOP_DIR)/lib/$(OS_NAME)
+#HVLIBDIR = $(HV_LOCATION)/$(OS_NAME)
+
+
+HELPDIR = ./help
+
+
+#---------------------------------------------------------------------
+# Define the C compiler and C Flags
+#---------------------------------------------------------------------
+
+        ifdef DEBUG
+          CFLAGS = -g
+        else
+          CFLAGS = -g
+        endif
+
+        CC = gcc
+
+        ifeq ($(OS_NAME),Linux)
+          CC = gcc 
+ 	  CFLAGS += -Wall -m486 -ansi
+        endif
+
+        ifeq ($(OS_NAME),HP-UX)
+          CC = gcc 
+ 	  CFLAGS += -Wall -ansi
+        endif
+
+	CFLAGS += -c
+
+
+#---------------------------------------------------------------------
+# Define the necessary X libraries and paths
+# First the default settings, and then architectural
+# dependent mods -- YOU MAY HAVE TO HACK THESE PATHS
+#---------------------------------------------------------------------
+
+
+        XLIBS         = -lXt -lX11
+        XMLIBS        = -lXm
+        XINCLUDEDIR   = /usr/include/X11
+	XMINCLUDEDIR  = /usr/include/X11 
+	XLIBDIR       =e /usr/lib 
+	XMLIBDIR      = /usr/lib
+        HVINCLUDEDIR = $(HV_LOCATION)/src
+
+        ifeq ($(OS_NAME),Linux)
+          XLIBS        = -lXt -lXpm -lXext -lX11 -lXp
+          XINCLUDEDIR  = /usr/X11R6/include
+          XMINCLUDEDIR = /usr/X11R6/include
+          XLIBDIR      = /usr/X11R6/lib
+	  XMLIBDIR     = /usr/lib/Motif1.2
+        endif
+
+        ifeq ($(OS_NAME),IRIX)
+          XLIBS        = -lXt -lX11_s
+	  STANDARDLIBS = -lPW -lm -lmalloc
+        endif
+
+        ifeq ($(OS_NAME),IRIX64)
+          XLIBS        = -lXt -lX11_s
+	  STANDARDLIBS = -lPW -lm -lmalloc
+        endif
+
+        ifeq ($(OS_NAME),OSF1)
+	  STANDARDLIBS = -ldnet_stub -lPW -lm
+        endif
+
+        ifeq ($(OS_NAME),SunOS)
+          XINCLUDEDIR  = /usr/openwin/include
+          XMINCLUDEDIR = /opt/SUNWspro/Motif_Solaris24/dt/include 
+          XLIBDIR      = /usr/openwin/lib
+          XMLIBDIR     = /usr/dt/lib
+        endif
+
+        ifeq ($(OS_NAME),HP-UX)
+          XINCLUDEDIR  = /usr/include/X11R5
+          XMINCLUDEDIR = /usr/include/Motif1.2
+          XLIBDIR      = /usr/lib/X11R5
+          XMLIBDIR     = /usr/lib/Motif1.2
+	  STANDARDLIBS = -lm
+        endif
+
+        ifeq ($(OS_NAME),AIX)
+          XLIBS        = -lXt -lXext -lX11
+	  STANDARDLIBS = -lPW -lm
+        endif
+
+#---------------------------------------------------------------------
+# Define rm& mv  so as not to return errors
+#---------------------------------------------------------------------
+
+        RM =  rm -f
+        MV =  mv -f
+
+#---------------------------------------------------------------------
+# Define (relative to the source dir) the object dir
+#---------------------------------------------------------------------
+
+        OBJDIR = obj/$(OS_NAME)
+
+        VIEWPATH = ../..
+
+#---------------------------------------------------------------------
+# This variable lists bos path and libraries
+#---------------------------------------------------------------------
+
+    BOSPATH = $(CLAS_LIB)
+#    BOSLIBS =  -L$(BOSPATH) -lc_bos_io -lclasutil
+    BOSLIBS =  -L$(BOSPATH)   \
+               -lfputil -ldc -lmapmanager \
+               -lbos -lfpack -lc_bos_io \
+               -lclasutil -lrecutl -lfputil -lbos -lfpack
+     
+
+	
+
+#---------------------------------------------------------------------
+# This variable lists cern path.
+#---------------------------------------------------------------------
+
+    CERNLIBS = -L$(CERN_ROOT)/lib -lpacklib
+
+#---------------------------------------------------------------------
+# Put all the libraries together with their paths
+#---------------------------------------------------------------------
+
+        HVLIB = $(HVLIBDIR)/libHv.a
+        LIBS = $(HVLIB) -L$(XMLIBDIR) $(XMLIBS)\
+	   -L$(XLIBDIR) $(XLIBS)\
+           $(BOSLIBS) $(CERNLIBS)\
+	   $(STANDARDLIBS)
+
+
+        SOCKETLIBS = -lnsl -lsocket
+        ifeq ($(OS_NAME),Linux)
+          SOCKETLIBS = 
+        endif
+        ifeq ($(OS_NAME),AIX)
+          SOCKETLIBS = 
+        endif
+
+#---------------------------------------------------
+# Program and library names
+#---------------------------------------------------
+
+     ifdef DEBUG
+       PROGRAM = $(TOP_DIR)/bin/$(OS_NAME)/ced_dbg
+     else
+       PROGRAM = $(TOP_DIR)/bin/$(OS_NAME)/ced
+     endif
+
+#---------------------------------------------------------------------
+#LIBFLAGS are used when building the ced library
+#---------------------------------------------------------------------
+
+     LIBFLAGS = -DMLIB
+
+#---------------------------------------------------------------------
+# The source files that make up the application
+#---------------------------------------------------------------------
+
+      SRCS = \
+             alldc.c\
+             alldcview.c\
+             anchor.c\
+             beamline.c\
+             bitops.c\
+             calview.c\
+             cerenkov.c\
+             dc.c\
+             dlogs.c\
+             draw.c\
+             ec1.c\
+	     et.c\
+             evdump.c\
+             event.c\
+             fannedscint.c\
+             fannedshower.c\
+             feedback.c\
+             field.c\
+             geometry.c\
+             init.c\
+             main.c\
+             math.c\
+             menus.c\
+             message.c\
+             removenoise.c\
+             scintillator.c\
+             scintview.c\
+             sectorhex.c\
+             sectorview.c\
+             setup.c\
+             shower.c\
+             tagger.c\
+             tile.c\
+             track.c
+
+#---------------------------------------------------------------------
+# The object files (via macro substitution)
+#---------------------------------------------------------------------
+
+      ifdef DEBUG
+        OBJS = ${SRCS:.c=.dbg}
+      else
+        OBJS = ${SRCS:.c=.o}
+      endif
+
+#---------------------------------------------------------------------
+# This variable lists the subdirectories to search for include files.
+#---------------------------------------------------------------------
+
+      INCLUDES = -I$(HVINCLUDEDIR)\
+        -I$(XINCLUDEDIR)\
+        -I$(XMINCLUDEDIR)\
+        -I$(CLAS_PACK)/include\
+        -I$(CLASUTIL)
+
+#---------------------------------------------------------------------
+# How to make a .o file from a .c file 
+#---------------------------------------------------------------------
+
+
+$(OBJDIR)/%.o : %.c
+	$(CC) $(CFLAGS) -DNO_ET -D_LANGUAGE_C $(INCLUDES) $< -o $@
+
+$(OBJDIR)/%.dbg : %.c
+	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
+
+
+#--------------------------------------------------------
+# Default target
+#--------------------------------------------------------
+
+     exe: $(addprefix $(OBJDIR)/,$(OBJS))
+     ifeq ($(OS_NAME),HP-UX)
+	$(CC) -o $(PROGRAM) $(addprefix $(OBJDIR)/,$(OBJS)) $(LIBS) -lf
+     else
+	f77 -o $(PROGRAM) $(addprefix $(OBJDIR)/,$(OBJS)) $(LIBS) $(SOCKETLIBS)
+     endif
+
+	@echo "executable placed in $(PROGRAM)"
+
+#---------------------------------------------------------------------
+# This rule creates the library libced.a
+#---------------------------------------------------------------------
+
+     lib: 
+	@echo "ced only builds as an executable."
+
+#---------------------------------------------------------------------
+#this rule makes the help file
+#---------------------------------------------------------------------
+
+     help:
+	$(RM) $(HELPDIR)/$(PROGRAM).help
+	nroff $(HELPDIR)/beforenroff.help >> $(HELPDIR)/$(PROGRAM).help
+	$(RM) $(CLAS_PARMS)/$(PROGRAM).help
+	cp $(HELPDIR)/$(PROGRAM).help $(CLAS_PARMS)
+	
+
+	cat $(HELPDIR)/$(PROGRAM).help | more
+
+#---------------------------------------------------------------------
+# This rule cleans up the build directory (type "make clean").
+#---------------------------------------------------------------------
+
+     clean:
+	$(RM) $(OBJDIR)/*.o *.o core
+
+#---------------------------------------------------------------------
+# This rule runs the appropriate ced
+#---------------------------------------------------------------------
+
+     run:
+	$(TOP_DIR)/bin/$(OS_NAME)/ced
+
+#---------------------------------------------------------------------
+#additional dependencies
+#---------------------------------------------------------------------
+
+INCLUDEFILES =  ced.h data.h bos.h geometry.h macro.h proto.h
+$(PROGRAM):     $(HVLIB)
+
+$(OBJDIR)/alldc.o:        $(INCLUDEFILES)
+$(OBJDIR)/alldcview.o:    $(INCLUDEFILES) feedback.h
+$(OBJDIR)/anchor.o:       $(INCLUDEFILES)
+$(OBJDIR)/beamline.o:     $(INCLUDEFILES)
+$(OBJDIR)/bitops.o:       $(INCLUDEFILES)
+$(OBJDIR)/calview.o:      $(INCLUDEFILES) feedback.h
+$(OBJDIR)/cerenkov.o:     $(INCLUDEFILES)
+$(OBJDIR)/dc.o:           $(INCLUDEFILES)
+$(OBJDIR)/dd.o:           $(INCLUDEFILES)
+$(OBJDIR)/dlogs.o:        $(INCLUDEFILES)
+$(OBJDIR)/draw.o:         $(INCLUDEFILES)
+$(OBJDIR)/ec1.o:          $(INCLUDEFILES)
+$(OBJDIR)/evdump.o:       $(INCLUDEFILES)
+$(OBJDIR)/event.o:        $(INCLUDEFILES)
+$(OBJDIR)/fannedscint.o:  $(INCLUDEFILES)
+$(OBJDIR)/fannedshower.o: $(INCLUDEFILES)
+$(OBJDIR)/feedback.o:     $(INCLUDEFILES) feedback.h
+$(OBJDIR)/field.o:        $(INCLUDEFILES)
+$(OBJDIR)/geometry.o:     $(INCLUDEFILES)
+$(OBJDIR)/init.o:         $(INCLUDEFILES)
+$(OBJDIR)/main.o:         $(INCLUDEFILES)
+$(OBJDIR)/math.o:         $(INCLUDEFILES)
+$(OBJDIR)/menus.o:        $(INCLUDEFILES)
+$(OBJDIR)/message.o:      $(INCLUDEFILES)
+$(OBJDIR)/removenoise.o:  $(INCLUDEFILES)
+$(OBJDIR)/scintillator.o: $(INCLUDEFILES)
+$(OBJDIR)/scintview.o:    $(INCLUDEFILES) feedback.h
+$(OBJDIR)/sectorhex.o:    $(INCLUDEFILES)
+$(OBJDIR)/sectorview.o:   $(INCLUDEFILES) feedback.h
+$(OBJDIR)/setup.o:        $(INCLUDEFILES) feedback.h
+$(OBJDIR)/shower.o:       $(INCLUDEFILES)
+$(OBJDIR)/tagger.o:       $(INCLUDEFILES)
+$(OBJDIR)/tile.o:         $(INCLUDEFILES)
+$(OBJDIR)/track.o:        $(INCLUDEFILES)
+
+
+
+$(OBJDIR)/alldc.dbg:        $(INCLUDEFILES)
+$(OBJDIR)/alldcview.dbg:    $(INCLUDEFILES) feedback.h
+$(OBJDIR)/anchor.dbg:       $(INCLUDEFILES)
+$(OBJDIR)/beamline.dbg:     $(INCLUDEFILES)
+$(OBJDIR)/bitops.dbg:       $(INCLUDEFILES)
+$(OBJDIR)/calview.dbg:      $(INCLUDEFILES) feedback.h
+$(OBJDIR)/cerenkov.dbg:     $(INCLUDEFILES)
+$(OBJDIR)/dc.dbg:           $(INCLUDEFILES)
+$(OBJDIR)/dd.dbg:           $(INCLUDEFILES)
+$(OBJDIR)/dlogs.dbg:        $(INCLUDEFILES)
+$(OBJDIR)/draw.dbg:         $(INCLUDEFILES)
+$(OBJDIR)/ec1.dbg:          $(INCLUDEFILES)
+$(OBJDIR)/evdump.dbg:       $(INCLUDEFILES)
+$(OBJDIR)/event.dbg:        $(INCLUDEFILES)
+$(OBJDIR)/evstore.dbg:      $(INCLUDEFILES)
+$(OBJDIR)/fannedscint.dbg:  $(INCLUDEFILES)
+$(OBJDIR)/fannedshower.dbg: $(INCLUDEFILES)
+$(OBJDIR)/feedback.dbg:     $(INCLUDEFILES) feedback.h
+$(OBJDIR)/field.dbg:        $(INCLUDEFILES)
+$(OBJDIR)/geometry.dbg:     $(INCLUDEFILES)
+$(OBJDIR)/init.dbg:         $(INCLUDEFILES)
+$(OBJDIR)/library.dbg:      $(INCLUDEFILES)
+$(OBJDIR)/main.dbg:         $(INCLUDEFILES)
+$(OBJDIR)/math.dbg:         $(INCLUDEFILES)
+$(OBJDIR)/menus.dbg:        $(INCLUDEFILES)
+$(OBJDIR)/message.dbg:      $(INCLUDEFILES)
+$(OBJDIR)/removenoise.dbg:  $(INCLUDEFILES)
+$(OBJDIR)/scintillator.dbg: $(INCLUDEFILES)
+$(OBJDIR)/scintview.dbg:    $(INCLUDEFILES) feedback.h
+$(OBJDIR)/sectorhex.dbg:    $(INCLUDEFILES)
+$(OBJDIR)/sectorview.dbg:   $(INCLUDEFILES) feedback.h
+$(OBJDIR)/setup.dbg:        $(INCLUDEFILES) feedback.h
+$(OBJDIR)/shower.dbg:       $(INCLUDEFILES)
+$(OBJDIR)/tagger.dbg:       $(INCLUDEFILES)
+$(OBJDIR)/tile.dbg:         $(INCLUDEFILES)
+$(OBJDIR)/track.dbg:        $(INCLUDEFILES)
+
+
+

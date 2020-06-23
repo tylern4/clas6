@@ -1,0 +1,19 @@
+from build_system import environment
+
+p2p_delay_el_src = """physana/BatchService.cxx  physana/JEventCount.cxx
+		      physana/phyana.cxx  physana/RunControl.cxx
+		      procid/NumStrips.cxx  procid/physEVNT.cxx  procid/TPhysProc.cxx  
+		      procid/TReaction.cxx  procid/TShowCalib.cxx  procid/TTofCalib.cxx""".split()
+
+p2p_delay_el_deps = {'clas6': ['default_libs'], 
+		     'root':  ['default_libs']}
+
+p2p_delay_el_env = environment.env(deps=p2p_delay_el_deps.keys())
+
+p2p_delay_el_env.load_dependency(p2p_delay_el_deps)
+
+p2p_delay_el_env.AppendUnique(CPPPATH = './pinclude')
+
+p2p_delay_el_env.ignore_library_order()
+
+p2p_delay_el_prog = p2p_delay_el_env.program(target="p2p_delay_el", source=p2p_delay_el_src)

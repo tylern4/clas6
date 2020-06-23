@@ -1,0 +1,31 @@
+****************************************************************
+*                                                              *
+* Directions for compiling TOF calibration software packages   *
+*                                                              *
+*  Joe Santoro                                                 *
+*  9-6-01                                                      *
+*                                                              *
+****************************************************************
+
+Use the -P flag if you don't have the SCT bank for run #s after 55357.  
+
+
+Use Makefile_map if you want to link into the old Mapfile libraries. This will force the executable
+to use the old mapfile to read in the calibration constants.
+
+|------------------------------------------------------|
+| To make all the executables in this directory, type: |
+|                                                      |
+| make -f Makefile_map.mk all                          |
+|------------------------------------------------------|
+
+
+
+Use Makefile_caldb if you want to link into the Calibration Database libs. This will force the
+executable to use the CalDB to read in the calibration constants. 
+
+|------------------------------------------------------|
+| To make all the executables in this directory, type: |
+|                                                      |
+| make -f Makefile_caldb.mk all                        |
+|------------------------------------------------------|

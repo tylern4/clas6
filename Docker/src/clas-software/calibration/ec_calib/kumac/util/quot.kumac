@@ -1,0 +1,8 @@
+macro quot string
+
+  a = '       '//'include '//''''//'duh'//''''
+  message [a]
+  call write(21,' ',' ',' ')
+  call write(21,[a],,)
+
+return

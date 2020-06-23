@@ -1,0 +1,18 @@
+7       !  1: AO 2: maid98  3: maid2000 7: etamaid 11:dvmp
+0	    !  0: Full, 1: Factorizable and Leading log  
+6.0     !  bmom - lepton momentum
+0.0     !  tmom - momentum per nucleon
+1       !  lepton - 1 electron, 2 muon
+3       !  ivec - detected hadron (1) p for pi0 channel, (2) pi+, (3) p for eta channel (for DVMP and etamaid only)
+0.04    !  vcut - cut on inelasticity (0.) if no cut, negative -- v
+
+
+11 ! no. of points
+1.60 1.60 1.60 1.60 1.60 1.60 1.60 1.60 1.60 1.60 1.60 
+2.00 2.00 2.00 2.00 2.00 2.00 2.00 2.00 2.00 2.00 2.00 
+0.90 0.90 0.90 0.90 0.90 0.90 0.90 0.90 0.90 0.90 0.90 
+30.  60.  90.  120. 150. 180. 210. 240. 270. 300. 330. 
+
+
+
+

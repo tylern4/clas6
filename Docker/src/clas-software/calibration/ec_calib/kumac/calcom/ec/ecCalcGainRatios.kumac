@@ -1,0 +1,37 @@
+macro ecCalcGainRatios type 
+
+  global/import gainpath
+  
+  ifile = [gainpath]/ec[type]gains.vec
+  ofile = [gainpath]/ecadcgain.vec
+
+  vec/cre    dum(ecvecdim) r
+  vec/cre   dum2(ecvecdim) r
+  vec/cre mipnrg(ecvecdim) r
+  
+  message ecCalcBosGains: Reading CLASPAW gains from [ifile]
+  vec/read dum [ifile]
+      
+* This kludge should be totally unnecessary in the late 20th century
+  
+  do str = 1,36
+    do lay = 1,6
+      do sec = 1,6
+        case [lay] in
+          (1,2,3) vec/inp mipnrg([str],[lay],[sec]) 100
+          (4,5,6) vec/inp mipnrg([str],[lay],[sec]) 160
+        endcase
+      enddo
+    enddo
+  enddo
+   
+  sigma ecgain=mipnrg/dum
+  sigma dum2=0.0001*(ecgain+(dum eq 0))
+  
+  message ecCalcBosGains: Writing BOS gains to [ofile]
+  vec/write dum2 [ofile]
+  
+  vec/del mipnrg,dum*
+  
+return 
+  

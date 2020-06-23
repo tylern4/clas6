@@ -1,0 +1,17 @@
+extern char caldb_tcl_proc[];
+extern char copy_parms_tcl_proc[];
+extern char expert_controls_tcl_proc[];
+extern char expert_tcl_proc[];
+extern char filter_tcl_proc[];
+extern char fit_tcl_proc[];
+extern char go_tcl_proc[];
+extern char logo_tcl_proc[];
+extern char main_tcl_proc[];
+extern char map_tcl_proc[];
+extern char misc_tcl_proc[];
+extern char notebook_tcl_proc[];
+extern char options_tcl_proc[];
+extern char quality_tcl_proc[];
+extern char residual_tcl_proc[];
+extern char tmax_tcl_proc[];
+extern char tzero_tcl_proc[];

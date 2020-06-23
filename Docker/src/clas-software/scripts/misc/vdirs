@@ -1,0 +1,15 @@
+#! /usr/bin/perl
+ $pack = $ENV{"CLAS_PACK"};
+
+foreach $arg (@ARGV) {
+	@dirs = split(/\//,$arg);
+	$prev = "";
+	foreach $dir (@dirs) {
+		print "$dir\n";
+		$r = "$prev$dir";
+		$cmd = "$pack/scripts/vdir $r";
+		system($cmd);
+		print "$cmd\n";
+		$prev = "$r/";
+	}
+}

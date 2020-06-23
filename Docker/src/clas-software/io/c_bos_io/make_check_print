@@ -1,0 +1,14 @@
+#!/usr/local/bin/perl
+
+while(<>){
+ if (/print/){
+  $name = $_;
+  chop($name);
+  $name =~ s/^.*print//;
+  $name =~ s/bank.+//;
+  $newvar = "CHECK_PRINT(\"$name\",print$name"."bank);\n";
+  print $newvar
+}
+
+
+}

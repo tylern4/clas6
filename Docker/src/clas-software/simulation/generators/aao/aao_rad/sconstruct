@@ -1,0 +1,12 @@
+from build_system import environment
+
+aao_radEnv = environment.env(deps='clas6 cern')
+aao_radEnv.AppendUnique(FORTRANPATH = ['.','./include'])
+aao_radEnv.load_dependency(['clas6'])
+aao_radEnv.load_dependency({'clas6' : ['recsis_libs', 'c_bos_io', 'bosio', 'default_libs']})
+
+ignore_list = ['aaosig1.F', 'ekine.F']
+
+aao_radEnv.program(
+    target = 'aao_rad',
+    ignore = ignore_list)

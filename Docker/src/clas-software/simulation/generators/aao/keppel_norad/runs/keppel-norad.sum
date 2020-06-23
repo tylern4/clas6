@@ -1,0 +1,11 @@
+  Keppel Calculation of Inclusive ep Scattering
+  Starting time: Mon Aug  7 12:38:59 2000
+  Incident electron energy =  2.44499993 GeV
+ Electron Q**2 limits:  0.400000006  1.70000005
+ lower and upper limit for scattered electron energy(GeV):  0.5  2.0870657
+ sigr_max  0.0243696682
+  ntries, nevent, mcall_max:  929412 190193 2
+  Integrated cross section =  0.0950703472  0.0950963914 micro-barns
+  Beam time at Lum=1.0E34 =  200.000223 seconds
+  Elapsed CPU time =   0.416666657 minutes
+  CPU time/event =   0.000131445428 sec

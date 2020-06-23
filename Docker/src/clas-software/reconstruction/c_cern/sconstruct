@@ -1,0 +1,6 @@
+from build_system import environment
+
+c_cernEnv = environment.env(deps=['clas6'])
+c_cernEnv.load_dependency('clas6')
+c_cernLib = c_cernEnv.library(target='c_cern')
+c_cernEnv.return_from_sconstruct(c_cernLib)

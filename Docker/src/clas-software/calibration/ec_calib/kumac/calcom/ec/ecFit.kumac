@@ -1,0 +1,537 @@
+macro menu
+
+menu:
+
+  message ''
+  message 'EcFit Options: '
+  message ' 1) Display Test Results'
+  message ' 2) Process Cosmic-Ray Histogram File'
+  message ' 3) Plot Fit Gains'
+  message ' 4) Plot Fit Attenuation Lengths'
+  message ' 5) Update Map w/ New Software Gains'
+  message ' 6) Update Map w/ New Attenuation Lengths'
+  message ' 7) Update HV Mainframe w/ New Voltages'
+  message ''
+  
+  read option 'Enter option (q=quit): '
+  
+  case [option] in
+    (q) exitm
+    (1)	read run  'Run Number of Cosmic-Ray Run: '
+        exec ecTestSummary cosmic[run] 100 1 2 3 4 5 6 
+    (2) read run  'Run Number of Cosmic-Ray Run: ' 
+        read sec  'Sector Number to Fit: '
+        exec ecFit#init; exec ecFit#process cosmic[run] [sec] [run] 
+    (3) read run  'Run Number of Cosmic-Ray Run: '
+        read opt1 'Mean or Pixel fit: '
+        read opt2 'Plot by sector (1) or all (2): '
+        case [opt2] in
+          (1) read sec  'Sector Number to Plot: '
+              exec ecFit#plot [opt1] [sec] [run]
+          (2) exec ecFit#plotall [opt1] [run]
+        endcase   
+    (4) read sec 'Sector number to Plot:'
+        global/cre sector [sec]; exec ecPlotSummary2 att 
+    (5) read run1 'Run Number of Cosmic-Ray Run: '
+        read run2 'Run Number to Update in Map: ' 
+        read sec  'Sector Number to Update: '
+        read type 'Enter type (mean,pix,const): '
+        exec ecFit#updategainmap [sec] [run1] [run2] [type]
+    (6) read run1 'Run Number of Cosmic-Ray Run: '
+        read run2 'Run Number to Update in Map: ' 
+        read sec  'Sector Number to Update: '
+        exec ecFit#updateattmap [sec] [run1] [run2]
+    (7) read run 'Run Number of Cosmic-Ray Run: '
+        read sec 'Sector Number to Get New HV: '
+        read opt1 'Mean or Pixel fit:'
+        exec ecFit#updatehv  [sec] [run] [opt1]
+  endcase
+  
+  goto menu
+ 
+return
+
+macro init
+ 
+  exec ecSetupVectors
+  exec ecComisChi2  
+  vec/cre step(4) r 0.1 0.1 0.1 0.1
+  vec/cre pmin(4) r 0.1    0.  0.8 10.
+  vec/cre pmax(4) r 300. 350.  1.2 70.
+  vec/cre par(4)  r 20. 100. 1.0 20.
+  vec/cre sigpar(4) r
+  vec/cre ecFitadc_mean(ecvecdim) r
+  vec/cre ecFitadc_meanerr(ecvecdim) r
+  vec/cre ecFitadc_sigm(ecvecdim) r
+  call kumac/calcom/ec/fun/gauass.f77
+    
+return
+
+macro process file sec run opt=mean
+
+  global/import gainpath
+  exec ecFit#loop [file] [sec] [run] [opt]
+  exec ecGetPixelVec [file] 1 [sec]  
+  exec ecFastFit 1 2 3 4 5 6
+  vec/cre dum1(ecvecdim); vec/cre dum2(ecvecdim);vec/cre dum3(ecvecdim)
+  vec/cop ecFitadc_ymaxfit(:,:,1) dum1(:,:,[sec])
+  vec/cop ecFitadc_ymaxfit(:,:,2) dum2(:,:,[sec])
+  vec/cop ecFitadc_atten(:,:,1)   dum3(:,:,[sec])
+  exec ecFit#store [gainpath]/ecPixGain[run]_[sec].vec [sec] dum1 dum2 
+  exec ecFit#store [gainpath]/ecPixAtten[run]_[sec].vec [sec] dum3
+  vec/del dum*  
+  
+return
+  
+macro look s lay str
+
+  opt stat;opt fit;global/cre fitopt BQL
+  global/cre sector [s]
+  next
+
+  id = [s]000
+  if $hexist([id]).eq.0 then
+    hi/copy //lun1/ec/[s]03 [id]
+    slix [id] 216
+    hi/proj [id]
+  endif
+  exec ecFit#pmt [s] [lay] [str] vec
+  exec ecPlotFit adc [lay] [str]
+ 
+return
+ 
+macro pmt s lay str start=vec
+
+  global/imp fitopt
+
+  pmt = ([lay]-1)*36+[str]
+  
+  case [start] in
+    (vec) cen = $eval(vcen([str],[lay],[s])) 
+          rms = $eval(vrms([str],[lay],[s]))
+          cnt = $eval(vcnt([str],[lay],[s]))
+   (auto) vec/inp par 20. 100. 1. 10
+          exec utilGetSliceStats [s]000 x [pmt] 50
+          global/imp cen; global/imp rms; global/imp cnt
+     (*)  exec utilGetSliceStats [s]000 x [pmt] 50
+          global/imp cen; global/imp rms; global/imp cnt
+  endcase
+    
+  xmin = $eval(int([cen]-[rms]*1.8))
+  xmax = $eval(int([cen]+[rms]*2.5))
+    
+  hi/copy [s]000.slix.[pmt] 777       
+  hi/fit 777([xmin].:[xmax].) gauass [fitopt] 4 par step pmin pmax sigpar
+  atitle 'ADC channel'
+  hi/del 777
+    
+  message Fit result sector [s] layer [lay] strip [str] : $eval(par(2)) +- $eval(sigpar(2))
+  message Statistics: Nevents = [cnt] mean = [cen]  rms = [rms]
+  
+  vec/inp ecFitadc_mean([str],[lay],[s])    par(2)
+  vec/inp ecFitadc_meanerr([str],[lay],[s]) sigpar(2)
+  vec/inp ecFitadc_sigm([str],[lay],[s])    par(3)
+  
+return
+
+macro loop file sec=6 run=0 
+ 
+  global/import vecpath
+  global/import gainpath
+  shift;shift;shift; global/cre fitopt BQ0L; go to $word([*],1,1,' ')
+  
+mean:
+  
+  close 0
+  hi/file 1 hist/[file].rzh
+  
+  vec/cre vcen(ecvecdim) r
+  vec/cre vrms(ecvecdim) r
+  vec/cre verr(ecvecdim) r
+  vec/cre vcnt(ecvecdim) r 
+  
+  do s = [sec],[sec]
+    hi/copy //lun1/ec/[s]03 [s]000
+    slix [s]000 216
+    hi/proj [s]000
+    do lay=1,6
+      do str=1,36
+        pmt = ([lay]-1)*36+[str]
+        exec utilGetSliceStats [s]000 x [pmt] 50
+        global/imp cen; global/imp rms; global/imp cnt
+        vec/inp vcen([str],[lay],[s]) [cen]
+        vec/inp vrms([str],[lay],[s]) [rms]
+        vec/inp vcnt([str],[lay],[s]) [cnt]
+        message Processing sector [s] layer [lay] strip [str] : [cnt] [cen]
+      enddo
+    enddo
+  enddo
+  
+  exec ecGenAttCor2 [file] [sec]  
+  exec ecFit#store [gainpath]/ecMeanGain[run]_[sec].vec [sec] vcen vrms vcnt out
+  
+exitm
+  
+fit:
+    
+  close 0
+  hi/file 1 hist/[file].rzh
+  
+  do s = [sec],[sec]
+    hi/copy //lun1/ec/[s]03 [s]000
+    slix [s]000 216
+    hi/proj [s]000
+    do lay=1,6
+      do str=1,36
+        exec ecFit#pmt [s] [lay] [str] vec  
+      enddo
+    enddo
+  enddo
+  
+  exec ecGenAttCor2 [file] [sec]  
+  exec ecFit#store [gainpath]/ecFitGain[run]_[sec].vec [sec] ecFitadc_mean ecFitadc_meanerr vcnt out 
+  
+return
+
+macro plotget type sec run n=1
+
+  global/import gainpath
+  
+  vec/cre   cen(ecvecdim) r
+  vec/cre   rms(ecvecdim) r
+  vec/cre   cnt(ecvecdim) r
+  vec/cre   cor(ecvecdim) r
+  
+  case [type] in  
+    (mean) exec ecFit#fetch [gainpath]/ecMeanGain[run]_[sec].vec [sec] cen rms cnt cor 
+           sigma new=cen/cor; sigma newerr=rms/sqrt(cnt)/cor
+           title = Sector [sec]: Atten Corrected Mean MIP Gains
+     (fit) exec ecFit#fetch [gainpath]/ecFitGain[run]_[sec].vec  [sec] cen rms cnt cor
+           sigma new=cen/cor; sigma newerr=rms/sqrt(cnt)/cor 
+           title = Sector [sec]: Atten Corrected [opt] Fitted Gains
+     (pix) exec ecFit#fetch [gainpath]/ecPixGain[run]_[sec].vec  [sec] cen rms
+           title = Sector [sec]: Pixel Fitted Mean MIP Gains
+           sigma new=cen; sigma newerr=rms 
+  endcase
+  
+  vec/cop new new[n]; vec/copy newerr newerr[n]
+  global/cre plot.title [title]
+     
+return  
+
+macro plot type=mean sec run1=0 run2=0
+
+  ymax1=200;ymax2=200;ymax3=200;ymax4=300;ymax5=300;ymax6=300
+
+  case [run2] in
+    (0) exec ecFit#plotget [type] [sec] [run1] 1; global/import plot.title
+        title = Run [run1] $unquote([plot.title])
+        exec ecPlotSecVec error ylab='Mean' label=on ymin=0 ymax=300 sec=[sec] title=[title] new newerr
+    (*) exec ecFit#plotget [type] [sec] [run1] 1 
+        if $substring([run2],1,1).eq.'-'  then
+          run2 = $substring([run2],2,5)
+          exec ecFit#plotget [type] [sec] [run2] 2; global/import plot.title
+          title = Run [run1]/[run2] $unquote([plot.title])
+          exec ecPlotSecVec ratio ylab='Ratio' label=on ymin=0.5 ymax=1.5 sec=[sec] title=[title] new1 new2
+        elseif $substring([run2],1,1).eq.'+' then
+          run2 = $substring([run2],2,5)
+          exec ecFit#plotget pix [sec] [run2] 2; global/import plot.title
+          title = Run [run1]/[run2] $unquote([plot.title])
+          exec ecPlotSecVec ratio ylab='Ratio mean/pix' label=on ymin=0.5 ymax=1.5 sec=[sec] title=[title] new1 new2          
+        else
+          exec ecFit#plotget [type] [sec] [run2] 2; global/import plot.title
+          title = Runs [run1] and [run2] $unquote([plot.title])
+          exec ecPlotSecVec mean ylab='Mean' label=on ymin=0 ymax=[ymax[sec]] sec=[sec] title=[title] new1 new2
+        endif   
+  endcase 
+  
+  exec post c[type]_[run1]_[sec].ps      
+    
+  title_gl ''
+  vec/del new*
+  global/del [plot.title] 
+    
+return 
+
+macro plotruns
+
+  global/import *path
+
+  vec/cre x([#]) r; vec/cre xerr([#]) r; vec/cre y([#]) r ; vec/cre yerr([#]) r
+  ref1=100;ref2=100;ref3=100;ref4=160;ref5=160;ref6=160
+
+  
+  do i = 1,[#] 
+    vec/cre   cen[i](ecvecdim) r
+    vec/cre   rms[i](ecvecdim) r
+    vec/cre   cnt(ecvecdim) r
+    vec/cre   cor(ecvecdim) r
+    vec/inp   x([i]) [%i]
+    do sec = 1,6
+      exec ecFit#fetch [gainpath]/ecMeanGain[%i]_[sec].vec  [sec] cen[i] rms[i] cnt cor
+    enddo
+      sigma cen[i]=cen[i]/cor; sigma rms[i]=rms[i]/sqrt(cnt)/cor
+  enddo
+  
+  next; zone 1 1
+  
+loop:
+
+  read sec 'Sector: '  
+  read lay 'Layer: '
+  read pmt 'Pmt: '  
+  
+  do i = 1,$vlen(x)
+    vec/inp y([i])    $eval(cen[i]([pmt],[lay],[sec])/[ref[lay]])
+    vec/inp yerr([i]) $eval(rms[i]([pmt],[lay],[sec])/[ref[lay]]) 
+  enddo
+  
+  null $eval(0.9*x(1)) $eval(1.1*x($vlen(x))) 0.5 1.5
+  hplot/errors x y xerr yerr $vlen(x) 20 0.15 
+  line $eval(0.9*x(1)) 1 $eval(1.1*x($vlen(x))) 1
+  line 8532 0 8532 2
+  
+  go to loop
+  
+return
+
+macro plotall type=mean
+
+  global/import *path
+  
+  vec/cre   mipnrg(ecvecdim) r 1296*0  
+  vec/read  mipnrg [vecpath]/mipnrg.vec
+  
+  shift
+  
+  do i = 1,[#]
+    vec/cre   cen[i](ecvecdim) r
+    vec/cre   rms[i](ecvecdim) r
+    vec/cre   cnt(ecvecdim) r
+    vec/cre   cor(ecvecdim) r
+    do sec = 1,6
+      case [type] in
+        (mean) exec ecFit#fetch [gainpath]/ecMeanGain[%i]_[sec].vec  [sec] cen[i] rms[i] cnt cor
+         (pix) exec ecFit#fetch [gainpath]/ecPixGain[%i]_[sec].vec  [sec] cen[i] rms[i]
+      endcase
+    enddo
+      case [type] in
+        (mean) sigma cen[i]=cen[i]/cor; sigma rms[i]=rms[i]/sqrt(cnt)/cor
+      endcase
+  enddo
+  
+  case [#] in
+    (1)  sigma cen=cen1/mipnrg
+         sigma rms=rms1/mipnrg
+         title = Cosmic Ray Run [1]/MIP: Mean MIP Gains
+    (2)  sigma cen=cen1/cen2
+         sigma rms=cen*sqrt((rms1/cen1)**2+(rms2/cen2)**2)
+         title = Cosmic Ray Run [1]/[2]: Mean MIP Gains
+  endcase
+  
+  title_gl [title]   
+
+  zone 1 1
+  null 0 217 0 7
+  sigma y=array(216,1#216)
+  vec/cre yerr(216) r 216*0.
+  vec/cre col(6) i 2 4 6 2 4 6
+  vec/cre sym(6) i 24 20 24 20 24 20 
+  do sec = 1,6
+    vec/cre x(216) r 216*[sec]
+*    igset pmci col([sec])
+    hplot/errors  y cen(:,:,[sec]) yerr rms(:,:,[sec]) 216 sym([sec]) 0.08
+    line  0 [sec]-0.1 217 [sec]-0.1 
+    line  0 [sec]+0.1 217 [sec]+0.1 
+    line  0 [sec] 217 [sec] 
+    sigma cen=cen+1
+  enddo
+  igset pmci 1
+  line 36.5 0 36.5 216
+  line 72.5 0 72.5 216
+  line 108.5 0 108.5 216
+  line 144.5 0 144.5 216 
+  line 180.5 0 180.5 216   
+  
+  atitle 'PMT' 'SECTOR'
+  
+return     
+    
+macro updategainmap sec run1 run2 type
+
+  global/import vecpath
+  global/import gainpath
+  
+  vec/cre       cen(ecvecdim) r
+  vec/cre       rms(ecvecdim) r
+  vec/cre       cnt(ecvecdim) r
+  vec/cre       cor(ecvecdim) r
+  vec/cre   pixgain(ecvecdim) r 1296*0
+  vec/cre    mipnrg(ecvecdim) r
+  
+  vec/read mipnrg [vecpath]/mipnrg.vec 
+  exec ecCreateMask 8 1
+  scale = 1.0
+   
+  case [type] in  
+    (mean) exec ecFit#fetch [gainpath]/ecMeanGain[run1]_[sec].vec [sec] cen rms cnt cor 
+           sigma dum=cen/cor
+     (fit) exec ecFit#fetch [gainpath]/ecFitGain[run1].vec  [sec] cen rms cnt cor
+           sigma dum=cen/cor
+     (pix) exec ecFit#fetch [gainpath]/ecPixGain[run1]_[sec].vec  [sec] pixgain
+           exec ecFit#fetch [gainpath]/ecMeanGain[run1]_[sec].vec [sec] cen rms cnt cor
+           sigma dum1 = pixgain
+           sigma dum2 = cen/cor
+           sigma dum  = dum1*(mask eq 0)+dum2*(mask eq 1)+mipnrg*(mask eq 2) 
+   (const) sigma dum=mipnrg
+  endcase
+  
+  vec/cop dum ecgain
+  
+  sigma dum1=mipnrg/ecgain 
+  sigma dum2=0.0001*dum1*(dum gt 1)+0.0001*dum1*(dum eq 1)
+
+  exec calGetMap ec gain [run2]
+  
+  title = Run [run1]: Old and New Gains for Sector [sec]; title_gl [title]
+  vec/draw ecgain[run2](1:36,1:6,[sec]) id=100
+  vec/draw dum2(1:36,1:6,[sec]) id=101
+  zone 1 2
+  min 100 0.0; max 100 0.0002;hi/plot 100; line 0 0.0001 1296 0.0001
+  atitle 'PMT no.' 'Gain'
+  do i=1,6; line [i]*36+1 0 [i]*36+1 0.1; enddo
+  min 101 0.0; max 101 0.0002;hi/plot 101; line 0 0.0001 1296 0.0001
+  do i=1,6; line [i]*36+1 0 [i]*36+1 0.1; enddo
+  atitle 'PMT no.' 'Gain'
+  wait 'Proceed? ' 0
+  
+  vec/copy dum2(:,:,[sec]) ecgain[run2](:,:,[sec])
+  exec calPutMap ec gain [run2] ecgain[run2]
+  
+return
+
+macro updateattmap sec run1 run2
+
+  global/import gainpath
+  
+  vec/cre attfit(ecvecdim)
+  
+  exec ecFit#fetch [gainpath]/ecPixAtten[run1]_[sec].vec [sec] attfit
+  sigma attfit=100.*(attfit eq 0)+attfit*(attfit gt 0)
+  exec calGetMap ec att [run2]
+  vec/copy attfit(:,:,[sec]) ecatt[run2](:,:,[sec])
+  exec calPutMap ec att [run2] ecatt[run2]
+  
+return
+
+macro updatehv sec run type
+
+  global/import vecpath
+  global/import gainpath
+  
+  vec/cre      cen(ecvecdim) r
+  vec/cre      rms(ecvecdim) r
+  vec/cre      cnt(ecvecdim) r
+  vec/cre      cor(ecvecdim) r
+  vec/cre      pmt(ecvecdim) r 1296*10.
+  vec/cre  pixgain(ecvecdim) r 1296*0
+  vec/cre   mipnrg(ecvecdim) r 1296*0
+  
+  vec/read mipnrg [vecpath]/mipnrg.vec
+  exec ecCreateMask 8 1
+  scale = 1.0 
+   
+  case [type] in  
+    (mean) exec ecFit#fetch [gainpath]/ecMeanGain[run]_[sec].vec [sec] cen rms cnt cor
+           sigma dum	= cen/cor
+           sigma ratio 	= mipnrg/dum
+           sigma dum1 	= ratio*(mask eq 0)+ratio*(mask eq 1)+[scale]*(mask eq 2)
+     (fit) exec ecFit#fetch [gainpath]/ecFitGain[run]_[sec].vec  [sec] cen rms cnt cor
+           sigma dum	= cen/cor
+           sigma ratio 	= mipnrg/dum
+           sigma dum1 	= ratio*(dum gt 1)+(dum eq 1)
+     (pix) exec ecFit#fetch [gainpath]/ecPixGain[run]_[sec].vec  [sec] pixgain
+           exec ecFit#fetch [gainpath]/ecMeanGain[run]_[sec].vec [sec] cen rms cnt cor
+           sigma dum	= pixgain
+           sigma dum2	= cen/cor
+           sigma ratio1	= mipnrg/dum
+           sigma ratio2	= mipnrg/dum2
+           sigma dum1	= ratio1*(mask eq 0)+ratio2*(mask eq 1)+[scale]*(mask eq 2) 
+  endcase
+  
+  sigma ratio = dum1**(1./pmt)
+  sigma ratio = ratio*(ratio lt 1.1)+1.1*(ratio ge 1.1)
+  
+  title = Run [run]: HV (top) and Gain (bot) Corrections for Sector [sec]; title_gl [title]
+  vec/draw ratio(1:36,1:6,[sec]) id=100
+  vec/draw dum1(1:36,1:6,[sec]) id=101
+  zone 1 2
+  min 100 0.9; max 100 1.15;hi/plot 100; line 0 1 1296 1
+  atitle 'PMT no.' 'HV Correction'
+  do i=1,6; line [i]*36+1 0 [i]*36+1 2; enddo
+  min 101 0.2; max 101 2.0;hi/plot 101; line 0 1 1296 1
+  do i=1,6; line [i]*36+1 0 [i]*36+1 2; enddo
+  atitle 'PMT no.' 'Gain Correction'
+  
+  read opt 'Proceed? '
+  case [opt] in
+    (yes,y,1)   *  exec hvGetFile ec [sec] DVI file=ec5_r873732091
+               exec hvGet ec [sec] DVI
+               sigma newhv = int(DVI*ratio)
+               sigma newhv = newhv*(newhv gt -2800)+(-2800)*(newhv le -2800)
+    (*) vec/del dum*; exitm
+  endcase
+  
+  read opt 'Change HV now? ' 
+  
+  case [opt] in
+    (yes,y,1) exec hvPut ec [sec] newhv
+    (*) vec/del dum*; exitm
+  endcase
+    
+return
+    
+macro store ofile sec
+
+  vec/cre vec(36,6) r
+  
+  end = [#]-1
+  
+  case [#] in
+    (3) opt = oc
+    (*) opt = o
+  endcase
+  
+  do i=3,[#]
+    vec/copy [%i](:,:,[sec]) vec
+    vec/write vec [ofile] ! [opt]
+    opt = ' '
+    if [i].eq.[end] then
+      opt = c
+    endif
+  enddo
+    
+return
+
+ macro fetch ifile sec
+
+  vec/cre vec(36,6) r
+  
+  end = [#]-1
+  
+  case [#] in
+    (3) opt = oc
+    (*) opt = o
+  endcase
+  
+  do i = 3,[#]
+    vec/read vec [ifile] ! [opt]
+    vec/copy vec [%i](:,:,[sec])
+    opt = ' '
+    if [i].eq.[end] then
+      opt = c
+    endif
+  enddo
+    
+return
+ 

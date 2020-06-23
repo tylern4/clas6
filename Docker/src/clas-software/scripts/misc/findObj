@@ -1,0 +1,94 @@
+#! /usr/bin/env perl
+
+
+#eval "exec perl -S $0 FROM_SHELL $* LASTFILE" if 0;
+
+#######################################################
+#                                                     #
+# findObj                                             #
+#                                                     #
+# Sept 11, 1993, Const Olchanski                      #
+#                                                     #
+# This program can find references to symbol names    #
+# inside libraries. In fact it does a little bit more #
+# than 'nm libfile | grep symname':                   #
+# 1) grep's more than one file                        #
+# 2) prints the object file names for each match      #
+#    (which 'nm' does not do)                         #
+#                                                     #
+#######################################################
+#
+sub usage
+{
+  print STDERR "Usage: findObj symbol libfiles... --- lookup names in libraries\n";
+  exit 1;
+}
+#
+#######################################################
+
+shift @ARGV if ($ARGV[0] eq "FROM_SHELL");
+
+&usage if ($#ARGV < 1);
+
+$| = 1;
+
+$i = 0;
+$sym = $ARGV[$i];
+
+&usage if ($sym eq "LASTFILE");
+
+$printusage = 1;
+
+while ($ARGV[++$i])
+{
+  $file = $ARGV[$i];
+
+  last if ($file eq "LASTFILE");
+
+  if (! -r $file)
+    {
+      print "Cannot read file '$file'\n";
+      next;
+    }
+
+  $printusage = 0;
+
+  print "Looking for $sym in $file: ";
+
+  $cmd = "nm $file | /bin/grep -c $sym";
+
+  $ret = `$cmd`;
+  chop $ret;
+
+  if ($ret eq "0")
+    {
+      print "no matches\n"; 
+      next;
+    }
+
+  print "$ret matches\n";
+
+  $obj = "???";
+
+  open(SCAN,"nm $file |");
+
+  while (<SCAN>)
+    {
+      chop;
+
+      if (/Symbols from/)
+	{
+	  /(.*)\[(.*)\](.*)/;    # This matches something like: $1[$2]$3, like: libname[objname]
+
+	  $obj = $2;
+	}
+      elsif (/$sym/)
+	{
+	  print "$obj: $_\n";
+	}
+    }
+}
+
+&usage if $printusage;
+
+#

@@ -1,0 +1,52 @@
+macro ecGetPixGainCor sec
+
+  global/import gainpath
+  
+  case [sec] in
+    (3) global/cre runno 1802 
+    (5) global/cre runno 559
+    (6) global/cre runno 1617
+  endcase
+  
+  ifile = crt[runno] 
+  ofile = [gainpath]/crt[sec]_gaincor.vec
+    
+  exec ecSetupVectors
+  exec ecComisChi2  
+  exec ecGetPixelVec [ifile] 1 crt[sec] 
+  exec ecFastFit 1 2 3 4 5 6
+  exec ecVectorIO write
+  
+  exec ecGetPeakStats hist adc 50 40 250 ecGainMean ecGainRms 1 1 crt[sec]
+  
+  vec/cre dum1(36,6) r
+  vec/cre dum2(36,6) r
+  
+  vec/copy ecfitadc_ymaxfit(:,:,1)    dum1
+  vec/copy ecgainmean(:,:,crt[sec])   dum2
+  
+  sigma rat = dum2/dum1
+  
+  do ilay = 1,6
+    d10 = $eval(rat(10,[ilay]))
+    slope = $eval(0.1*([d10]-1.))
+    do istr = 1,9
+      corr = 1.+[slope]*[istr]
+      vec/inp rat([istr],[ilay]) [corr]
+    enddo
+  enddo
+  
+  vec/write rat [ofile]
+  message ecGetPixGainCor: Writing ratio vector to [ofile]
+  
+  vec/cre dum(ecvecdim)
+  vec/copy rat(:,:) dum(:,:,[sec])
+  
+  title = Sector [sec]
+  exec ecPlotSecVec ylab='Mean/Fit' ymin=0 ymax=1 sec=[sec] title=[title] dum 
+    
+  vec/del dum*,rat
+  
+  close 1
+  
+return 

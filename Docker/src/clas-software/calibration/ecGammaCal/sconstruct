@@ -1,0 +1,33 @@
+from build_system import environment
+from os import path
+
+ecGammaCalLibEnv = environment.env(deps='clas6 root')
+
+ecGammaCalLibEnv.load_dependency({'clas6' : ['clasEvent_libs', 'default_libs']})
+ecGammaCalLibEnv.load_dependency('root')
+
+ecGammaCalLibs = ecGammaCalLibEnv.library(
+    target = 'ecGammaCal',
+    source = [
+        'TCalibECCalib.cc',
+        'TCalibECFit.cc',
+        'TCalibECReject.cc',
+        'TCalibGamma.cc',
+        'TCalibEC.cc' ]
+    )
+
+ecGammaCalEnv = ecGammaCalLibEnv.Clone()
+
+for libfile in ecGammaCalLibs['static_libs']:
+    dir,lib = path.split(libfile)
+    ecGammaCalEnv.AppendUnique(PATH = [dir])
+    ecGammaCalEnv.PrependUnique(LIBS = [lib])
+
+ecGammaCalEnv.program(source=['checkBetaNeutrals.cc'])
+ecGammaCalEnv.program(source=['computeCalibConsts.cc'])
+ecGammaCalEnv.program(source=['filterGammas.cc'])
+ecGammaCalEnv.program(source=['fitTimeDifference.cc'])
+ecGammaCalEnv.program(source=['getCalibConsts.cc'])
+ecGammaCalEnv.program(source=['putConstsInMap.cc'])
+ecGammaCalEnv.program(source=['rejectGammas.cc'])
+

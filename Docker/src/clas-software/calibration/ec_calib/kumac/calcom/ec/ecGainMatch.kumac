@@ -1,0 +1,26 @@
+macro ecGainMatch  
+
+  global/import gainpath  
+
+  vec/cre   pmt(ecvecdim) r 1296*10.
+  vec/cre gains(ecvecdim) r 
+  vec/cre newhv(ecvecdim) r 
+  
+  vec/read gains [gainpath]/ecadcgain.vec
+   
+  sigma ratio= (10000*gains)**(1./pmt)
+  
+  do i = 1,[#]
+    sec = [%i]
+    exec hvGet ec [sec] DVI
+    sigma newhv = int(DVI*ratio)
+*    exec hvPut ec [sec] newhv
+  enddo
+    
+return  
+    
+  
+
+   
+
+  

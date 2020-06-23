@@ -1,0 +1,6 @@
+from build_system import environment
+
+g12AnalEnv = environment.env(deps='clas6')
+g12AnalEnv.load_dependency({'clas6':['clasEvent_libs', 'default_libs']})
+
+g12AnalEnv.program('g12Anal')

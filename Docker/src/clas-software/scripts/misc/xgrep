@@ -1,0 +1,23 @@
+#! /usr/bin/perl
+$n = "-n30";
+
+@arr = ();
+for (@ARGV) {
+     if (/^-n/) {
+        $n = $_;
+	
+    }
+    else {
+        push(@arr,($_));
+    }
+}
+
+@ARGV = @arr;
+
+$pack = $ENV{"CLAS_PACK"};
+
+$cmd = "lgrep $n $ARGV[0] $pack/include/bosddl.h";
+#print "COMMAND: $cmd\n";
+system($cmd);
+
+

@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+workdir=/work/clas/disk2/kjoo/packages/aao/kaon_norad
+filename=test
+FRZN=$workdir/$filename.rzn
+FOUT=$workdir/$filename.out
+FSUM=$workdir/$filename.sum
+FBOS=$workdir/$filename.bos
+#
+rm  $FRZN $FOUT $FSUM $FBOS 
+export FRZN FOUT FSUM FBOS
+kaon_norad < kaon-4.0.inp

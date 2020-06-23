@@ -1,0 +1,43 @@
+macro calGainStudy det
+
+  message calGainStudy: Bank [det]
+
+  read runno   'Run number: '
+  read cwnfile 'Ntuple file containing data (no path or extension): '
+  read seclist 'Sectors to include: '
+  
+  alias/cre seclist $quote([seclist])
+  
+  case [det] in
+    (ec) min=20;max=300;wid=200
+    (cc) min=30;max=400;wid=200
+    (sc) min=200;max=5000;wid=200
+  endcase
+  
+  hi/file 1 ntup/[cwnfile].rzn
+  hrin 2000
+  global/cre runno [runno]
+  nevents = $hinfo(2000,'entries')l
+  nev = [nevents]/[ngrps]
+  
+  read ngrps   'Number of groups to analyze: '
+  read nev     'Number of events/group: '
+  
+  evno = 1
+  
+  message calGainStudy: Analyzing [nev] events per group...[nevents] total. 
+  
+  do grp = 1,[ngrps]
+    message calGainStudy: Group [grp]
+    exec [det]GetPeakStats [wid] [min] [max] [det]GainMean[grp] [det]GainRms[grp] [evno] [nev] seclist
+    evno = [evno]+[nev]
+  enddo
+  
+  
+  do grp = 1,[ngrps]
+    exec [det]PlotSecVec norm mean 0 2000 [det]GainMean[grp] [det]GainMean[grp] [seclist] 'Gain Study' ' ' [grp]
+  enddo  
+  
+  close 1
+    
+return

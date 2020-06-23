@@ -1,0 +1,21 @@
+macro ecGenAngles
+
+  global/import vecpath
+  
+  vec/cre theta(1296)
+  vec/cre phi(1296)
+  
+  call kumac/calcom/ec/fun/eccallib.f77
+  
+  call ecfillang
+  sigma costh=cos(theta*0.01745)
+  
+  vec/write theta [vecpath]/ec_pixtheta.vec
+  vec/write phi   [vecpath]/ec_pixphi.vec
+  vec/write costh [vecpath]/ec_pixcosth.vec
+  
+  vec/del theta,phi,costh
+  
+return
+  
+  

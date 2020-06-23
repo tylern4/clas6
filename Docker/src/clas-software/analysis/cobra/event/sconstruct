@@ -1,0 +1,15 @@
+from build_system import environment
+import glob
+
+event_env = environment.env(deps = ['root'])
+
+event_env.load_dependency('root')
+
+event_env.AppendUnique(CPPPATH = '../include ../ptypes ../parray'.split())	
+
+#event_rdict = event_env.ROOTDictionary('Event', 'Photon.h Particle.h Event.h LinkDef.h'.split())
+
+event_lib = event_env.library('Event', source=glob.glob('*.C'))
+
+#event_env.return_from_sconstruct(event_lib)
+

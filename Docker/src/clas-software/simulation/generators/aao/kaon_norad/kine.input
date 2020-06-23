@@ -1,0 +1,17 @@
+1.d0		! proton
+1.d0		! kaon
+1.d0		! lambda
+1.d0		! sigma
+1.d0		! K*
+1.d0		! K1
+1.d0		! L(1405)
+1.d0		! L*
+1.d0		! L*
+1.d0		! N*(1450)
+1.d0		! N*(1620)
+1.d0		! N*(1710)
+1.d0		! Delta(1620)
+1.d0		! Delta(1900)
+1.d0		! Delta(1910)
+0		! flagX: 0=none, 1=MX2000, 2=MX2050, 3=MX2000+MX2050
+

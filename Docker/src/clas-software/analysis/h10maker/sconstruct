@@ -1,0 +1,10 @@
+from build_system import environment
+import glob
+
+h10maker_env = environment.env(deps='clas6 root'.split())
+h10maker_env.load_dependency({'clas6':['default_libs'], 'root': ['default_libs']})
+sources =['h10maker.cc']
+sources += glob.glob("*.F")
+sources += ['mctk.cc','mvrt.cc','Options.cc','part.cc','seb.cc']
+h10maker_env.program(source=sources, target='h10maker')
+

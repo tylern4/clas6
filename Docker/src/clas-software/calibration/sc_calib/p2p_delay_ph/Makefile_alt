@@ -1,0 +1,108 @@
+#! gnumake
+
+#---------------------------------------------------
+# The D. P. Weygand Makefile
+#---------------------------------------------------
+include $(CLAS_CMS)/Rules.make
+
+ifdef USEBOSIO
+BOSLIB= -lbosio$(ADD_DEBUG)
+else
+BOSLIB = -lfputil$(ADD_DEBUG) -lbos$(ADD_DEBUG) -lfpack$(ADD_DEBUG)
+endif
+
+STDLIBS= -L$(LOCAL_LIB) -L$(CLAS_LIB)   -lclasEvent$(ADD_DEBUG) -leloss$(ADD_DEBUG) -lmomentum_correction$(ADD_DEBUG) -lplib$(ADD_DEBUG) -lpid$(ADD_DEBUG) -lec$(ADD_DEBUG) -lcc$(ADD_DEBUG) -lsc$(ADD_DEBUG) -ltrk$(ADD_DEBUG) -ldc$(ADD_DEBUG) -llac$(ADD_DEBUG) -lst$(ADD_DEBUG)  -lpid$(ADD_DEBUG) -ltag$(ADD_DEBUG) -lscaler$(ADD_DEBUG) -lvertex$(ADD_DEBUG) -lbankdefs$(ADD_DEBUG) -lclasutil$(ADD_DEBUG)   -lc_bos_io$(ADD_DEBUG) -lrecutl$(ADD_DEBUG) -litape$(ADD_DEBUG) $(BOSLIB) -lc_bos_io$(ADD_DEBUG) -lmapmanager$(ADD_DEBUG)  -lonline_dummy$(ADD_DEBUG) -lc_cern$(ADD_DEBUG) -lpp$(ADD_DEBUG) -lpwaUtil$(ADD_DEBUG) -lnsl
+
+#use the newest cern library
+CERNPATH= $(CERN_ROOT)/lib
+CERNLIB= -L$(CERNPATH)  -lpacklib -lmathlib -lkernlib
+MATHLIB= -lm 
+
+FINCLUDE := $(FINCLUDE) -I./include
+INCLUDE := $(INCLUDE) -I./include 
+CCSRCS:= 
+
+fSRCS:= 
+
+FSRCS:= 
+
+SRCS:=  
+
+fOBJS= $(patsubst %.f,$(OBJDIR)/%.o,$(fSRCS))
+FOBJS= $(patsubst %.F,$(OBJDIR)/%.o,$(FSRCS))
+OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+CCOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(CCSRCS))
+
+fit_offsetsSRCS= fit_offsets.c
+fit_offsetsOBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(fit_offsetsSRCS))
+
+hist_offsetsSRCS= hist_offsets.c
+hist_offsetsOBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(hist_offsetsSRCS))
+
+pair_monSRCS= pair_mon.c
+pair_monOBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(pair_monSRCS))
+
+pair_mon_plane3SRCS= pair_mon_plane3.c
+pair_mon_plane3OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(pair_mon_plane3SRCS))
+
+pair_mon_plane4SRCS= pair_mon_plane4.c
+pair_mon_plane4OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(pair_mon_plane4SRCS))
+
+fit_offsets: $(fit_offsetsOBJS)
+	$(CC) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+hist_offsets: $(hist_offsetsOBJS)
+	$(CC) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+pair_mon: $(pair_monOBJS)
+	$(CC) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+pair_mon_plane3: $(pair_mon_plane3OBJS)
+	$(CC) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+pair_mon_plane4: $(pair_mon_plane4OBJS)
+	$(CC) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+
+
+processConstantsSRCS= processConstants.cc
+processConstantsOBJS= $(patsubst %.cc,$(OBJDIR)/%.o,$(processConstantsSRCS))
+
+processConstants: $(processConstantsOBJS)
+	$(C++) $(CDBG) $(CFLAGS) $(INCLUDE) -o $@ $^ $(STDLIBS) $(CERNLIB) $(FLIB) $(FLIB_NATIVE) $(MATHLIB)
+
+all: lib  fit_offsets hist_offsets pair_mon pair_mon_plane3 pair_mon_plane4 install
+
+LIBS= $(LOCAL_LIB)/libp2p_delay_ph$(ADD_DEBUG).a
+lib: $(LIBS)
+
+$(LIBS): $(OBJS) $(FOBJS) $(fOBJS) $(CCOBJS)
+	$(VDIR) $(LOCAL_LIB)
+	ar rv $@ $?
+install:  fit_offsets hist_offsets pair_mon pair_mon_plane3 pair_mon_plane4
+	$(VDIR) $(LOCAL_BIN)
+	/usr/bin/install  fit_offsets $(LOCAL_BIN)
+	/usr/bin/install  hist_offsets $(LOCAL_BIN)
+	/usr/bin/install  pair_mon $(LOCAL_BIN)
+	/usr/bin/install  pair_mon_plane3 $(LOCAL_BIN)
+	/usr/bin/install  pair_mon_plane4 $(LOCAL_BIN)
+env:
+	@echo EXE $(EXE)
+	@echo LIBS $(LIBS)
+	@echo CC $(CC)
+	@echo FC $(FC)
+	@echo OS_NAME $(OS_NAME)
+	@echo INCLUDE $(INCLUDE)
+	@echo BOSPATH $(BOSPATH)
+	@echo FLIB $(FLIB)
+	@echo OBJS $(OBJS)
+	@echo CFLAGS $(CFLAGS)
+	@echo FFLAGS $(FFLAGS)
+	@echo CCLAGS $(CCFAGS)
+	@echo INCLUDE $(INCLUDE)
+	@echo LOCAL_LIB $(LOCAL_LIB)
+	@echo LOCAL_BIN $(LOCAL_BIN)
+	@echo LOCAL_INCLUDE $(LOCAL_INCLUDE)
+	@echo OBJDIR $(OBJDIR)
+	@echo STDLIBS $(STDLIBS)

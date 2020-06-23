@@ -1,0 +1,39 @@
+****
+* Create plane file with old (previous) set of calibration constants
+* in the format: 
+* sector layer pmt a1l a1r t2l t2r
+* The constants a2l=a2r=0, t1l=t1r=0.05 are fixed
+****
+macro make_calib_prev runno=100000
+****
+* [runno]  run number
+*
+* get old calibration constants from Map Manager
+* and store them (temporary) in the current dir as 
+* in four files: a1l,a1r,t2l,t2r
+****
+shell get_const_from_map [runno] 
+****
+ve/cre sec(256) I
+ve/cre sta(256) I
+ve/cre pmt(256) I
+****
+ve/cre a1l(256) R
+ve/cre a1r(256) R
+ve/cre t2l(256) R
+ve/cre t2r(256) R
+****
+ve/read sec,sta,pmt parms.dat
+****
+ve/read a1l a1l
+ve/read a1r a1r
+ve/read t2l t2l
+ve/read t2r t2r
+****
+ve/write 'sec,sta,pmt,a1l,a1r,t2l,t2r' 'calib_prev.dat' '(3i4,4f10.4)' 'OC'
+****
+* remove temporary files
+****
+shell rm a1l a1r t2l t2r
+****
+return

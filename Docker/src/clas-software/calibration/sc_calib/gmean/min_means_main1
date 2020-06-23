@@ -1,0 +1,30 @@
+#
+# Example shell script to execute min_means_main.exe
+# 
+# Files used:
+#
+# ASCII data file		min_input	output of hscan
+# Fitted parameters		min_parm	used to update map file
+# Minuit List Output		min_output
+# Kumac File to view results	min_kumac	PAW with file = hscan_input
+#
+rm min_input
+rm min_parm 
+rm min_kumac
+ln -s means.dat  min_input
+ln -s means.parm min_parm
+ln -s min_means.kumac min_kumac
+ls -lgF min_input
+ls -lgF min_kumac
+ls -lgF min_parm
+ls -lgF min_output
+#ls -lgF min_parm.kumac
+#
+# run minimization
+#
+min_means_main.exe
+#
+# copy kumac into local file
+#
+cp min_kumac min_kumac.kumac
+#

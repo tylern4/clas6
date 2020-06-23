@@ -1,0 +1,84 @@
+****
+*
+macro fit_mips lun=1 filename=' '
+*
+****
+hi/file [lun] [filename] 8191 ' '
+Cdir //LUN[lun]
+****
+Ntuple/Cuts $0 -
+**** 
+Ntuple/Cuts $3 sum_xi+sum_yi<75
+Ntuple/Cuts $4 sum_xi+sum_yi+sum_xo+sum_yo<150
+Ntuple/Cuts $5 sum_xo+sum_yo>40
+Ntuple/Cuts $6 sum_xi+sum_yi+sum_xo+sum_yo>75
+****
+opt stat
+opt fit
+ve/cre nst(4) I 24 40 24 40
+****
+do nsect = 1, 2
+  if ([nsect] = 2) then
+     Ntuple/Cuts $1 -
+  endif
+  Ntuple/Cuts $1 Sector=[nsect]
+  do layer=1,4
+    nstack = nst  ([layer])
+    if ([layer] = 1) then
+      id_ind = xi
+      st_id  = xi
+    endif  
+    if ([layer] = 2) then
+      id_ind = yi
+      st_id  = yi
+    endif
+    if ([layer] = 3) then
+      id_ind = xo
+      st_id  = xo
+    endif
+    if ([layer] = 4) then
+      id_ind = yo
+      st_id  = yo
+    endif
+             
+    do i = 1, [nstack]
+****
+      hi/delete 999
+      hi/create/1dhis 999 [nsect]_[layer]_[i]  128 0. 65. 
+****
+*     **    define cuts ***
+      Ntuple/Cuts $2 -
+      Ntuple/Cuts $2 id_[id_ind]=0+[i]
+*     **    define Histo ID ***
+      h_id=[nsect]*1000+[layer]*100+[i]
+*       
+      nt/plot //LUN[lun]/200.sum_[st_id] $1.AND.$2.AND.$3.AND.$4.AND.$5.AND.$6 99999999 1 9999999 ' ' 999 
+*
+      mean  = $HINFO(999,'MEAN')
+      sigma = $HINFO(999,'RMS')
+      hmax  = $HINFO(999,'MAX')
+*  
+      nmean  = [mean]-[sigma]*0.18
+      nsigm  = [sigma]*0.75
+*
+      ve/del par
+      ve/cre par(3) r [hmax] [nmean] [nsigm] 
+*  
+      low   = [mean]-[sigma]*1.3
+      high  = [mean]+[sigma]*1.3
+      hi/fit 999([low]:[high]) g q 3 par 
+*
+      hi/copy 999 [h_id] sec_[nsect]_lay_[layer]_stack_[i]
+*      
+      call get_fit_parms.for([nsect],[layer],[i])
+*    
+    enddo
+  enddo    
+enddo
+***
+shell if (-f calib_e.dat) rm calib_e.dat
+* shell rm calib_e.dat
+***  
+call calc_corr.for
+***
+return

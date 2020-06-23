@@ -1,0 +1,6 @@
+from build_system import environment
+
+clasDISenv = environment.env(deps=['clas6'])
+clasDISenv.load_dependency(['clas6'])
+clasDISenv.program(target='clasDIS')
+

@@ -1,0 +1,221 @@
+<HEAD>
+<title>Porting SCAT to another platform </title>
+</head>
+<body>
+<h1>Porting SCAT to another platform </h1>
+
+<h2>Introduction</h2>
+
+The SCAT library is based upon ONC RPC. The O'Reilly book "Power RPC
+Programming" provides all the reference that is needed to change/add to
+SCAT. This should be portable to other flavors of RPC. The library
+seeks to be simple to use and general enough to be useful. Serveral
+routines are linked together on both sides of a communications (comm)
+partnership. The SCAT library does not have to be used in a
+client/server model. But client/server is simple to understand and
+will be used with the example programs. The SCAT library provides
+functions to establish comm connections with other SCAT processes
+running on the network. After a connection is established the programs
+can send information bidirectionally. The current implementation has
+been adapted to send arrays of data in a simple manner. The client
+program is simple to create. It justs sends a message and may wait for
+a response from some server. Using the SCAT library the client program
+looks like:
+<p>
+<pre>
+   ...
+   char bfr [1024];
+   Scat_Initialize (bfr);
+   handle = Scat_LocateProgram ("the.name.of.the.program");
+   /*
+    * send one and don't wait.
+    */
+   Scat_SendMsgNr (handle, "some message string");
+   /*
+    * now, send one and wait.
+    */
+   Scat_SendMsg (handle, "query the_list 1");
+   ... 
+</pre>
+The server program is more difficult. In order for the SCAT library to
+be general purpose a limit to the amount of code the library actually
+supplies was made. ONC RPC (and RPC in general) puts a very small demand
+upon the host program. The typical server program would spin in a loop
+checking for any in coming messages and process them as they
+arrive. The RPC protocol compiler generates object modules that must
+be linked into your server code and should be called once in a
+while. SCAT provides a simple interface to these generated RPC
+protocol routines. The user must write or provide 6 functions for the
+current implementation of scat to run. See the examples for more info.
+<p>
+
+<hr>
+<h1>Porting SCAT</h1>
+<p>
+To port the SCAT library to a new platform follow this process:
+<p>
+<ol>
+<li>make sure the file j.x is present.
+<li>make sure you save a copy of j_svc.c first.
+<li>rpcgen j.x.
+<li>recompile libscat.a
+<li>recompile your application and test.
+</ol>
+<p>
+<h2>Things to watch out for:</h2>
+<p>
+<ul>
+<li>after rpcgen the file j.h needs the variable IVER set equal to
+33. The number 33 is how the SCAT library identifies other scat
+processes in the rpc.portmapper.
+<li>rpcgen never gets the client and server function names
+correct. It is VERY important that the client and server names be
+just a little bit different or else the linker will complete the wrong
+addresses when you try and build your application. All modules that
+will be in the server have _svc appended to the end of the name (the
+hp and sun and aix rpcgen's do this wrong, linux does it
+correctly). For example, this is what you get from rpcgen:
+<pre>
+extern Event *msgwreply_1();
+</pre>
+If you have rpcgen create the client side stubs you'll see that this
+matches. If you have rpcgen generate the server side stubs you see you
+need the _svc appendage (Hp, Aix, Sun and linux all do it wrong - I
+must not be using a rpcgen flag correctly somewhere). The stubb in the
+file j_clnt.c looks like the above. This is what I use to separate the
+server (and add in the file j.h, in the file j_svc.c I extend the
+function names referenced in the switch statement) from client:
+<pre>
+extern Event *msgwreply_1();
+extern Event *msgwreply_1_svc();
+</pre>
+Remember, both server and client rpc generated functions are in
+libscat.a. In order for the application to work the correct stuff must
+be linked on each side.  
+<li>The sun rpcgen will place a lot of extra
+functions in the file j_svc.c that are not used. I only keep 1
+function from rpcgen (for any platform): evtsvc_inp_1(). Make sure
+evtsvc_inp_1 is NOT declared static. The function evtsvc_inp_1 is
+linked to global functions inside of the RPC library. The Hp, AIX,
+and Linux versions of rpcgen are more resonable. They generate an
+extra main function that is not needed. The tool rpcgen is oriented
+toward very simple RPC systems where the server is stand alone and
+does nothing else.
+</ul>
+<p>
+Why would you want to save a copy of j_svc.c? If you look inside the
+orginal copy of this file
+you see that most of the case statements inside the C language switch
+statement just execute a function call and drop through to the bottom
+of the file and return something. One case statement
+only returns an integer AND it sends the return message before it
+calls the function. I do the send of the return message first so
+that the RPC machinery is happy. This must be implemented before
+message with no reply will work correctly. BUT the library can be
+tested without change right after rpcgen is run (and the above edits
+are made).
+<p>
+Sometimes rpcgen generates code that your compiler may not like (does
+this on linux with gcc 2.7.2 so go figure) - check each message and
+make sure its just complaining and not erroring. Make sure you don't
+try to use source code generated for another platform on your box -
+strange things work and don't work together. If in doubt, use rpcgen
+again. 
+</hr>
+<hr>
+<h1>Doing more ...</h1>
+<p>
+In general sending a CLAS physics event around the network consists of
+sending enough information that the event can be placed back into a
+BOS/FPACK format on the receiving side. With SCAT, you don't have to
+use the data in BOS format but with a call to Scat_Filter2Bos the
+incoming data is inserted into the array you have previously
+initialized BOS with. If you use BOS/FPACK you can skip the next
+paragraph (Remember to drop all banks in the BOS array before every
+call to Scat_Filter2Bos).
+<p>
+If you don't want to use BOS/FPACK then you need to be aware of the
+size and order of the data (in the case of an array). RPC will
+correctly send 16 bit quantites only if you tell it correctly. The
+standard integer on most machines is 32 bits today. So, what does this
+mean? The default is to send all data as integers/floats which are the
+same size in ONC RPC. If your data are not one of the standard sizes
+(which correspond to raw data banks: SC, EC, CC, DC & integers) then
+you should use the protocol language to create a structure for it in
+the file j.x.
+<p>
+The data is sent by the caller of Scat_SendMsg and lands on the
+destination machine in the correct byte ordering and in the correct
+array order - all set to process! Any data that is sent is first
+wrapped up in a SCAT package or packet. The RPC protocol generation
+tool (rpcgen) is used to create this packet. The packet consists of
+two parts: a ascii string and a physics event. The event is
+represented as an array of one or more BOS banks or fortran common
+blocks or C language arrays.
+<p>
+To achieve this magic, the data is "packed" from a RPC
+standpoint. Packing the data means to associate a RPC representation
+scheme (the data is an array of integers, for example) with your
+data. This scheme will be applied (read this, a copy into the RPC cloud
+before a copy to the network cloud!) should you actually send your data
+(but not before!!!!).
+</hr>
+<p>
+<hr>
+The subject of packing leads to the subject of implementation. ONC RPC
+will correctly translate any data that is sent between different
+machine byte orderings. This is done by creating a RPC protocol
+specification and compiling this into your source code. The tool
+rpcgen can be used to create the specification file from an input
+file. In SCAT, j.x is the specification file. This file is compiled
+into the files j.h, j_svc.c, j_clnt.c, j_xdr.c by rpcgen. Inspection
+of the file j.x will reveal that all of the data structures that make
+up the physics event part of the SCAT packet are dynamic in size
+(read, created at run time). The routines in spack.c will correctly
+allocate the needed memory.
+<p>
+At this point lets jump to the makefile before we put the whole thing
+together. The makefile shows us that some files in the SCAT library
+interface are linked with different sides of the SCAT comm link.
+<p>
+<pre>
+#
+SERVOBJS = j_svc.o j_xdr.o active.o reg.o svt.o
+#
+CLNTOBJS = j_clnt.o j_xdr.o scat.o spack.o sinfo.o lst.o evout.o svt.o
+#
+</pre>
+<p>
+NOTICE, the objects svt.o and j_xdr.o are common to both sides. More
+details are needed...
+<p>
+Lets look at the EventStore makefile to see how a client and server
+link. The client is one stand alone process to unix. The server is
+another. They both compile/link with the SCAT library.
+<pre>
+...
+#
+CLIBS        = -L$(SCATDIR) -lscat
+SLIBS        = -L$(SCATDIR) -lscat
+#
+SOBJS        = isvc.o printevent.o msvc.o config.o \
+	eserror.o bnode.o dynary3.o esobj.o lstobj.o \
+	parsestr.o director.o
+COBJS        = clnt.o printevent.o evout.o parsestr.o
+
+EventStore: $(SOBJS) 
+	$(CC++) $(CFLAGS) -o $@  $(SOBJS) $(SLIBS)  
+
+client : $(COBJS) 
+	$(CC++) $(CFLAGS) -o $@ $(COBJS) $(CLIBS) 
+...
+</pre>
+<p>
+The SOBJS target corresponds to the software linked into the server
+side of the application. The COBJS target contains the client
+side. The server will link both the SOBJS and the routines in
+SERVOBJS. The client will link in CLNTOBJS as needed.
+<p>
+</hr>
+
+</body>

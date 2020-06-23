@@ -1,0 +1,120 @@
+************************************************************************
+release note 03/16/2005
+
+- The corrections for the torus current I=3375A setting are available 
+  for icor=2 option (Tsutomu)
+  (g10pcor.F, pcorpppm_mm.F, pcorpppm_tm.PAR)
+- The calling sequence is changed. The corrections are selected according 
+  to PID for icor= 4. Input variable 'icharge' is replaced by 'ipid'.
+  The pi+, pi-, K+, K- and proton are supported. 
+  (g10pcor.F, choosepcor.F, c_g10pcor.c, g10pcor.h)
+- Definithion of PID number is PDG PIDs (see calling sequence below)
+  This can be easily modified by user by editing definitions in g10pcor.F and choosepcor.F
+
+************************************************************************
+release note 03/04/2005
+
+- Bug in the interpolation of the MM correction was corrected (Marco)
+  (pcorpppm_mm.F)
+- Bug in wrong asignment of field setting for icor=4 was fixed (Tsutomu, Stepan)
+  (g10pcor.F, choosepcor.F)
+- It was found that TM correction has ambiguity in absolute scale of the correction.
+  Overall scaling factor was applied in TM corrections for 2250A (Tsutomu)
+  (pcorpppm_tm.PAR)
+
+************************************************************************
+release note 02/14/2005
+
+- Bug in pcorpppm_tm.F was fixed (Marco)
+- Comments in choosepcor.F were corrected (Tsutomu)
+
+************************************************************************
+release note 02/11/2005
+
+This is a set of subroutines for momentum corrections for g10 data set.
+The corrections have been determined from three independent analysis;
+(1) 4-momentum conservation in gamma + d --> p + p + pi^- reaction 
+(2) transverse momentum conservation in gamma + d --> p + p + pi^- reaction 
+(3) Ks^0 mass in Ks^0 --> pi^+ + pi^- decay mode.
+This function provides above three corrections and a hybrid correction 
+which combines the analysis (1) and (3).
+
+Main subroutine is g10pcor which is a Fortran subroutine.
+C-wrapper is available for c-based codes. 
+The calling sequences are similar to the ELOSS package.
+PAW based analysis needs additional prescriptions.
+
+-----------------------
+Building library 
+
+There is a Makefile in this package. Run 'make lib' and it will build
+g10pcor library. Then you can link it with your program.
+
+-----------------------
+Calling sequence (Fortran):
+
+* initialization
+No initialization is necessary at this moment.
+However, we keep Initg10pcor for future development. 
+Currently the initialization function Initg10pcor 
+only checks input parameters. 
+
+* applying a correction
+call g10pcor(torus,ipid,pold,icor,pnew,istat)
+
+     Inputs:
+        torus  : integer, torus current (Ampere)
+        ipid   : integer, particle id (in GEANT definition)
+                  = 211 : pi+
+                  =-211 : pi-
+                  = 321 : K+
+                  =-321 : K-
+                  =2212 : p
+        pold(3): real,  3 momentum before momentum correction
+                        (after ELOSS correction)
+        icor   : choice of correction functions
+                  = 1 : pppm MM correction (1)
+                  = 2 : pppm TM correction (2)
+                  = 3 : K0   NB correction (3)
+                  = 4 : Combined correction (currently, 1+3)
+     Outputs
+        pnew(3): real, 3 momentum after correction
+        istat  : integer,
+                  < 0 : error
+                  = 1 : correction was measured
+                  = 2 : correction was not measured, extrapolated
+
+
+-----------------------
+Calling sequence (C-code):
+
+include the prototype definition with: 
+#include <g10pcor.h>             
+
+* initialization
+No initialization is necessary at this moment.
+But you can still call Initg10pcor to check input parameters.
+
+* applying a correction
+The c function c_g10pcor is a wrapper for the Fortran subroutines.
+
+istat =c_g10pcor(torus, ipid, icor, &p4);
+
+p4 is a measured 4-momentum vector (vector4_t) corrected for the 
+target energy loss. As explained above, 
+torus, icharge, icor are input parameters. This routine 
+passes the inputs to the main routine (g10pcor) and updates 4-vector p4.
+A status (istat) is returned from this function.
+
+-----------------------
+Calling sequence (in PAW):
+
+(in preparation)
+
+
+-----------------------
+Please give us bug reports or suggestions.
+
+Tsutomu Mibe    (mibe@jlab.org)
+Nathan Baltzell (baltzell@jlab.org)
+Marco Mirazita  (mirazita@jlab.org)

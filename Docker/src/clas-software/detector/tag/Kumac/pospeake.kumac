@@ -1,0 +1,94 @@
+*  size of the window checked in ns
+max = 30 
+*  number of bin (resolution)
+bin = 80
+*  statistic we accept for determining the position of the peak
+stat = 5 
+
+vec/cr oldposepeak(384) R
+vec/cr posepeak(384) R
+vec/cr statistic(384) I 
+vec/cr vect([bin])
+vec/cr posmean(2) R 0 0
+vec/cr data(2) R
+
+message 'Old peak position file :'
+read filenameold
+message 'New peak position file :'
+read filename
+
+*READ old values of position of the peak:
+
+vec/read data [filenameold] 'F4.0,F8.2' 'O'
+vec/copy data(2) oldposepeak(1)
+do i=2,383
+vec/read data [filenameold] 'F4.0,F8.2' ' '
+vec/copy data(2) oldposepeak([i])
+enddo
+vec/read data [filenameold] 'F4.0,F8.2' 'C'
+vec/copy data(2) oldposepeak(384)
+
+minusmax= -[max]
+
+do l=1,384
+i=2*[l]-1
+h/cr/1d 1000 'pos peak E'[l] [bin] [minusmax] [max]
+n/proj 1000 1.time_e e_id=[i]
+h/pl 1000
+h/get/cont 1000 vect
+
+sigma lmax = lvmax(vect)
+
+*  if we have enough statistic:
+if vect(lmax)>[stat] then
+vec/input statistic([l]) 1
+sigma chmax = [max]*(-1 + 2*lmax/[bin])
+vec/copy chmax posepeak([l])
+vadd oldposepeak([l]) posmean(1) posmean(1)
+vadd posepeak([l]) posmean(1) posmean(1)
+vbias posmean(2) 1 posmean(2)
+endif
+
+if vect(lmax)<=[stat] then
+vec/input statistic([l]) 0
+endif
+
+h/del 1000
+enddo
+
+vdiv posmean(1) posmean(2) posmean(1)
+* to obtain the mean value we divide the sum by the number of entries
+
+* Correct the old values by the measured shift
+
+vadd posepeak oldposepeak posepeak
+
+
+do i=1,384
+if statistic([i])=0 then
+message 'not enough statistic for E'[i]
+vec/copy posmean(1) posepeak([i])
+* if we don't have enough statistic we take for the peak position the mean value.
+endif
+enddo
+
+* Write new values in the new file
+
+vec/input data(1) 1
+vec/copy posepeak(1) data(2)
+vec/write data [filename] 'F4.0,F8.2' 'O'
+do i=2,384
+vec/input data(1) [i]
+vec/copy posepeak([i]) data(2)
+vec/write data [filename] 'F4.0,F8.2' ' '
+enddo
+vec/input data(1) 1000 
+vec/copy posmean(1) data(2)
+vec/write data [filename] 'F4.0,F8.2' 'C'
+
+vec/del oldposepeak
+vec/del posepeak
+vec/del statistic
+vec/del vect
+vec/del posmean
+vec/del data

@@ -1,0 +1,2 @@
+line 1: number of events to be processed
+line 2: number of particle you want to process per event

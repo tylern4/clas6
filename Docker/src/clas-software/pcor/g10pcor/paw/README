@@ -1,0 +1,5 @@
+calling sequence
+
+(1) include g10pcorpaw.f in the paw analysis code.
+(2) run initg10pcor.kumac in paw session. This saves parameters in vectors.
+(3) to apply corrections, call subroutine g10pcor in the analysis code

@@ -1,0 +1,20 @@
+#!/bin/csh
+
+set run = $1
+
+set RI   = (`grep $run runs.txt | awk '{print $2}'`)
+set DATA = (`grep $run runs.txt | awk '{print $3}'`)
+set DEST = /work/clas/disk1/ungaro/cc
+if($RI == "") then
+	echo no run $run found in runs.txt. Exiting.
+	exit
+endif
+
+set command = /home/ungaro/projects/calib/Cerenkov/Cerenkov
+
+echo Run Index: $RI
+echo Destination Directory: $DEST/$DATA
+
+cd  $DEST/$DATA
+hadd  cc_adc_spe_$run.root ../*$run*.root
+$command -USE_QT=0 -ROOT_FILE=cc_adc_spe_$run.root -RUN_INDEX=$RI -RUNNO=$run -PROCESS_ROOT=1

@@ -1,0 +1,31 @@
+Use the perl script 'caldb_write_and_link_EC_pedestals.pl' to load EC pedestals
+into the calibration database.  
+
+usage:
+caldb_write_and_link_EC_pedestals.pl  f=<file with constants> ci=<comment for run index>\
+    min=<run min> max=<run max> [srmin=<source run min>] [srmax=<source runmax>]\
+    [cv=<comment for item value table>] [it=<run index table name>] [user=<MySQL user name>] \
+    [hostname=<hostname of db server>]
+    
+Other files:
+
+load_EC_PEDESTALS - short script for calling caldb_write_and_link_EC_pedestals.pl
+
+example - example of short script for loading multiple pedestal runs. Calls load_EC_PEDESTALS.
+Also this file provides a hard copy record of what was loaded.
+
+ec.trans_clasprod_0xxxxx.txt - contains pedestal values for run xxxxx.  These files are located
+on the CLON cluster under $CLON_PARMS/pedman/Tfiles and must be copied to the JLAB machines in 
+the same directory as caldb_write_and_link_EC_pedestals.pl 
+
+Notes: 
+
+1) Make sure <run min> and <run max> are appropriate when loading pedestals for run xxxxx.
+Basically <run min>=xxxxx <run max>=yyyyy-1, where yyyyy is the run number of the next pedestal 
+run following xxxxx.
+
+2) After loading pedestals verify that the database was updated using the web page:
+
+http://clasweb.jlab.org/cgi-bin/caldb/cq.pl?runMin=&runMax=&system=EC_CALIB&subsystem=EC_PEDESTALS&button=Limit+Choices&item=none&run=&itemValueId=&date=&runIndexTable=&hostname=
+
+

@@ -1,0 +1,15 @@
+macro ecCalPMTID.kumac
+
+  vec/cre pmtID(216) i
+  m = 0
+
+  do layer = 1,6
+    do strip = 1,36
+      m = [m] + 1
+      id = 256*[layer] + [strip]
+      vec/inp pmtID([m]) [id]
+    enddo
+  enddo
+  
+return
+  

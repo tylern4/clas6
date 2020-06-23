@@ -1,0 +1,146 @@
+#! /usr/local/bin/perl
+
+# This perl script will write a routine to make the ddl file into a ntuple format
+# for use with ntuple booking program.
+
+$home = $ENV{"HOME"};
+$user = $ENV{"USER"};
+$CLAS_PACK = $ENV{"CLAS_PACK"};
+$orig_dir = $ENV{"PWD"};
+
+$argc = @ARGV;
+
+if ($CLAS_PACK ne "") {
+
+    for ($j=0; $j < $argc; $j++) {
+	@list_var = ();
+	
+	$ddl_file = "$ARGV[0].ddl";
+	$bank_name = $ARGV[0];
+	
+	if ( -e "$orig_dir/$bank_name.h") {
+	    print STDERR "This header file already exists.  Please remove using the rm_bank command.\n";
+	} else {
+	    if ( -e "$CLAS_PACK/bankdefs/$ddl_file") {
+
+		$_ = $bank_name;
+		tr/a-z/A-Z/;
+		$bank_name_2 = $_;
+
+		print STDERR "Making C structure for bank $bank_name_2.\n\n";
+		
+		open (NF,">>$orig_dir/$bank_name.h");
+		print NF "typedef struct {\n";
+		
+		open (CP,"$CLAS_PACK/bankdefs/$ddl_file");
+		print STDERR "Writing ";
+		while (<CP>) {
+		    chop ($_);
+		    $line = $_;
+		    print STDERR ".";
+
+# Sleep command
+		    &sleep(1);
+		    if ($line =~ /^!/) {
+			
+# This is a comment line and should be skipped
+			
+		    } else {
+			
+# Parse this line for spaces and extract the second column.  Look for any special
+# key words like "END" to skip this line...
+			
+			
+			@pieces = split (/\s+/,$line);
+			
+			if ($pieces[1] ne "TABLE" && $pieces[1] ne "END") {
+			    $_ = $pieces[2];
+			    tr/A-Z/a-z/;
+			    $variable_name = $_;
+			    if ($pieces[3] eq "F") {
+				$type = "float";
+				$pawtype = "R";
+			    } else {
+				$type = "int";
+				$pawtype = "I";
+			    }
+			    if ($variable_name ne "") {
+				print NF "\t$type $variable_name;\n";
+				$element = "$variable_name:$pawtype";
+				push(@list_var,$element);
+			    }
+			}
+		    }
+		}
+		close (CP);
+		print STDERR "\n\n";
+	
+		print NF "} cwn_$bank_name\_;\n\n";
+		print NF "char *cwn_$bank_name\_Event = \"";
+	
+# Write out the string for the common block ntuple
+	
+		$num_vars = @list_var;
+		for ($i=0; $i < $num_vars; $i++) {
+		    if (($num_vars - $i) > 1) {
+			print NF "$list_var[$i], ";
+		    } else {
+			print NF "$list_var[$i]";
+		    }
+		}
+		print NF "\";\n\n";
+		print STDERR "Finished making C structure.\n";
+	    }
+# Ask to see if we should acknowledge this in the database with a unique ID number
+# Check to see if it already exists in the database first...
+	
+	    print STDERR "\nDo you want this header file acknowledged in the database (Y/N)?\n";
+	    $answer = <STDIN>;
+	    chop($answer);
+	    if ($answer eq "Y" || $answer eq "y") {
+
+# An associative array for use in the DBM system...
+
+		if ( -e "$orig_dir/headers.db") {
+		    dbmopen(%HEADERS, "headers", 0644);
+		    &search_database();
+		} else {
+		    print STDERR "\nNo database exists...\n";
+		    print STDERR "Would you like the database to be created (Y/N)?\n";
+		    $answer = <STDIN>;
+		    chop($answer);
+		    if ($answer eq "Y" || $answer eq "y") {
+			$cmd = "mk_database";
+			system ($cmd);
+			dbmopen(%HEADERS, "headers", 0644);
+			&search_database();
+		    }
+		}
+		dbmclose(%HEADERS);
+	    }
+	    close (NF);
+	}
+	shift (@ARGV);
+    }
+}
+
+sub sleep {
+    for ($i=0; $i < 20000*$_[0]; $i++) {
+    }
+}
+
+sub search_database { 
+    foreach $key (keys %HEADERS) {
+	$ID = $HEADERS{$key};
+	push (@id_elements,$ID);
+    }
+    if (@id_elements ne ()) {
+	@ids = sort {$a <=> $b} @id_elements;
+	$last_ID_assigned = pop(@ids);
+	$UNIQUE_ID = $last_ID_assigned+1;
+    } else {
+	$UNIQUE_ID = 0;
+    }
+    $HEADERS{"$bank_name_2"} = $UNIQUE_ID;
+    print NF "#define $bank_name_2\_NT_ID $UNIQUE_ID\n\n";
+}

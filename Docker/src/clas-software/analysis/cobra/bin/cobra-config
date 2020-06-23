@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+# -----------------------------------------------------------------------------
+#
+# Usage: cobra-config [options]
+# Options:
+#          --cflags  Includes and compiler flags for COBRA software
+#          --libs    Libs for COBRA software
+#          --help    Prints help to screen
+#
+# -----------------------------------------------------------------------------
+#
+use Getopt::Long;
+$help = "";
+$cflags = "";
+$libs = "";
+GetOptions ('help' => \$help, 'libs' => \$libs, 'cflags' => \$cflags);
+#
+# If -h option used, print options to the screen and quit
+#
+if($help ne ""){
+    &printopts;
+    exit(0);
+}
+$cobra_loc = `printenv COBRASYS`;
+chop $cobra_loc;
+#
+# Parse the command line
+#
+if($cflags ne ""){
+    # print out the includes and flags
+    print " -I$cobra_loc/include";
+}
+if($libs ne ""){
+    # print out the libs
+    print " -L$cobra_loc/lib -lClasEvent -lEvent -lKinFit -lClasRuns -lPArray -lPTypes";
+}
+exit(0);
+###############################################################################
+#                         Subroutine Printopts                                #
+###############################################################################
+sub printopts{
+    print "Usage: $0 [--options]
+
+          --cflags    COBRA includes 
+
+          --libs      COBRA libs
+
+          --help      Prints this message
+
+          \n";
+}

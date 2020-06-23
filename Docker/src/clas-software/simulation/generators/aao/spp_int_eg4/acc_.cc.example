@@ -1,0 +1,101 @@
+#include "TROOT.h"
+
+#include "V3.h"
+#include "V4.h"
+#include "Event.h"
+
+#include <iostream>
+#include <stdlib.h>
+#include <fstream>
+#include <iomanip>
+
+#include "parms.h"
+
+#include "accept_funct_eg1b.h"
+#include "myutility_eg1b.h"
+#include "calc_acc_eg1b.h"
+
+using namespace std;
+
+int vertex_Flag;
+
+int first=1;
+
+int print=0;
+
+
+extern "C" {
+void acc_(float *ebeam,float *Q2,float *W,float *phi_cm,float *the_cm,float *acc);
+}
+
+
+
+void acc_(float *ebeam,float *Q2,float *W,float *phi_cm,float *the_cm,float *acc){
+//  costhecm=cos(PI-ep->pmom_cm.The()); //180-th is th of the pion
+//  phicm=ep->pmom_cm.Phi()*RD; //phi of the proton in my frame is = to phi of pion in MAID frame
+  float the_cm_tmp;
+  the_cm_tmp=180-*the_cm;
+  //fix phi_el(the value assigned is irilevant
+  float phi_el=0.;
+  //initialize vertexFlag.If vertexFlag==1 =>use vertex cuts
+  vertex_Flag=0;
+
+  
+//  cout<<"Using the following values"<<endl;
+//  cout<<"W="<<*W<<endl;
+//  cout<<"Q2="<<*Q2<<endl;
+//  cout<<"the_cm_tmp="<<the_cm_tmp<<endl; 
+//  cout<<"phi_cm="<<*phi_cm<<endl; 
+//   cout<<"ebeam="<<*ebeam<<endl;
+
+
+  float torcur=2250.;
+  Int_t etight=2,ptight=2;
+
+ 
+
+  V4 e_lab,p_lab;
+  
+ 
+  
+  
+    
+    cm_to_lab(*ebeam,*Q2,*W,*phi_cm,the_cm_tmp,phi_el,&e_lab,&p_lab);
+
+    if(print){
+    e_lab.Print();
+    p_lab.Print();
+    }
+
+    float esec_phi,psec_phi;
+    Int_t esec,psec;
+    if(vertex_Flag==1){
+      if(first){      
+	cout<<"using vertex cuts"<<endl;
+	first=0;
+      }
+
+      esec_phi=calcsecphivertexel(e_lab.Phi(),e_lab.Mod(),*ebeam)*RD;
+      esec=calcsectorvertexel(e_lab.Phi(),e_lab.Mod(),*ebeam);
+      psec_phi=calcsecphivertexprot(p_lab.Phi(),p_lab.Mod(),*ebeam)*RD;
+      psec=calcsectorvertexprot(p_lab.Phi(),p_lab.Mod(),*ebeam);
+
+    }
+    else{
+      if(first){      
+	cout<<"using DC cuts"<<endl;
+	first=0;
+      }
+      esec_phi=calcsecphi(e_lab.Phi())*RD;
+      esec=calcsector(e_lab.Phi());
+      psec_phi=calcsecphi(p_lab.Phi())*RD;
+      psec=calcsector(p_lab.Phi());
+      
+      
+    }
+    *acc=calc_acc_eg1b(e_lab.Mod(),e_lab.The()*RD,esec_phi,esec,p_lab.Mod(),p_lab.The()*RD,psec_phi,psec,torcur,*ebeam,etight,ptight,vertex_Flag,0);
+    *acc=*acc/360.;  
+   //cout<<"acc in .cc"<<*acc<<endl; 
+  return ;
+}
+

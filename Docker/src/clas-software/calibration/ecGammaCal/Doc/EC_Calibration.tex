@@ -1,0 +1,429 @@
+\documentclass [12pt,letterpaper]{article}
+
+
+%-----------------------------------
+%       Packages definition
+%-----------------------------------
+ 
+\usepackage[dvips]{epsfig}
+
+\begin{document}
+
+
+%------------------------------------
+%            Title
+%------------------------------------
+\begin{titlepage}
+\begin{center}
+{\huge \bf EC Time Calibration}
+\\
+{\huge \bf Procedure For Photon Runs}
+
+\vspace{0.5 cm}
+{\huge in CLAS}
+
+\vspace{3cm}
+{\large  Matthieu Guillo, \em University of South Carolina}
+
+\vspace{0.5 cm}
+{\large  Dennis Weygand, \em Thomas Jefferson National Laboratory}
+
+\vspace{0.5 cm}
+{\large Jingliang Hu, \em Thomas Jefferson National Laboratory}
+
+\vspace{0.5 cm}
+{\large Mina Nozarm, \em Thomas Jefferson National Laboratory}
+
+\end{center}
+\end{titlepage}
+ 
+\newpage
+
+%------------------------------------
+%       Tables, figures, TOC
+%------------------------------------
+\tableofcontents   % table of contents
+\newpage
+\listoffigures     % list of figures.
+\newpage
+
+%------------------------------------
+%        Document starts here
+%------------------------------------
+
+\section{Motivation for EC time calibration}
+
+\subsection{Photon / Neutron separation}
+Discriminating neutrons from photons is crucial in many channels studied in Hall B. Neutral particles are identified by a hit in the forward or large angle calorimeters with no matching track. Neutrons are dicriminated from photons based on $\beta$: the current code considers that neutrals with $\beta < 0.9$ are neutrons and photons otherwise.
+In order to achieve good separation, good EC timing is essential. Time resolution is related directly to $\beta$ resolution according to the following formula:
+
+\begin{eqnarray}
+\beta_0 & = & \frac{L}{c t } \\
+\sigma_{\beta_0}(\sigma_{t}, \sigma_{L}) & = & \frac{\beta_0}{L} (\sigma_L + \beta_0 \, c \, \sigma_t) \label{eq:sigma_beta0}
+\end{eqnarray}
+
+\begin{itemize}
+  \item $L$ is the distance from the vertex to the hit in the calorimeter and its value is roughly $5 \,m$.
+  \item $\sigma_L$ is the distance uncertainty due to vertex resolution and hit position in the calorimeter. This value will vary according to the azimuthal angle but can be roughly estimated:\\
+	$\sigma_L \approx 1cm$ for photons (they interact almost immediately in the calorimeter)\\
+	$\sigma_L \approx 20cm$ for neutrons (asssuming they can interact with uniform probability in the thickness of the calorimeter)
+  \item \begin{equation}
+	\beta_0 = \left\{ \begin{array}{ll}
+        	               1 &  \mbox{for photons} \\ 
+                               \frac{p}{\sqrt{m_n^2 + p^2}} = \beta_0(p) & \mbox{for neutrons}
+                           \end{array}
+		    \right. \label{eq:beta0}
+        \end{equation}
+  As the momentum increases, $\beta$ becomes closer to 1, making the photon / neutron separation more difficult (Figure \ref{fig:beta_vs_p_neutron}).
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 12.cm
+\epsffile{Figures/beta_vs_p_neutron.eps}
+\caption{\it $\beta$ vs momentum for neutrons} 
+\label{fig:beta_vs_p_neutron}
+\end{center}
+\end{figure}
+
+\end{itemize}
+
+\subsection{Need for a new calibration scheme}
+A package ({\it ec\_time}) already exists to calibrate the calorimeter. The procedure was developed for electron runs, and uses both electrons and pions for the calibration. Electrons are well suited; their velocity is $c$, and they interact on the surface of the calorimeter creating an electromagnetic shower. Pions, on the other hand, can interact anywhere inside the calorimeter or may just ionize: they will give poorer time resolution. For electron runs, this is not such an issue since every event has at least one electron which can be used for the calibration. Since CLAS toroidal magnetic field bends electrons in the forward direction, pions are used only at the highest azimutal angles. Using this scheme, time resolution varies between $250\, ps$ and $400\, ps$ \\
+In photon runs, generally we do not have electrons, and attempts to calibrate the EC using pions produced time resolutions between $500\,ps$ and $1\,ns$. We will show how much this affects photon / neutron separation and indicate the need for another scheme.\\
+Let's assume a simple gaussian $\beta$ distribution for both photons and neutrons at a given momentum $p$:
+
+\begin{eqnarray}
+f_{\gamma} (\beta, \sigma_t) &  = & \frac{1}{\sqrt{2\pi} \sigma_{\beta_0}(\sigma_{t}, \sigma_{L})} e^{\textstyle - \frac{ (\beta -1) ^ 2 }{ 2 \, \sigma_{\beta_0}^2(\sigma_{t}, \sigma_{L}) }} \\
+f_{neutron} (\beta, p, \sigma_t) & = & \frac{1}{\sqrt{2\pi} \sigma_{\beta_0}(\sigma_{t}, \sigma_{L})} e^{\textstyle - \frac{( \beta -\beta_0(p))^2}{2\, \sigma_{\beta_0}^2(\sigma_{t}, \sigma_{L}) }}
+\end{eqnarray}
+
+where $\beta_{0}(p)$ has been defined in Equation \ref{eq:beta0} and $\sigma_{\beta_0}(\sigma_{t}, \sigma_{L})$ in Equation \ref{eq:sigma_beta0}. For $\beta < 0.9$, neutrals are called neutrons, whereas for $\beta \geq 0.9$, they are called photons. Figure \ref{fig:betadistribution} shows the particle misidentification due to the width of the distribution (function of the time resolution $\sigma_{t}$ and position resolution $\sigma_{L}$) as well as the position of the neutron peak (function of the neutron momentum).   
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 12.cm
+\epsffile{Figures/betadistribution.eps}
+\caption{\it $\beta$ distribution for neutrons and photons}
+\label{fig:betadistribution}
+\end{center}
+\end{figure}
+
+For neutrons with momentum below $1\, GeV/c$, time resolution is not so important as the peak is far away from $\beta = 0.9$, but resolution effects show up clearly at higher momentum. For photons, the effects are less dramatic since $\sigma_{L}$ is smaller, but still evident. The percentage of real neutrons (respectively real photons) misidentified is denoted by $m_{N}(p,\sigma_{t})$ ($m_{\gamma}(\sigma_{t})$), and in this simple model can be computed as:
+
+\begin{eqnarray}
+ m_{N}(p,\sigma_{t}) & = & \int_{0.9}^{\infty} f_{neutron} (\beta, p, \sigma_t) \, d\beta\\
+ m_{\gamma}(\sigma_{t}) & = &  \int_{- \infty}^{0.9} f_{\gamma} (\beta, \sigma_t) \, d\beta
+\end{eqnarray}
+ 
+Figure \ref{fig:neutrals_misidentified} shows the results for some values of $\sigma_{t}$ and neutron momenta.
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 12.cm
+\epsffile{Figures/neutrals_misidentified.eps}
+\caption{\it Neutron and photon misidentification}
+\label{fig:neutrals_misidentified}
+\end{center}
+\end{figure}
+
+Time resolution has a small effect (compare the difference between $\sigma_{t} = 400 ps$ and $\sigma_{t} = 800 ps$) in the leakage of photons into neutrons. However, the effect is not neglectable for the leakage of neutrons into photons when the neutron momentum is between $1.2$ and $1.8 \, GeV/c$.\\
+This very simple study takes into account only time resolution. If the time is systematically off, then the $\beta$ peaks position are displaced from their correct values, and the effects are even worse. It is therefore crucial for the time to be correct and have the smallest uncertainty. 
+
+
+\section{Method for calibration}
+We propose to use photons to calibrate the forward electromagnetic calorimeter (EC) in photoproduction. Photons interacting with the massive structure of the calorimeter will convert quickly into an $(e^{+},\,e^{-})$ pair and produce an electromagnetic shower. A package has been written to achieve this goal, mainly in C++ and Perl to glue programs together. All programs have a help accessible through the ``-h'' flag. The package is available from the CVS repository (\$CLAS\_PACK/utilities/ecGammaCal); there is a README file that explains how to build and use the programs as well as the prerequisite libraries.\\
+ 
+The whole calibration procedure requires 7 steps:
+
+\begin{enumerate}
+\item filtering events that can be used for calibration (program {\it filterGammas}).
+\item computing the calibration constants (program {\it computeCalibConsts}).
+\item computing the difference between the time expected and the time from the calibration (program {\it fitTimeDifference}). The difference is fitted using a gaussian.
+\item rejecting gammas biasing the fit and giving poor quality calibration constants (program {\it rejectGammas}).
+\item selecting the best calibration constants (program {\it getCalibConsts}).
+\item checking the quality of the calibration constants (ROOT macros). 
+\item putting the numbers into the map.
+\end{enumerate} 
+
+Steps 2, 3 and 4 are performed in a cycle, the output of step 4 feeding the input of step 2. During each cycle, we create a new set of calibration constants as well as monitoring histograms. At the end of step 5, final calibration constants are selected from the previous sets and final monitoring histograms are produced. There should be no need for re-cooking the data in order to check the quality of the calibration constants.
+
+
+\subsection{Filtering events for calibration}
+\subsubsection{Identifying photons}
+Since the EC timing has not been done at that stage, $\beta$ for neutral particles is incorrect, so is the particle ID for neutrons and photons ie some particles identified as photons are really neutrons and {\it vice versa}. We need to rely on physics (not on particle id) if we want to use photons for calibration. \\
+The current sheme is to select events where one, and only one, proton has been identified and one or many neutrals have been detected. Since the target is a proton, baryon number conservation forbids the neutral to be a neutron. Particle id for these neutrals is changed, if necessary, so that they are gammas.\\
+Another sheme has been tested and failed. The idea was to use events where one proton and exactly 2 neutrals were detected. The neutrals were treated as $\gamma$'s,  and their invariant mass computed. The $\pi^{0}$ peak stood up clearly in the mass distribution on top of some small background. This distribution was fitted using a first degree polynomial (for the background) and a gaussian (for the $\pi^{0}$ peak) (Figure \ref{fig:pi0}).
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 12.cm
+\epsffile{Figures/pi0.eps}
+\caption {\it Mass distribution of 2 $\gamma$}
+\label{fig:pi0}
+\end{center}
+\end{figure}
+
+We kept the event if the 2 neutral invariant mass was within 2 $\sigma$ of the centroid of the $\pi^{0}$ peak: those neutrals were then considered to be true $\gamma$'s. Unfortunately, no good calibration was obtained using this method. Figure \ref{fig:ec_overlap} shows a typical hit in the EC and may give a possible explanation why the calibration failed: most of the photons using this selection method had hits in the same sector, leading to some overlapping signal. Those events confuse the calibration since we cannot know which fraction of the ADC is due to the first gamma and which fraction is due to the second. Also the time of the hit is ambiguous.\\
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 12.cm
+\epsffile{Figures/ec_overlap.eps}
+\caption {\it 2 $\gamma$'s overlapping signals in the EC}
+\label{fig:ec_overlap}
+\end{center}
+\end{figure}
+
+
+\subsubsection{Selecting good events}
+Before starting, one has to select events that can be used for calibration. This is the purpose of the program {\em filterGammas}. A good event is one where in the final state, exactly one proton, at least 2 charged tracks (for better vertex reconstruction using the MVRT package) and at least one {\em good gamma}, after converting all neutrals into gamma,  have been detected. A good gamma is defined by: \\
+
+\begin{itemize}
+\item all necessary BOS banks are present (PART, TBID, ECHB, ECPC and MVRT)
+\item the hit in the EC is in the fiducial region.
+\item there are no other EC hits in the same sector. This prevents overlapping signal leading to misinterpretation when reading ADC's and TDC's values.
+\item the energy reconstructed from the energy deposited in the EC must be above some minimum value. This reduces accidentals as well as signal noise. The default value is $0.1\,GeV$.
+\item the inner layer of the EC must have recorded a hit (but we do not require a hit in the outer layer). This is the expected behavior of gammas interacting in the EC ; neutrons, on the other hand, can interact anywhere in the calorimeter. Requiring a hit in the inner layer gets rid of some neutron leakage into our gammas sample.
+\end{itemize}
+
+
+\subsection{Computing the calibration constants}
+\subsubsection{ $T_{expected}$ versus $T_{model}$ }
+We can evaluate the time for a photon to generate a signal in the EC PMT's using pure geometry and the speed of light in vacuum as well as in a scintillator. This time will be labelled $T_{expected}$.\\
+The same time can also be evaluated using a semi-empirical model (using a set of 5 parameters denoted $a_{0}$ to $a_{4}$) based only on ADC, TDC, hit position on the surface of the calorimeter and the vertex time informations. This time will be labelled $T_{model}$.\\
+For each PMT (indexed by $j$), we will have a set of $a_{j,k}$ ($k = 0, .., 4$) and the goal of the calibration is to adjust them so that $T_{model}$ matches as close as possible $T_{expected}$; the program {\it computeCalibConsts} is in charge of this part.  
+
+\subsubsection{Expected time: $T_{expected}$}
+
+Let's consider a $\gamma$ interacting in the EC. A shower is created and the light generated in the strips reaches some PMTS and triggers a signal (see Figure \ref{fig:hit_in_calo}).
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 13.cm
+\epsffile{Figures/hit_in_calo.eps}
+\caption {\it photon's path to reach PMTs}
+\label{fig:hit_in_calo}
+\end{center}
+\end{figure}
+
+The time for a photon to propagate from the target to the EC strip and produce light seen by the corresponding PMT for a given view $i$ (where $i$ is either the $u$, $v$ or $w$ view) is:
+
+\begin{equation}
+T_{expected_{i}} = \frac{ L }{ c } + \frac{ l _{i} }{ v }
+\end{equation}
+
+\begin{itemize}
+\item $ c = 30 \,cm/ns $ since the photon travels in a medium with average index close to 1 before reaching the surface of the calorimeter.
+\item $ v $ is the speed of the light in the plastic scintillator and its empirical known value is $ v = 18.1\,cm/ns $. Here, this speed is independent of the strip; in a better model, it would be function of the strip length as it is done for in the Time of Flight's calibration procedure.  
+\item $ L $ is the distance between the vertex position and the centroid of the electromagnetic shower.
+\item $ l_{i} $ is the distance from the centroid of the shower to the edge of the view $i$ and is measured along a strip. Its determination involves only geometry.
+\end{itemize}
+
+\subsubsection{Model time: $T_{model}$}
+
+Since photons and electrons are expected to interact very similarly in the EC, we will use the same semi-empirical model used for calibrating the EC in electron runs.
+ 
+\begin{equation}
+T_{model_{i}} = a_{0} + a_{1}TDC_{i} + a_{2}\frac{1}{\sqrt{ADC_{i}}} +a_{3}l_{i}^{2} + a_{4}l_{i}^{3} - T_{vertex}
+\end{equation}
+
+The different terms have the following meaning:
+
+\begin{itemize}
+\item $ a_{0} $: constant term. Includes all constant times (delays due to cables length for instance).
+\item $ a_{1} TDC_{i} $: TDC conversion term. Time from the conversion of TDC values into $ ns $.
+\item $ a_{2} \frac{1}{\sqrt{ADC_{i}} }$: time-walk correction term.
+\item $ a_{3}l_{i}^{2} + a_{4}l_{i}^{3} $: light attenuation terms. They are part of the expansion of $e^{-l_{i}/l_{0}}$. The zero rank term is already included in the $a _{0}$ term and the first rank term is proportionnal to $l_{i}$ hence to the TDC and is included in the $ a_{1} TDC_{i}$ term. Higher rank terms are neglected.
+\item $ T_{vertex} $ is the time at the vertex and needs to be subtracted since it is the reference time. 
+\end{itemize}
+
+\subsubsection{Fitting method}
+
+To find the best calibration constants  $a_{j, k}$, we will use the {\it least squares method} on every single tube. Let's consider a given tube (indexed by $j$) where many hits (indexed by $i$), have been recorded (total number of hits is $N_{j}$) and the corresponding $T_{expected_{i}}$ and $T_{model_{i}}$ have been computed. The $\chi^2$ is given by:
+
+\begin{equation}
+\chi ^{2}_{j} = \sum_{i = 1}^{N_{j}} \frac{\left| T _{expected_{i}} - T _{model_{i}} \right| ^{2} }{ \sigma_{j,i} ^{2} } \label{eq:chi2}
+\end{equation}
+
+$ \sigma_{j, i} $ represents the time resolution due to statistical and systematical errors. At this time, only statistical errors have been considered and we have assumed a normal distribution to evaluate them; then $ \sigma_{j, i}^{2} =  \sigma_{j}^{2} = N_{j} $. Equation \ref{eq:chi2} can be rewritten as:
+
+\begin{equation}
+N_{j} \chi^{2}_{j} = \sum_{i = 1}^{N_{j}} [a_{j, 0} + a_{j, 1} TDC_i + a_{j, 2}\frac{1}{\sqrt{ADC_i} } + a_{j, 3} l_i^2 + a_{j, 4} l_i^3 - \underbrace{(T_{vertex_i} + \frac{ L_i }{ c } + \frac{l_i}{v})}_{T_i}]^2  \label{eq:chi2_2}
+\end{equation}
+
+Minimizing the $\chi^{2}_{j}$ for the set of ${a_{j, i}}$ variables requires that each partial derivative with respect to ${a_{j, i}}$ is equal to 0. This is equivalent to minimize the sum in Equation \ref{eq:chi2_2} and can be written in a matrix form since the expression is a linear function of the $a_{j, i}$ parameters.
+
+\begin{equation}
+M_{j} A_{j} = V_{j}  \label{eq:matrixeq}
+\end{equation}
+
+Where:
+
+\begin{equation}
+M_{j} = \sum_{i = 1}^{N_{j}}
+	\left[
+	\begin{array}{lllll}
+		1 &  TDC_i &  \frac{1}{\sqrt{ADC_i}}  & l_i^2 & l_i^3 \\	
+		TDC_i & TDC_i^2 &  \frac{TDC_i}{\sqrt{ADC_i}} &  {TDC_i l_i^2} &  {TDC_i l_i^3} \\
+		\frac{1}{\sqrt{ADC_i}} & \frac{TDC_i}{\sqrt{ADC_i}} &  \frac{1}{ADC_i} & \frac{l_i^2}{\sqrt{ADC_i}} & \frac{l_i^3}{\sqrt{ADC_i}} \\
+		l_i^2 & l_i^2 TDC_i &  \frac{l_i^2}{\sqrt{ADC_i}} &  {l_i^4} &  {l_i^5} \\
+		l_i^3 & l_i^3 TDC_i &  \frac{l_i^3}{\sqrt{ADC_i}} &  {l_i^5} &  {l_i^6}
+	\end{array}
+  	\right]
+      = \sum_{i = 1}^{N_{j}} M_{j, i}
+\end{equation}
+
+\begin{equation}
+\begin{array}{ccc}
+ A_{j} = \left[
+	\begin{array}{c}
+		a_{j,0} \\
+		a_{j,1} \\
+		a_{j,2} \\ 
+		a_{j,3} \\ 
+		a_{j,4}
+	\end{array}
+     	\right]
+&
+ and
+&
+V_{j} = \displaystyle \sum_{i = 1}^{N_{j}} T_i
+	\left[	
+	\begin{array}{l}
+		1 \\ 
+		TDC_i  \\
+		\frac{1}{\sqrt{ADC_i}} \\ 
+		l_i^2 \\   
+		l_i^3
+	\end{array}
+     	\right] 
+      = \sum_{i = 1}^{N_{j}} V_{j, i}
+\end{array}
+\end{equation}
+
+For every photon we look to see which tubes $j$ have been hit, compute the  corresponding $M_{j, i}$ and $V_{j, i}$ and add them to the $M_{t}$ and $V_{t}$ matrices. At the end, the $a_{j, i}$ parameters, which are the elements of the $A_{j}$ vector, are computed by:
+
+\begin{equation}
+A_{j} = M_{j}^{-1} V_{j}
+\end{equation}
+
+
+\subsection{Fitting $T_{expected} - T_{model}$}
+Once we have calculated the calibration constants, we can check their quality by looking at the difference between $T_{expected}$ and $T_{model}$. This is the purpose of the program {\it fitTimeDifference}.\\
+$T_{expected} - T_{model}$ histograms distributions are created for each tube, and fitted with a gaussian. We chose ROOT analysis libraries both for the histograms and fitting packages since the libraries can be called seamlessly from our C++ code. The histograms, along with a tree that contains more information (in case of anomalies) are written into a ROOT file. A check of the histograms gives immediate feedback of the quality of the calibration, without the need for recooking the data using the new constants. For a good calibration, we expect the distribution for a given tube to be gaussian, centered at 0 and with width giving the time resolution of this tube. 
+
+\subsection{Rejecting bad gammas}
+Unfortunately, the calibration can be biased by a few number of hits for which the time difference is very large. Figure \ref{fig:biaised_calib} illustrates this point in a trivial example: fitting a line through a cloud of points.
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 12.cm
+\epsffile{Figures/biaised_calib.eps}
+\caption {\it Method for rejecting bad points}
+\label{fig:biaised_calib}
+\end{center}
+\end{figure}
+
+The method for rejecting bad points and getting better calibration constants is the following (this is done on a tube by tube basis):
+
+\begin{enumerate}
+\item from the histogram we compute the mean and RMS of the distribution.
+\item we fit the histogram using a gaussian centered at the mean value and in the range spanning $\left[mean - RMS, mean + RMS \right]$ to obtain the centroid position and $\sigma$ of the gaussian.
+\item for every hit we compute the time difference $\Delta T = T_{expected} - T_{model}$ and flag the photon for rejection if the following condition: $centroid - n\times \sigma < \Delta T < centroid + n\times \sigma$ ($n$ is controlled by the user, the default value is $n = 2$) is not respected.
+\end{enumerate}
+
+The first 2 steps are actually performed at the fitting step by the program {\it fitTimeDifference}. The rejection program {\it rejectGammas} does the last step, using the centroid and $\sigma$ values written by {\it fitTimeDifference}. The output of {\it rejectGammas} is a BOS file almost identical to the initial input of {\it computeCalibConsts}, but with some photons in the PART bank flagged not to be used the next time. Those are the files that need to be fed back to {\it computeCalibConsts} in order to have better calibration constants. 
+
+\subsection{Getting the final calibration constants and checking their quality}
+The previous procedure can be repeated many times, each cycle bringing a new set of calibration constants. The procedure converges, each cycle resulting in better calibration constants; the last cycle should give the best calibration constants. There is one case where this is not true (and that's why we do not run this loop forever). Since at each cycle we reject photons, it may happen that after a couple of loops, some tubes no longer have enough photons for calibration, the calibration constants are therefore flagged by setting them at some arbitrary large values. The program {\it getCalibConsts} reads all calibration files, and for every tube selects the constants that were obtained using the minimum number of hits and having not being flagged: these are hopefully the best obtained.\\
+To check the quality of this set of constants, we run {\it fitTimeDifference} again, but this time on the {\it whole} data set, including rejected photons. If everything worked properly, the $\Delta T$ distibutions should be a gaussian centered at 0 (due to the good photons) on top of some background (due to the rejected photons). The ROOT macro {\emph showPasses.C} provides the checking by drawing $\Delta T$ distibutions for every cycle.
+\\
+A perl script {\it calibEC.pl} exists to go through all these cycles of finding the calibration constants, fitting the time difference, rejecting the bad photons and finally getting the best quality calibration constants. In normal use, the user should modify only the first lines to fit his needs. However, for more advanced users, each program can be tuned (throught a set of flags) to achieve better calibration.
+
+
+\subsection{Witting numbers into the Map}
+The last step is to write the calibrations constants into the map. This is the role of the program {\it putConstsInMap}. At this time, the program writes the numbers into a {\it EC\_CALIB.map} Map but does not make the changes into the recent Mysql database. This will be part of a future upgrade.
+
+\section{Example of calibration: g6b run period}
+This section shows the results of the calibration procedure for the g6b running period. The goal is to show what can be achieved at this stage, compared to the previous calibration package ({\emph ec\_time}) and can be used as a reference to be checked against.\\
+We used 7 cycles (passes): the reason behind this choice is that the calibration constants didn't seem to change much afterwards. Figure  \ref{fig:calib_steps} shows the results of the calibration at different passes for all tubes (integrated).
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 12.cm
+\epsffile{Figures/calib_steps.eps}
+\caption {\it $T_{expected} - T_{model}$ at different passes for all tubes}
+\label{fig:calib_steps}
+\end{center}
+\end{figure}
+
+For the first pass, the distribution is not centered at 0, the width is huge, and the overall shape is not gaussian. But already at pass 2 the centroid position, shape and width begin to be acceptable; adding more passes adjusts the shape as well as the width. Notice also that at each new pass the number of photons used decreases, since we reject more and more photons. Figure \ref{fig:final_calib} shows the final result where we used the calibration constants from pass 7 and applied them to all our photons, including the rejected ones.
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 12.cm
+\epsffile{Figures/final_calib.eps}
+\caption {\it Calibration results for all tubes}
+\label{fig:final_calib}
+\end{center}
+\end{figure}
+
+When comparing to pass 1 from Figure \ref{fig:calib_steps}, two observations can be made. The first one is that indeed, this method works. The second one is that we can understand where the so-called ``bad'' photons are from: the ``shoulders'' at $-4 \, ns$ and $-2\, ns$ one can clearly see  in the distribution are an indication that bad photons are from a different beam bucket. Being able to distinguish them in the time-difference distribution gives us confidence that the calibration worked well. To obtain the overall (integrated) time resolution, we fit the distribution using the sum of a third degree polynomial and a gaussian. The overall time resolution is $460 ps$ and this includes good tubes as well as bad ones.\\
+Figure \ref{fig:tubes_resolution} shows individual tube time resolution. The left column is the result of the first pass, the right column is after the seventh pass. We clearly see the improvements made by the technique of rejecting bad photons for original good tubes (first row), bad tubes (second row) and even for bad tubes with few statistics (last row).
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 14.cm
+\epsffile{Figures/tubes_resolution.eps}
+\caption {\it Calibration improvements for individual tubes}
+\label{fig:tubes_resolution}
+\end{center}
+\end{figure}
+
+Figure \ref{fig:timemodelterms} and Figure \ref{fig:parameters} show the relative contribution of the different terms in the time model and the values of the calibration constants for every tube. 
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 14.cm
+\epsffile{Figures/timemodelterms.eps}
+\caption {\it Relative contributions of the terms in the time model}
+\label{fig:timemodelterms}
+\end{center}
+\end{figure}
+
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 14.cm
+\epsffile{Figures/parameters.eps}
+\caption {\it Calibration constants values }
+\label{fig:parameters}
+\end{center}
+\end{figure}
+
+Finally, one can check the  quality of the calibration by recomputing $\beta$ for neutrals using the new constants. This requires to recooking the data. Figure \ref{fig:betapersector} shows the results sector by sector while Figure \ref{fig:oldvsnewcalib} compares the old (using pions) versus the new (using gammas) EC calibration method and proves that, at least for photon runs, the new method is much better.  
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 14.cm
+\epsffile{Figures/betapersector.eps}
+\caption {\it $\beta$ for neutral particles, sector per sector}
+\label{fig:betapersector}
+\end{center}
+\end{figure}
+
+
+\begin{figure} [h]
+\begin{center}
+\epsfxsize = 14.cm
+\epsffile{Figures/oldvsnewcalib.eps}
+\caption {\it Comparison between the old and the new calibration methods}
+\label{fig:oldvsnewcalib}
+\end{center}
+\end{figure}
+
+
+\end{document}
+
+
+

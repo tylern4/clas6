@@ -1,0 +1,123 @@
+#! /usr/local/bin/perl
+
+#  nextRun determines which run is the next one to be processed.
+#          next Run takes a run number as an argument and  
+#          then checks this run # against a list of runs that are already
+#          completed. It then checks the run # against a list of runs to be
+#          skipped.  The output of this script is the next  run that needs to be
+#          processed.
+
+#        Usage: nextRun run_number [-h]
+#                run_number              Run to be Processed. 
+#                +h                      Print this message.
+#                Uses environment variable $CLAS_DB
+
+require "ctime.pl";
+
+$dbdir = $ENV{"CLAS_DB"};
+
+foreach $arg (@ARGV) {
+    if ($arg =~ /^\+dbdir/){
+	$dbdir = pop(@ARGV);
+    } 
+    elsif ($arg =~ /^\+h/) {
+	&PrintUsage;
+	exit(0);
+    }
+}
+
+if ($ARGV[0] =~ /(\d+)/) {
+    $run = $ARGV[0];
+    shift;
+    $list = 0;
+    $run = &TestRun($list, $run);
+} else {
+    $list = 1;
+    if (-e "$dbdir/list" && -r "$dbdir/list") {
+	open(L,"$dbdir/list") || die "\n$0: Could not read $dbdir/list list.\n";
+	while (<L>) {
+	    if ($_ =~ /(\d+)/) {
+		chop;
+		$run = $_;
+		$run = &TestRun($list, $run);
+		if ($run != 0) {
+		    last;
+		} 
+	    } else {
+		$run = 0; 
+	    } 
+	}
+	close(L);
+    } else {
+      print "$0: No run selected by user and no list file found in the DB directory.\n";
+      print "\tEither run ProcessRun again with a run number as the first argument or\n";
+      print "\tcreate a list file in the database directory with one run number per\n\tline in the file.\n\n";
+      print " 0\n";
+    }
+}
+
+# This run needs to be processed     
+print "$run\n";
+ 
+sub TestRun {
+
+    local($list) = $_[0];
+    local($run) = $_[1];
+    
+    if (-e "$dbdir/done" && -r "$dbdir/done") {
+	open(D,"$dbdir/done") || die "\n$0: Could not read $dbdir/done list.\n";
+	while (<D>) {
+	    chop;
+	    $prun = $_;
+	    if ($run == $prun) {
+		if (!($list)) {
+		    print STDERR "Run $run has already been submitted\n";
+		    close(D);
+		    print STDERR "\nEither pick a new run or delete $run from $dbdir/done file.\n";
+		    return 0;
+		} else {
+		    print STDERR "Run $run has already been submitted\n";
+		    close(D);
+		    return 0;
+		}
+	    }
+	}
+	close(D);
+    }
+    
+    if (-e "$dbdir/skip" && -r "$dbdir/skip") {
+	open(D,"$dbdir/skip") || die "\n$0: Could not read $dbdir/skip list. \n";
+	while (<D>) {
+	    chop;
+	    $prun = $_;
+	    if ($run == $prun) {
+		if (!($list)) {
+		    print STDERR "Run $run should be skipped\n";
+		    close(D);
+		    print  STDERR "\nEither pick a new run or delete $run from $dbdir/skip file.\n";
+		    return 0;
+		} else { 
+		    print STDERR "Run $run should be skipped\n";
+		    close(D);
+		    return 0;
+		}
+	    }
+	}
+	close(D);
+    }
+    
+    return $run;
+    
+}
+
+
+
+sub PrintUsage {
+    print "\n\tUsage: $0 run_number [-h] +dbdir <db_dir>\n";
+    print "\t\trun_number \t\t\tRun number to be processed.\n";
+    print "\t\t-h \t\t\tPrint this message.\n";
+    print "\t\t Uses environment variable CLAS_DB\n\n";
+}
+
+
+

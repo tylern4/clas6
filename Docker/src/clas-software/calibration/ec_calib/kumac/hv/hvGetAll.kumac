@@ -1,0 +1,12 @@
+macro hvGetAll det var 
+
+  do sec = 1,6
+    exec hvGet [det] [sec] [var] 0
+  enddo
+  
+  vec/cre [det][var]([det]vecdim)
+  vec/cop [var] [det][var]
+  vec/write [det][var] kumac/hv/db/[det][var].vec
+  
+return    
+     

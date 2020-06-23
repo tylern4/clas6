@@ -1,0 +1,312 @@
+<html>
+<head>
+<title>Getting Started Using COBRA</title>
+<link rel=stylesheet type="text/css" href="style.css">
+</head>
+<body text="#000000" bgcolor="#ffffff">
+<table border=0 cellspacing="0" cellpadding="0" width="95%" bgcolor="ffffff">
+<tr><td width="10">&nbsp;</td>
+<td>
+<center>
+<h1>Getting Started Using COBRA</h1>
+</center>
+<hr>
+Below are tips on how to get started using the COBRA software. If you did not
+go through the installation process yourself, please first read the 
+<a class="blue" href="install.html#SetUp">Setting Up the Enviornment</a> 
+section from the installation page. The key point is that you need to define
+a COBRASYS enviornment variable the points to the top directory where COBRA is
+located.
+<p>
+This page is divided into the following sections,
+<p>
+<a class="blue" href="./start.html#Test" target="basefrm">Testing the Set Up</a>
+<p>
+<a class="blue" href="./start.html#Logon" target="basefrm">Making COBRA Available in ROOT From Anywhere</a>
+<p>
+<a class="blue" href="./start.html#Compile" target="basefrm">Compiling Against COBRA</a>
+<p>
+<a class="blue" href="./start.html#Skim" target="basefrm">Skimming CLAS Data Files to Produce Event Files</a>
+<p>
+<a class="blue" href="./start.html#Event" target="basefrm">Analyzing Event Files</a>
+<hr>
+<a name="Test"></a>
+<center><h2>Testing the Set Up</h2></center>
+<p>
+First, go the the cobra/test directory.
+<div class="command"><pre>
+[edwood@plan9]$ cd $COBRASYS/test
+</pre></div>
+
+Start ROOT and run the following macros,
+<p>
+<div class="command"><pre>
+[edwood@plan9 test]$ root
+Loading personal settings...
+root [0] .x test_ClasRuns.C
+________________________________________________________________________________
+This macro calls ClasRuns::Print(). This function prints ALL run period info
+known to COBRA. This is read in from the file ClasRunInfo.lst located
+in COBRASYS/clasruns. If no run info is printed, then the file either can't be
+located or can't be opened...if this is the case, make sure your COBRASYS
+enviornment variable is properly set. If a run you need is not on the list, you
+can add it by editing the ClasRunInfo.lst file. Simply add the info, then quit
+ROOT and restart it, then run this macro again...the new run info should appear.
+________________________________________________________________________________
+ClasRuns:
+[RunPeriod: g1c(20926-21359) E0: 3.115
+        I: 1920 Target: Material: 1 Cell: 3 Offset: 0]
+[RunPeriod: g1c(21427-21645) E0: 2.897
+        I: 1920 Target: Material: 1 Cell: 3 Offset: 0]
+[RunPeriod: g1c(21763-21983) E0: 2.445
+        I: 1920 Target: Material: 1 Cell: 3 Offset: 0]
+[RunPeriod: g11(43490-44107) E0: 4.023
+        I: 1920 Target: Material: 1 Cell: 7 Offset: -10]
+[RunPeriod: g11(44108-44133) E0: 5.015
+        I: 1920 Target: Material: 1 Cell: 7 Offset: -10]
+ 
+root [1] .x test_ParticleTypes.C
+________________________________________________________________________________
+This macro calls ParticleTypes::Print(). This function prints ALL particle
+info known to COBRA. This is read in from the file  ListOfParticles.lst located
+in COBRASYS/ptypes. If no particle info (other than the default +,-,0 paritlces)
+is output, then the file is not being found. If this happens, check the COBRASYS
+enviornment variable. If you need a particle which is not listed, you can add it
+by simply editing ListOfParticles.lst. Just add the info, quit ROOT and restart
+it, then run this macro again...the new info should appear.
+________________________________________________________________________________
+Particle Types:
+e+(1/2-) [lepton] mass: 0.000511 q:1 width: 0 Ids(pdg:-11,geant:2) LaTex (e^{+})
+e-(1/2+) [lepton] mass: 0.000511 q:-1 width: 0 Ids(pdg:11,geant:3) LaTex (e^{-})
+mu+(1/2-) [lepton] mass: 0.105658 q:1 width: 2.99592e-19 Ids(pdg:-13,geant:5) LaTex (\mu^{+})
+mu-(1/2+) [lepton] mass: 0.105658 q:-1 width: 2.99592e-19 Ids(pdg:13,geant:6) LaTex (\mu^{-})
+pi+(0-) [meson] mass: 0.13957 q:1 width: 2.52837e-17 Ids(pdg:211,geant:8) LaTex (\pi^{+})
+pi-(0-) [meson] mass: 0.13957 q:-1 width: 2.52837e-17 Ids(pdg:-211,geant:9) LaTex (\pi^{-})
+pi0(0-) [meson] mass: 0.13498 q:0 width: 7.8e-09 Ids(pdg:111,geant:7) LaTex (\pi^{0})
+k+(0-) [meson] mass: 0.493677 q:1 width: 5.31416e-17 Ids(pdg:321,geant:11) LaTex (K^{+})
+ks(0-) [meson] mass: 0.497672 q:0 width: 7.367e-15 Ids(pdg:310,geant:16) LaTex (K_{S})
+kl(0-) [meson] mass: 0.497672 q:0 width: 1.27e-17 Ids(pdg:130,geant:10) LaTex (K_{L})
+k-(0-) [meson] mass: 0.493677 q:-1 width: 5.31416e-17 Ids(pdg:-321,geant:12) LaTex (K^{-})
+p(1/2+) [baryon] mass: 0.93827 q:1 width: 0 Ids(pdg:2212,geant:14) LaTex (p)
+n(1/2+) [baryon] mass: 0.93957 q:0 width: 7.423e-28 Ids(pdg:2112,geant:13) LaTex (n)
+p-(1/2+) [baryon] mass: 0.93827 q:-1 width: 0 Ids(pdg:-2212,geant:15) LaTex (\bar{p})
++() [] mass: 0 q:1 width: 0 Ids(pdg:0,geant:0) LaTex (+)
+0() [] mass: 0 q:0 width: 0 Ids(pdg:0,geant:0) LaTex (0)
+-() [] mass: 0 q:-1 width: 0 Ids(pdg:0,geant:0) LaTex (-)
+ 
+ 
+root [2] .q
+</pre></div>
+<p>
+You should see all the information above. The macros themselves will tell you
+what you should see and what's wrong if you don't see it.  If you do see all
+of this info, then your build and your COBRASYS variables are probably ok. 
+I hope to have a more complete test program available soon.
+
+<hr>
+<a name="Logon"></a>
+<center><h2>Making COBRA Available in ROOT from Anywhere</h2></center>
+<p>
+To have ROOT automatically load the COBRA libs and utils anytime you logon to ROOT
+from anywhere, do the following. First, create a .rootrc file in your home directory
+and add the following line (just to remind you, edwood is your user name in all of
+these examples).
+
+<div class="command"><pre>
+Rint.Logon:  /home/edwood/rootlogon.C
+</pre></div>
+
+This will force ROOT to always load the rootlogon.C located in your home directory.
+Then, in this rootlogon.C file you'll want to load the file cobra_rootlogon.C file
+which is located in COBRA's top directory. You can also load anything else that 
+you want and set some plotting options here. Also, it's a good idea to tell your 
+global rootlogon script to check the local directory to see if there's a local
+rootlogon.C also. If there is, then execute it as well. Here's an example of how to
+do this.
+
+<div class="command"><pre>
+// ROOT logon script...will be run whenever I logon to ROOT from anywhere
+void rootlogon(){
+
+  // Load CLASdata lib (compressed CLAS ROOT files)...not needed for COBRA
+  // but a good example of how to load other libs. 
+  cout << "Loading CLASdata lib...";
+  string clasdata_lib = string(getenv("CLAS_DEVEL")) + "/slib/" 
+    + string(getenv("OS_NAME")) + "/libCLASdata.so";  
+  gSystem->Load(clasdata_lib.c_str());
+  cout << "done." << endl;
+
+  // Execute the COBRA ROOT logon (which also loads libPhysics.so)
+  string cobrasys = getenv("COBRASYS");
+  gROOT->Macro((cobrasys + "/cobra_rootlogon.C").c_str());
+
+  // Set some plotting preferences
+  cout << "Setting plotting options...";
+  gStyle->SetPalette(1,0);
+  gStyle->SetOptStat(0);
+  cout << "done." << endl;
+
+  // Look for local rootlogon.C
+  TSystemDirectory dir("/",".");
+  TList *files = dir.GetListOfFiles();
+  bool has_local_logon = false;
+  TString rootlogon("rootlogon.C");
+  if(files) {
+    TIter next(files);
+    TSystemFile *file;
+    while ((file=(TSystemFile*)next())) {
+      if(file->GetName() == rootlogon){
+	has_local_logon = true; // found one
+	break;
+      }
+    }
+  }
+  if(has_local_logon){
+    // local directory has a rootlogon.C...execute it
+    cout << "Executing local rootlogon.C..." << endl;
+    gROOT->Macro("./rootlogon.C");
+  }
+}
+</pre></div>
+
+The COBRA logon script loads all of the ROOT compatible COBRA libs and also loads any
+macro located in the utils directory (any file that ends with .C is loaded). It is 
+located in the COBRA top directory, below is the file cobra_rootlogon.C.
+
+<div class="command"><pre>
+// ROOT logon script to load COBRA when ROOT starts
+void cobra_rootlogon(){
+
+  cout << "Loading ROOT Physics lib...";
+  // To use classes such as TLorentzVector
+  string lib_list = gSystem->GetLibraries();
+  if(lib_list.find("Physics") == string::npos) // this means it wasn't in list
+    gSystem->Load("libPhysics");
+  cout << "done." << endl;
+
+  string cobrasys = getenv("COBRASYS");
+
+  cout << "Loading COBRA libs...";
+  
+  // Load the ROOT compatible libs
+  string cobra_lib = cobrasys + "/lib/";
+  gSystem->Load((cobra_lib + "libPTypes.so").c_str()); // for ParticleTypes
+  gSystem->Load((cobra_lib + "libPArray.so").c_str()); // for ParticleArray
+  gSystem->Load((cobra_lib + "libEvent.so").c_str()); // for Event
+  gSystem->Load((cobra_lib + "libClasRuns.so").c_str()); // for ClasRuns
+
+  cout << "done." << endl;
+
+  // Load cobra utility macros
+  string cur_dir = gSystem->pwd();
+  cout << "Loading COBRA utils...";
+  int err;
+  TSystemDirectory dir("/",(cobrasys + "/utils/").c_str());
+  TList *files = dir.GetListOfFiles();
+  string fileName;
+  string::size_type size;
+  if(files) {
+    TIter next(files);
+    TSystemFile *file;
+    while ((file=(TSystemFile*)next())) {
+      fileName = file->GetName();
+      size = fileName.size();
+      if(size >= 3 && fileName[size-1] == 'C' && fileName[size-2] == '.'){
+	// it ends with .C, load it
+	gROOT->LoadMacro((cobrasys + "/utils/" + fileName).c_str(),&err);
+      }
+    }
+  }
+  gSystem->cd(cur_dir.c_str());
+  cout << "done." << endl;
+}
+</pre></div>
+
+At this point, you should be able to use all of the ROOT compatible COBRA classes 
+and any COBRA ROOT utilities interactively in ROOT...no matter where you logon
+to ROOT from.
+
+<hr>
+<a name="Compile"></a>
+<center><h2>Compiling Against COBRA</h2></center>
+<p>
+The globals.mk file (which is generated by the configure script when COBRA is built) 
+defines all the libs,includes,flags,etc. you'll need. Thus, all you have to do is
+include this in your Makefile. Below is a simple example that will compile any 
+source file that ends with .cc or .cxx that includes COBRA software (Note: this 
+Makefile doesn't create the objects and bin directories if they don't exist, so just
+do that yourself when you're setting up the directory).
+
+<div class="command"><pre>
+#! gnumake
+include $(COBRASYS)/globals.mk # include the COBRA globals makefile
+
+clean:;
+	@rm -f objects/.o bin/*
+
+%: %.cxx $(COBRASYS)/lib/*.so
+	g++ $(ALL_FLAGS) -c -o objects/$*.o $*.cxx
+	g++ $(ALL_FLAGS) objects/$*.o $(ALL_LIBS) -o bin/$*
+
+%: %.cc $(COBRASYS)/lib/*.so
+	g++ $(ALL_FLAGS) -c -o objects/$*.o $*.cc
+	g++ $(ALL_FLAGS) objects/$*.o $(ALL_LIBS) -o bin/$*
+</pre></div>
+
+
+<hr>
+<a name="Skim"></a>
+<center><h2>Skimming CLAS Data Files to Produce Event Files</h2></center>
+<p>
+
+CLAS data files are interfaced with using the ClasEvent class. Usually this is 
+done by skimming the CLAS data file into an <em>Event File</em>. An Event file
+is a ROOT file with a tree (usually called <em>T</em>) with a branch (called 
+<em>event</em>) that stores an Event class object for each event that was
+skimmed (the tree can also have any other branches and the file could contain
+histograms, for example a flux histogram). 
+<p>
+The 2 interfaces currently provided are for compressed ROOT files, which store
+info in the CLASdata class, and the traditional BOS file format.  Once the 
+ClasEvent object is intialized for each event, then which interface is being 
+used irrelevant. In the cobra/tutorials directory, there is an example of
+producing the same Event file (skimming out omega meson events) from a 
+compressed root file (<a class="blue" href="SkimOmega_8cc-source.html">SkimOmega.cc</a>)
+and from a BOS file (<a class="blue" href="BosSkimOmega_8cc-source.html">BosSkimOmega.cc</a>).
+Switching channels is simple, simply replace the <em>"p:pi+:pi-"</em> string in
+the ClasEvent constructor call with whatever final state particles you want to
+detect. For example, for &gamma;p&rarr;pK<sup>+</sup>(&pi<sup>-</sup>) the string
+would be <em>"p:k+"</em> (the &pi<sup>-</sup> doesn't go in the string since it
+isn't required to be detected).
+<p>
+Once you've skimmed out an Event file, you can stop linking against the CLAS software.
+At this point you'll only need the COBRA includes and libEvent.so and libPArray.so,
+along with ROOT of course, to compile source code to analyze the events.
+
+<hr>
+<a name="Event"></a>
+<center><h2>Analyzing Event Files</h2></center>
+<p>
+Event files can be analyzed with ROOT macros or with compiled code. There are numerous examples
+in the <a class="blue" href="tutorial_files.html">Tutorials</a> section that should give
+you a good idea how to get information from these files.
+
+
+
+
+<hr>
+<br>
+<hr size="1"><address style="align: right;">
+&copy 2005 <a class="blue" href="http://www-meg.phys.cmu.edu/~williams/" target="_Top">Mike Williams</a>, Department of Physics, Carnegie Mellon University.
+<hr size="1">
+</center>
+
+<address>
+
+</ADDRESS>
+</td>
+<td width="10">&nbsp;</td></tr>
+</table>
+<br><br>
+</BODY>
+</html>

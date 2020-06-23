@@ -1,0 +1,21 @@
+#!/usr/local/bin/perl
+# run at packages level
+
+#build libs
+
+system("make -i lib");
+system("make -i lib DEBUG=1");
+
+#build exes
+
+system("make -C recsis exe");
+system("make -C recsis exe DEBUG=1");
+system("make -C user_ana exe");
+system("make -C user_ana exe DEBUG=1");
+system("make -C fdump exe");
+system("make -C fdump exe DEBUG=1");
+system("make -C utilities exe");
+system("make -C utilities exe DEBUG=1");
+
+
+

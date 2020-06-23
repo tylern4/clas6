@@ -1,0 +1,13 @@
+from build_system import environment
+from glob import glob
+
+aligndc_src = 'aligndc.c dcg_tools.c amoeba.c filltrack.c fmatrix.c nrutil.c'.split()
+mapdiff_src = 'mapdiff.c nrutil.c'.split()
+
+aligndc_deps = {'clas6': 'default_libs'.split()}
+
+aligndc_env = environment.env(deps=aligndc_deps.keys())
+aligndc_env.load_dependency(deps=aligndc_deps)
+
+aligndc_prog = aligndc_env.program(target='aligndc', source=aligndc_src)
+mapdiff_prog = aligndc_env.program(target='mapdiff', source=mapdiff_src)

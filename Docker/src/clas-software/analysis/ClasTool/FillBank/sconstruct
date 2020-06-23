@@ -1,0 +1,7 @@
+from build_system import environment
+
+FillBankEnv = environment.env(deps='clas6 root'.split())
+FillBankEnv.load_dependency('clas6 root'.split())
+
+FillBankLib = FillBankEnv.library('FillBank')
+FillBankEnv.return_from_sconstruct(FillBankLib)

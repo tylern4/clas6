@@ -1,0 +1,161 @@
+      SUBROUTINE DASPE_FIT
+c
+c
+      IMPLICIT NONE
+      SAVE
+c
+c_begin_inc
+c  include files :
+c  ---------------------
+#include "fit_par.inc"
+c_end_inc
+c
+c_begin_var
+c  input/output variables:
+c  -----------------------
+c
+c  Local pre-defined variables:
+c  ---------------------------
+c  RCS information: 
+      CHARACTER*132  CFILE, CREVIS, CSTATE, CDATE, CAUTHO, CRCSID
+      PARAMETER (CFILE = '$RCSfile: DASPE_main.F $')
+      PARAMETER (CREVIS = '$Revision: 1.1 $')
+      PARAMETER (CSTATE = '$State: Exp $')
+      PARAMETER (CDATE = '$Date: 1996/12/11 20:41:20 $')
+      PARAMETER (CAUTHO = '$Author: stepanya $')
+      DATA CRCSID/   
+     1'$Id: DASPE_main.F 1.1 1996/12/11 20:41:20 stepanya Exp $'   
+     2/   
+c  Module information:
+      CHARACTER*(*)  CRNAME, CRAUTH
+      CHARACTER*100  CRMESS
+      PARAMETER (CRNAME='DASPE_MAIN')
+      PARAMETER (CRAUTH='stepanya')
+c
+c  Local User defined variables:
+c  -----------------------------
+       INTEGER I,ERRORflag
+       double precision stv,stsz,dzero,ar_list(35),llim,ulim
+       data dzero/0.D00/
+       EXTERNAL DASPE_fmin
+       real fputil
+c_end_var
+c
+c  executable code for routine DASPE_MAIN:
+c----6----------------------------------------------------------------72
+c Initialize Minuit, Define I/O
+          CALL mninit(lmini,lmino,lminf)
+c     Define the title of the Job
+          CALL mnseti('Dispersion Analyses of Single pion Production')
+c     Define parameters, Set the initial values
+          fix_param=0.
+          DO i=1,parms
+             stv=start_value(i)
+             stsz=step_size(i)
+             llim=low_lim(i)
+             ulim=up_lim(i)
+             call mnparm(Plist(i),Pname(i),stv,stsz,llim,ulim,errorflag)
+             if(errorflag.ne.0)then
+                write(6,*)'Unable to define parameter  ',pname(i),
+     +               i,' Error',errorflag
+             endif
+          ENDDO
+          ar_list(1)=1.
+          CALL mnexcm(DASPE_fmin,'call ufc',ar_list,1,errorflag,fputil)
+          DO i=1,parms
+             ar_list(1)=i
+c             ar_list(2)=100
+             ar_list(2)=10
+             if(abs(par_stat(i)).eq.1)then
+                print *,'Scaning parameter ',i
+                call mnexcm(DASPE_fmin,'scan',ar_list,2,errorflag,fputil)
+             endif
+             if(par_stat(i).ge.1)then
+                fix_param=fix_param+1.
+                ar_list(1)=float(Plist(i))
+                CALL mnexcm(DASPE_fmin,'FIX',ar_list,1,errorflag)
+                if(errorflag.ne.0)then
+                   write(6,*)'Unable to Fix the parameter  ',pname(i),
+     +                  i,' Error',errorflag
+                endif
+             endif
+          ENDDO
+c   
+          print *,'Number of parameters = ',parms,
+     +'  Number of fixed parameters = ',fix_param
+          fputil=0.
+          ar_list(1)=1.
+          CALL mnexcm(DASPE_fmin,'set print',ar_list,1,errorflag,fputil)
+c     
+          ar_list(1)=errorup
+          CALL mnexcm(DASPE_fmin,'set errordef',ar_list,1,errorflag,fputil)
+c     
+          ar_list(1)=2.
+          CALL mnexcm(DASPE_fmin,'call ufc',ar_list,1,errorflag,fputil)
+c     
+          ar_list(1)=maxcalls
+          ar_list(2)=tolorance
+          write(6,*)'Starting fit', ar_list(1), ar_list(2)
+          CALL mnexcm(DASPE_fmin,'MIG',ar_list,2,fputil,errorflag)
+          write(6,*),'MIGRAD',errorflag
+          write(lmino,*)'MIGRAD',errorflag
+c     
+	if(errorflag.ne.0)then
+          ar_list(1)=tolorance
+          ar_list(2)=1
+          ar_list(3)=2
+          ar_list(4)=3
+          CALL mnexcm(DASPE_fmin,'MINOS',ar_list,1,errorflag,fputil)
+          write(6,*),'MINOS',errorflag
+          write(lmino,*),'MINOS',errorflag
+	endif
+C    
+        print *,'Sending STOP to MINUI '
+        CALL mnexcm(DASPE_fmin,'STOP',0,0,fputil,errorflag)
+       END
+c
+c------------------------------------------------------------------------------
+      Subroutine prterr
+c
+      Implicit none
+#include "fit_par.inc"
+      Double precision fmin,fedm,errdef,eplus,eminus,eparab,globcc,parv,parerr
+      Double precision bn1,bn2
+      Integer npari,nparx,istat,i,iv
+	REAL a(10),e(10)
+      CHARACTER*10 pnamei(35)
+c
+      call mnstat(fmin,fedm,errdef,npari,nparx,istat)
+      write(6,*)
+      write(6,*)fmin,fmin/ndf,fedm,errdef,npari,nparx,istat
+      write(6,*)
+      write(6,*)'Parameter error'
+        write(6,332)a(1),e(1),a(2),e(2),a(3),e(3),
+     +   a(4),e(4),a(5),e(5),a(6),e(6)	
+c
+      do i=1,parms
+         call mnpout(i,pnamei(i),parv,parerr,bn1,bn2,iv)
+         if(par_stat(i).le.0)then
+            call mnerrs(-i,eplus,eminus,eparab,globcc)
+	a(i)=parv
+	e(i)=parerr
+            write(6,*)i,'  ',pnamei(i),parv,parerr
+            write(f_out,*)i,'  ',pnamei(i),parv,parerr
+         else
+         endif
+      enddo
+        write(6,332)a(1),e(1),a(2),e(2),a(3),e(3),
+     +   a(4),e(4),a(5),e(5),a(6),e(6)	
+c
+332   format(12f8.3)
+      return
+      end
+
+
+
+
+
+
+
+
+

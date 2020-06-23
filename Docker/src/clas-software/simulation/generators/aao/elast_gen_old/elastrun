@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+workdir=/work/clas/disk5/$USER
+FRZN=$workdir/elast-1.6.rzn
+FOUT=$workdir/elast-1.6.out
+FBOS=$workdir/elast-1.6.bos
+rm $FRZN $FOUT $FBOS
+#
+export FRZN FOUT FBOS
+#
+$TOP_DIR/bin/$OSNAME/elast_gen < elast_gen-1.6.inp

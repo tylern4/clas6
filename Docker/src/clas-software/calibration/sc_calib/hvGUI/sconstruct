@@ -1,0 +1,18 @@
+from build_system import environment
+
+hvguiEnv = environment.env(deps=['clas6', 'mysql', 'root'])
+hvguiEnv.load_dependency(['clas6', 'mysql', 'root'])
+
+
+maputil_lib = hvguiEnv.sconstruct('MapUtils')
+
+hvgui_rootdict = hvguiEnv.ROOTDictionary(
+    target = 'MyDict.cc',
+    sources = 'MainWindow.h HistoWindow.h doHV.h'.split())
+
+hvguiEnv.PrependUnique(LIBS = ['MapUtils'])
+
+hvguiEnv.ignore_library_order()
+
+hvgui_prog = hvguiEnv.program(target='hvGUI',
+    source = 'MainWindow.cc MyDict.cc'.split())

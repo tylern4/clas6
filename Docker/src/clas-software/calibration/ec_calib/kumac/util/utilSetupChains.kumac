@@ -1,0 +1,39 @@
+macro ecSetupChains path=data tag='cr' pre=data
+
+* Author:	Cole Smith
+* Purpose: 	Finds ntuple files whose names have the format
+*               <string><tag><number>.rzdat and creates a chain
+*               called <prefix><number> that points to each file.
+* Parameters: 	path 	= path of directory containing *.rzdat files
+*             	tag  	= unique tag preceeding run number
+*             	prefix 	= prefix of chain name
+* Output:	vector <prefix>runs containing run numbers 
+
+  message ecSetupChains: Searching for runs in [path] with tag [tag]
+  global/cre prefix [pre]
+  vec/cre [prefix]runs(100) i
+  
+  command       = 'ls  '//[path]//'/*'//[tag]//'*.rz*'
+  a 		= $shell([command],' ')
+  numfiles 	= $words([a],' ')
+  taglen 	= $len([tag])
+  
+  do i = 1,[numfiles]
+    file	= $word([a],[i],1,' ')
+    n1		= $index([file],[tag])+[taglen]
+    n2		= $index([file],'.rz')
+    nch		= $eval([n2]-[n1])
+    run		= $substring([file],[n1],[nch])
+    vec/inp [prefix]runs([i]) [run]
+    chain [prefix][run] [file]
+    message ecSetupChains: Found run[run] in [path]
+  enddo
+  
+  vec/cre dummy(100) r
+  vec/copy [prefix]runs dummy
+  sigma dummyy=order(dummy,-dummy)
+  vec/cop dummyy [prefix]runs 
+  
+  message ecSetupChains: Assigned [numfiles] runs to chain prefix [prefix] 
+  
+return

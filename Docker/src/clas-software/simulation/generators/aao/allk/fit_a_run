@@ -1,0 +1,57 @@
+#!/bin/csh -f
+
+# Arguments
+# $1 decimal equiv. of bit pattern for fitted pion channel and observable
+# Bits 0-9: pi0,pi+,crs,alt',alt,asym,sigT,sig0,sigTT,sigTL
+# $2 beam energy
+# $3 wmin
+# $4 wmax
+# $5 q2min
+# $6 q2max
+# $7 subdirectory of fit results (fits/$7)
+# $8 starting parameter input file
+# $9-$12 input data files
+
+if(`filetest -e dum` != 0) then
+  rm dum
+endif
+
+echo junk.dat     >> dum
+echo 50           >> dum
+echo 0.1          >> dum
+echo 1.0          >> dum
+echo 37           >> dum
+echo $1           >> dum
+echo $2           >> dum
+echo $3,$4,0.01   >> dum
+echo $5,$6,0.5    >> dum
+echo -0.2,0.2,0.2 >> dum
+echo  0.0,360.0,0.0 >> dum
+echo par.out      >> dum
+echo 2            >> dum
+echo 200000.      >> dum
+echo $9		  >> dum
+echo $10	  >> dum
+echo $11          >> dum
+echo $12          >> dum
+
+mv dum slfit_inp.dat
+rm inp.dat ; ln -s inp_fit.dat inp.dat
+
+echo -2 0 $8 -q$5-$7.tbl | allk
+
+if(`filetest -e fits/$7` != 1) then
+  mkdir fits/$7
+endif
+
+cp slfit_inp.dat fits/$7
+mv *.vec         fits/$7
+mv fort*         fits/$7
+mv *$7.tbl       fits/$7
+
+rm inp.dat ; ln -s inp_hallk.dat inp.dat
+echo $5 0 par.out -qjunk.tbl  | allk
+
+mv allk*.tbl     fits/$7
+mv par.out       fits/$7
+

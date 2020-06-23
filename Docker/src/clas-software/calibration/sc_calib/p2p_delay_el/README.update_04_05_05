@@ -1,0 +1,42 @@
+Although there are a lot of changes to the files, the core of the
+ p2p_delay_el program is not affected. Most of the changes are to the
+ interface to be compatible with other calibration programs, with the
+ graphic surface of GAMECOCK, and with the more restrictive rules of
+ the g++ compiler version 3.2.2
+
+ 1) Arguments without leading minus sign are now considered to be filenames  
+    of cooked data files to be processed and used for calibration. Therefore   
+    it is not necessary any more to create a conf-file which contains the
+    names of the data files. Yet, conf-files can be used if the traditional
+    oriented user decides to do so  (use -c option as before in this case).
+
+ 2) The undocumented option show to plot the survey histograms at the end
+    needs now a preceding minus sign (-show) to be recognized as an option.
+    The shorthand notation -s is good as well.
+
+ 3) As in most unix programs the user now has the choice to have/not to have
+    a blank in between the option and the option parameter. E.g. both of the
+    following are OK
+       -c my.conf
+       -cmy.conf
+
+ 4) The compiler was confused by the homemade four-momentum vector class,
+    especially because the name of the header file happens to be vector.h.
+    I removed the homemade vector stuff and replaced it by the built in
+    TLorentzVector, which is more powerful in case someone wants to extend
+    the program.
+
+ 5) Minor bugs in the Makefiles (there is no such library like -ltcl_debug :-)
+    and the inconvenience that the executable in the $TOP_DIR/bin/$OS_NAME
+    directory didn't get updated since the last makeover -  have been
+    corrected.
+
+ 6) When called from GAMECOCK p2p_delay_el supports the progress bar by 
+    showing how many percent of the data have been processed.
+
+ 7) Gcc 3.2 and later versions are more restrictive in the syntax when using
+    the standard library which caused plenty of warning messages. This warning
+    messages are harmless but annoying if you want to find a real syntax
+    error...fixed. Additionally the user got a warning when calling
+    the fmod function with float parameters (ambiguity), which had been
+    resolved by creating a fmod_d inline function.

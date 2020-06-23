@@ -1,2 +1,0 @@
-#!/bin/csh -f
-./checkin.tcl >& checkin.log &

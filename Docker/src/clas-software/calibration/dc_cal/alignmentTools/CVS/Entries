@@ -1,0 +1,13 @@
+/Makefile/1.2/Fri Feb 17 05:01:45 2006//
+/alignTheDriftChambers.sh/1.1/Tue Dec 20 21:08:15 2005//
+/buildBatchJobFileForCooking.sh/1.1/Tue Dec 20 21:08:15 2005//
+/cleanUpAndPutTogetherAPass.sh/1.1/Tue Dec 20 21:08:15 2005//
+/getMeansOfResi.cc/1.2/Fri Feb 17 05:01:45 2006//
+/lookAtMeansAndWidths.C/1.1/Fri Feb 17 05:06:46 2006//
+/plotResiVsLayer.cc/1.1/Tue Dec 20 21:08:15 2005//
+/printDCAlignmentOffsets.sh/1.1/Tue Dec 20 21:08:15 2005//
+/putInDB.sh/1.1/Tue Dec 20 21:08:15 2005//
+/run_getMeansOfResi.sh/1.2/Fri Feb 17 05:01:45 2006//
+/run_plotResiVsLayer.sh/1.1/Tue Dec 20 21:08:15 2005//
+/splitUpYourBosFile.sh/1.2/Fri Feb 17 05:16:36 2006//
+D

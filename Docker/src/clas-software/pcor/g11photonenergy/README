@@ -1,0 +1,52 @@
+Photon Beam Energy corections were made using missing mass technique.
+The reaction gp--> pi+ pi- Proton serves as calibration reaction.
+
+ELOSS corrections were applied.
+
+1. First step.
+   The corection to the Elecgron Beam Energy were done run-by-run baiss.
+
+2. Second step.
+   E-id corrections were extracted using 50% of the g11 data.
+
+The input parameters are : Ebeam0 and run number.
+Ebeam0 is the photon energy just after the cooking.
+
+The output parameters are:
+
+EBEAM1 - photon energy after the first step. No E_id corection at this step.
+EBEAM2 - photon energy after run-by-run and e_id corrections. This is probably what your need.
+
+There is a possibility that due to the different momentum corrections that you are using the missing mass spectra will be out of the table one. In this case you have to apply just one corection factor for all energies.
+
+EBEAM3=EBEAM3*CONSTANT.
+
+This CONSTANT you have to determine from your data.
+
+Valery Kubarovsky
+
+
+
+      SUBROUTINE PHOTONENERGY(EBEAM0,RUN,EBEAM1,EBEAM2)
+C
+C-------------------------------------------------------------C
+C     Run-by-run  g11 photon beam energy corrections               
+C
+C     INPUT PARAMETERS:
+C
+C     EBEAM0 - photon energy after cooking
+C     RUN    - RUN number (integer)
+C
+C     OUTPUT PARAMETERS:
+C     EBEAM1 - photon energy after the first correction
+C              done run-by-run. No E-id based corrections applied
+C               You can use it in case you have your own E-id corrections
+C     EBEAN2 - photon energy after run-by-run corrections and E-id 
+C              corrections. It is the final photon energy after all
+C              corrections. This is probably you need.
+C
+C                                            Valery Kubarovsky
+C                                            February 25, 2005
+C----------------------------------------------------------------C
+C
+      IMPLICIT NONE

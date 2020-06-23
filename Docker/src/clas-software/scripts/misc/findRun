@@ -1,0 +1,26 @@
+#! /usr/local/bin/perl
+
+$mapdir = $ENV{'CLAS_PARMS'};
+@disks = ("/work/clas/disk1" , "/work/clas/disk2" , "/work/clas/disk3");
+
+
+foreach $run (@ARGV) {
+
+	$cmd = "get_map_char -m$mapdir/Maps/RUN_DATES.map -sdate -ivalue -l256 -t$run |";
+	open(C,$cmd) || die "Could not execute\n";
+                  $_ = <C>;
+	chop;
+	$subdir = $_;
+	foreach $disk (@disks) {
+		$cmd2 = "ls -1 $disk/$subdir |";
+		open(D,$cmd2) || die "Could not execute\n";
+		while (<D>) {
+			if (/.*$run.*/) {
+				print "$disk/$subdir/$_";
+			}
+
+		}
+
+	}
+	
+}

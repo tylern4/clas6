@@ -1,6 +1,0 @@
-#! gnumake
-include $(COBRASYS)/globals.mk # include the COBRA globals makefile
-
-install:
-	cp *.h $(CLAS_PACK)/inc_derived
-

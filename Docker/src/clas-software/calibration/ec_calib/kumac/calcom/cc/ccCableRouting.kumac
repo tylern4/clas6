@@ -1,0 +1,50 @@
+macro ccCableRouting
+************************************************************
+* ccCableRouting -- For any given channel in the CLAS      *
+* Cerenkov detector, list the various components of the    *
+* electronics associated with it.  For instance, sector 1, *
+* channel 1 is connected to the TDC in slot 10, channel 0. *
+* To be used as an aid in electronics debugging, to help   *
+* alleviate the fact that the numbering schemes for the    *
+* software and the hardware are different.                 *
+************************************************************
+* Makes use of the translation table stored in             *
+* $CLON_PARMS/ROC12.tab.  Using this name directly will    *
+* take into account any changes to the translation table   *
+* that come up in the future.  Initially, only set up to   *
+* look at the FASTBUS electronics; in a later version,     *
+* will perform the same function for the NIM, CAMAC, and   *
+* HV stuff as well.                                        *
+************************************************************
+message
+message ***** CERENKOV CABLE ROUTING *****
+message
+message
+message    Select a numbering scheme from the following:
+message    ---------------------------------------------
+message      1. Sofware  (sector 1-6, id 1-36)
+message      2. Hardware (sector 1-6, id 1-18, side LR)
+message
+read selection
+
+if ([selection] .eq. 1) then 
+  scheme='software'
+else
+  scheme='hardware'
+endif
+
+read sector Enter the sector number (1-6):
+if ([scheme] .eq. 'software') then
+  read channel Enter the channel (1-36):
+else
+  read hwchannel Enter the channel (1L, 1R, 2L,...18R):
+  chnum = $SUBSTRING([hwchannel],1,$LEN([hwchannel])-1)
+  chside = $SUBSTRING([hwchannel],-1)
+  if ([chside] .eq. 'R') then
+    channel = 2. * [chnum]
+  else
+    channel = 2. * [chnum] - 1
+  endif
+endif
+message sector = [sector]       channel = [channel]
+exitm

@@ -1,0 +1,708 @@
+It is strongly recommended to read "second coming of RECSIS" document.
+http://claspc2.cebaf.gov/~marki/recsis2/secondcoming/
+
+If you want to use the tagger package, you can put in your tcl script:
+
+( An alternative way is to chech out the tcl package and use the tag.tcl
+tcl swith file that is providede there. )
+
+IF you want to use only the tagger results:
+
+turnoff ALL
+
+Then in any cases:
+
+turnon tag
+set ltagger_do $true
+
+-If you want to have the user_ana histograms produced :
+
+set lusr0_do $true
+set lusr1_do $true
+set lusr0_h_do $true
+set lusr1_h_do $true
+set ltagger_h_do $true
+
+(if you don't : $false)
+
+- Tcl swithes that control the processing parameters:
+
+to change the Adjacent T time coincidence window :
+ set Tagger_TTwin <value>
+(default value is 10 ns)
+
+to change the  Adjacent E time coincidence window :
+ set Tagger_EEwin <value>
+(default value is 20 ns)
+
+to change the  E/ T time coincidence window       :
+ set Tagger_ETwin <value>
+(default value is 30 ns)
+
+to change the E TDC minimum accepted value       :
+ set Tagger_ETDCmin <value>
+(default value is 700)
+
+to change the E TDC maximum accepted value       :
+ set Tagger_ETDCmax <value>
+(default value is 1200)
+
+to change the T- DSD time coincidence window     :
+ set Tagger_DSDwin <value>
+(default value is 15 ns)
+
+to change the PS paddles time coincidence window :
+ set Tagger_PSOSwin <value>
+(default value is 30 ns)
+
+
+-If you don't want to analyse the data by only looking at the T counters
+hits (disregarding the E-counters) :
+
+set Tagger_NO_E 1
+
+(default value is 0 : we want to use the E counters in the analysis
+to make geometric matching and time coincidence )
+
+
+- If you want to dump on screen some of commons used for the tagger analysis:
+
+set Tagger_debug_begin <valuemin>
+
+set Tagger_debug_end <valuemax>
+
+<value min> and <value max> let you choose which commons you want to dump on the screen:
+those values are:
+-1 : Tcl controled Processing paramaters ( ADJ_T_COINC, ADJ_E_COINC, ET_window, E_TDC_MIN,
+                                          E_TDC_MAX, TAG_DSD_window, PS_COINC_WINDOW )
+ 0 : RAW T counters and E counters common
+ 1 : T & E counters after filtering common
+ 2 : T & E counters after geometric matching common
+ 3 : T & E counters after time matching common
+ 4 : T & E counters after binning common
+ 5 : T & E counters after RF correction common
+ 6 : TAGR common 
+
+
+defaults values are :
+
+      Tagger_debug_begin = 0
+      Tagger_debug_end = -1
+(nothing will be dumped)
+
+
+- If you want to dump on screen the scaler BOS banks:
+
+bdump RTSL jw
+bdump G1SL jw
+bdump G2SL jw
+bdump G3SL jw
+bdump G4SL jw
+
+- If you want to dump on screen the DSD commons :
+
+set Tagger_DSD_debug 1
+default value is 0 (nothing is dumped)
+
+- If you want to have the DSD analysed even
+when there is not TDC hit :
+
+set Tagger_PC_TDC 0 
+set Tagger_PS_TDC 0 
+set Tagger_TAC_TDC 0 
+
+default values are:
+
+ Tagger_PC_TDC = 1 
+ Tagger_PS_TDC = 1 
+ Tagger_TAC_TDC = 1
+
+which means a given device won't be analysed if there isn't
+any hit in its TDC(s) 
+
+- If you want to define how often the warning messages are
+printed to the screen
+
+ set Tagger_warning X
+
+every X warning, there will be a message on the screen,
+this is to avoid in some cases having the screen filled
+with warning messages which slows down the analysis.
+
+default value is 10.
+
+- If you want to dump any BOS Bank:
+
+bdump TAGT
+bdump TAGE
+bdump TAGR
+bdump TAGI
+bdump DSPC
+bdump DSPS
+bdump DSTC
+bdump PCO
+bdump PSO
+bdump TACO
+bdump CALL
+bdump RF
+
+-If you want to have some of the regular BOS banks generated from the raw BOS Banks:
+
+set Tagger_Raw_Format <value>
+
+<value> let you select which BOS bank you want to generate from the raw Bank. This value is passed as a parameter (pattern) to the routine tag_raw_2_BOS.
+Here follows part of the heading of this routine:
+
+	subroutine tag_raw_2_BOS(OK,pattern)
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: README,v 1.14 1999/05/27 18:06:41 anciant Exp $
+c
+c  Documentation for subroutine
+c
+c  Purpose:    Takes the Raw Banks RC11, RC12 & RC13 and convert them to 
+c  --------
+c		BOS bank format TAGT & TAGE & DSPC & DSPS & DSTC & CALL & ST0
+c		  This should be used only for 97 runs (now early run 98)
+c
+c  Input Parameters: pattern (integer) : bit pattern of data to be converted to BOS
+c  ----------------
+c
+c       1  : converts raw to TAGT
+c       2  : converts raw to TAGE
+c       4  : converts raw to DSD banks: DSPC (pair counter), DSTC (total absorption counter), DSPS (pair spectrometer)
+c       8  : converts raw to CALL (RF)
+c       16 : converts raw to ST0 (start counter)
+c
+c & any combinations :
+c   3 = TAGT & TAGE
+c   5 = TAGT & DSD                     
+c   9 = TAGT & CALL
+c  17= TAGT & ST0
+c   6 = TAGE & DSD
+c  10 = TAGE & CALL
+c  18 = TAGE & ST0
+c  12 = DSD & CALL
+c  20 = DSD & ST0
+c  24 = CALL & ST0
+c  7  = TAGT & TAGE & DSD
+c  etc..
+c
+
+
+Default value of this switch is 0 : eveything is taken from the regular
+ (as opposed to RAW) BOS banks.
+
+
+================================================
+PARAMETERS & constants files
+
+There are a lot of constants and parameters that are loaded at the beginning
+of the analysis, and at the beginning of a run.
+Those constants & parameters can be read from 3 different places:
+The Map Manager           (Map manager files)
+The $CLAS_PARMS directory (text file)
+Your local directory.     (text file)
+
+Let's review them:
+
+All constants and paramaters are read at the beginning of each run.
+
+1) Some parameters can only be found in the Map Manager, these are the Run Control parameters:
+
+Beam Energy
+Torus current
+Tagger current
+PS current
+T Translation table patch need.
+
+2) Some of them can be found in the Map Manager OR files, this is the case for:
+
+$CLAS_PARMS/Maps/TAG_CALIB.map
+
+which contains the following information :
+
+ T TDC slopes left & right
+ E TDC slope
+ Ci time alignment constants
+ T peak positions left and right
+ E peak positions
+ DSD pedestal, peak positions and TDC slopes
+ Need to use a T Translation table (0 = no, 1 = yes)
+ T Transalation table (only used if the previous parameter is non 0)
+
+> scan_map TAG_CALIB.map
+
+Map: TAG_CALIB.map
+        Subsystem: pc,  nitems: 3
+                Item: peak,     length: 1,      type: float,    narray:8
+                Item: ped,      length: 6,      type: float,    narray:8
+                Item: tdc_w,    length: 1,      type: float,    narray:8
+        Subsystem: ps,  nitems: 5
+                Item: Ethresh,  length: 1,      type: float,    narray:8
+                Item: peak,     length: 8,      type: float,    narray:8
+                Item: ped,      length: 8,      type: float,    narray:8
+                Item: tdc_w,    length: 8,      type: float,    narray:8
+                Item: walk,     length: 3,      type: float,    narray:8
+        Subsystem: tac, nitems: 4
+                Item: Escale,   length: 7,      type: float,    narray:8
+                Item: peak,     length: 1,      type: float,    narray:8
+                Item: ped,      length: 7,      type: float,    narray:8
+                Item: tdc_w,    length: 1,      type: float,    narray:8
+        Subsystem: tag2tof,     nitems: 1
+                Item: value,    length: 1,      type: float,    narray:11
+        Subsystem: tag_e,       nitems: 2
+                Item: dt,       length: 384,    type: float,    narray:8
+                Item: slope,    length: 1,      type: float,    narray:2
+        Subsystem: tag_t,       nitems: 7
+                Item: ci,       length: 121,    type: float,    narray:8
+                Item: do_translation,   length: 1,      type: int,      narray:3
+                Item: dt_left,  length: 61,     type: float,    narray:8
+                Item: dt_right, length: 61,     type: float,    narray:8
+                Item: slope_left,       length: 61,     type: float,    narray:6
+                Item: slope_right,      length: 61,     type: float,    narray:6
+                Item: transl_to_table,  length: 122,    type: int,      narray:3
+
+Those information can also be found in the following files:
+
+tagTDCCal.dat
+tagTDCCalE.dat
+tagCalCi.dat
+tagposTpeak.dat
+tagposEpeak.dat
+tagdsdcal.dat
+tagTTransTable.dat
+
+in your local directory
+
+3) Constants that are only in files (either in the $CLAS_PARMS directory or your local directory)
+
+this is case for three files:
+tagETcoinc_ALL.dat
+tagE-boundaries.dat
+tagT-boundaries.dat
+
+tagETcoinc_ALL.dat contains the geometrical matching map between E counters and T counters.
+tagE-boundaries.dat contains the energy bounds (in terms of fraction of the incident beam energy)
+ and mean energy of each E counters.
+tagT-boundaries.dat contains the energy bounds (in terms of fraction of the incident beam energy)
+  of each T counters.
+
+(for more informations about this file see Appendix A, in this file: Dan Sober notes on this files.)
+
+this map is energy dependant, so the beam energy as givens my the Run Controls parameters
+in the Map Manager is used to select the closest Energy Map in the file.
+
+> for the constants that can be put in local files, you cam choose to use 
+in prority the values in your local files by seting the tcl switch 
+ "Tagger_parms_input" to 1
+
+In that case, the programm will look first in your local files if it can finds the constants
+it's looking for, if some constants can not be found, it will search them in the Map Manager
+or the $CLAS_PARMS directory.
+
+If the Tagger_parms_input is set to 0 (default) it will only look in the Map Manager
+and $CLAS_PARMS directory, disregarding files that are eventually in your local directory 
+(Normal behaviour). If it cannot find the appropriate constants, the proram will terminate
+displaying a Fatal error message.
+
+
+If your are using the old "old_bounds" cvs tag release, the behaviour is slightly different,
+see Appendix B.
+
+=========================================================================================================
+|Appendix A, Dan Sober notes about new tagETcoinc.dat, tagE-boundaries.dat and tagT-boundaries.dat files|
+=========================================================================================================
+
+
+                Modifications Required in Tagger Package
+                      D. Sober     14 May 1999
+
+1.  INTRODUCTION
+
+The energy calibration of the tagger changes slowly as a function of E0,
+because the magnetic field at the full-energy orbit decreases relative to the
+field at the center of the pole as the magnet approaches saturation.
+The effect is small (always less than 3 fine channels of ~.001 E0) at energies 
+below 4.1 GeV, but increases rapidly at higher energies, as shown in Table 1.
+The effect is largest for low photon energies, where the energy of the
+detected  electron is a large fraction of E0.
+
+--------------------------------------------------------------------------------
+  Table 1.  Values of k/E0 vs. fine channel for 5 different energies
+            (channel upper limit with no angular smearing).
+            
+   E0 =    0.90 GeV     2.39 GeV        4.14 GeV        5.56 GeV        6.12 GeV
+E channel  
+ 100       .85978       .86042          .86058          .86035          .85966
+ 200       .76309       .76357          .76361          .76204          .76047
+ 300       .66681       .66682          .66664          .66356          .66121
+ 400       .57056       .56990          .56941          .56484          .56177
+ 500       .47424       .47285          .47209          .46616          ,46244
+ 600       .37701       .37523          .37427          .36722          .36312
+ 700       .27888       .27710          .27608          .26841          .26404
+--------------------------------------------------------------------------------
+
+
+2.  CURRENT STATUS AS OF (14 MAY 1999)
+
+The tagger package makes use of 3 tables of quantities which are calculated from
+the tagger field maps and detector positions.  These are currently stored in
+3 files in the $CLAS_PARMS area:
+
+ tagE-boundaries.dat       Contains upper and lower bounds in k/E0 for
+                            each E-channel (1-767; odd=single, even=overlap)
+ tagT-boundaries.dat       Contains upper and lower bounds in k/E0 for
+                            eacg T-counter (1-61)
+ tagETcoinc.dat            Contains first and last T-counter (1-61) associated
+                            with each E-counter (1-384)
+
+The calculations used in creating these files consist of the following steps:
+(1) For each of the 10 field maps, calculate a file of trajectories by 
+    ray-tracing using the code SNAKE (actually my modification of an old
+    version of SNAKE.)  The present version of the trajectory file consists
+    of 235 rays (47 energies times 5 angles per energy).  I have tested the
+    energy steps and confirmed that interpolation between these energies
+    leads to energy errors less than 5E-5, or 0.05 fine channel.
+(2) Using the 235-ray files, run my tagger Monte Carlo code in two separate
+    modes:
+    (a) uniform energy steps (< 1.E-6 E0), no bremsstrahlung angle, no
+        multiple scattering -- to determine energy boundaries of counters
+        and channels.
+    (b) Monte Carlo energy distribution (as 1/k), bremsstrahlung and
+        multiple-scattering angular distributions enabled -- to determine
+        correlations between counters.
+
+The files tagE-boundaries.dat and tagT-boundaries.dat which are currently 
+in $CLAS_PARMS were calculated for an incident energy of 2.98 GeV.  The version
+of tagETcoinc.dat currently in $CLAS_PARMS was calculated for E0 = 4.144 GeV,
+and thus is unnecessarily restrictive for lower-energy running.
+
+The subroutines which read these files in recsis are found in $CLAS_PACK/tag:
+    tagcal_read_file.F     reads tagT-boundaries.dat and tagE-boundaries.dat 
+    tag_init.F             reads tagETcoinc.dat
+
+The read statements and formats are:
+    (tagT-boundaries.dat)
+     read (Ilun,6) dummy_int,Tboundary(2*i+1),dummy_real,Tboundary(2*i-2)
+     6   format (i10,f10.5,f10.5,f10.5)
+
+        The code loops through T-counter number i from 1 to 61, reads
+        the max. and min. energy for T-counter i.  Tboundary(j=122) is the
+        max. energy for T-channel j.
+                
+    (tagE-boundaries.dat)
+     read(Ilun,7) dummy_int,dummy_int,dummy_int,dummy_int,dummy_int,
+       dummy_real,Eaverage(i),Edeviation(i),Eboundary(i+1),dummy_real
+     7   format (i5,i6,i6,i6,i6,f9.1,f8.6,f8.6,f8.6,f8.6)
+
+        Loops through E-channel number i from 1 to 767. and reads Eboundary,
+        which is the lowest energy for channel i and therefore the max. energy
+        for channel i+1.  Eaverage and Edeviation are the average energy
+        and RMS deviation of the channel; Edeviation is not realistic, because
+        there is no angular smearing in the calculation of this file.
+
+     (tagETcoinc.dat)
+      read(Ilun,1) dummy_int,tmin(i),tmax(i)
+      tbinmin(tag_bin(i,1)) = tag_bin(tmin(i),1)
+      if (i.lt.384) tbinmin(tag_bin(i,2)) = tag_bin(tmin(i),1)
+      1   format(i4,i3,i3)
+
+        Loops through E-counter number i from 1 to 384, and reads tmin(i)
+        and tmax(i), thefirst and last T-counter (1-61) associated with 
+        that E-counter.  tmin and tmax are used in matching;  tbminmin
+        appears not to be used anywhere.
+
+
+3.  NEW DATA FILES
+
+I have produced new versions of the 3 required data files, whose names are
+now
+         tagE-boundaries.nnnn
+         tagT-boundaries.nnnn
+         tagETcoinc.nnnn
+where "nnnn" is a 4-digit number giving E0 in MeV for each of the 10 field
+map energies:
+    tagE-boundaries.0449  tagE-boundaries.2980  tagE-boundaries.5867
+    tagE-boundaries.0899  tagE-boundaries.4144  tagE-boundaries.6120
+    tagE-boundaries.1795  tagE-boundaries.5188
+    tagE-boundaries.2388  tagE-boundaries.5563
+    tagT-boundaries.0449  tagT-boundaries.2980  tagT-boundaries.5867    
+    tagT-boundaries.0899  tagT-boundaries.4144  tagT-boundaries.6120
+    tagT-boundaries.1795  tagT-boundaries.5188
+    tagT-boundaries.2388  tagT-boundaries.5563
+    tagETcoinc.0449  tagETcoinc.2388  tagETcoinc.5188  tagETcoinc.6120
+    tagETcoinc.0899  tagETcoinc.2980  tagETcoinc.5563
+    tagETcoinc.1795  tagETcoinc.4144  tagETcoinc.5867
+These files currently reside at JLab in /home/sober/tag_pack.
+
+The structure of the new files is NOT identical to that of the old ones.
+I have eliminated some clearly useless data, added some potentially useful
+quantities, and added some header lines (always beginning with # in column 1)
+which will be useful for controlling future updates.
+
+Joe Manak has suggested that these files be placed in the map, and that
+we load the files closest in energy to the run being analyzed.  I do not
+know how to implement this, and leave it to the experts.  An alternate scheme,
+which I have previously suggested, would be to concatenate the 10 files
+in order of increasing E0, and have tagcal_read_file and tag_init search through
+the files and select the closest energy.  (The energy is encoded in the first
+comment line of each file, and can be found by simple code beginning
+with "j=index(line,'E0')".)
+
+I suggest that the old files (ending with ".dat") be left in $CLAS_PARMS,
+and that old code be permitted to use them until the new procedure is
+thoroughly debugged.
+
+The data format of the new files, and my suggestions for reading them,
+follow below.
+
+tagT-boundaries.nnnn:
+
+   #     Tctr      kmin kminfirst      kmax   ! Last of 6 comment lines
+            1   0.94476   0.95347   0.95347   ! format(i10,3f10.5)
+            2   0.93500   0.94476   0.94570
+          ...
+          
+          (kminfirst is the minimum k for which this T counter is the first
+          one hit.)
+
+      do i=1,61
+ 1000  read(Ilun,'(a)') line                ! read 80-character line
+       if(index(line,'#').ne.0) go to 1000  ! skip lines with '#'       
+       read (line,'(i10,3f10.5)')) itest,Tboundary(2*i+1),dummy_real,
+     1  Tboundary(2*i-2)
+       if(itest.ne.i) go to 5000            ! test for data corruption
+      end do
+
+
+tagE-boundaries.nnnn:
+
+   # Echan    kmin      kmax      kavg     ksdev   ! Last of 6 comment lines
+       1   0.95169   0.95322   0.95246   0.04434   ! format(i5,4f10.5)
+       2   0.95097   0.95169   0.95133   0.02080
+       ...
+
+      do i=1,767         
+ 1000   read(iunit,'(a)') line               ! read 80-character line
+        if(index(line,'#').ne.0) go to 1000  ! skip lines with '#'
+        read(line,'(i5,4f10.5)') itest,Eboundary(i+1),dummy,Eaverage(i),
+     1   Edeviation(i)
+        if(itest.ne.i) go to 5000            ! test for data corruption
+      end do
+
+
+tagETcoinc.nnnn:
+   # Ectr Tmin Tmax T1min T1max TCHANmin TCHANmax  ! Last of 6 comment lines
+       1    1    1    1    1    1    1             ! format(7i5)
+       2    1    1    1    1    1    1
+     ...
+
+      (T1min and T1max are the first and last T's for which that T is the
+      first one in coincidence with the E.  TCHANmin and TCHANmax refer to
+      the T-channels 1-121.)
+
+      do i=1,384
+ 1000  read(Ilun,'(a)') line                  ! read 80-character line
+       if(index(line,'#').ne.0) go to 1000    ! skip lines with '#'
+       read(line,'(7i5)') itest,tmin(i),tmax(i)
+       if(itest.ne.i) go to 5000              ! test for data corruption
+       tbinmin(tag_bin(i,1)) = tag_bin(tmin(i),1)
+       if(i.lt.384) tbinmin(tag_bin(i,2)) = tag_bin(tmin(i),1)
+      end do
+
+
+
+
+
+------------------------------------------------------------------------
+APPENDIX A - Current code to read data files
+
+Existing code in tagcal_read_file.F
+
+16      if (tagTboundsMM.eq.0) then
+6         format (i10,f10.5,f10.5,f10.5)
+C Reserve A Logical Unit Number:
+          Call Reslun(Crname,Ilun,Iretb)
+          call revinm('CLAS_PARMS','tagT-boundaries.dat',fname)          
+          open (unit=Ilun,status='old',err=106,file=fname)
+          CRMESS='Reading energy T boundaries from file '//fname
+          CALL RECMES(CRNAME,'I',CRMESS)
+          read (Ilun,6) dummy_int,Tboundary(3),dummy_real,Tboundary(1)
+          do i=2,60
+            read (Ilun,6) dummy_int,Tboundary(2*i+1),dummy_real,Tboundary(2*i-2)
+          enddo
+          read (Ilun,6) dummy_int,Tboundary(122),dummy_real,Tboundary(120)
+          Call ResLun(crname,-Ilun,Iretb)
+          tagTboundsMM = 1
+        endif
+        
+17      if (tagEboundsMM.eq.0) then
+7         format (i5,i6,i6,i6,i6,f9.1,f8.6,f8.6,f8.6,f8.6)
+C Reserve A Logical Unit Number:
+          Call Reslun(Crname,Ilun,Iretb)
+          call revinm('CLAS_PARMS','tagE-boundaries.dat',fname)          
+          open (unit=Ilun,status='old',err=107,file=fname)
+          CRMESS='Reading energy E boundaries from file '//fname
+          CALL RECMES(CRNAME,'I',CRMESS)
+          read(Ilun,7) dummy_int,dummy_int,dummy_int,dummy_int,dummy_int,
+     +          dummy_real,Eaverage(1),Edeviation(1),Eboundary(2),Eboundary(1)
+          do i=2,767
+            read(Ilun,7) dummy_int,dummy_int,dummy_int,dummy_int,dummy_int,
+     +          dummy_real,Eaverage(i),Edeviation(i),Eboundary(i+1),dummy_real
+          enddo
+          Call ResLun(crname,-Ilun,Iretb)
+          tagEboundsMM = 1
+        endif
+
+
+Existing code in tag_init.F:
+
+c ---- first try to open the local file :
+        open(Ilun,status='old',err=101,file='tagETcoinc.dat')
+        CRMESS='Reading E-T geometric matching in local file tagETcoinc.dat'
+        goto 103
+
+101     call revinm('CLAS_PARMS','tagETcoinc.dat',fname)
+        CRMESS='Reading E-T geometric matching in file '//fname
+        open(Ilun,status='old',err=102,file=fname)
+        goto 103
+
+102     CRMESS=' E-T geometric matching file tagETcoinc.dat not present in 
+     1   CLAS_PARMS !!! Coincidence Map is corrupted !!!'
+        CALL RECMES(CRNAME,'F',CRMESS)
+        ok = .false.
+        goto 30
+
+103     CALL RECMES(CRNAME,'I',CRMESS)
+        do i=1,384
+          read(Ilun,1) dummy_int,tmin(i),tmax(i)
+          tbinmin(tag_bin(i,1)) = tag_bin(tmin(i),1)
+          if (i.lt.384) tbinmin(tag_bin(i,2)) = tag_bin(tmin(i),1)
+        enddo
+        close(Ilun)
+ 1      format(i4,i3,i3)
+
+
+
+
+
+
+==============================================================================
+|Appendix B: "old_bounds" cvs tag release parameters and constants managment.|
+==============================================================================
+
+---
+One file is read at the beginning of the Analysis and contain "almost RUN INDEPENDANT" parameters:
+
+tagETcoinc.dat  (E_T geometric matching file)
+
+The program searches for those files FIRST IN YOUR LOCAL DIRECTORY !!!,
+if it can't find them there, it will go and take them from $CLAS_PARMS
+
+So, if for example you want to change the processing parameters of your analysis,
+just copy the file tagparam.dat from the $CLAS_PARMS directory to your directory
+and modify it there. 
+
+---
+The other files are read at the beginning of each run:
+
+- The other files are calibrations files:
+They can be found in three places:
+
+1) In the tagger map manager file:
+$CLAS_PARMS/Maps/TAG_CALIB.map
+
+which contains the following information (so far):
+
+ T TDC slopes left & right
+ E TDC slope
+ Ci time alignment constants
+ T peak positions left and right
++
+ E peak positions
+ DSD pedestal, peak positions and TDC slopes
+ Need to use a T Translation table (0 = no, 1 = yes)
+ T Transalation table (only used if the previous parameter is non 0)
+
+> scan_map TAG_CALIB.map
+
+Map: TAG_CALIB.map
+        Subsystem: pc,  nitems: 3
+                Item: peak,     length: 1,      type: float,    narray:8
+                Item: ped,      length: 6,      type: float,    narray:8
+                Item: tdc_w,    length: 1,      type: float,    narray:8
+        Subsystem: ps,  nitems: 5
+                Item: Ethresh,  length: 1,      type: float,    narray:8
+                Item: peak,     length: 8,      type: float,    narray:8
+                Item: ped,      length: 8,      type: float,    narray:8
+                Item: tdc_w,    length: 8,      type: float,    narray:8
+                Item: walk,     length: 3,      type: float,    narray:8
+        Subsystem: tac, nitems: 4
+                Item: Escale,   length: 7,      type: float,    narray:8
+                Item: peak,     length: 1,      type: float,    narray:8
+                Item: ped,      length: 7,      type: float,    narray:8
+                Item: tdc_w,    length: 1,      type: float,    narray:8
+        Subsystem: tag2tof,     nitems: 1
+                Item: value,    length: 1,      type: float,    narray:11
+        Subsystem: tag_e,       nitems: 2
+                Item: dt,       length: 384,    type: float,    narray:8
+                Item: slope,    length: 1,      type: float,    narray:2
+        Subsystem: tag_t,       nitems: 7
+                Item: ci,       length: 121,    type: float,    narray:8
+                Item: do_translation,   length: 1,      type: int,      narray:3
+                Item: dt_left,  length: 61,     type: float,    narray:8
+                Item: dt_right, length: 61,     type: float,    narray:8
+                Item: slope_left,       length: 61,     type: float,    narray:6
+                Item: slope_right,      length: 61,     type: float,    narray:6
+                Item: transl_to_table,  length: 122,    type: int,      narray:3
+
+Those information can also be found in the following files:
+
+tagTDCCal.dat
+tagTDCCalE.dat
+tagCalCi.dat
+tagposTpeak.dat
+tagposEpeak.dat
+tagdsdcal.dat
+tagTTransTable.dat
+
+in your local directory or in the CLAS_PARMS directory
+
+You can generate those text files for a given run, from
+the map manager using the tag_get_map utility
+you can find in the tag/Kumac directory (see the README in this directory
+for more information.)
+
+
+YOU CAN CHOOSE TO HAVE THE PROGRAM READING THOSE CALIBRATION CONSTANTS
+EITHER FROM THE MAP MANAGER OR IN YOUR LOCAL DIRECTORY BY USING THE TCL VARIABLE:
+
+Tagger_parms_input
+
+Tagger_parms_input = 1 means LOOK IN YOUR LOCAL DIRECTORY FIRST
+if it doesn't find the file, then look in the Map manager file,
+if it doesn't find it there neither, look in the CLAS_PARMS directory for a DUMMY file.
+
+(this third step should actually be removed, if the program don't find the parameters
+nor in the map manager nor in local files, it should stop processing with an ERROR
+- this is on my list of things to do)
+
+
+Tagger_parms_input = 0 (DEFAULT) means LOOK IN THE MAP MANAGER FIRST
+if it doesn't find the file, then look in your local files,
+if it doesn't find there neither, look in the CLAS_PARMS directory for a DUMMY file.
+
+(this third step should actually be removed, if the program don't find the parameters
+nor in the map manager nor in local files, it should stop processing with an ERROR
+- this is on my list of things to do)
+
+tagE-boundaries.dat that gives the energy boundaries of E-counters, and Energy delta's.
+Those values scale to the first order with the energy of the beam,
+some the same file is used for all energy, 
+but might change slightly with Beam Energy or after fine calibration studies,
+however, it hasn't been implemented yet in the map manager, 
+so this file is read from the $CLAS_PARMS directory
+unless you have it in your local directory, in this case it would read your file.
+

@@ -1,7 +1,0 @@
-macro gsimDrawPart npart opt size
-
-  do i = 1,[npart]
-    dpart [i] [opt] [size]
-  enddo
-  
-return

@@ -1,0 +1,225 @@
+#!/usr/bin/perl
+
+# parse the command line
+use Getopt::Long;
+$help = "";
+$f2c = "";
+$optim = "";
+$warn = "";
+$debug = "";
+@interfaces = ();
+@builds = ();
+
+GetOptions ('help' => \$help, 'f2c=s' => \$f2c, 'opt=s' => \$optim, 'warn=s' => \$warn, 'debug' => \$debug,'interface=s' => \@interfaces,'build=s' => \@builds);
+
+if($help ne ""){
+    # check if help is needed
+    &printopts;
+    exit(0);
+}
+
+print "Conifiguring COBRA ... \n";
+print "Writing options to globals.mk ... \n";
+
+# open the output file
+open(outFile,">globals.mk");
+
+# write to it non-configuration dependend stuff
+print outFile "\#\! gnumake \n";
+print outFile "\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\n";
+print outFile "\#\n";
+print outFile "\# This Makefile contains a list of all global variables used by the various \n";
+print outFile "\# other Makefiles in this package. \n";
+print outFile "\#\n";
+print outFile "\# Note: This file is generated automatically by configure. \n";
+print outFile "\#\n";
+print outFile "\# Note: Make sure COBRASYS enviornment variable is properly set \n";
+print outFile "\#\n";
+print outFile "\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\n";
+print outFile "\#\n";
+print outFile "\# ROOT flags and libs \n";
+print outFile "\#\n";
+print outFile "ROOT_FLAGS	= \$(shell \$(ROOTSYS)/bin/root-config --cflags)\n";
+print outFile "ROOT_LIBS	= \$(shell \$(ROOTSYS)/bin/root-config --libs) \n";
+print outFile "\#\n";
+print outFile "\# CLAS includes and libs \n";
+print outFile "\#\n";
+print outFile "CLAS_FLAGS      = \$(shell \$(COBRASYS)/bin/clas-config --cflags) \n";
+print outFile "CLAS_LIBS       = \$(shell \$(COBRASYS)/bin/clas-config --libs) \n";
+print outFile "CLAS_LIBS_MIN   = \$(shell \$(COBRASYS)/bin/clas-config --libs_min) \n";
+print outFile "CLAS_SLIBS      = \$(shell \$(COBRASYS)/bin/clas-config --slibs) \n";
+print outFile "\#\n";
+print outFile "\# COBRA includes and libs \n";
+print outFile "\#\n";
+print outFile "COBRA_FLAGS     = \$(shell \$(COBRASYS)/bin/cobra-config --cflags) \n";
+print outFile "COBRA_LIBS      = \$(shell \$(COBRASYS)/bin/cobra-config --libs) \n";
+print outFile "\#\n";
+print outFile "\# FORTRAN to C lib (default is g2c, -f2c option in configure) \n";
+print outFile "\#\n";
+# print fortran to c library name
+if($f2c ne ""){
+    print outFile "F2C_LIB = -l$f2c \n";
+    print "FORTRAN to C library name is $f2c... \n";
+}
+else{
+    print outFile "F2C_LIB = -lg2c \n";
+    print "FORTRAN to C library name is g2c... \n";
+}
+print outFile "\#\n";
+print outFile "\# CERN libs \n";
+print outFile "\#\n";
+print outFile "CERN_LIBS = -L\$(CERN_ROOT)/lib -lpacklib -lnsl \n";
+# get optimization level
+$optLevel = "2";
+if($optim ne ""){
+    $optLevel = $optim;
+}
+print "Setting optimization level to $optLevel... \n";
+$cxx_flags = "-O$optLevel";
+# get warning option
+$optWarning = "all";
+if($warn ne ""){
+    $optWarning = $warn;
+}
+print "Setting warning level to $optWarning... \n";
+$cxx_flags = "$cxx_flags -W$optWarning";
+# get debug option
+if($debug ne ""){
+    print "Debuggin is turned ON... \n";
+    $cxx_flags = "$cxx_flags -D__DEBUG__";
+}
+else{
+    print "Debugging is turned OFF... \n";
+}
+$cxx_flags = "$cxx_flags -fPIC";
+print outFile "\#\n";
+print outFile "\# Compiler Flags \n";
+print outFile "\#\n";
+print outFile "CXX_FLAGS       = $cxx_flags \n";
+print outFile "\#\n";
+print outFile "\# General pattern to build objects from source files \n";
+print outFile "\#\n";
+print outFile "objects/\%.o: \%.C \$(DEPENDS)\n";
+print outFile "\tg++ \$(FLAGS) \$(INCLUDE) -c -o objects/\$\*.o \$\*.C \n";
+# check for build options
+print outFile "\#\n";
+print outFile "\# ClasEvent Interfaces defined (--interface option in configure)) \n";
+print outFile "\#\n";
+$num_interfaces = @interfaces;
+if($num_interfaces == 0){
+    # warn 'em they can't interface with anything
+    print "*******************************************************************************\n";
+    print "WARNING!!! No interface has been specified...you will NOT be able to \nuse ClasEvent on BOS or compressed ROOT files, etc... \n";
+    print "To specifiy an interface, use the --interface option (or --help for more info). \n";
+    print "*******************************************************************************\n";
+}
+else{
+    if(@interfaces[0] eq "all"){
+	$inters[0] = "Bos";
+	$inters[1] = "CLASdata";
+	$num_interfaces = 2;
+    }
+    else{
+	@inters = @interfaces;
+    }
+    for($loop = 0; $loop < $num_interfaces; $loop++){
+	print "Adding @inters[$loop] to interface builds... \n";
+	$temp_flag = "Build_@inters[$loop]_Interface";
+	print outFile "$temp_flag = 1 \n";
+    }
+}
+print outFile "\#\n";
+print outFile "\# Packages to build in (--build option in configure) \n";
+print outFile "\#\n";
+$num_builds = @builds;
+$builds_flags = "";
+$builds_libs = "";
+if($num_builds > 0){
+    for($loop = 0; $loop < $num_builds; $loop++){
+	print "Adding @builds[$loop] to packages to build in... \n";
+	$temp_flag = "Build_@builds[$loop]";
+	print outFile "$temp_flag = 1 \n";
+	$builds_flags = "$builds_flags -D_compile_@builds[$loop]";
+	$builds_libs  = "$builds_libs -l@builds[$loop]";
+    }
+}
+print outFile "\#\n";
+print outFile "\# Preproccessor flags for builds (along with libs) \n";
+print outFile "\#\n";
+print outFile "BUILD_FLAGS     = $builds_flags \n";
+print outFile "BUILD_LIBS      = $builds_libs \n";
+
+# Set up total LIBS and FLAGS
+print outFile "\#\n";
+print outFile "\# Overall LIBS and FLAGS \n";
+print outFile "\#\n";
+print outFile "ALL_FLAGS = \$(CXX_FLAGS) \$(BUILD_FLAGS) \$(CLAS_FLAGS) \$(COBRA_FLAGS) \$(ROOT_FLAGS) \n";
+$libs = "\$(BUILD_LIBS) \$(CERN_LIBS) \$(F2C_LIB) \$(ROOT_LIBS)";
+$libs_min = 1;
+$slibs = 0;
+for($i = 0; $i < $num_interfaces; $i++){
+    if(@inters[$i] eq "Bos"){
+	$libs_min = 0;
+    }
+    if(@inters[$i] eq "CLASdata"){
+	$slibs = 1;
+    }
+}
+if($libs_min){
+    $libs = "\$(CLAS_LIBS_MIN) $libs";
+}
+else{
+    $libs = "\$(CLAS_LIBS) $libs";
+}
+if($slibs){
+    $libs = "\$(CLAS_SLIBS) $libs";
+}
+$libs = "\$(COBRA_LIBS) $libs";
+print outFile "ALL_LIBS  =  $libs \n";
+
+close(outFile);
+
+print "Configuration complete. \n";
+
+###############################################################################
+#                         Subroutine Printopts                                #
+###############################################################################
+sub printopts{
+    print "Usage: $0 [--options]
+
+     --interface <inter> Build data interface \'inter\'. This is a build option
+                         to specify which CLAS data interfaces should be built 
+                         into ClasEvent.
+                         
+                         Options: Bos ==> For BOS file interface
+                                  CLASdata ==> Compressed ROOT file interface
+                                  all ==> Build all interfaces
+
+     --build <package>   Build \'package\' into COBRA. This tells COBRA which
+                         CLAS packages to build in when it's compiled. 
+                         Note: Make sure your CLAS_PACK or CLAS_DEVEL has these
+                               pacakages.
+
+                         Options: Pcor ==> g11/g1c momentum corrections
+                                  g11pcor ==> New g11a momentum corrections 
+                                  g10pcor ==> New g11a momentum corrections 
+                                  g1c2445pcor ==> New g1c2445 momentum corrections 
+                                  g6cpcor ==> New g6c momentum corrections 
+
+     --warn <level>      Set warning level (default is all). This adds -Wlevel
+                         to the compiler flags.
+
+     --opt <level>       Set optimization level (default is 2). Adds -Olevel to
+                         the compiler flags.
+
+     --debug             Turn debugging ON (default is OFF)
+
+     --f2c <lib>         FORTRAN to C conversion library (default is g2c)
+
+     --help              Print this message
+
+
+Example Usage:
+[destro\@cobracmd]\$ ./configure --interface all --build g11pcor 
+ \n";
+}

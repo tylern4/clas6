@@ -1,5 +1,0 @@
-macro movetar x y z
-
-  spos upst 1  clas [x] [y] [z] 0 many
-
-return

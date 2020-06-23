@@ -1,0 +1,38 @@
+macro ccGetPeakStats type var wid xlo xhi vcen vrms n1 nev
+
+  global/import ntupid
+
+  vec/cre [vcen](ccvecdim) r
+  vec/cre [vrms](ccvecdim) r
+  
+  case [type] in
+    (ntup,chain) nbin = $eval([xhi]-[xlo])
+                 2d 1000000 ' ' [nbin] [xlo] [xhi] 36 1. 37. 0.
+  endcase
+  
+  case [var] in
+      (adc)  id1 = $eval([sec]*100+3) ;id2 = $eval([sec]*100+5);var=adccc
+      (tdc)  id1 = $eval([sec]*100+2) ;id2 = $eval([sec]*100+4);var=tdccc
+  endcase 
+   
+  do i = 10,[#]  
+    sec = [%i]
+    case [type] in
+      (ntup,chain) hist/op/reset 1000000
+                   nt/proj 1000000 [ntupid].idcc%[var] seccc=[sec] ifirst=[n1] nevent=[nev]
+      (hist) hist/copy [sec]03 100000
+    endcase
+    slix 1000000 36
+    hi/proj 1000000
+    message ccGetPeakStats: Processing adccc sector [sec]
+    do sct = 1,36
+      exec utilGetSliceStats 1000000 x [sct] [wid]
+      global/imp cen; global/imp rms
+      j = mod([sct],2)
+      pmt = int([sct]/2)+[j]
+      vec/inp [vcen]([pmt],$eval(2-[j]),[sec]) [cen]
+      vec/inp [vrms]([pmt],$eval(2-[j]),[sec]) [rms]
+    enddo
+  enddo
+  
+return

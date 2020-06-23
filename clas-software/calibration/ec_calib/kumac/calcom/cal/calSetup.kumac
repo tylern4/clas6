@@ -1,5 +1,0 @@
-macro calSetup
-
-  exec calReadTAB 
-
-return

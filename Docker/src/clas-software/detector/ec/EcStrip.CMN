@@ -1,0 +1,10 @@
+***************** begin: EcStrip.CMN **********************************
+*- central edge position etc. of strips- (component,id,axis,layer,sector)
+      real  Ec_strip( Ec_i: dim, MAXstrips, Ec_u:Ec_w,
+     &                       whole: cover, MAXsectors)
+*  
+      integer Ec_stripN(Ec_u:Ec_w,whole:cover,MAXsectors)
+      integer Ec_stripID(MAXstrips,Ec_u:Ec_w,whole:cover,MAXsectors)
+      COMMON / EcStrip/ Ec_strip,Ec_stripN, Ec_stripID
+*
+******************* end: EcDba_geometry.CMN **********************************

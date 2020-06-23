@@ -1,0 +1,12 @@
+#! /usr/local/bin/perl
+
+# This is a support routine to handle making the database...
+
+$orig_dir = $ENV{"PWD"};
+
+if ( -e "$orig_dir/headers.pag" || -e "$orig_dir/headers.dir") {
+    print STDERR "Database \"headers\" already exists.  Use rm_database first.\n";
+} else {
+    dbmopen (%HEADERS,"$orig_dir/headers",0644);
+    dbmclose (%HEADERS);
+}

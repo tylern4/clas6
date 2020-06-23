@@ -1,0 +1,11 @@
+DISCLAIMER:  This is a quick and dirty way to make
+an executable for pdu2map - unaesthetic, but if you
+are in a hurry ........     /SP 12-07-00/
+
+(a) Make sure to add the header file 'pdu2map.h' in 
+    pdu2map.cc; ie '#include <pdu2map.h>'.
+
+(b) Use the makefile Makefile_4_pdu2map.
+
+(c) 'make pdu2map' gives you an executable.
+

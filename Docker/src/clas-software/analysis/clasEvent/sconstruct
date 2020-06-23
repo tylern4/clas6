@@ -1,0 +1,15 @@
+from build_system import environment
+from glob import glob
+
+clasEventEnv = environment.env(deps='clas6')
+clasEventEnv.load_dependency('clas6')
+
+source_files = 'vkTAGR/c_taggerenergy.c vkTAGR/taggerenergy.f'.split()
+source_files += 'clasEvent.cc clasUtilities.cc mwKfit.cc'.split()
+
+clasEventEnv.PrependUnique(
+    PATH = ['vkTAGR'],
+    CPPPATH = ['vkTAGR'],
+    FORTRANPATH = ['vkTAGR'] )
+
+clasEventLib = clasEventEnv.library('clasEvent', source=source_files)

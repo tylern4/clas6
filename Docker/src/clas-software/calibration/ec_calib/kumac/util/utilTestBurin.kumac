@@ -1,0 +1,19 @@
+macro utilTestBurin
+
+         H/del *
+       Appl Data ntmatch.dat
+        101. 201. 301.   
+        102. 202. 302.
+        103. 203. 303.   
+        104. 204. 304.   
+        105. 205. 305.
+        106. 206. 306.
+        107. 207. 307.
+        108. 208. 308.
+        109. 209. 309.
+       ntmatch.dat
+       Nt/Create 4 'Test of Match' 3 ! ! Xmatch Ymatch Zmatch
+       Nt/Read 4 ntmatch.dat
+       Nt/SCAN 4
+       
+return

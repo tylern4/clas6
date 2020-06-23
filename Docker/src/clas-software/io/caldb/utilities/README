@@ -1,0 +1,40 @@
+I. Access control.
+
+To access the MySQL database one has  to define
+the following environmental variables (defaults stored in 
+caldb/C/calib_envir.h  include file).
+
+a) CALDB_DBNAME default calib  
+b) CALDB_HOST   default clasdb.jlab.org (claspc13.jlab.org). Other hosts 
+                      running MySQL with copies of the "calib" 
+                      database could be used as well.
+c) CALDB_USER   default clasuser (different from CUE password) 
+d) CALDB_PASS   default ""       (needed for users trying to write to database)
+e) RUN_INDEX    default RunIndex
+
+This variables are defined in the include file (calib_connect.h), but could be redefined 
+later. Environment variables  CALDB_HOST,CALDB_USER,CALDB_PASSWORD,CALDB_DBNAME,RUN_INDEX,
+in case they are set will redefine the values of corresponding variables.
+In case none of them will define the variable a command prompt will appear asking for its 
+value. For any Dbase user except "clasuser" writing routines will ask a password, unless
+the variable CALDB_PASSWORD is defined.
+
+The following example reads the constants from GPP database
+
+caldb_read --system GPP --subsystem DC --item Reg1 --runno 20001 --v 0 > GPP2001
+with GPP2001 content:
+ 0.0334291 
+ -0.464735 
+ 14.6966 
+ -144.394 
+ 670.076 
+ -1580.25 
+ 1438.33 
+ 1467.06 
+ -4944.14 
+ 4593.61 
+ -1522.94
+
+caldb_write --system GPP --subsystem DC --item Reg1 --runmin 26100 --runmax 26110 --smin 26000 --smax 26120 --comr comment_for_Runindex --comv comment_for_valuid_table < GPP20001
+
+shows possible write and --write option will actually write to dbase the content of the file.

@@ -1,0 +1,58 @@
+#!/bin/sh
+##########################################################################
+# A Shell Script to Run hv.exe  A PMT high voltage calibration application
+##########################################################################
+#
+rm sc_pmt_parms.dat
+#
+
+#hv.exe -fscf.dat -gmin_parm_forward  -jmin_parm_log_forward  -Mgroup 
+#echo "******************************"
+#echo "Forward Carriage is Processed"
+#echo "******************************"
+
+#
+hv.exe -fsc_space.dat -gmin_parm_a  -jmin_parm_log_a -kmin_parm_b -mmin_parm_log_b  -Msingle 
+echo "******************************"
+echo "Space Frame is Processed"
+echo "******************************"
+
+#
+hv.exe -fsc_north.dat -gmin_parm_a -jmin_parm_log_a -kmin_parm_b -mmin_parm_log_b   -Mgroup 
+echo "******************************"
+echo "North Carriage is Processed"
+echo "******************************"
+
+#
+hv.exe -fsc_south.dat -gmin_parm_a -jmin_parm_log_a -kmin_parm_b -mmin_parm_log_b  -Mgroup 
+#
+echo "******************************"
+echo "South Carriage is Processed"
+echo "******************************"
+
+echo ""
+echo ""
+echo "***************************************************" 
+echo  "THE PMT'S HAVE BEEN PROCESSED SO GO HAVE A BEER!!!"
+echo "***************************************************" 
+
+#######################################################################################################################
+
+#
+
+##################################
+#mv sc1.dat        new_voltages/
+#mv sc2.dat        new_voltages/
+#mv sc3.dat        new_voltages/
+#mv sc4.dat        new_voltages/
+#mv sc5.dat        new_voltages/
+#mv sc6.dat        new_voltages/
+#mv scf_new.dat    new_voltages/
+mv sc_space_new.dat   new_voltages/
+mv sc_north_new.dat   new_voltages/
+mv sc_south_new.dat   new_voltages/
+mv alarm.dat          new_voltages/
+mv delta_v_pmts.hbook new_voltages/
+################################
+#
+

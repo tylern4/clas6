@@ -1,0 +1,7 @@
+from build_system import environment
+
+c_sqlEnv = environment.env(deps=['clas6'])
+c_sqlEnv.load_dependency('clas6')
+
+c_sqlLib = c_sqlEnv.library('c_sql')
+c_sqlEnv.return_from_sconstruct(c_sqlLib)

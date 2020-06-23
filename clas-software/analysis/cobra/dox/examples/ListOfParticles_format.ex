@@ -1,1 +1,0 @@
-# Name | Particle Type | Charge | Mass | Width | JP | PDG Id | GEANT Id  #

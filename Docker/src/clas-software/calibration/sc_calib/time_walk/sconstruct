@@ -1,0 +1,14 @@
+from build_system import environment
+
+make_tw_histos_deps = {
+                  'clas6': ['default_libs'], 
+	          'root':['default_libs']
+	          }
+	
+make_tw_histos_env = environment.env(deps=make_tw_histos_deps.keys())
+make_tw_histos_env.load_dependency(make_tw_histos_deps)
+
+make_tw_histos_env.AppendUnique(LIBS='libgamecock.a')
+
+make_tw_histos_env.program(target='make_tw_histos', source='make_tw_histos.c')
+

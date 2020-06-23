@@ -1,0 +1,162 @@
+                           Tagger in GSIM/GPP
+                           ------------------
+
+This README file briefly describes how to deal with the tagger
+information in GSIM/GPP.
+
+In general user has two options concerning TAGR bank generation in
+the Monte Carlo. First option is to generate TAGR bank in an event
+generator. The second option is to put incident photon information in
+the MCTK bank and let GSIM do the rest. In my opinion the first option
+should be depreciated. Anyhow, which ever way you choose to go, GSIM
+output BOS file usually will have TAGR bank with one photon in it and 
+with tpho=0.
+
+Next step is to make tagger information is more realistic.
+The means to do that are implemented as a new features of GPP utility,
+which is commonly used to post-process DC and SC information.
+
+These new features include:
+
+1. Smearing photon time according to actual resolution.
+2. Bad E- and T-counters removal as it is done with real data.
+3. Mixing in "accidental" hits as in real data.
+
+Step 1
+------
+
+There is a new utility that helps to get necessary information from the
+real data. The utility name is filter_tagr. It is located in CLAS CVS
+in packages/utilties/filter_tagr. This utility filters out TAGR from
+real data cooked file and make some useful histograms.
+
+Once you get it from cvs and built, you can type:
+
+filter_tagr -h
+
+That will give some guidance how to use it. Here is what you get:
+
+
+Usage: filter_tagr [options] -o<outfile> -b<bosfile> file1 [file2] etc....
+
+
+Purpose:	Filters out TAGR bank to the file that could be used
+		in GPP to add "accidental" hits to GSIM data
+
+  Options:
+	-M[#]		 Write only # number of events
+	-i		 Process file in batch mode (no counter)
+	-o<outfile>	 Output histogram file name
+	-b<outfile>	 Output bos file name where TAGR goes
+	-R		 Regenerate the PART/TBID and associated banks
+	-t# 		 Select trigger mask (exclusive)
+			 example: -t0x4 select events with trigger bit 3 only
+			 default is any trigger
+	-h		 Print this message.
+
+This is an example:
+
+filter_tagr -M150100 -R -t0x4 -brun20020_TAGR.bos \
+run20020_cooked.A00.00
+
+This will filter out 150100 TAGR banks from file run20020_cooked.A00.00
+and put them in run20020_TAGR.bos file. It will search for events with
+trigger bit 3 only and will rebuild PART/TBID banks.
+
+While processing input data it looks for "good" photon usual way as
+pid package does. If "good" photon is found, it modifies status of
+this hit in TAGR bank and writes it out to the output file.
+
+Besides out put BOS file one needs to get two constants out of this
+data. Particularly, photon tame offset and timing resolution with
+respect to RF. This could be done using two histograms produced bu this
+utility. Histogram 63 is tagger_time-RF_time. One needs to fit this
+histogram and find sigma. The other histogram is 500. One needs to
+determine peak position. This peak position gives an offset from 0
+time. Once these two constants are determined, they must be placed in
+GPP map. There is new subsystem in there called tagr with two items in
+it:
+
+	Subsystem: tagr,	nitems: 2
+		Item: offset,	length: 1,	type: float,	narray:1
+		Item: sigma,	length: 1,	type: float,	narray:1
+
+
+Step 2
+------
+
+Once all these done, on can proceed with GPP.
+
+gpp -h gives:
+Usage: gpp [options] inputFile 1 [inputFile2] etc. 
+
+		Writes trigger bits into HEAD trigbits (latch1) field, whether
+		the event passes the trigger or not.
+
+	options:
+	-P[#]	Bitwise Process Flags, as defined below:
+			0x1	 DC - Remove dead wires
+			0x2	 Smear DC values
+			0x4	 SC - Remove dead paddles
+			0x8	 Smear SC values
+			0x10	 Create CALL Bank
+***			0x20	 Smear Tagger timeing
+***			0x40	 Remove bad tagger conters
+		   Default: 0x1f (all activated)
+	-T[#]	Bitwise Trigger Flags, as defined below:
+			0x1	 EC in trigger
+			0x2	 ECinner in trigger
+			0x4	 CC in trigger
+			0x8	 Starts CC trigger after CC bit 1
+		   Default: 0x0 (none activated)
+	-t	Determine possible trigger types for a given 
+		event (PART bank only). Overide -T option
+	-ofilename	output to filename
+***	-Afilename	get TAGR banks from filename
+	-M[#]	Process  only (#) number of events
+	-R#	Use Run Number (#) to overlay on the Monte Carlo banks (def=1)
+	-v	verbose mode- print dead wires
+	-E	EC threshold in mV
+	-I	EC inner threshold in mV
+	-C	CC threshold in mV
+	-D[#]	Drop (#=1 default) or don't drop (#=0) raw banks 
+		for failed events.
+	-f	scale factor for SC tdcl/tdcr smear
+	-a	scale factor for DOCA smear in Region 1
+	-b	scale factor for DOCA smear in Region 2
+	-c	scale factor for DOCA smear in Region 3
+	-h	This information
+
+New option relevant to the tagger are tagged with ***.
+
+If -A option is specified, gpp will add accidental hits from the
+supplied file. When it add hits, it shifts them by the offset found in
+previous step. If there is only one hit in the data file, than it keeps
+photon from Monte Carlo and does not add anything else. The "good"
+photon from the data file will be skipped and replaced by the
+Monte Carlo photon. If it happens that one of the hits in the input
+TAGR bank has the same T-id as the hit from the Monte Carlo, then it
+will check their relative timing and keep hit that comes earlier. This
+is kind of simulation of single-hitness of TDC.
+
+If smearing is requested, it will smear time for the Monte Carlo
+photon using sigma defined in the previous step. 
+
+If dead counters removal is requested, the it will take status
+information from TAG_CALIB map and check Monte Carlo photon against
+status arrays. If it is an overlap hit (two adjacent counters) and if
+one of them is tagged as bad, it will reassign bin number as appropriate
+and modify photon energy accordingly. This is kind of simulation of
+bin migration due to bad counters.
+
+Important notes. Monte Carlo photon is ALWAYS the very first raw in
+the resulting TAGR bank. If it happen to hit bad counter it will get
+status 0. If it happens to come later than accidental photon in the
+same T-counter, it will get status 715.  
+
+When simulating photon experiment one will probably use -P0x6F and -A options.
+
+I also added some histograms relevant to the tagger in gpp code.
+
+In case you have questions, feel free to contact me at pasyuk@jlab.org
+

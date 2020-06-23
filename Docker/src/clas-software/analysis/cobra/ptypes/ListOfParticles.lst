@@ -1,0 +1,35 @@
+###############################################################################
+#                                                                             #
+# This file contains a list of all particles that will be recognized by the   #
+# ParticleTypes class and, in tern, the ParticleArray class.                  #
+#                                                                             #
+# The format is as follows:                                                   #
+#                                                                             #
+# Name | Type | Charge | Mass | Width | JP | PDG Id | GEANT Id | LaTex Name   #
+#                                                                             #
+# The mass and width are in GeV and the charge is in units of e.              #
+#                                                                             #
+###############################################################################
+#
+# Leptons
+#
+e+    lepton  +1  0.000511  0            1/2-  -11  2  e^{+}
+e-    lepton  -1  0.000511  0            1/2+   11  3  e^{-}
+mu+   lepton  +1  0.105658  2.99592e-19  1/2-  -13  5  \mu^{+}
+mu-   lepton  -1  0.105658  2.99592e-19  1/2+   13  6  \mu^{-}
+#
+# Mesons
+#
+pi+   meson   +1  0.13957   2.52837e-17   0-   211   8  \pi^{+}
+pi-   meson   -1  0.13957   2.52837e-17   0-  -211   9  \pi^{-}
+pi0   meson    0  0.13498   7.8e-09       0-   111   7  \pi^{0}
+k+    meson   +1  0.493677  5.31416e-17   0-   321  11  K^{+}
+ks    meson    0  0.497672  7.367e-15     0-   310  16  K_{S}
+kl    meson    0  0.497672  1.27e-17      0-   130  10  K_{L}
+k-    meson   -1  0.493677  5.31416e-17   0-  -321  12  K^{-}
+#
+# Baryons
+#
+p     baryon  +1  0.93827   0            1/2+  2212  14  p
+n     baryon   0  0.93957   7.423e-28    1/2+  2112  13  n
+p-    baryon  -1  0.93827   0            1/2+ -2212  15  \bar{p}

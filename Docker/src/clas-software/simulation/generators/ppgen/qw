@@ -1,0 +1,47 @@
+#! /usr/local/bin/perl
+
+@arr = ();
+
+$M = 1000;
+
+
+for (@ARGV) {
+     if (/^-q(.+)/) {
+         $qlo = $1;
+    }
+    if (/^-Q(.+)/) {
+	$qhi = $1;
+      }    
+     if (/^-n(.+)/) {
+ 	$n = $1;
+    } 
+
+    if (/^-W(.+)/) {
+ 	$W = $1;
+    }
+    if (/^-M(.+)/) {
+ 	$M = $1;
+    }
+    else {
+        push(@arr,($_));
+    }
+}
+
+@ARGV = @arr;
+
+$delq = ($qhi - $qlo)/$n;	
+
+$q1 = $qlo;
+while ($n != 0) {
+
+$q2 = $q1 + $delq;
+$WW = $W + 0.001;
+$out = "electron-$q1-$q2-$W";
+
+$cmd = "electron -q$q1 -Q$q2 -w$W -W$WW -M$M | makebos -n1 -o$out";
+print "$cmd\n";
+system($cmd);
+$q1 = $q1+$delq;
+$n--;
+}
+

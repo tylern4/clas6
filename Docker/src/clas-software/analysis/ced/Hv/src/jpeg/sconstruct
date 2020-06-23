@@ -1,0 +1,16 @@
+from build_system import environment
+
+jpeg_env = environment.env()
+
+sources = 'jcapi.c jccoefct.c jccolor.c jcdctmgr.c jchuff.c jcmainct.c \
+           jcmarker.c jcmaster.c jcomapi.c jcparam.c jcprepct.c jcsample.c \
+           jdapi.c jdatasrc.c jdatadst.c jdcoefct.c jdcolor.c jddctmgr.c \
+           jdhuff.c jdmainct.c jdmarker.c jdmaster.c jdpostct.c jdsample.c \
+           jerror.c jutils.c jfdctfst.c jfdctflt.c jfdctint.c jidctfst.c \
+           jidctflt.c jidctint.c jidctred.c jquant1.c jquant2.c jdmerge.c \
+           jmemmgr.c jmemansi.c'.split()
+
+jpeg_lib = jpeg_env.library(target='jpeg', source=sources)
+jpeg_env.install_headers()
+
+jpeg_env.return_from_sconstruct(jpeg_lib)

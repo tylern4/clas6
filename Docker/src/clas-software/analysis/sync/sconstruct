@@ -1,0 +1,10 @@
+from build_system import environment
+
+sync_deps = ['mysql', 'cern', 'clas6', 'root']
+	
+sync_env = environment.env(deps=sync_deps)
+sync_env.load_dependency(sync_deps)
+
+sync_env.program(target='sync', source='sync.cc')
+
+sync_env.sconstruct('tripfixer')

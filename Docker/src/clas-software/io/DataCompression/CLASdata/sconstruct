@@ -1,0 +1,8 @@
+from build_system import environment
+
+clasdata_env = environment.env('clas6 root'.split())
+clasdata_env.load_dependency('clas6')
+clasdata_env.load_dependency('root')
+
+clasdata_env.install_headers()
+clasdata_env.library('CLASdata', source='CLASdata.C')

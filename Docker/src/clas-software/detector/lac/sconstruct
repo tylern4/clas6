@@ -1,0 +1,6 @@
+from build_system import environment
+
+lacEnv = environment.env(deps=['clas6'])
+lacEnv.load_dependency('clas6')
+lacLib = lacEnv.library(target='lac')
+lacEnv.return_from_sconstruct(lacLib)

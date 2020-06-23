@@ -1,0 +1,47 @@
+#
+# ------------ TRANSLATE THE HBOOK TO SOMETHING ELSE --------
+#
+# Files used:
+# 
+# Histogram input file:		hscan_input
+# ASCII output file:		hscan_data
+# ASCII data file		min_input	output of hscan
+# Fitted parameters		min_parm	used to update map file
+# Minuit List Output		min_output
+# Kumac File to view results	min_kumac	PAW with file = hscan_input
+# 
+# delete, then define new input and output links
+#
+rm hscan_input
+rm hscan_data
+rm min_input
+rm min_parm 
+rm min_kumac
+#
+cd /work/clas/disk2/elton/means/packages/utilities/sc_calib/atten
+#
+ln -s s3_atten.hbook hscan_input
+ln -s s3_atten.dat hscan_data
+ln -s s3_atten.dat min_input
+ln -s s3_atten.parm min_parm
+ln -s s3_atten.kumac min_kumac
+#
+ls -lgF hscan_input
+ls -lgF hscan_data
+ls -lgF min_input
+ls -lgF min_kumac
+ls -lgF min_parm
+#
+#
+# ------------ TRANSLATE THE HBOOK TO SOMETHING ELSE --------
+#
+hscan_atten
+#
+# ------------ RUN MINIMIZATION -----------------
+#
+min_atten
+#
+# copy kumac into local file
+#
+cp min_kumac min_kumac.kumac
+#

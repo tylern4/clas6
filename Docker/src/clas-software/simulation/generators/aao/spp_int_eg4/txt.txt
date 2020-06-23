@@ -1,0 +1,201 @@
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/aao_test.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/aaosig1.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/cgln_amps.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/daresbury.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/ekine1.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/ekine2.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/helicity_amps.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/int_ctrl_0.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/int_ctrl_1.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/int_ctrl_2.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/int_ctrl_3.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/int_ctrl_4.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/int_ctrl_5.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/int_ctrl_6.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/int_ctrl_7.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/int_ctrl_8.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/interp.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/lee_dummy.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/lee_dummy1.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/legendre.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/maid98_dummy.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/maid_lee.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/multipole_amps.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/read_sf_file.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/sigma0_calc.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/splie2.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/splin2.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/spline.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/splint.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/util.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:550: depends/LinuxRH6/xsection.d: No such file or directory
+/group/clas/builds/DEVELOPMENT/packages/cms/Makefile:553: depends/LinuxRH6/spp_int.dd: No such file or directory
+/bin/sh         -c 'g77 -MM -DEGCS -DLinux \
+-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include \
+spp_int.F | \
+sed -e '\''s/spp_int.F.o/spp_int.dd \/home\/biselli\/packages\/aao\/spp_int_eg1\/lib\/LinuxRH6\/spp_int.o/g'\'' > depends/LinuxRH6/spp_int.dd'
+Makefile: making dependency file for xsection.F
+Makefile: making dependency file for util.F
+Makefile: making dependency file for splint.F
+Makefile: making dependency file for spline.F
+Makefile: making dependency file for splin2.F
+Makefile: making dependency file for splie2.F
+Makefile: making dependency file for sigma0_calc.F
+Makefile: making dependency file for read_sf_file.F
+Makefile: making dependency file for multipole_amps.F
+Makefile: making dependency file for maid_lee.F
+Makefile: making dependency file for maid98_dummy.F
+Makefile: making dependency file for legendre.F
+Makefile: making dependency file for lee_dummy1.F
+Makefile: making dependency file for lee_dummy.F
+Makefile: making dependency file for interp.F
+Makefile: making dependency file for int_ctrl_8.F
+Makefile: making dependency file for int_ctrl_7.F
+Makefile: making dependency file for int_ctrl_6.F
+Makefile: making dependency file for int_ctrl_5.F
+Makefile: making dependency file for int_ctrl_4.F
+Makefile: making dependency file for int_ctrl_3.F
+Makefile: making dependency file for int_ctrl_2.F
+Makefile: making dependency file for int_ctrl_1.F
+Makefile: making dependency file for int_ctrl_0.F
+Makefile: making dependency file for helicity_amps.F
+Makefile: making dependency file for ekine2.F
+Makefile: making dependency file for ekine1.F
+Makefile: making dependency file for daresbury.F
+Makefile: making dependency file for cgln_amps.F
+Makefile: making dependency file for aaosig1.F
+Makefile: making dependency file for aao_test.F
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	aao_test.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/aao_test.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	aaosig1.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/aaosig1.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	cgln_amps.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/cgln_amps.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	daresbury.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/daresbury.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	ekine1.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/ekine1.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	ekine2.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/ekine2.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	helicity_amps.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/helicity_amps.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	int_ctrl_0.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_0.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	int_ctrl_1.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_1.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	int_ctrl_2.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_2.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	int_ctrl_3.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_3.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	int_ctrl_4.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_4.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	int_ctrl_5.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_5.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	int_ctrl_6.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_6.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	int_ctrl_7.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_7.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	int_ctrl_8.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_8.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	interp.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/interp.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	lee_dummy.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/lee_dummy.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	lee_dummy1.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/lee_dummy1.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	legendre.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/legendre.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	maid98_dummy.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/maid98_dummy.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	maid_lee.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/maid_lee.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	multipole_amps.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/multipole_amps.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	read_sf_file.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/read_sf_file.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	sigma0_calc.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/sigma0_calc.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	splie2.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/splie2.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	splin2.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/splin2.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	spline.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/spline.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	splint.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/splint.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	util.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/util.o
+g77  -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+	-DEGCS -DLinux \
+	-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+	xsection.F  -o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/xsection.o
+Makefile: archiving files /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/aao_test.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/aaosig1.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/cgln_amps.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/daresbury.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/ekine1.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/ekine2.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/helicity_amps.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_0.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_1.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_2.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_3.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_4.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_5.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_6.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_7.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/int_ctrl_8.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/interp.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/lee_dummy.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/lee_dummy1.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/legendre.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/maid98_dummy.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/maid_lee.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/multipole_amps.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/read_sf_file.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/sigma0_calc.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/splie2.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/splin2.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/spline.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/splint.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/util.o /home/biselli/packages/aao/spp_int_eg1/obj/LinuxRH6/spp_int_eg1/xsection.o
+test -d /home/biselli/packages/aao/spp_int_eg1/lib/LinuxRH6/ || mkdir -p /home/biselli/packages/aao/spp_int_eg1/lib/LinuxRH6/
+g77 -O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore -DEGCS -DLinux \
+		-I. -I./ -I/group/clas/builds/DEVELOPMENT/packages/include -I/group/clas/builds/DEVELOPMENT/packages/inc_derived -I/usr/include -I/usr/X11/include -c \
+		spp_int.F -o /home/biselli/packages/aao/spp_int_eg1/lib/LinuxRH6/spp_int.o 
+g77   \
+-O2 -m486 -fno-automatic -finit-local-zero -ffixed-line-length-none -fno-second-underscore \
+/home/biselli/packages/aao/spp_int_eg1/lib/LinuxRH6/spp_int.o  -L/home/biselli/packages/aao/spp_int_eg1/lib/LinuxRH6 -L/group/clas/builds/DEVELOPMENT/lib/LinuxRH6 -L/apps/cernlib/pc_linux/99/lib -L/usr/lib/X11/.. -L/group/clas/mysql/LinuxRH6/lib -lspp_int_eg1 -lrecutl -lc_cern -lmathlib -lkernlib -lpacklib -ltcl -lnsl -ldl   \
+-o /home/biselli/packages/aao/spp_int_eg1/bin/LinuxRH6/spp_int_eg1
+

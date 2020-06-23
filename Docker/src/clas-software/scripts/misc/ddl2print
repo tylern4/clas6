@@ -1,0 +1,88 @@
+#! /usr/bin/env perl
+
+# Written by Chris A. Hamilton on 07/03/97
+
+$def = 0;
+$i = 0;
+while(<>){
+
+# If the line contains a ! then leave it alone
+
+	if(/^!.*/) {
+	chop;
+	}
+
+# If the line contains TABLE, print out comment and beginning of first
+# function
+
+	elsif (/\s*TABLE\s+(\w+)\s+(.*)$/) {
+	    $name = $1;
+            
+            if($name eq "CC") {
+                $name = "CC0";
+            }
+            $t = "clas". $name ."_t";
+            $nn_l = $name;	
+	    $nn_l =~ tr/A-Z/a-z/;
+	    print "\n/* Print $nn_l bank -------------------------------------------------*/\n";
+	    $nn_u = $nn_l;
+	    $nn_u =~ tr/a-z/A-Z/;
+	    print "void p$nn_u(FILE *fp, $nn_l","_t *$nn_l)\n"; 
+            print "{\n";
+	    print "  fprintf(fp,\"";
+	}
+
+# If the line contains the element information, put each element name and type
+# into 2 parallel arrays
+	
+	elsif (/\s*(\d+)\s+(\w+)\s+(\w+)(.*)$/) {
+   
+	    @names[$i] = $2;
+            @types[$i] = $3;
+	    $i++;  
+	    
+	}	
+
+# Once all element info has been processed, use two count controlled
+# loops to print out rest of function
+
+	elsif (/\s*END\s+TABLE.*/) {
+	    
+	    for ($j = 0; $j < $i; $j++) {
+		if ($types[$j] eq 'F') {
+		    print "$names[$j]",": %5.3f  ";
+		} elsif ($types[$j] eq 'I') {
+		    print "$names[$j]",": %6d  ";
+		} 
+		else {
+		    print STDERR "YIKES!!!!!!!!!!! UNKNOWN TYPE in $nn\n";
+		} 
+	    } 
+	    print "\\n\"";
+	    for ($j = 0; $j < $i; $j++) {
+		$name_lower = $names[$j];
+		$name_lower =~ tr/A-Z/a-z/;
+		print ", $nn_l","->","$name_lower";     
+	    }
+
+# Now print out the second function
+	
+	    print ");";
+	    print "\n}\n";
+	    print "\nvoid print","$nn_u","bank(FILE *fp, clas","$nn_u","_t *$nn_l) {\n";
+	    print "  int i;\n\n";
+	    print "  if($nn_l","->bank.nrow) {\n";
+	    print "    pBankHead(fp,&$nn_l","->bank);\n";
+	    print "    for (i = 0; i < $nn_l","->bank.nrow; i++)\n";
+	    print "      p$nn_u","(fp,&$nn_l","->$nn_l","[i]);\n";
+	    print "    fprintf(fp,","\"\\n\"",");";
+	    print "\n  }\n";
+	    print "}\n";
+	    
+	    $i = 0;
+	}
+	
+    }
+
+
+

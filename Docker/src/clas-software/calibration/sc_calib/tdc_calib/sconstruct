@@ -1,0 +1,18 @@
+from build_system import environment
+
+tdc_calib_src = """BankDescription.cxx  Expect.cxx  JBosFile.cxx  JEventCount.cxx  
+	      JMainMenu.cxx  ReadRoc.cxx  SlotAverage.cxx  Spectra.cxx  
+	      tdc_calib.cxx  TdcHistogram.cxx""".split()
+
+
+tdc_calib_deps = {'clas6': ['default_libs'],
+	          'root':  ['default_libs']}
+
+tdc_calib_env = environment.env(deps=tdc_calib_deps.keys())
+
+tdc_calib_env.load_dependency(tdc_calib_deps)
+
+tdc_calib_prog = tdc_calib_env.program(target="tdc_calib", source=tdc_calib_src)
+
+
+

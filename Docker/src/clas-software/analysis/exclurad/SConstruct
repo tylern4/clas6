@@ -1,0 +1,24 @@
+from init_env import init_environment
+
+env = init_environment("")
+
+import os
+
+OSENV  = os.environ
+CERN_LIB  = OSENV['CERN_LIB']
+env.Append(LIBPATH = [CERN_LIB])
+
+libs = [
+        'mathlib', 'packlib'
+       ]
+cernlibs = []
+for lib in libs:
+	cernlibs.append(lib)
+env.Append(LIBS = cernlibs)
+
+sources = Split("""exclurad.f
+                   multipole_amps.F """)
+
+
+env.Program(source = sources,     target = 'exclurad')
+

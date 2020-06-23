@@ -1,0 +1,15 @@
+#!/bin/csh -f
+
+
+
+
+set runs = (66246 66247 66248 66262 66250 66260 66252 66259 66254 66263 66256 66257) 
+
+foreach r ($runs)
+#	scp clasrun@clondaq2:/raid/stage_in/clas_0$r".A00" /work/clas/disk1/ungaro/
+#	/site/bin/jcache /mss/clas/tpe/data/clas_0$r.A00
+#	./tpecalib -RUN_INDEX=calib_user.RunIndextpe -PROCESS_BEAM=1 -USE_QT=0 /cache/mss/clas/tpe/data/clas_0$r.A00
+	scp ftp.jlab.org:./projects/calib/TPECal/tpe_beam_$r.root .
+end
+
+

@@ -1,0 +1,97 @@
+macro ecTestSummary file nch=100
+
+  scale = 0.75
+
+  alias/cre test1  u
+  alias/cre test2  v
+  alias/cre test3  w
+  alias/cre test4  x
+  alias/cre test5  y
+  alias/cre test6  z
+  alias/cre test7  u+v+w
+  alias/cre test8  x+y+z
+  alias/cre test9  (u+v+w)+(x+y+z)
+  alias/cre test10 (u+v+w).(x+y+z)
+  alias/cre test11 u.v.w
+  alias/cre test12 x.y.z
+  alias/cre test13 (u.v.w)+(x.y.z)
+  alias/cre test14 (u.v.w).(x.y.z)
+  alias/cre test15 (u+v).(v+w).(u+w).(x+y).(y+z).(x+z)
+  alias/cre test16  u=1
+  alias/cre test17  v=1
+  alias/cre test18  w=1
+  alias/cre test19  x=1
+  alias/cre test20  y=1
+  alias/cre test21  z=1
+  alias/cre test22  u.v.w
+  alias/cre test23  x.y.z
+  alias/cre test24 (u.v.w)+(x.y.z)
+  alias/cre test25  mip=(u.v.w).(x.y.z)
+  alias/cre test26  uvw
+  alias/cre test27  xyz
+  alias/cre test28  uvw=1
+  alias/cre test29  xyz=1
+  alias/cre test30  uvw=1+xyz=1
+  alias/cre test31  pix=uvw=1.xyz=1
+  alias/cre test32  uvw=1.xyz=0
+  alias/cre test33  uvw=0.xyz=1
+  alias/cre test34  uvw=1.xyz
+  alias/cre test35  uvw.xyz
+  alias/cre test36  mip.pix
+  alias/cre test37  mip.(.not.pix)
+  alias/cre test38  pix.(.not.mip)  
+  
+  hi/del *
+  file = hist/[file].rzh
+  hi/file 1 [file]
+  vec/cre dum(100,6)
+  get_vect/contents //lun1/ectest/10000 dum
+  close 1
+  ntrig = $eval(dum(100,1))
+*  nch = 100
+*  sigma dum=dum/[ntrig]
+
+  size 21 21
+  next
+  igset chhe 0.6*[scale]
+  itx 1 20 EC Test Summary
+  line 1 19.5 19 19.5
+  line 1 19.3 19 19.3 
+  igset chhe 0.3*[scale] 
+  itx 9.0 20 FILE: [file]
+  itx 15.5 20 Nevents: [ntrig]
+
+  itx 1 18.5 Test 
+  itx 4 18.5 Description
+  
+  x = 11.3
+  line [x]-0.45 18.3 [x]-0.45 0.0  
+  do i = 1,6
+    itx [x] 18.5 S[i]
+    line [x]+0.9 18.3 [x]+0.9 0.0
+    x = [x] + 1.4
+  enddo
+  
+  y = 18
+  igset chhe 0.3*[scale]
+  
+  do i = 1,38
+    itx 1.5 [y] [i] 
+    itx 2.5 [y] text=test[i]
+    x0 = 11
+    do j = 3,[#]
+      sec = [%j]
+      nrm = $eval(dum([nch],[sec]))
+      value = $eval(dum([i],[sec])/[nrm])
+      x = [x0]+([sec]-1)*1.4
+      itx [x] [y] $format([value],F5.3)
+    enddo      
+    y = [y]-0.6*[scale]
+  enddo
+  
+  vec/del dum*
+  alias/del test*
+  size 20 20
+  
+return
+  

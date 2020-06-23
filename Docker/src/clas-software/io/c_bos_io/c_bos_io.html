@@ -1,0 +1,137 @@
+<html>
+<head>
+<title>C Utilities for BOS - libc_bos_io.a</title>
+</head>
+
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#
+FF0000">
+
+
+<body>
+<center><h1>C Utilities for BOS - libc_bos_io.a </h1></center>
+<center>
+<img src="../../icons/blue-line2.gif">
+</center>
+
+<a name ="introduction"><h1> <a href="c_bos_io_intro.html">Introduction</a></h1>
+<P>
+This is a joint project by Joe Manak, and Marurik Holtrop
+to allow BOS banks to be accessed by C data structures. A very
+brief <a href="c_bos_io_intro.html"> introduction </a>
+was posted to the clas_offline list server.
+</P>
+
+<h1>Documentation</h1>
+<P>
+The c_bos_io library is a C interface to the BOS and FPACK packages, as such
+BOS and FPACK are a prerequisite. Most routines assume a structure of the
+type BOSbank(the BOS common block) is present. The structure BOSbank 
+is defined in the file bostypes.h. Examples of code using the c_bos_io library
+exist in <font COLOR="AF0000">packages/utilities/bosdump</font>, and the
+recsis user library. 
+</P>
+<B><menu>
+<li><B><font COLOR="#AF0000">initbos()</font></B>
+	<menu>
+	Initialize the bos bcs_ and wcs_ arrays
+	</menu>
+<li><B><font COLOR="#AF0000">void *getBank(BOSbank *bosbank,const char *bankname)</font></B>
+	<menu>
+	Returns a pointer to the first bank of the type requested, returns NULL is bank is empty.
+	</menu>
+<li><B><font COLOR="#AF0000">void *getNextBank(BOSbank *bosbank,const bankHeader_t *header)</font></B>
+	<menu>
+	Given a pointer to a bank this routine returns a pointer to the next bank of the same type or NULL if another one does not exist.
+	</menu>
+<li><B><font COLOR="#AF0000">void *getGroup(BOSbank *bosbank,const char *bankname, int banknumber)</font></B>
+<menu>
+Given a bankname and a bank number this routine returns a pointer to that bank  or NULL if that specific bank does not exist.
+	</menu>
+<li><B><font COLOR="#AF0000">void *makeBank(BOSbank *bosbank,const char *bankname, int banknumber, int ncolumns, int nrows)</font></B>
+<menu>
+Given a bankname, bank number and the number of columns and rows of the bank to be created this routine returns a pointer to that bank  or NULL if that specific bank can not be created.
+	</menu>
+<li><B><font COLOR="#AF0000">void *dropBank(BOSbank *bosbank,const char *bankname, int banknumber)</font></B>
+<menu>
+Given a bankname, and bank number remove the bank from the given BOSbank array returns a pointer to the bank dropped or NULL. 
+	</menu>
+<li><B><font COLOR="#AF0000">void dropAllBanks(BOSbank *bosbank,const char *bankname)</font></B>
+<menu>
+Given a bankname, drop all banks of that type from the given BOSbank array.
+	</menu>
+<li><B><font COLOR="#AF0000">void cleanBanks(BOSbank *bosbank)</font></B>
+<menu>
+Clean the BOS common, by removing dropped banks.
+	</menu>
+</B></menu>
+
+<a name ="scripts"><h1>Scripts</h1>
+<P>
+
+</P>
+<menu>
+<li><a href="../scripts/ddl2h"> Perl Script to convert .ddl files to C header files</a> - located in $CLAS_PACK/scripts/ddl2h
+<li><a href="../scripts/ddl2print"> Perl Script to generate C print routines from .ddl files</a> - script ddl2print
+<li><a href="../scripts/ddl2proto"> Perl Script to generate C prototypes of print routines from .ddl files</a> - script ddl2proto
+
+</menu>
+
+<a name ="header"><h1>Header Files</h1>
+<P>
+
+</P>
+<menu>
+<li><a href="../include/bostypes.h"> Master header file</a> - located in $CLAS_PACK/include/bostypes.h
+<li><a href="../include/bosddl.h"> C structures for BOS banks</a> - located in $CLAS_PACK/include/bosddl.h
+</menu>
+
+<a name ="source"><h1>Source Code</h1>
+<P>
+The source for libc_bos_io.a and examples of code using these routines
+</P>
+<menu>
+<li><a href="../c_bos_io/readbos.c"> Source for read routines</a> - located in $CLAS_PACK/c_bos_io/readbos.c
+<li><a href="../utilities/elastic_mon/elastic_mon.c"> Example of code using libc_bos_io.a</a> - located in $CLAS_PACK/utilities/elastic_mon/elastic_mon.c
+</menu>
+
+<h1><font COLOR="#AA0001">Other Utilities located in the c_bos_io library</font></h1>
+
+<h1>3 and 4 vector manipulation</h1>
+<P>
+A group of routines written by Joe Manak and others for working with
+3 and 4 vectors, including the usual addition, subtraction, multiplication
+and boosts -  the routines are listed in the header file
+<a href="../include/kinematics.h"> 
+packages/include/kinematics.h</a>.
+</P>
+
+<h1> Coordinate Transformations </h1>
+<P>
+C routines to go from the CLAS coordinate system to the sector coordinate
+system and vice versa using 3 vectors.
+</P>
+<B><menu>
+<li><B><font COLOR="#AF0000">vector3_t sector2lab(vector3_t sector, int sec)</font></B>
+	<menu>
+	Given a 3 vector in the sector frame and the sector frame it is in
+	return a 3 vector in the lab frame prototype located in 
+	<a href = "../include/utility.h"> utilitity.h </a>
+	</menu>
+<li><B><font COLOR="#AF0000">vector3_t lab2sector(vector3_t lab, int sec)</font></B>
+	<menu>
+	Given a 3 vector in the lab fram and the sector frame to go to
+	return a 3 vector in that frame - prototype in packages/include/utility.h	
+	</menu>
+</menu>
+</B>
+<hr>
+<a href = "../../offline_libs.html"> <img src="../../icons/cebaf.old.gif" border=0></a>
+<hr>
+<address>
+For comments or questions: 
+<a href="mailto:manak@cebaf.gov">manak@cebaf.gov</a><br>
+</address>
+
+</body>
+</html>
+

@@ -1,0 +1,73 @@
+macro ecPlotSecVec type=norm ylab=rms label=off ymin=0 ymax=6 sec title
+
+  vec/cre zo(6) i 1 3 5 2 4 6
+  sigma x=array(36,1#36)
+  vec/cre linemip(6) i 100 100 100 160 160 160
+  vec/cre sym(8) i 20 24 21 25 22 26 23 27
+  vec/cre xerr(36) r 36*0.
+  vec/cre yerr(ecvecdim) r 1296*0.
+  vec/cre linemip(6) i 6*-1000
+  
+  nvec = [#]-7
+  
+  do vec = 1,[nvec]
+    i = [vec]+7
+    vec/cre yplot[vec](ecvecdim)
+    vec/cop [%i] yplot[vec]
+  enddo
+  
+  case [label] in
+    (on)     switch z
+             do layer = 1,6
+               vec/copy yplot1(:,[layer],[sec]) dum
+               sigma dum1 = order(dum,dum)
+               sigma dum2 = dum1 lt 50
+               ind      = $eval($vlen(dum2)+1)
+               vec/plot dum1([ind]:36) id=777
+               mean 	= $format($hinfo(777,'mean'),f5.1)
+               rms  	= $format($hinfo(777,'rms'),f4.1)
+               text[layer]	= Mean=$unquote([mean]) +- $unquote([rms])
+             enddo
+             switch g 
+             vec/inp linemip 100 100 100 160 160 160
+  endcase
+     
+  case [type] in
+    (norm)  line = -1000; vec/inp linemip 100 100 100 160 160 160
+    (ratio) vdivide yplot1 yplot2 yplot1; nvec=1; vec/inp linemip 6*1.0
+    (error) vec/copy yplot2 yerr; line = -1000; nvec=1
+  endcase
+    
+  next
+  opt zfl1 
+  
+  title_gl $quote([title])
+  
+  do vec = 1,[nvec]
+    symbol = $eval(sym([vec]))
+    do layer = 1,6  
+      case [layer] in
+        (1) chview=UI
+        (2) chview=VI
+        (3) chview=WI
+        (4) chview=UO
+        (5) chview=VO
+        (6) chview=WO
+      endcase    
+      zon = $eval(zo([layer]))
+      zone 2 3 [zon] s
+      null 0 37 [ymin] [ymax]
+      hplot/errors x yplot[vec](:,[layer],[sec]) xerr yerr(:,[layer],[sec]) 36 [symbol] 0.15
+      line = $eval(linemip([layer]))
+      line 0 [line] 36 [line]    
+      atitle [chview]//' PMT' [ylab] 
+      if [label].eq.'on' then
+        itx 10 250 [text[layer]] 
+      endif          
+    enddo
+  enddo
+  
+  title_gl ' '
+  vec/del yplot*,dum*
+  
+return 

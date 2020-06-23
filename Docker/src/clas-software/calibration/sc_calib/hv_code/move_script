@@ -1,0 +1,14 @@
+#!/bin/sh
+###########################################################################################
+# A script to move updated voltage files to directory for commiting to clon machine via CVS
+###########################################################################################
+
+#mv sc1.dat $HOME/app/hvca/db/
+#mv sc2.dat $HOME/app/hvca/db/
+#mv sc3.dat $HOME/app/hvca/db/
+#mv sc4.dat $HOME/app/hvca/db/
+#mv sc5.dat $HOME/app/hvca/db/
+#mv sc6.dat $HOME/app/hvca/db/
+mv sc_space_new.dat $HOME/app/hvca/db/sc_space.dat
+mv sc_north_new.dat $HOME/app/hvca/db/sc_north.dat
+mv sc_south_new.dat $HOME/app/hvca/db/sc_south.dat

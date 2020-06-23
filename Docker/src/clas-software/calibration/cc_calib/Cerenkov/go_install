@@ -1,0 +1,29 @@
+#!/bin/csh -f
+
+set wdir = /arena1/cc_calib/
+set rdir = /group/clas/www/clasweb/html/ungaro/cc_calib/
+set runno = $1
+
+set runp = (`grep $runno farm/runs.txt | awk '{print $3}'`)
+
+echo Run number: $runno - run period: $runp
+if($runp == "") then
+	echo
+	echo Error: rungroup not specified. Add entry for $runno in farm/runs.txt
+	echo
+endif
+
+mkdir -p $wdir/$runp/$runno/img
+set a = `\ls spe_fit_*.gif | grep $runno `
+
+mv  $a   $wdir/$runp/$runno/img
+ps2pdf spe_fits_$runno.ps
+rm spe_fits_$runno.ps
+
+set a = `\ls | grep $runno `
+mv $a $wdir/$runp/$runno
+
+scp -r $wdir/$runp/$runno ftp:$rdir/$runp
+
+
+

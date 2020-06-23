@@ -1,0 +1,14 @@
+from build_system import environment
+
+tof_calib_deps = {
+                  'clas6': ['default_libs', 'recsis_libs'], 
+	          'root':['default_libs']
+	          }
+	
+tof_calib_env = environment.env(deps=tof_calib_deps.keys())
+tof_calib_env.load_dependency(tof_calib_deps)
+
+tof_calib_env.AppendUnique(LIBS='-lgamecock -lscat'.split())
+
+tof_calib_env.program(target='tof_calib', source='tof_calib.c')
+

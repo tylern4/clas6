@@ -1,0 +1,4 @@
+from build_system import environment
+
+env = environment.env(deps=['clas6'])
+env.sconstruct(dirs = Split('libpp plib pwaUtil'))

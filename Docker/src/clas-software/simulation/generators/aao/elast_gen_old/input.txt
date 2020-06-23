@@ -1,0 +1,9 @@
+line 1:( thickness of target, radiation lengths)
+line 2:( beam energy, GeV)
+line 3:( minimum energy for scattered electron, GeV)
+line 4:( minimum and maximum angle for scattered electron, degrees)
+line 5:( Input 0 to include elastic peak, 1 to exclude it)
+line 6:( Number of output events)
+line 7:( Number of output particles for gsim)
+line 8:( factor to adjust the maximum cross section, used in M.C. 
+         selection)

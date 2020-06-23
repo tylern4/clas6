@@ -1,0 +1,51 @@
+###############################################################################
+#                                                                             #
+# This file contains a list of all CLAS run periods known to the clasevent    #
+# package.
+#                                                                             #
+###############################################################################
+#
+# "g1c" run [ october-november 1999 ]
+#
+# name |  run #'s  | beam energy | torus current | target: mat  cell  offset
+g1c     20926-21359     3.115          1920                 1     3     0
+g1c     21427-21645     2.897          1920                 1     3     0
+g1c     21763-21983     2.445          1920                 1     3     0 
+g1c2445 21763-21983     2.445          1920                 1     3     0 
+#
+# "g6c" run [ august-september 2001 ]
+#
+# name |  run #'s  | beam energy | torus current | target: mat  cell  offset
+g6c     29808-30198     5.734          1688                 1     5     -100
+#
+# "g11" run [ may-july 2004 ]
+#
+# name |  run #'s  | beam energy | torus current | target: mat  cell  offset
+g11     43490-44107     4.023          1920                 1     7    -10
+g11     44108-44133     5.015          1920                 1     7    -10
+#
+# "g10" run [ march-may 2004]
+#
+# name |  run #'s  | beam energy | torus current | target: mat  cell  offset
+g10     42299-42922     3.779          2250                 2     6    -25
+g10     42923-43228     3.779          3375                 2     6    -25
+#
+# "g11" run [ may-july 2004 ]
+#
+# name |  run #'s  | beam energy | torus current | target: mat  cell  offset
+g12     56363-57323     5.714          1930                 1     7    -90
+#                                                                                                                                                        
+# "g8b" run [ july - september(1st) 2005 ]                                                                                                               
+#                                                                         
+# name |  run #'s  | beam energy | torus current | target: mat  cell  offset                                                                            
+g8b     47923-48657     4.559          1930                 1     7    -20
+#                                                                                                                                                      
+# "g9a" run [ November 2007 - Febrary 2008 ]                                                                                                           
+#                                                                                                                                                      
+# name |  run #'s  | beam energy | torus current | target: mat  cell  offset                                                                            
+g9      55521-55595     1.645          1920
+g9      55604-55676     2.478          1920
+g9      55678-55844     3.539          1920
+g9      55854-55938     2.751          1920
+g9      55945-56152     4.599          1920
+g9      56164-56233     2.478          1920

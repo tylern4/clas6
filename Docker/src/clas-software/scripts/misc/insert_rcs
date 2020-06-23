@@ -1,0 +1,215 @@
+#!/usr/local/bin/perl
+# $Id: insert_rcs,v 1.2 1997/11/12 16:37:01 feuerbac Exp $
+#
+###########################################################################
+#  simple little script to insert RCS variables into existing fortran files
+#
+#   execution:  insert_rcs keyword offset filename
+# 
+#                keyword : keyword that describes a line in your code
+#                          like IMPLICIT
+#                offset  : number of lines down from the line that contains
+#                          KEYWORD that the RCS variables should be inserted
+#                filename: COMPLETE fortran filename or .F for ALL fortran
+#                          in the directory
+#
+#   original file is copied to filename.old
+#   author of the script: Arne Freyberger
+#   
+###########################################################################
+$tmp_dir = $ENV{"CLAS_SCRIPTS"};
+#  first get variables from command line (routine name, flag, first, last)
+#  if routine name blank or ? go to help
+if ($ARGV[0] !~ /\w/ || $ARGV[0] eq 'H' || $ARGV[0] eq 'h') {
+   print "Executing help subroutine\n";
+   &wrt_help; 
+}
+# first make a file that contains all the *.F routines
+if ($ARGV[2] eq '.F') {
+    print "insert_rcs I: No file name given, will convert ALL .F files!!!\n";
+    exec `ls *.F > temp.list`;
+    $infile = 'temp.list';
+    open(IN,$infile);
+# initialize counter ifile
+    $ifile=0;
+# loop over files in "temp.list" and write where neccessary
+    while(<IN>) {
+	$file[$ifile] = $_;
+        chop($file[$ifile]);
+	++$ifile;
+    }
+    close(IN);
+} elsif ($ARGV[2] eq '.inc') {
+    print "insert_rcs I: No file name given, will convert ALL .inc files!!!\n";
+    exec `ls *.inc > temp.list`;
+    $infile = 'temp.list';
+    open(IN,$infile);
+# initialize counter ifile
+    $ifile=0;
+# loop over files in "temp.list" and write where neccessary
+    while(<IN>) {
+	$file[$ifile] = $_;
+        chop($file[$ifile]);
+	++$ifile;
+    }
+    close(IN);
+} else {
+	$file[$ifile] = $ARGV[2];
+        ++$ifile;
+    }
+#
+# get authors name from $HOME/.tmpl file
+#
+$afrom = "command line";
+if ($author1 eq "" && -s "$home/.tmpl") {
+    open(IN,"$home/.tmpl");
+    $afrom = "users .tmpl file";
+    while(<IN>) {
+	if (/First\w*/) {
+            @words = split(/:/, $_);
+            $author1 = $words[1]; 
+            chop($author1);
+	} elsif (/Last\w*/) {
+            @words = split(/:/, $_);
+            $author2 = $words[1];
+            chop($author2);
+	}
+    }
+    close(IN)
+}
+#
+# if author is still blank fill it in with REAL LIFE name in finger output
+#
+if ($author1 eq "") {
+    $author1 = $ENV{"LOGNAME"};
+    foreach $_ (`finger "$author1"`) {
+	if (/Login n\w*/) {
+	    @words = split(/: /, $_);
+            @author = split(/ /,$words[2]);
+            $author1 = "\u\L$author[0]"; 
+	    $author2 = "\u\L$author[1]";
+            chop($author2);
+            $afrom = "the output finger cmnd";
+    }
+    }
+}
+#
+$keyword = $ARGV[0];
+$offset = $ARGV[1];
+#
+#  pointer to users home directory
+$home = $ENV{"HOME"};
+#
+#  pointer to the template file
+if ($tmp_dir !~ /\w/) {
+   $tmp_dir = "/clas/cebafb/u1/cmobj/script";
+        print "insert_rcs I: Enviroment variable CMH_SCRIPT not defined\n";
+        print "insert_rcs I: will use default value: $tmp_dir\n";
+}
+#
+# determine if this is a .F or .inc file
+#
+$_ = $ARGV[2];
+if (/.F/) {
+    $rcstmpl = "$tmp_dir/rcs.F";
+} elsif (/.inc/) {
+    $rcstmpl = "$tmp_dir/rcs.inc";
+} else {
+    print "insert_rcs  I: extension $ARGV[2] not allowed\n";
+$ifile = 0
+}
+# set the flags and redirect input/output
+#
+#
+# loop over files in $file
+$index = 0;
+while($index < $ifile) {
+    $csave = $file[$index];
+    $_ = $csave;
+    s/.F//;
+    s/.inc//;
+    $csave = $_;
+    print "insert_rcs I: Renaming $file[$index] to $file[$index].old \n";
+    rename("$file[$index]","$file[$index].old");
+    $iline = 0;
+    $insert = 0;
+    $outfile = $file[$index];
+    $routine = "$file[$index].old";
+    open(IN,$routine);
+#first read in the file and find the position
+    while(<IN>){
+	++$iline;
+	if (/$keyword/ && $insert == 0) {
+	    $insert = $iline + $offset;
+	    }
+    }
+    close(IN);
+    if ($insert == 0) {
+	print "insert_rcs W: Keyword $keyword NOT found in $file[$index]\n";
+	print "insert_rcs W: $file[$index] NOT modified \n";
+    }
+# 
+# now open INPUT and OUTPUT files
+#
+    open(IN,$routine);
+    open(OUT,">$outfile");
+# Now loop again and insert at the correct point
+    $iline = 0;
+    while(<IN>){
+	++$iline;
+	if ($iline < $insert){
+	    print OUT $_;
+	} elsif ($iline == $insert) {
+            print OUT $_;
+	    open(RCS,$rcstmpl);
+	    while(<RCS>){
+		s/template/$csave/g;
+		s/John/$author1/;
+		s/Doe/$author2/;
+		$author =$author1.$author2;
+		print OUT $_;
+	    }
+	    close(RCS);
+	} else {
+	    print OUT $_;
+	}
+    }
+    close(IN);
+    close(OUT);
+    ++$index;
+}
+# remove temp.list file
+unlink ("temp.list");
+# end file loop
+# help package
+sub wrt_help {
+print "insert_rcs  I: simple little script to include RCS variables\n";
+print "insert_rcs  I: into existing Fortran code\n";
+print "insert_rcs  I:\n";
+print "insert_rcs  I: execution:  insert_rcs keyword offset filename  \n";
+print "insert_rcs  I:\n";
+print "insert_rcs  I: output:  filename and filename.old\n";
+print "insert_rcs  I: required input:\n";
+print "insert_rcs  I: keyword = keyword that is contained in your code \n";
+print "insert_rcs  I: offset = number of lines from line containing KEYWORD\n";
+print "insert_rcs  I:          to insert RCS variables \n";
+print "insert_rcs  I: filename = full fortran file name, \n";
+print "insert_rcs  I:            or .F for ALL .F files in subdirectory \n";
+print "insert_rcs  Q: Please enter keyword now: ";
+$ARGV[0] = <STDIN>;
+chop($ARGV[0]);
+print "insert_rcs  Q: please enter offset now: ";
+$ARGV[1] = <STDIN>;
+chop($ARGV[1]);
+print "insert_rcs  Q: please enter filename now (enter .F for all fortran files): ";
+$ARGV[2] = <STDIN>;
+chop($ARGV[2]);
+print "insert_rcs  I: Thank you and have a most pleasant day \n";
+}
+
+
+
+
+
+
+

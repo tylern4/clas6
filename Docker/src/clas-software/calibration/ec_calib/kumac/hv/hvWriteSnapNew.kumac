@@ -1,0 +1,59 @@
+macro hvWriteSnap det=0 sec vec
+
+  if [det]=0 then
+    message 'Purpose: Write HV snapshot file of EPICS HV'
+    message '         database values'
+    message '  Usage: hvWriteSnap det sec dbvar vec'
+    message '    det: Detector (ec,cc,sc)'
+    message '    sec: Sector (1-6)'
+    message '    vec: KUIP vector containing voltages'
+    exitm
+  endif
+  
+  file = kumac/hv/db/[det][sec].snap
+  
+  message hvWriteSnap: Writing vector [vec] to snapshot file [file]
+  
+  det = $upper([det])
+  global/imp [det]map*
+
+  if $fexist([file]) then
+    shell rm [file]
+  endif
+  
+  lun1 = 2
+  n = 0
+  k = 1
+  
+  case [det] in
+     (EC) pmtmax=36;laymax=6;split=6
+     (CC) pmtmax=18;laymax=2
+     (SC) pmtmax=23;laymax=2
+  endcase
+  
+  do lay = 1,[laymax]
+    do pmt = 1,[pmtmax]
+      if [pmt].lt.10 then
+        pmt = 0[pmt]
+      endif
+      string1 = B_hv_[[det]map([pmt],[lay],[sec])].DVO
+      string1 = $quote([string1])
+      string2 = 1 $eval([vec]([pmt],[lay],[sec]))
+      string2 = $quote([string2])
+      n = [n]+1
+      case [n] in
+        (1)  fort/file [lun1] kumac/hv/db/tmp[k].dat unknown
+             call write([lun1],[string1],[string2],' ')        
+        (54) n = 0;k=[k]+1
+             call write([lun1],[string1],[string2],' ')
+             close [lun1]         
+      endcase
+    enddo
+  enddo
+  
+  close [lun1]
+  
+  shell cat kumac/hv/db/header.txt kumac/hv/db/tmp1.dat kumac/hv/db/tmp2.dat kumac/hv/db/tmp3.dat kumac/hv/db/tmp4.dat > [file]
+
+return
+  

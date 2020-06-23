@@ -1,0 +1,15 @@
+from build_system import environment
+
+scatEnv=environment.env(deps=['clas6'])
+scatEnv.load_dependency('clas6')
+
+scatLib = scatEnv.library(
+    target = 'scat',
+    ignore = ['scatbos.c', 'pmap.c', 'bos.h'] )
+
+scatbosLib = scatEnv.library(
+    target = 'scatbos',
+    source = ['scatbos.c', 'evout.c'],
+    ignore = ['bos.h'] )
+
+scatEnv.return_from_sconstruct(scatLib)

@@ -1,0 +1,446 @@
+How to use the gflux code in obtaining the photon flux.
+
+------------------
+TABLE OF CONTENTS:
+------------------
+
+1.  THE GFLUX CODE
+2.  GFLUX EXTERNAL CODE REQUIREMENTS
+3.  GFLUX COMPILATION
+4.  GFLUX INPUT
+5.  GFLUX OUTPUT
+6.  GFLUX PRINT USAGE
+7.  EXPLINATION OF THE SWITCHES
+8.  PROCEDURE TO OBTAIN THE FLUX
+9.  SAMPLE PROCEDURE
+10.  BOS BANKS USED BY GFLUX 
+
+-------------------
+1.  THE GFLUX CODE:
+-------------------
+
+The gflux utility can be found in the directory packages/utilities/gflux.  
+The actual source code is gflux.c.  The other two pieces of code found in this
+directory are the header file, gflux.h and various functions in the 
+gflux_util.c file.  I plan to include a additional code, gflux_final, that 
+recalcuates the flux from a hbook which is a sum of hbook files for a given 
+run using the add_hbooks utility.  This will increase the statics in the 
+calculation.  But I'm starting to believe that we have aready surpressed the 
+statistical error enough, where the systematic error would dominate anyways. 
+
+-------------------------------------
+2.  GFLUX EXTERNAL CODE REQUIREMENTS:
+-------------------------------------
+
+Update the tag library at packages/tag.  New code has been written specifically
+for gflux.  Enter this directory and type: make lib.  The library libtag.a 
+should be placed in $TOP_DIR/lib/{OSNAME}/.
+
+At least version 1.9 of the include file packages/include/clas_cern.h for 
+hbook wrapers.
+
+The file packages/include/trip.h is the header to the routines that knockout 
+events during beam trips.  This file contains the declares the functions TRIP 
+and open_trip_file along with the trip data structure.
+
+The file packages/include/tripGlobal.h is the header to have access to the 
+trip common block needed for the event numbers of the endpoints in a scaler
+interval.  This is used to do a correction for the skipped sync intervals.
+
+The file packages/include/tagtnorm.h is the header to the data structure that 
+utilizes the common block in the tagging package.  It is used for counting 
+purposes in which it is necessary to override the ET coincidence.
+
+Update the clasutil library at packages/clasutil.  The function ftrip.c has 
+been added and has the source code to TRIP and open_trip_file.  Enter this 
+directory and type: make lib.  The library libclasutil.a should be placed in
+$TOP_DIR/lib/{OSNAME}/.  This code will also be necessary to include in 
+personal analysis since these events are knocked out of the normalization, 
+hence, they have to be knocked out of the yields.  A quick summary of these 
+two functions since this is their first star appearence.  The funtion 
+open_trip_file is self explainatory, and has a string argument of the location
+of the trip file.  When this file is opened, the first line of the trip file 
+is read in.  It is set up that all initial events of a file will be skipped 
+until the first scaler event in the file.  The function TRIP has no arguments 
+and works purely from the trip file.  The TRIP function must be called for 
+every phyisics and scaler event.  For physics events, if TRIP returns a trip 
+status of zero the event is processed, otherwise discarded.  For scaler events,
+the TRIP function reads the next line of the trip file, which has the trip 
+status along with other values, and it returns the previous trip status.  It 
+returns the previous trip status because gflux is set up to do flux 
+calculations every scaler event, and it needs to know if the previous scaler
+interval had trips or if it was the start of a file.  For the following 
+physics events after a scaler event the TRIP funtion will return the value read
+during the scaler event.
+
+The pid package is necessary if you wish to use the particle histograms for
+normalized yield tests, but it is not necessary for the fluxes alone.  
+Unfortunately, it is necessary for complilation.  No modifications were done 
+to this package in the development of gflux.  This library can be found at 
+packages/pid, and command of make lib in this directory should give you the 
+lib $TOP_DIR/lib/{OSNAME}/libpid.a.  It is most likely that this step is not
+needed, since the compliation of gflux will grab this lib from the group
+area.
+
+Update the sync package at packages/utilities/sync.  Additional code has been 
+added to calculate the trip status with the -t option.  Enter this directory
+and perform make sync.  This will give you the executable sync in the same
+directory.
+
+The map $CLAS_PARMS/Maps/NORM.map.  The following values are needed in this 
+map:
+
+   Subsystem: gflux,       nitems: 11
+      Item: begin_t_window,   length: 1,      type: float
+      Item: end_t_window,     length: 1,      type: float
+      Item: ngamma_25mev,     length: 100,    type: float
+      Item: ngamma_25mev_u,   length: 100,    type: float
+      Item: ngamma_eb_u,      length: 767,    type: float
+      Item: ngamma_tc,        length: 61,     type: float
+      Item: norm_run,         length: 1,      type: int
+      Item: stolen_window,    length: 61,     type: float
+      Item: tag_ratio,        length: 61,     type: float
+      Item: tag_ratio_u,      length: 61,     type: float
+
+Actually, none of these items are necessary to process the normalization runs,
+which is the first step in obtaining the flux.  And for the production runs, 
+only the items:  begin_t_window, end_t_window, stolen_window and the tag_ratio
+with its error, tag_ratio_u are needed.  The items tag_ratio and tag_ratio_u 
+are determined from the normalization runs.  The final items are the fluxes 
+themselves in the binning of T counter, E bin, and energy, along with their 
+respective errors.  These would be the fluxes per run, but currently it hasn't
+be decided if we wish to procede in this fashion or just to use them file per
+file.  The final item in the map is called norm_run.  This tells gflux for a 
+given production run, which normalization run to use.  After seeing all of the
+normalizations runs from the 2.4 GeV period of g1c, we only see a 1% spread 
+about the weighted average of all of the normalization runs.  Hence, this 
+portions is very stable, and it allows use to use the easy procedure of 
+normalizing each production run to the previous normalization run.  Hence, 
+simply place the run number of each normalization run into this item at the 
+same position, -t, as the run number you want to enter.  
+
+The final outside influence to gflux in also in the NORM.map:
+
+   Subsystem: photon_atten,        nitems: 2
+      Item: error,    length: 1,      type: float
+      Item: value,    length: 1,      type: float
+
+This is the photon attenuation along the beam line, which was studied by 
+Reinhard Schumacher, and can be found in the clas note 2001-010.  For the 
+g1 running this correction results in a ~4% increase in flux. 
+
+----------------------
+3.  GFLUX COMPILATION:
+----------------------
+
+Once the external sources are in place enter the gflux directory and type:  
+make.  A executable, gflux, is created in your bin/$OS_NAME directory.  If you
+are using your own maps for the parms area instead of the data base type
+make MAP=1.
+
+----------------
+4.  GFLUX INPUT:
+----------------
+
+gflux can be run on either raw or cooked data.  Also the trip file and sync
+file are included in the switches even though they are not necessary for 
+operation.  The default setup for gflux assumes production running on the farm.
+Hence, by default it builds all of the necessary banks.  This can be overriden.
+
+-----------------
+5.  GFLUX OUTPUT:
+-----------------
+
+gflux produces a hbook called gflux[run#].hbk.  In production running also
+three text files:  gflux[run#]_tc.dat, gflux[run#]_eb.dat, and 
+gflux[run#]_erg.dat, and gflux[run#]_erg2.dat which are the photon fluxes 
+binned per T counter, E bin, and in two energy scales, respectively.  The 
+normalization run produces the text file gflux[run#]_tag_ratio.dat.  All of 
+these text files are in the format of two columns, the value and its error.  
+Adding the switch -f[file#] changes the file format to gflux[run#].a00.hbk and
+so on for example with the -f0 switch.  Hence, don't forget this switch when 
+processing all of the files from a run in a single directory or else each file
+will overwrite the previous file.
+
+----------------------
+6.  GFLUX PRINT USAGE:
+----------------------
+
+Usage: gflux [-Options] file1 [file2] etc...
+ 
+  Options:
+        -B              Bloated mode(All histograms) equivalent to -P -T -e
+        -F[#]           Run gated clock frequency in KHz, default 10 KHz
+        -M[#]           Process only # number of events
+        -N[#]           Normalize to this run, instead of using map
+        -P              Rebuild PID with particle histograms
+        -R              Do NOT rebuild TAGR bank, by default it does
+        -T              Raw tagger histograms from TAGE, TAGT, and TAGI
+	-E              apply tagger energy correction (default: no correction)
+        -b              Batch mode(no printout on screen)
+        -c              Clock based DAQ livetime, default event based
+        -e              Make exclusive reaction histograms
+        -f              File number, necessary if you want to keep txt files
+        -l[#]           Scaler intervals in timeline histograms, default 50
+        -n              Process a normalization run
+        -o<outfile>     Output hbook file name
+        -p              Particle histograms without rebuilding PID
+        -s              Start counter histograms from ST1 and STR
+        -t<file>        Trip file
+        -y<file>        Synch event mode (skip events)
+
+---------------------------------
+7.  EXPLAINATION OF THE SWITCHES:
+---------------------------------
+-B:	Includes all of the histograms
+
+-F[#]:	For experiments before g8a, the frequency of the run gated clock was
+        10 KHz, and this switch is not needed.  For g8a to present, the clock 
+        frequency is 100 KHz.
+
+-M[#]:	Self explaintory.
+
+-N[#]:  Use to override the what the map has entered in as the normalization 
+        run to use.
+
+-P:	Has the same outcome as -p, but redoes tagging and pid. 
+
+-R:	This code defaults in rebuilding the TAGR bank, if that is not 
+        necessary then use this switch.
+
+-T:	Includes raw tdc channels from tage, tagt_left, tagt_right. 
+
+-E:	applies tagger energy correction obtained by g10 run using Pair Spectrometer. 
+        Without this switch there is no corretcion. 
+
+-b:	This leaves out the event counter, nice also when redirecting the 
+        stdout to a file.
+
+-c:	This option is used for experiments runing on the level 2 trigger, 
+        where the event based livetime is meaningless.
+
+-e      book and fill yield histograms for exclusive reactions
+        gamma + p -> pi^+ +n and
+        gamma + p -> pi^+ + pi^- +p 
+
+-f[#]: 	Changes the default name from gflux[run#].hbk to gflux[run#].a0[#].hbk.
+
+-l[#]:	There are various timeline plots, and this overwrites the default of 
+        50 intervals, 10 sec each.  Again the code caters to production 
+        running, hence the short lenth of time.  This switch is useful for the
+        normalizaition runs to see the timelines of the entire run.
+
+-n:	Must include to process a normalization run when obtaining the tagging
+        ratio.
+
+-o<outfile>:  rename hbook from default gflux[run#].hbk
+
+-p:	Includes particle yields of p, pi+, pi-, unknown, and charged along 
+        with normalized yields and ratios of various particle yields to the 
+        pi+ yield.
+
+-s:	Produces histograms which measure the rate of the start counter pairs.
+
+-t<file>:	Trip file created with the sync utility using the -t option.
+                The full path can be given.  
+
+-y<file>:	Sync file also obtained from the sync utility with or without 
+                the -t option.  The full path can be given.
+
+---------------------------------
+8.  PROCEDURE TO OBTAIN THE FLUX:
+---------------------------------
+
+A quick overview:
+
+1.  Enter the photon attenuation along with its error into the NORM.map.
+
+2.  Run the sync utility with the -t switch on the normalization files all at
+    once.  
+
+3.  In the gflux.h file set the values of NUM_ERG, ERG_LOW, ERG_HIGH 
+    appropriate for your experiment.  These are the constants defining the
+    energy range and number of bins.  There are another set of variables with
+    ERG2 so you can have two sets of energy ranges if desirable.  The defaults
+    are 0.4875-2.9875 GeV with 100 bins for the ERG settings and 0.5-3.0 GeV
+    with 50 bins for the ERG2 settings. 
+
+4.  Run gflux on these normalization files with the -n, -T, -t<tripfile>, and 
+    -y<syncfile>  switches.
+
+5.  Place the tagging ratio and its error into NORM.map.
+
+6.  From the the hbook produced with the normalization run, determine the out 
+    of time window from histogram 72.  Place these values, begin_t_window and 
+    end_t_window into NORM.map.  Also enter which normalization run is to be 
+    used by the production runs in the item norm_run. Also use this histogram
+    to determine the stolen_window.  This is measured from the beginning of the
+    TDC scale to the dip just before the main trigger peak.  Also place these
+    values in the NORM.map.
+    
+7.  Run the sync utility with the -t and -c switch on each production file 
+    independently.  The -t switch produces the trip file and -c switch adds to
+    the sync file two more columns corresponding to the times of each sync 
+    interval endpoint from the first two columns.  This will allow gflux to 
+    correct for the skipped sync interval, which for g1c was ~1%.
+
+8.  Run gflux on each production file with the -T, -t<tripfile>, -y<syncfile>,
+    and -f[file#] switches.
+
+9.  Now you have the fluxes in four binnings:  T counter, E bin, and two in 
+    energy on a file per file basis.
+
+Extra notes on each section:
+
+1.  The photon attenuation values for each running period can be found in the 
+    clas note 2001-010.  These values are placed once at the beginning of the 
+    running period.
+
+2.  Assuming that all of the files can be seen by one computer, the sync 
+    utility is run on the entire normalization run at once.  At least this is 
+    the way I did it.  This allows you to have one hbook and a single tagging
+    ratio.  Of course you can do this file by file do a weighted average on all
+    of the tagging ratios from each file, your choice.  A quark of sync is that
+    it tries to write into the directory of the data file.  Hence, this 
+    requires soft links to be made to the cached data files in your current 
+    working directory.  This utility names its new files by taking the first 
+    file given in its argument and adds the suffuxes .sync and .trip.
+
+3.  These values are for the rebinning of the photon flux into energy bins.  
+    NUM_ERG is the total number of bins, and the values ERG_LOW, and ERG_HIGH 
+    are the lower and upper bound of the energy range.  By default, there are
+    100 25 MeV bins with the inital bin center at 500 MeV.
+
+4.  The -T switch is included so that histogram 72 is produced, since this is 
+    the necessary histogram on part 5.
+
+5.  The awk command can be used here on the gflux[run#]_tag_ratio.dat to enter
+    these values into the map.
+
+6.  Histogram 72 produced by gflux is a 2d plot of T counter vs. Tpho.  Where 
+    Tpho is the photon timming from the TAGR bank.  The goal here is to 
+    determine the limits of the out of time window.  These are global 
+    limits with respect to T counter.  So the criteria is to make the out of 
+    time window as large as possible for statistics without interfering with
+    the intime peak or leaving the range of the TDC.  The values are given in 
+    ns.  For g1c the values are: begin_t_window 30, end_t_window 160.  Even 
+    though we get this timing in the normalization run, it is still valid for
+    for the production runs since it is always the MOR which produces the 
+    trigger because it is the last signal in coiencidence in both running
+    configurations.  The stolen_window variable is different for each T counter
+    and it ranged from 9-20 ns in g1c.
+
+7.  Here, batch production running is assumed, hence, the file by file basis.
+    Version 1.17 of the sync.c file added the -c switch for the interrupt time
+    of each endpoint sync event.  These times are used to correct for the 
+    lost time of the bad sync intervals.
+
+8.  You can override which normalization run to use by including the switch
+    -N[normrun#].  If you are using cooked data, the -P or -p switches can be
+    used to produce normalized yields, the choice in -P or -p comes from if you
+    are rebuilding the banks or not.
+
+---------------------
+9.  SAMPLE PROCEDURE:
+---------------------
+
+Here are step by step commands given using the normalization run 21767 and the 
+production run 21785.  Assume being in a single directory on the work disk.
+The run 21767 has files A00-A05, and the run 21785 has files A00-A11.  Using 
+the $ as a prompt:
+
+1.  Create two text files, one with the photon attenuation and one with its 
+    error.  Using the file names value and error:
+
+    $ put_map_float -m$CLAS_PARMS/Maps/NORM.map -sphoton_atten -ivalue -t20800
+      < value
+
+    $ put_map_float -m$CLAS_PARMS/Maps/NORM.map -sphoton_atten -ierror -t20800
+      < error
+
+2.  $ ln -s /cache/mss/clas/g1c/data/clas_021767.A00
+
+    Repeat for each file.
+
+    $ sync -t clas_021767.A00  clas_021767.A01 clas_021767.A02 clas_021767.A03
+      clas_021767.A04 clas_021767.A05 
+
+    The files clas_021568.A00.sync and clas_021568.A00.trip are created.
+
+3.  $ gflux -n -T -tclas_021568.A00.trip -yclas_021568.A00.sync -l350 
+      clas_021767.A00 clas_021767.A01 clas_021767.A02 clas_021767.A03
+      clas_021767.A04 clas_021767.A05 >& status21767 
+
+    The redirection of the stdout is done to make sure all is well.  Assuming
+    so then the hbook gflux21767.hbk and the text file gflux21767_tag_ratio.dat
+    are created.  The -l350 switch is included so that the timelines in the 
+    gflux hbook show the entire run, adjust as needed.
+
+4.  $ awk '{print $1}' gflux21767_tag_ratio.dat | put_map_float 
+      -m$CLAS_PARMS/Maps/NORM.map -sgflux -itag_ratio -t21767
+
+    $ awk '{print $2}' gflux21767_tag_ratio.dat | put_map_float
+      -m$CLAS_PARMS/Maps/NORM.map -sgflux -itag_ratio_u -t21767
+
+    Here the awk command is used to print columns of the tagging ratio data
+    file, hence, the notation $1 for column 1 and $2 for column 2.  Then it
+    is piped to the map manager command.
+
+5.  From histogram 72 in gflux21767.hbk, the out of time window was determined
+    to range from 30-160ns.  Create two text files, begin with the value 30 and
+    end with the value 160.  Also create the text file norm with the value 
+    21767.
+
+    $ put_map_float -m$CLAS_PARMS/Maps/NORM.map -sgflux -ibegin_t_window
+      -t21767 < begin
+ 
+    $ put_map_float -m$CLAS_PARMS/Maps/NORM.map -sgflux -iend_t_window
+      -t21767 < end
+
+    $ put_map_int -m$CLAS_PARMS/Maps/NORM.map -sgflux -inorm_run -t21767
+      < norm
+
+    Create a vector of the stolen_windows for each T counter and write it to 
+    a file, here called stolen_window.txt
+
+    $ put_map_float -m$CLAS_PARMS/Maps/NORM.map -sgflux -istolen_window 
+      -t21767 < stolen_window.txt
+
+6.  $ ln -s /cache/mss/clas/g1c/data/clas_021785.A00
+
+    $ sync -t -c clas_021785.A00
+
+    The files clas_021785.A00.trip and clas_021785.A00.sync are produced.  
+    Repeat for all files.
+
+7.  $ gflux -T -tclas_021785.A00.trip -yclas_021785.A00.sync -f0 
+      clas_021785.A00 
+  
+    The hbook gflux21785.a00.hbk and the text files gflux21785_tc.a00.dat,
+    gflux21785_eb.a00.dat, and gflux21785_eb25mev.dat are created.  The -f
+    switch is needed since this will be repeated for all the files.
+
+    Even if you decide to use cooked files instead, using the -y option for
+    the trip files will allow gflux to correct for the lost sync intervals.
+    Excluding the -y flag on the cooked file will allow gflux to functionally
+    run properly just with out this correction.
+
+----------------------------
+10.  BOS BANKS USED BY GLUX:
+----------------------------
+
+Banks common to all possible switch combinations:
+
+HEAD TBTR TAGR TRGS S1ST
+
+Additional banks used with the -T option:
+
+TAGE TAGT TAGI
+
+Additional banks used with the -P or -p and -e options:
+
+PART TBID GPID
+
+Additonal banks used with the normalization run -n option:
+
+TACO

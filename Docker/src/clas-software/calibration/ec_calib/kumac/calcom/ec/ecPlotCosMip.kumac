@@ -1,0 +1,32 @@
+macro ecPlotCosMip sec 
+
+  case [sec] in
+    (3) runno = 1802
+    (5) runno = 559
+    (6) runno = 1617
+  endcase
+  
+  close 0
+  
+  hi/file 1 hist/mip.rzh
+  hi/file 2 hist/ec706_t1315.rzh
+  
+  opt stat
+  zone 2 2
+
+  loop:
+  
+    read lay Enter layer:
+    read str Enter strip:
+    
+    pmt1 = ([lay]-1)*36+[str]
+    pmt2 = [pmt1]+108
+    
+    exec plot 1 ec [sec] adc [pmt1]
+    exec plot 2 ec [sec] adc [pmt1]
+    exec plot 1 ec [sec] adc [pmt2]
+    exec plot 2 ec [sec] adc [pmt2]
+    
+  goto loop
+  
+return 

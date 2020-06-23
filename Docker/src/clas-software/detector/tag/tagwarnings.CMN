@@ -1,0 +1,66 @@
+c	
+c      include file tagwarnings.CMN
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: tagwarnings.CMN,v 1.2 2004/12/10 23:59:36 pasyuk Exp $
+c
+c  Documentation for include file event
+c
+c  Purpose:  common used for storage of calibration constants
+c  --------  
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   E. Anciant april, 20th 1998
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file event:
+c  ----------------------------------
+c************* RECSIS compiling parameters ************
+c
+c   those parameters are here (mostly array size parameters) because there is no reason
+c   they should be used in routines other than the ones that use the corresponding arrays
+c   and therefore includes this file. E.A
+c
+c
+
+
+c
+c
+c_end_var
+c  -----------------------------------
+c
+
+       integer wtrfb,wta,wtpt,wtiftb,wtftb,
+     +         wtr2b,wtfo,wtetgm,wtettm,wtetb,wttaa,wtrtc,
+     +         witiftb,wtrpcb,wtpcp,wtrpsb,wtpsp,wtrtcb,wttcp,
+     +         witrpcb,witrpsb,witrtcb,
+     +         wtagta,wtagte,wtagtm,wtagea,wtagee,wtagem,
+     +         wtageo,wtid,wecid,wits,witpt,
+     +	       wtgtla,wtgtle,wtgtlm,wtgtlo,wtgtlid,
+     +	       wtgtra,wtgtre,wtgtrm,wtgtro,wtgtrid
+
+
+       common/tagwarnings/wtrfb,wta,wtpt,wtiftb,wtftb,
+     +         wtr2b,wtfo,wtetgm,wtettm,wtetb,wttaa,wtrtc,
+     +         witiftb,wtrpcb,wtpcp,wtrpsb,wtpsp,wtrtcb,wttcp,
+     +         witrpcb,witrpsb,witrtcb,
+     +         wtagta,wtagte,wtagtm,wtagea,wtagee,wtagem,
+     +         wtageo,wtid,wecid,wits,witpt,
+     +	       wtgtla,wtgtle,wtgtlm,wtgtlo,wtgtlid,
+     +	       wtgtra,wtgtre,wtgtrm,wtgtro,wtgtrid
+
+
+     		
+c----6----------------------------------------------------------------72
+		

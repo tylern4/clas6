@@ -1,1 +1,0 @@
-      COMMON/TRAC2/ALIM(2,3)

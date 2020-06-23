@@ -1,0 +1,26 @@
+macro ecProcessNewFit file sec
+
+  exec ecGenAttCor  
+  exec ecGetPixelVec [file] 1 [sec]
+  
+  sigma ei = (adc1+adc2+adc3)/300.
+  sigma eo = (adc4+adc5+adc6)/480.
+  sigma eie = (adcerr1+adcerr2+adcerr3)/300.
+  sigma eio = (adcerr4+adcerr5+adcerr6)/480.
+  
+  vec/copy sumcor(:,1,[sec]) dum1
+  vec/copy sumcor(:,2,[sec]) dum2
+    
+  sigma ti = 0.333*dum1
+  sigma to = 0.333*dum2
+  
+  sigma hist = ei/ti
+  sigma histerr = eie/ti
+  
+  exec ecNewFit hist histerr ber
+  
+return
+  
+   
+  
+  

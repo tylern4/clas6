@@ -1,0 +1,10 @@
+from build_system import environment
+import os.path
+
+g12monenv = environment.env(deps=['clas6', 'root'])
+g12monenv.load_dependency(['clas6', 'root'])
+
+g12monDict = g12monenv.ROOTDictionary('g12mon', ['g12_monitor.h', 'g12_monitorLinkDef.h'])
+
+g12monenv.program(target='g12_monitor', source = ['g12_monitor.cc', g12monDict[0]])
+			  

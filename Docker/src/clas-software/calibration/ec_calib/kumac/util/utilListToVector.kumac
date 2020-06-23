@@ -1,0 +1,25 @@
+macro utilListToVector vec
+
+  listlen = [#]-1
+  
+  case $vexist([vec]) in
+    (1) dim = $vdim([vec])
+        vec/inp [vec] [dim]*0
+        if ([#].gt.[dim]) then
+          vec/cre [vec]([#])
+        endif
+    (0) dim = [#]
+        vec/cre [vec]([dim])
+  endcase
+   
+  vec/inp [vec](1) [listlen]
+  do i = 2,[#]
+    vec/inp [vec]([i]) [%i]
+  enddo
+  
+return
+    
+       
+  
+
+  

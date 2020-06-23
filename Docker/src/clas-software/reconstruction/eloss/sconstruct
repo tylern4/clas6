@@ -1,0 +1,6 @@
+from build_system import environment
+
+elossEnv = environment.env(deps=['clas6'])
+elossEnv.load_dependency('clas6')
+elossLib = elossEnv.library('eloss')
+elossEnv.return_from_sconstruct(elossLib)

@@ -1,0 +1,75 @@
+macro calNewWriteSparTable crate runno pedoff nola=0 file
+
+  global/import sparpath
+
+  if [det]=0 then
+    message 'Purpose: Writes sparcification table to disk file [crate]_[run].spar'
+    message '  Usage: calWriteSparTable  crate runno pedoff'
+    message '  crate: Crate (ec1,ec2,cc,sc)'
+    message '  runno: Run number'
+    message ' pedoff: Offset added to pedestal for sparcification'
+    message '   nola: Suppress large angle bars'
+    message 'seclist: List of sectors to deactivate.' 
+    exitm
+  endif
+  
+  case [crate] in
+    (EC1,ec1) crocnum=14;crocname=croc08;det=ec
+    (EC2,ec2) crocnum=15;crocname=croc11;det=ec
+    (CC,cc)   crocnum=12;crocname=croc07;det=cc
+    (SC,sc)   crocnum=13;crocname=croc06;det=sc
+  endcase
+   
+  exec calGetVec [det] ped [runno]
+  
+  d1 = $vdim([det]Mean[runno],1)
+  d2 = $vdim([det]Mean[runno],2)
+  d3 = $vdim([det]Mean[runno],3)
+  
+  vec/cre thr([d1],[d2],[d3]) r
+  vec/cre ithr([d1],[d2],[d3]) i
+  vec/cre pad(1) i 1000
+  vec/cre islot(1) i; vec/cre ichan(1) i
+  
+  if [nola].eq.1 then
+    exec scPedMask [det]Mean[runno] 
+  endif
+  
+  vec/copy [det]Mean[runno] thr
+  
+  if [#].gt.6 then
+    do i = 6,[#]
+      s = [%i]
+      vec/inp thr(:,:,[s]) $eval([d1]*[d2])*0.
+    enddo 
+  endif   
+  
+  sigma thr = (thr le 0)*1000 + (thr gt 0)*thr
+  sigma thr = int(thr+[pedoff])
+  
+  vec/copy  thr ithr     
+  
+  fort/file 1 [file]
+  
+  do slot = 25,1,-1
+    num = $eval(croc[crocnum]([slot]))
+    if [num].eq.1 then
+      message Processing [crocname] slot [slot] 
+      vec/inp islot(1) [slot]
+      do chan = 1,64
+        vec/inp ichan(1) $eval([chan]-1)
+        sec = $eval(rc[crocnum]map(3,[chan],[slot]))      
+        if [sec].ne.-1 then
+          lay = $eval(rc[crocnum]map(2,[chan],[slot]))
+          str = $eval(rc[crocnum]map(1,[chan],[slot]))
+          vec/write islot(1),ichan(1),ithr([str],[lay],[sec]) [file] 3I chopt=' '
+        else
+          vec/write islot(1),ichan(1),pad(1) [file] 3I chopt=' '
+        endif
+      enddo  
+    endif       
+  enddo
+  
+  close 1
+  
+return    

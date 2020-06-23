@@ -1,0 +1,61 @@
+macro scXY corr=0
+
+  alias/cre tdiff (float(tdclsc)-float(tdcrsc))
+  alias/cre tsum  0.5*(float(tdclsc)+float(tdcrsc))
+  alias/cre gmean sqrt(float(adclsc*adcrsc))
+  
+  vec/cre scgmean(24,100)
+  vec/cre sccounts(24,100)
+  vec/cre sccorr(100,24) 
+
+  2d 200 '' 24 1. 25.  100. -600. 600. 0.
+  2d 201 '' 24 1. 25.  100. -600. 600. 0.
+  2d 202 '' 24 1. 25.  100. -600. 600. 0.
+  2d 203 '' 100. -600. 600. 24 1. 25. 0.
+  2d 204 '' 100. -600. 600. 24 1. 25. 0.
+  
+  nt/plot 2000.tdiff%idsc secsc=6.and.statussc=0.and.abs(tdiff).lt.600 idh=200 option=colz
+  nt/plot 2000.tdiff%idsc secsc=6.and.gmean.and.statussc=0.and.abs(tdiff).lt.600 idh=201 option=colz
+  divide 201 200 202
+  get_vect/contents 200 sccounts
+  get_vect/contents 202 scgmean
+  
+  case [corr] in
+    (1) prof 100 '' 24 1. 25. -600. 600. 
+        nt/plot 2000.tdiff%idsc secsc=6.and.statussc=0.and.abs(tdiff).lt.600 idh=100  
+        vec/cre scshift(24) r
+        get_vect/contents 100 scshift
+  endcase
+  
+  do i = 1,24
+    shift = $eval(int(scshift([i])/12.))
+    vec/copy sccounts([i],:) dum
+    sigma dum = ls(dum,[shift])
+    vec/copy dum sccorr(:,[i])
+  enddo
+  
+  put_vect/contents 203 sccorr
+  
+  do i = 1,24
+    shift = $eval(int(scshift([i])/12.))
+    vec/copy scgmean([i],:) dum
+    sigma dum = ls(dum,[shift])
+    vec/copy dum sccorr(:,[i])
+  enddo
+  
+  put_vect/contents 204 sccorr
+  
+  zone 2 2
+  
+  hi/plot 203 colz
+  hi/plot 204 colz
+  
+  alias/del gmean
+  alias/del tdiff
+  alias/del tsum    
+    
+return
+  
+  
+  
+  

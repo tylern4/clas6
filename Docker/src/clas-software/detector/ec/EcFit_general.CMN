@@ -1,0 +1,34 @@
+***************** begin: EcFit_general.CMN **********************************
+*	
+*- Ec fitting information
+*
+*- total number of hits on a layer in a sector
+      integer EcFit_Nhit( whole:cover, MAXsectors)
+*- info on a hit in a layer in a sector
+      real EcFit_hit( Ec_x: last_par, MAXhits,
+     &                       whole:cover, MAXsectors)
+*
+*- Coordinates of hits on the face of the EC
+      real ifec(MAXhits,whole:cover, MAXsectors)
+      real jfec(MAXhits,whole:cover, MAXsectors)
+      real difec(MAXhits,whole:cover, MAXsectors)
+      real djfec(MAXhits,whole:cover, MAXsectors)
+*- total number of matched hits for given layers in a sector
+      integer nmatch(whole:cover,whole:cover,MAXsectors)
+*- Matched hit IDs in a sector
+      integer matched(whole:cover,whole:cover,MAXhits,MAXsectors)
+*- Quolaty measure for matching.
+      real c2match(whole:cover,whole:cover,MAXhits,MAXsectors)
+*
+*- total number of unreconstructed instances
+C      integer EcFit_Nunrecon( whole: outer, MAXsectors)
+*- info on unreconstructedon instances
+C      real EcFit_unrecon( near: highest, Ec_x: last_par,
+C     &             MAXunrecon, whole: outer, MAXsectors)
+*
+*
+      COMMON /EcFit_general/ EcFit_Nhit,EcFit_hit,ifec,jfec,difec,djfec,
+     &                nmatch,matched,c2match
+C     &             ,  EcFit_Nunrecon,EcFit_unrecon
+*
+******************* end: EcFit_general.CMN **********************************

@@ -1,0 +1,47 @@
+macro hvPlot main=0 var=DVI vec=hvmain min=0 max=3000 opt=colz
+
+  if [main].eq.0 then
+    message 'Usage: hvPlot main var vec min max opt'
+    message ' main: Mainframe number...1-6(EC),7-8(EC,CC),9-10(SC)'
+    message '  var:  EPICS database variable (DVI,MVI,MCI)'
+    message '  vec:  vector containing voltages (hvmain,DVI,MVI,etc.)'
+    message '  min:  minimum y limit of 1D plot (0,3000)'
+    message '  max:  maximum y limit of 1D plot (0,3000)'
+    message '  opt:  2d plot z-axis option: colormap (colz) or textmap (text)'
+    exitm
+  endif
+  
+  sigma dum=abs([vec])
+  
+  opt zfl1;opt linz;opt liny;opt linx
+
+  title = LeCroy 1458 Mainframe [main]
+  title_gl [title]
+  
+  case [var] in
+    (DVI) ytit=[var] (volts)
+    (MVI) ytit=[var] (volts)
+    (MCI) ytit=[var] (microamps)
+  endcase
+  
+  2d 100 ';Channel;Slot' 12 1. 13. 16 1. 17. 0.  
+  put_vect/contents 100 dum(:,:,[main])
+  min 100 [min]
+  max 100 [max]
+  
+  case [opt] in
+  (colz) zone 1 2
+         null 0 192 [min] [max]
+         sigma chan=array(192,1#192)
+         hplot/symbols chan dum(:,:,[main]) 192 20 0.1
+         atitle 'Channel No.' [ytit]
+         hi/plot 100 colz
+  (text) zone 1 1
+         hi/plot 100 text
+  endcase
+  
+  title_gl ' '
+  
+  opt nzfl
+  
+return

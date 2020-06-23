@@ -1,0 +1,151 @@
+macro fine_tune
+|
+|
+| Define vector containing all the fine tuning constants.
+|
+if ( $VEXIST(DT_S) = 1 ) then
+ ve/del DT_S
+endif
+ve/cr DT_S(48,6)
+|
+| Define vector containing errors on all the fine tuning constants
+|
+if ( $VEXIST(DT_S_Err) = 1 ) then
+ ve/del DT_S_Err
+endif
+ve/cr DT_S_Err(48,6)
+|
+| Define vector containing status about fine tuning result
+|
+if ( $VEXIST(FailFlag) = 1 ) then
+ ve/del FailFlag
+endif
+ve/cr FailFlag(48,6)
+|
+for/close 92
+|
+|
+| Loop over sectors and so fine tuning for them
+|
+do iSect=1, 6
+ for/file 92 fine_[iSect].ps 
+ metafile 92 -111 
+ exec fine_tune_sect Sector=[iSect]
+ for/close 92
+enddo
+|
+return
+|
+|===============================================================================
+|
+|
+macro fine_tune_sect Sector=1 
+|
+opt nstat; opt nfit; zone 3 4; opt grid ; opt htit
+|
+| Create necessary vectors
+|
+if ( $VEXIST(DT_1) = 1) then
+ ve/del DT_1
+endif
+ve/cr DT_1(48);
+if ( $VEXIST(Err) = 1 ) then
+ ve/del Err
+endif
+ve/cr Err(48);
+if ( $VEXIST(PRS) = 1) then
+ ve/del PRS
+endif
+ve/cr PRS(3) R 10. 0. 0.2
+| 
+title 'Sector '//[Sector]
+|
+|
+|   Do fine tuning with the electrons and Pions
+|
+|
+mess 'Doing Fine tuning for Sector '[Sector] 
+do iStrp=1, 48
+ if ( [iStrp] < 21 ) then
+| Electrons 
+  cuts $1 - 
+  cuts $1 Type.EQ.3
+ else
+| Pions and Electrons
+  cuts $1 - 
+  cuts $1 Type.EQ.2.OR.Type.EQ.3
+ endif
+ ID_H_P = $EVAL([Sector]*1000+[iStrp]) 
+ if ( $HEXIST([ID_H_P]) = 1 ) then
+  h/del [ID_H_P] ; 
+ endif
+ 1d [ID_H_P] 'Strip '//[iStrp] 300 -2. +2. 
+ if ( $VEXIST(Y_VEC) = 1 ) then
+  ve/del Y_VEC
+ endif
+ ve/cr Y_VEC(300)
+ nt/proj [ID_H_P] //PAWC/20.CT Sect=[Sector].and.Strp=[iStrp].and.$1 
+ get_vect/cont [ID_H_P] Y_VEC
+ MaxBin = $SIGMA(LVMAX(Y_VEC))
+ X_Max = $Sigma(-2.+([MaxBin]-1.+1./2.)*4./300.) 
+|
+| Check if its too close to the limits of -1, +1 interval
+|
+ if     ( $Sigma(Abs([X_Max]-1.)) < 0.35 ) then
+  h/del [ID_H_P] ; 1d [ID_H_P] ' ' 300 -2. +2. 
+  nt/proj [ID_H_P] //PAWC/20.CT Sect=[Sector].and.Strp=[iStrp].and.CT>0.and.$1 
+  nt/proj [ID_H_P] //PAWC/20.CT+2. Sect=[Sector].and.Strp=[iStrp].and.CT<=0.and.$1 
+ elseif ( $Sigma(Abs([X_Max]+1.)) < 0.35 ) then
+  h/del [ID_H_P] ; 1d [ID_H_P] ' ' 300 -2. +2.  
+  nt/proj [ID_H_P] //PAWC/20.CT Sect=[Sector].and.Strp=[iStrp].and.CT<=0.and.$1 
+  nt/proj [ID_H_P] //PAWC/20.CT-2. Sect=[Sector].and.Strp=[iStrp].and.CT>0.and.$1 
+ endif
+ LoFit = $RSigma([X_Max]-0.7); UpFit=$RSigma([X_Max]+0.7)
+ UpLim = $HINFO([ID_H_P],'MAX')
+ ve/del PRS; ve/cr PRS(3) R [UpLim] [X_Max] 0.3 
+ h/fit [ID_H_P]([LoFit]:[UpFit]) g Q 3 PRS
+ mess  [iStrp] $EVAL(PRS(1))  $EVAL(PRS(2))  $EVAL(PRS(3)) 
+ NEvt = $HINFO([ID_H_P],'ENTRIES')
+ Temp  = PRS(2) ;  ve/input DT_1([iStrp]) [Temp]; ve/input DT_S([iStrp],[Sector]) [Temp]
+|
+| If less than 5 evts then set error to 2. 
+|
+ if ( [NEvt] < 5 ) then
+  ve/input Err([iStrp]) 2. ; ve/input DT_S_Err([iStrp],[Sector]) 2.  
+ else  
+  Temp = $RSIGMA(ABS(PRS(3))/Sqrt([NEvt]));
+  ve/input Err([iStrp]) [Temp] ;
+  ve/inp DT_S_Err([iStrp],[Sector]) [Temp]
+ endif 
+enddo
+|
+|
+mess 'Reporting known failures and reseting them'
+do iStrp=1, 48
+ Sig = $EVAL(DT_S_Err([iStrp],[Sector]))
+ Mean = $EVAL(DT_S([iStrp],[Sector]))
+ if ( ($Sigma(Abs([Mean])) > 1.2) .or. ($Sigma(Abs([Sig])) > 1.)  .or. ( $Sigma(Abs([Sig])) < 0.00001 ) ) then
+  ve/inp DT_S([iStrp],[Sector]) 0. ; ve/input DT_1([iStrp]) 0.
+  ve/input DT_S_Err([iStrp],[Sector]) 2. ; ve/input Err([iStrp]) 2. 
+  mess [Sector] [iStrp]
+  ve/input FailFlag([iStrp],[Sector]) 1.
+ else
+  ve/input FailFlag([iStrp],[Sector]) 0.
+ endif
+enddo
+|
+| Plot the fine tuning result for the sector
+|
+ID_H = 140+[Sector]
+if ( $HEXIST([ID_H]) = 1) then
+ h/del [ID_H]
+endif
+1d [ID_H] 'To' 48 0.5 48.5
+put_vec/cont [ID_H] DT_1
+put_vec/erro [ID_H] Err
+zone;opt utit; title 'Sector '//[Sector];
+h/plot [ID_H](1:48); atitle 'Strip' 'T?0!, ns'
+|
+|
+return
+|

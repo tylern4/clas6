@@ -1,0 +1,75 @@
+import os
+
+env = Environment(ENV = os.environ)
+
+VariantDir('build/src', '.', duplicate=0)
+
+### ignore other "programs"
+source_files = '''
+    spp_int.F
+    aaosig1.F
+    aao_test.F
+    cgln_amps.F
+    daresbury.F
+    helicity_amps.F
+    int_ctrl_0.F
+    int_ctrl_10.F
+    int_ctrl_11.F
+    int_ctrl_12.F
+    int_ctrl_1.F
+    int_ctrl_2.F
+    int_ctrl_3.F
+    int_ctrl_4.F
+    int_ctrl_5.F
+    int_ctrl_6.F
+    int_ctrl_7.F
+    int_ctrl_8.F
+    int_ctrl_9.F
+    legendre.F
+    maid_lee.F
+    multipole_amps.F
+    read_sf_file.F
+    splie2.F
+    splin2.F
+    spline.F
+    splint.F
+    spp_interp.F
+    util.F
+    xsection.F
+    sigma0_calc.F
+    acc_.cc
+    revinm.F
+    reclog.F
+    get_log.F
+    get_prompt.F
+    chklun.F
+    keep_log.F
+    keep_prompt.F
+    chkfpk.F
+    '''.split()
+source_files = ['build/src/'+f for f in source_files]
+
+
+if 'CERNLIB' in os.environ:
+    cernlib = os.environ['CERNLIB']
+else:
+    # if CERNLIB environment variable is not set, we look for it in
+    # the usual (linux) locations.
+    from glob import glob
+    cernlib_dirs = glob('/usr/lib64/cernlib/*/lib')+glob('/usr/lib/cernlib/*/lib')
+    for d in cernlib_dirs:
+        if path.exists(d):
+            cernlib = d
+            break
+
+
+cernlibs = ['packlib']
+
+env.AppendUnique(
+    LIBPATH = [cernlib],
+    LIBS = ['gfortran']+cernlibs)
+
+
+spp_int_prog = env.Program(target='build/bin/spp_int', source=source_files)
+
+env.Install('bin', spp_int_prog)

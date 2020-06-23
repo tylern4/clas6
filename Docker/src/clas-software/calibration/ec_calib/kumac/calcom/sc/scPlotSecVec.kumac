@@ -1,0 +1,36 @@
+macro scPlotSecVec type=norm var=ped stat=rms ymin=0 ymax=6 sec title vec1 vec2 
+
+  next
+  sigma x=array(48,1#48)
+  vec/cre y(48,2,6) 
+ 
+  case [type] in
+    (norm)  vec/copy [vec1] y; line = -1000
+    (ratio) vdivide [vec1] [vec2] y; line = 1.0
+  endcase
+  
+  case [var] in
+    (gain) xlab1 = Bar No.;xlab2 = Bar No.
+           ylab1 = SQRT(ADCL*ADCR); ylab2 = 150*LOG(ADCL/ADCR)
+           ymin1 = 0; ymax1 = 8000; ymin2 = -200; ymax2= 200
+           line = 0.0
+    (*)    xlab1 = Left PMT;xlab2 = Right PMT
+           ylab1=[var][stat];ylab2 = [var][stat]
+           ymin1 = [ymin]; ymax1 = [ymax]; ymin2 = [ymin]; ymax2 = [ymax]
+  endcase
+    
+  title_gl $quote([title])
+    
+  do lr = 1,2  
+    zone 1 2 [lr] s
+    null 0 49 [ymin[lr]] [ymax[lr]]
+    hplot/symbols x y(:,[lr],[sec]) 48 20 0.1
+    line 0 [line] 48 [line]    
+    atitle [xlab[lr]] [ylab[lr]]            
+  enddo
+  
+  title_gl ' '
+  zone 1 1
+  alias/del tit*
+  
+return 

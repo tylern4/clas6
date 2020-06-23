@@ -1,0 +1,40 @@
+CXX           = g++
+ObjSuf        = o
+SrcSuf        = cxx
+ExeSuf        =
+DllSuf        = so
+
+ROOTCFLAGS   := $(shell root-config --cflags)
+ROOTLIBS     := $(shell root-config --libs)
+ROOTGLIBS    := $(shell root-config --glibs)
+ROOTINCLUDE  := $(shell root-config --cflags)
+
+all: gamecock
+
+MyDict.cxx:
+	@rm -rf MyDict.*
+	rootcint MyDict.cxx -c JSurvey.h
+
+gamecock: gamecock.o Calibration.o JndexBox.o JInteractive.o JSurvey.o \
+    SConstants.o ShowSector.o fitlinear.o fittimewalk.o \
+    fitlandau.o fitgauss.o fittdc.o showsec.o Regression.o \
+    SingleStripe.o ButtonOkCancel.o ParameterSlider.o SliderBox.o \
+    CheckinBox.o CheckinValues.o  MySQL.o CaldbServer.o	NeedInput.o \
+    ReadRoc.o SlotAverage.o EnterValues.o CaldbBox.o SectorAxis.o \
+    ReadPipe.o Inx.o
+
+	$(CXX) -g -o $@ $^ $(ROOTLIBS) $(ROOTGLIBS)
+
+
+#	@echo "Generating dictionary $@..."
+#	@rootcint -f $@ -c $^
+
+%.o: %.cxx
+	$(CXX) -g -c -DUSE_OLD_ROOTVERSION -Wall $(ROOTINCLUDE) -c $<
+#	$(CXX) -g -c  $(ROOTINCLUDE) -c $<
+
+rfit: rfit.o
+	g++ -g -o  $@ $^ $(ROOTLIBS)
+
+anim: main.o anim.o
+	g++ -g -o  $@ $^ $(ROOTLIBS)

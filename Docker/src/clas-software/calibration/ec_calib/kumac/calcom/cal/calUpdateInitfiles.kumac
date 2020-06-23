@@ -1,0 +1,45 @@
+macro calUpdateInitfiles crate=0 run
+
+  if [crate]=0 then
+    message 'Purpose: Creates sparcification table [croc]_[run].tab in ' 
+    message '         $CLAS_PARMS/initfiles and makes symbolic link to '
+    message '         [croc].tab, which is read by JAMloadpeds '
+    message '         in each VX_GO_SFI_CROCxx boot script. '
+    message '  Usage: calUpdateInitfiles croc run '
+    message '  crate: Readout controller (SC,CC,EC1,EC2) '
+    message '    run: Pedestal calibration run number' 
+    exitm
+  endif
+
+  global/imp sparpath
+  global/imp dbpath
+  
+  case [crate] in
+    (EC1,ec1) croc=croc08
+    (EC2,ec2) croc=croc11
+    (CC,cc)   croc=croc07
+    (SC,sc)   nola=0;read nola 'Enter 1 to suppress large angle TOF'
+              croc=croc06
+  endcase 
+  
+  file1 = [dbpath]/initfiles/[croc].spar  
+  file2 = [dbpath]/initfiles/[croc]_[run]_$exec('unixtime').spar
+  
+  read pedoff 		'Enter pedestal offset for sparcification threshold: '
+  read padlist    	'Enter sectors to pad with 1000: '
+  
+  alias/cre padlist $quote([padlist]) 
+  
+  exec calWriteSparTable [crate] [run] [pedoff] [nola] [file2] padlist
+    
+  if $fexist([file1]).eq.1 then
+    command = rm [file1]
+    message calUpdateInitFiles: [command]
+    shell [command]
+  endif
+  
+  command = ln -s [file2] [file1]
+  message calUpdateInitfiles: [command]
+  shell $quote([command])
+  
+return 

@@ -1,0 +1,12 @@
+macro ecComisChi2
+
+ Application COMIS quit
+      SUBROUTINE chiq
+      COMMON/HCFITS/NCFITS,NPFITS,NFPAR,FITCHI,FITPAR(35),FITSIG(35)
+     +,FITDER(35)
+      vector chi2
+      chi2(1)=fitchi
+      END
+    quit
+    
+return

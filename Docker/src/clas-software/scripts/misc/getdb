@@ -1,0 +1,78 @@
+#!/usr/local/bin/perl
+#get select info from off-line database
+$i = 0;
+
+for (@ARGV) {
+    if(/^-h/)      {
+	&PrintUsage;
+        exit;
+    }
+    elsif(/^-K/) {
+	$_ =~ s/^-K//;
+	$keys[$i] = $_;
+	print STDERR "key: " . $keys[$i] . "\n";
+	$i++;
+    }
+    elsif(/^-F(\d+)/){
+	$fraction = $1;
+	print STDERR "calculate number per $fraction for each key\n";
+    } elsif(/^-S(\d+)/){
+	$PS = $1;
+	print STDERR "divide by integrated_PS_scalers for each key\n";
+    }else {
+	push(@arr, ($_));
+    }
+}
+
+
+for (@arr) {
+    $entry = $_;
+# get rid of .db
+    $entry =~ s/\.db//;
+    dbmopen(%ENTRY, $entry, undef);
+    $keynum = 0;
+    $CL = $ENTRY{"Command Line"} ;
+    if (!$CL) {
+	$CL = $ENTRY{"a1c Command Line"} ;
+    }
+    if ($CL =~ /clas_0+(\d+)/){	    
+	$RunNo = $1;
+	print STDOUT "$RunNo ";
+    }            
+    if ($CL =~ /clas_\d+\.A0*(\d+)/){
+	$FileNo = $1;
+	print STDOUT "$FileNo ";
+    }
+    if ($CL){
+	while ( $keynum < $i){
+	    if ($ENTRY{$keys[$keynum]}){
+		if ($fraction){
+		    $tmp = $ENTRY{$keys[$keynum]}/$ENTRY{"# of events"} * $fraction;
+		} elsif ($PS){
+		    if ($ENTRY{"integrated_PS_scalers"} > 0.0){
+			$tmp = $ENTRY{$keys[$keynum]}/$ENTRY{"integrated_PS_scalers"}*$PS;
+		    } else { $tmp = 0.0;}
+		}else {
+		    $tmp = $ENTRY{$keys[$keynum]};
+		}
+		printf STDOUT "%8.3f ", $tmp ;
+	    } else {
+		print STDOUT "0.0 ";
+	    }
+	    $keynum++;
+	} 
+	print "\n";
+	dbmclose(%ENTRY);
+    }
+    
+}
+
+sub PrintUsage {
+    print "usage: getdb -K<key1> -K<key2> <dbfile1, dbfile2 etc...>
+     -K<key>  set key       
+     -h       print this Help
+     -F<###>  fraction of events * number
+     -S<###>  Scale by integrated_PS_scalers*<###>
+"
+}
+

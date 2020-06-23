@@ -1,0 +1,8 @@
+from build_system import environment
+
+caldbMapEnv = environment.env(deps=['mysql'])
+caldbMapEnv.load_dependency('mysql')
+
+caldbMapLib = caldbMapEnv.library('caldbMap', ignore=['calib_test.c'])
+
+#caldbMapEnv.return_from_sconstruct(caldbMapLib)

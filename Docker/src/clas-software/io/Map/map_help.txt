@@ -1,0 +1,247 @@
+
+     mapmanager(3)             UNIX System V             mapmanager(3)
+
+     NAME
+          mapmanager - c routines to access the Map
+          (map_add_item, map_rem_item, map_rem_sub, map_put_int,
+          map_put_float, map_put_char, map_get_int, map_get_float,
+          map_get_char, map_rem_arr, map_fnd_int, map_fnd_float,
+          map_next_sub, map_next_item, map_stat_item, map_log_mess)
+
+     General description
+          The Map database is a file containing lists of arrays of
+          values.  Each list corresponds to one item, e.g. LGD high
+          voltage settings.  Each array in a list may contains several
+          values for the particular item, e.g. an array of LGD high
+          voltage settings one for each channel.  With each array is
+          stored the time at which the values first became current
+          (usually the time they were entered into the database).
+          Each item is specified by two character strings, the
+          subsystem name and the item name, e.g. 'LGD' and 'HIGH
+          VOLTAGE'.
+
+     c routine arguments
+          char filename[]     file name of the map database.
+
+          char subsystemname[]    subsystem name, 1 to 15 characters long, case
+                              sensitive.
+
+          char itemname[]     item name, 1 to 15 characters long, case
+                              sensitive.
+
+          int arraylength     number of 4-byte words in each array for item.
+
+          int arraytype       code for 4-byte words to be stored for item.
+                              0 => int, 1 => float, 2 => string.
+
+          int array[]         array of integer values.
+
+          float farray[]      array of floating values.
+
+          char carray[]    array of char values.
+
+          int firsttime       unix time at which the values were first current.
+
+          int atime           unix time at which the desired values were
+                              current.  Any time from the time when the values
+                              were first current up to, but not including, the
+                              time when the next set of values were first
+                              current.
+
+          int narray       number of arrays in map database for this item.
+
+     c routine return values
+
+     Page 1                                           (printed 7/8/94)
+
+     mapmanager(3)             UNIX System V             mapmanager(3)
+
+          Most of the map_ routines return a status code.  The actual values
+          are listed in map_manager.h.  Normal status code (MAP_OK) is 0.
+          Error and warning status codes are negative.
+
+     c routine
+          int map_create(const char filename[]);
+
+          Create a new map database and initialize it.  A new database will not
+          be created if a file already exists with the given filename.  The
+          preferred method for creating database is the command mapcreate.
+
+          int map_add_item(const char filename[], const char subsystemname[],
+                      const char itemname[], int arraylength, int arraytype);
+
+          Add a new item to map database.  If subsystem does not exist in
+          database, it will also be added to database.  List of value array is
+          initially empty.  If item already exists in database, a message is
+          printed and no changes are made to the database.  If arraytype is 2
+          (char type) then arraylength is the maximum length ever expected
+          (this length is used for error checking only and is not allocated
+          every time an array is added).
+
+          int map_rem_item(const char filename[], const char subsystemname[],
+                      const char itemname[]);
+
+          Remove an item from map database.  Removes all arrays of values for
+          specified item and item definition from map database.  When the last
+          item is removed from a subsystem, the subsystem is also removed.
+
+          int map_rem_sub(const char filename[], const char subsystemname[]);
+
+          Remove a subsystem from map database.  Removes all arrays of values
+          for all items in subsystem, all item definitions for all items in
+          subsystem, and the subsystem definition from map database.
+
+          int map_put_int(const char filename[], const char subsystemname[],
+                      const char itemname[], int arraylength,
+                      const int array[], int firsttime);
+
+          Put an array of int values into database.  If firsttime is 0, the
+          current time is used.  If firsttime < 0, -firsttime is used and
+          values for that time are replaced if necessary.
+
+          int map_put_float(const char filename[], const char subsystemname[],
+                      const char itemname[], int arraylength,
+                      const float farray[], int firsttime);
+
+     Page 2                                           (printed 7/8/94)
+
+     mapmanager(3)             UNIX System V             mapmanager(3)
+
+          Put an array of float values into database.  If firsttime is 0, the
+          current time is used.  If firsttime < 0, -firsttime is used and
+          values for that time are replaced if necessary.
+
+          int map_put_char(const char filename[], const char subsystemname[],
+                      const char itemname[], int arraylength,
+                      const char carray[], int firsttime);
+
+          Put an array of char values into database.  If firsttime is 0, the
+          current time is used.  If firsttime < 0, -firsttime is used and
+          values for that time are replaced if necessary.
+
+          int map_get_int(const char filename[], const char subsystemname[],
+                      const char itemname[], int arraylength, int array[],
+                      int atime, int *firsttime);
+
+          Get the array of int values from the database that was current at
+          time atime.  If atime is 0, the current time is used.  The first time
+          that the values were current is returned.  If no values were valid at
+          atime, firsttime is set to -1 and array is undefined.  If an error
+          occurs, firsttime is set to -2.
+
+          int map_get_float(const char filename[], const char subsystemname[], 
+                      const char itemname[], int arraylength, float farray[],
+                      int atime, int *firsttime);
+
+          Get the array of float values from the database that was current at
+          time atime.  If atime is 0, the current time is used.  The first time
+          that the values were current is returned.  If no values were valid at
+          atime, firsttime is set to -1 and array is undefined.  If an error
+          occurs, firsttime is set to -2.
+
+          int map_get_char(const char filename[], const char subsystemname[],
+                      const char itemname[], int arraylength, char carray[],
+                      int atime, int *firsttime, int *olength);
+
+          Get the array of char values from the database that was current at
+          time atime.  If atime is 0, the current time is used.  The first time
+          that the values were current is returned.  If no values were valid at
+          atime, firsttime is set to -1 and array is undefined.  If an error
+          occurs, firsttime is set to -2.  olength is the minimum of
+          arraylength used when map_put_char was called and arraylength of this
+          call.
+
+          int map_rem_arr(const char filename[], const char subsystemname[],
+                      const char itemname[], int firsttime);
+
+     Page 3                                           (printed 7/8/94)
+
+     mapmanager(3)             UNIX System V             mapmanager(3)
+
+          Remove an array of values and their corresponding time from map
+          database.  firsttime must be an exact match for the time used
+          when the values were put into the database.  firsttime must be
+          greater than 0.
+
+          int map_fnd_int(const char filename[], const char subsystemname[],
+                      const char itemname[], int arraylength, int array[],
+                      int atime, int *firsttime);
+
+          Find the first time (before or equal to atime) that the specified
+          item had the int values in array.  If atime is 0, the current time
+          is used.  The first time that the values were current is returned.
+          If no values match, firsttime is set to -1.  If error occurs,
+          firsttime is set to -2.
+
+          int map_fnd_float(const char filename[], const char subsystemname[],
+                      const char itemname[], int arraylength, float farray[],
+                      int atime, int *firsttime);
+
+          Find the first time (before or equal to atime) that the specified
+          item had the float values in array.  If atime is 0, the current time
+          is used.  The first time that the values were current is returned.
+          If no values match, firsttime is set to -1.  If error occurs,
+          firsttime is set to -2.
+
+          int map_next_sub(const char filename[],
+                       const char subsystemname[], char nextsubsystemname[],
+                       int *nitems);
+
+          Returns information (i.e. the name and the number
+          of items) on the next subsystem in the
+          database.  Subsystems are stored in alaphbetical order.  To get
+          information on the first subsystem, use subsystemname = "*".  If
+          subsystemname is the name of the last subsystem, nextsubsystemname
+          is returned as "*".
+
+          int map_next_item(const char filename[], const char subsystemname[],
+                       const char itemname[], char nextitemname[],
+                       int *arraylength, int *arrarytype, int *narray);
+
+          Returns information (i.e. the name, the length of arrays, the array
+          type, and number of arrays currently stored) on the
+          next item of the subsystem.  Items are stored in alaphbetical order.
+          To get information on the first item, use itemname = "*".  If
+          itemname is the name of the last item, nextitemname is returned as
+          "*" and arraylength is returned as 0.
+
+     Page 4                                           (printed 7/8/94)
+
+     mapmanager(3)             UNIX System V             mapmanager(3)
+
+          int map_stat_item(const char filename[], const char subsystemname[],
+                       const char itemname[],
+                       int *arraylength, int *arrarytype);
+
+          Returns information (i.e. the type and the length of arrays) on the
+          given item of the subsystem.
+
+          int map_log_mess(const int error_code, const int log);
+
+          Turns off and on the error and warning messages produced by various
+          map manager routines.  error_code is the number of the error which
+          is to be turned off/on.  See map_manager.h for possible values of
+          error_code.  The error code name is also printed with each error
+          message.  If error_code = 0, all error messages are turned off/on.
+          If log is true, the selected error messages are turned on. Otherwise,
+          they are turned off.  Initially all error and warning messages are
+          turned on.
+
+     FILES
+           $CLAS_LIB/libmapmanager.a     object library
+           $CLAS_LIB/libmapmanager_ro.a  object library when using a readonl
+                                            map file, no file locking
+           $CLAS_PACK/include/map_manager.h   function prototypes
+
+     SEE ALSO
+          mapcreate(1), mapdump(1), maptoascii(1), mapfrascii(1),
+          mapmerge(1) mapmanager for FORTRAN
+
+     HISTORY
+          Created 11/19/92 by T. Sulanke.
+          Return values added 10/1/93 by T. Sulanke
+
+     BUGS
+          None known.
+
+     Page 5                                           (printed 7/8/94)

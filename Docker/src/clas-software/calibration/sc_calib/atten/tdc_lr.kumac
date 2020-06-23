@@ -1,0 +1,116 @@
+** tdc_lr.kumac August 1, 2001  Yelena Prok
+
+
+** This kumac 'looks' at the counter-versus-position-of-the-hit histogram for every sector.It adjusts the left-right offset for every paddle, by finding the left and right limits of the plot, adding them and dividing by the effective velocity. (veff=16 cm/ns)
+** file is the name of the input file
+** delta_t_RunNumber.dat is the output text file with 288 rows (one for each paddle) and 1 column (time offset=delta_t) 
+** threshold is the parameter defining what you will consider as the left and right limits. The current value of 0.05 means 5% of the peak value in the distribution.
+
+
+macro tdc_lr [file] [runno] thresh=0.05
+opt nbox
+paddle=48
+if ([runno] .gt. 55356) then
+  paddle = 57
+endif
+
+global/create threshold [thresh]
+message 'Using file=' [file] ', threshold =' [threshold]
+
+zone 3 3
+
+do j=1,6
+  h/del *
+  close 0
+
+  h/fil 0 [file].hbook  
+  hid = [j]*10+6                                 
+  hist/cre/slix [hid] [paddle]
+  hist/proj [hid]
+  do i=1,[paddle]
+    h1 = [i]+100
+    h/copy [hid].slix.[i] [h1]      
+  enddo
+
+  v/cr [j]par(2,[paddle])
+  do i = 1,[paddle]
+    h1 = [i]+100
+    exec center_box [h1] 
+    global/import offset*
+    vec/copy offset(1) [j]par(1,[i]) 
+    vec/copy offset(2) [j]par(2,[i]) 
+  enddo
+  
+enddo
+
+  do i = 1, 6
+    v/cre [i]allsum(1,[paddle])
+    v/cre [i]deltaT(1,[paddle])
+    vadd [i]par(1) [i]par(2) [i]allsum
+    vscale [i]allsum 0.0625 [i]deltaT
+    wait
+    if ([i] .eq. 1) then
+      vec/write [i]deltaT delta_t_RunNumber.dat 'F10.5' 'O'
+    elseif ([i] .eq. 6) then
+      vec/write [i]deltaT delta_t_RunNumber.dat 'F10.5' 'C'
+    else
+      vec/write [i]deltaT delta_t_RunNumber.dat 'F10.5' ' '
+    endif
+  enddo
+
+return
+** this routine will find the 'most left' and 'most right' points of the distribution
+macro center_box 
+
+global/create p1 0.
+global/create p2 0.
+global/create p3 0.
+global/import threshold
+thresh = [threshold]
+sigma y=array(1000,0#0) 
+sigma x=array(1000,0#0) 
+
+h1 = [1]
+
+
+label1:
+* hi/pl [h1]
+hi/op/smooth [h1] 1Q
+hi/get_vec/cont [h1] y
+hi/get_vec/absc [h1] x
+sigma ym=vmax(y)
+sigma xm=lvmax(y)
+thr = [thresh]*ym
+  
+i=1
+while (y([i]).lt.[thr]) do
+i = [i]+1
+endwhile
+left = x([i])
+
+i=xm
+while (y([i]).gt.[thr]) do
+i = [i]+1
+endwhile
+i=[i]-1
+right = x([i])
+
+
+
+v/del offset
+v/cr offset(2) I [left] [right] 
+
+set plci 2
+dline [left] [left] 0. 0.50*ym
+dline [right] [right] 0. 0.50*ym
+dline [left] [right] [thresh]*ym [thresh]*ym
+
+wait 'press <ENTER> to continue'
+
+return
+
+
+
+
+
+

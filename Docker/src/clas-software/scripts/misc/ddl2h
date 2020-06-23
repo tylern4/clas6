@@ -1,0 +1,78 @@
+#!/usr/bin/env perl
+$def = 0;
+print "#ifndef bosddlH_INCLUDED\n#define bosddlH_INCLUDED\n";
+while(<>){
+	if(/^!.*/) {
+	chop;
+# print "/* $_ */\n";
+	}
+	elsif (/\s*TABLE\s+(\w+)\s+(.*)$/) {
+            $name = $1;
+            
+            if($name eq "CC") {
+                $name = "CC0";
+            }
+             $nn = $name;	
+            $nn =~ tr/A-Z/a-z/;
+           $nn_u = $nn;
+           $nn_u =~ tr/a-z/A-Z/;
+           $t = "clas". $nn_u ."_t";
+
+            print "\n/* ------------------------ $nn -----------------*/\n";
+            
+            $n = $nn . "_t";
+            print "typedef struct {\n";
+            if ($2 =~ /\s*B16.*/) {
+                $s = "uint16";
+                $b16flag = 1;
+                $b16count = 0;
+            }elsif ($2 =~ /\s*B32.*/){
+		$s = "uint32";
+	    }else {
+                $s = "int";
+            }
+            
+            
+	}
+	elsif (/\s*(\d+)\s+(\w+)\s+(\w+)(.*)$/) {
+            $tmp3 = $3;
+            $tmp3 =~ tr/a-z/A-Z/;
+            $tmp2 = $2;
+            $tmp2 =~ tr/A-Z/a-z/;
+            if ($tmp3 eq 'F') {
+                print "\tfloat $tmp2; ";
+            } elsif ($tmp3 eq 'I') {
+                print "\t$s $tmp2; ";
+		if($b16flag == 1){ $b16count++;}
+            } elsif ($tmp3 eq 'A'){
+		print "\tchar $tmp2; ";
+	    }
+            else {
+                print STDERR "Warning-- UNKNOWN TYPE: '$_' in $nn\n";
+            }
+            $comment =  $4;
+            if ($comment =~ /\s*!(.*)/) {
+                printf "   /* $1 */";
+            }
+            print "\n";
+            
+            
+	}
+	elsif (/\s*END\s+TABLE.*/) {
+            print "} $n;\n";
+            
+            print "\ntypedef struct {\n";
+            print "\tbankHeader_t bank;\n";
+            print "\t$n $nn\[1\];\n";
+            print "} $t;\n";
+            print "\n/* --------------------- END $nn -----------------*/\n";
+            
+	}
+        
+
+	
+}
+print "\n\n#endif\n\n/* end of file */\n";
+
+
+

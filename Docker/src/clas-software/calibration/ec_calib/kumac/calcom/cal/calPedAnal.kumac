@@ -1,0 +1,32 @@
+macro calPedAnal det
+
+  message calPedAnal: Bank [det]
+  exec calReadTAB 
+
+  read runno   'Run number: '
+  read cwnfile 'Ntuple file containing pedestal data (no path or extension): '
+  read seclist 'Sectors to include: '
+  read nev     'Number of events to analyze: '
+  
+  alias/cre seclist $quote([seclist])
+  
+  hi/file 1 ntup/[cwnfile].rzn
+  global/cre runno [runno]
+  global/cre ntupid 2000
+  exec [det]GetPeakStats ntup adc 20 10. 1000. [det]PedMean [det]PedRms 1 [nev] seclist
+  close 1
+  
+  continue:  
+  read opt 'Save pedestals to disk? (y/n): '
+  case [opt] in
+    (y) global/imp pedpath
+        if $fexist([pedpath]).eq.0 then
+          shell mkdir [pedpath]
+        endif
+        message Writing run [runno] pedestal data to [pedpath]
+        vec/write [det]PedMean [pedpath]/[det]pedmean[runno].vec
+        vec/write [det]PedRms  [pedpath]/[det]pedrms[runno].vec
+    (n) exitm
+  endcase
+  
+return 

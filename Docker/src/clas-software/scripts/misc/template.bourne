@@ -1,0 +1,53 @@
+nocap#!/bin/sh
+nocap#
+nocap# $Id: template.bourne,v 1.1.1.1 1997/04/07 15:27:44 freyberg Exp $
+nocap################################################################
+nocap#   Brief Discription:
+#nocap
+nocap#   execution:  template
+nocap#
+nocap#   required input:
+nocap#
+nocap#   optional input:
+nocap#
+nocap#   output:    
+nocap#
+nocap#   examples: 
+nocap#
+nocap#   created:  day-mon-xx
+nocap#
+nocap#   author of the script: John Doe
+nocap#   
+nocap###############################################################
+nocap#  if routine name blank or ? go to help
+nocapif [ $# -eq 0 ]; then
+nocap ans1="h"
+nocapelse
+nocap ans1=$1
+nocapfi
+nocapif [ "$ans1" = "h" -o "$ans1" = "H" ]; then
+nocap echo "template  I: Executing help subroutine"
+nocap echo "template  h: put help package here"
+nocap echo "template  h:"
+nocap echo "template  h: execution:  template  arg[0] arg[1]"
+nocap echo "template  h:"
+nocap echo "template  h: output: "
+nocap echo "template  h:"
+nocap echo "template  h: required input:"
+nocap echo "template  h:"
+nocap echo "template  h: optional input:"
+nocap echo "template  h:"
+nocap echo "template  h: examples:"
+nocap echo "template  h: template arg[0] arg[1]"
+nocap echo "template  h:"
+nocap echo "template  Q: Please enter first argument: \c"
+nocap read ans1
+nocap echo "template  Q: Please enter second argument: \c"
+nocap read ans2
+nocap echo "template  h: Thank you and have a most pleasant day "
+nocapelse
+nocap ans2=`expr $2`
+nocapfi
+nocap#
+nocapecho "template  i: entered arguments are $ans1 and $ans2"
+nocap#

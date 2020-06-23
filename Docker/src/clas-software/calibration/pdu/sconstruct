@@ -1,0 +1,13 @@
+from build_system import environment
+
+pdu_src = 'pdu.c pduInit.c pdu_hbk.c CountHits.c FlagBadWires.c'.split()
+
+pdu_deps = {'clas6': ['default_libs', 'recsis_libs']}
+	        
+pdu_env = environment.env(deps=pdu_deps.keys())
+pdu_env.load_dependency(pdu_deps)
+
+pdu_env.AppendUnique(LIBS=['-lscat'])
+
+pdu_env.program(target='pdu', source=pdu_src)
+

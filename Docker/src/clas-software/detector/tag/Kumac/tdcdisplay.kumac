@@ -1,0 +1,19 @@
+zone 4 4
+message 'nom du fichier output :'
+read filename
+
+do i=1,4
+pic/cr a
+do j=1,16
+l=[j]+16*[i]-16
+h/cr/2d 1999 ' T'[l] 200 -50. 150. 40 -1. 1.
+k=2*[l]-1
+m=2*[l]
+n/proj 1999 1.trf%tmean t_id=[k].or.t_id=[m]
+h/pl 1999
+h/del 1999 
+enddo
+pic/pr [filename][i].ps
+pic/pr [filename][i].gif
+pic/del a
+enddo

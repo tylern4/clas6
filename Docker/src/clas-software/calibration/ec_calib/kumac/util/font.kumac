@@ -1,0 +1,15 @@
+macro font
+
+* Author: Cole Smith
+* Purpose: Setup Fonts
+* Input:  [1] - font identifier
+*         [2] - font precision 
+*     	  [3] - horizontal text alignment
+*	  [4] - vertical text alignment
+*     	  [5] - character height
+  igset txfp -[1][2]
+  arg = 10*[3] + [4]
+  igset txal [arg]
+  igset chhe [5]
+  
+return

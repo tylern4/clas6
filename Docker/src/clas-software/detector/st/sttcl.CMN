@@ -1,0 +1,49 @@
+c      include file sttcl
+c
+c_begin_doc
+c  RCS ID string
+c  $Id: sttcl.CMN,v 1.5 2008/03/16 04:33:24 fklein Exp $
+c
+c  Documentation for include file sttcl
+c
+c  Purpose:  holds the Start counter control variables for communication with
+c  --------  TCL script
+c
+c  Used in routines:
+c  ----------------
+c
+c  ------
+c
+c  Author:   T. Auger     Created:  Mon Jun 03 10:11:52 EST 1997
+c  -------
+c
+c  Major revisions: 
+c  ---------------- 
+c
+c_end_doc
+c
+c_begin_var
+c  variables for include file sttcl:
+c  -----------------------------------
+c 
+c----6----------------------------------------------------------------72
+c  
+c  Variables contained in RUN_CONTROL common block
+c  --------------------------------------------
+c maybe use later
+      real*8  st_time_resolution
+      integer st_type
+c
+c_end_var
+c
+      Common /sttcl_real/ st_time_resolution,st_type
+c
+c
+c----6----------------------------------------------------------------72
+
+
+
+
+
+
+

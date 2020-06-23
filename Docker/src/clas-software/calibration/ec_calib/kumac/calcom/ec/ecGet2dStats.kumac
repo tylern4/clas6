@@ -1,0 +1,16 @@
+macro ecGet2dStats var ylo yhi vmean vrms
+
+  vec/cre [vmean](ecvecdim) r
+  vec/cre  [vrms](ecvecdim) r
+  
+  profile 1000000 ' ' 216 1. 217. [ylo] [yhi] S  
+   
+  do i = 6,[#]  
+    sec = [%i]  
+    hist/op/reset 1000000
+    nt/proj 1000000 2000.[var]%(layerec-1)*36+stripec secec=[sec]
+    get_vect/contents 1000000 [vmean](:,:,[sec])
+    get_vect/errors   1000000 [vrms](:,:,[sec])
+  enddo
+      
+return

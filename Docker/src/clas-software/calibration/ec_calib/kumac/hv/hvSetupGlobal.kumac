@@ -1,0 +1,12 @@
+macro hvSetupGlobal
+
+  message hvSetupGlobal: Setting up globals
+  
+*  dbcal = /u/home/clasrun/lcsmith/hv
+
+  global/cre hvreqpath  dbcal
+  global/cre hvsnappath dbcal
+  global/cre hvtmppath  dbcal
+  
+return
+

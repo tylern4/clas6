@@ -1,0 +1,60 @@
+macro utilCreateCWN name maxvar max index 
+
+  global/imp [name]*
+
+  lun1 = 21
+  file1 = [name]nt.inc
+  fort/file [lun1] [file1] new
+  lun2 = 22
+  file2 = [name]book.f
+  fort/file [lun2] [file2] new
+  
+  string = '     '//'subroutine '//[name]//'book(id)'
+  call write([lun2],[string],' ',' ')
+  call write([lun2],'     IMPLICIT NONE',' ',' ')
+  call write([lun2],'     integer id',' ',' ')
+  string = '     '//'include '//$quote([file1])
+  call write([lun2],[string],' ',' ')
+
+  string = '     '//'integer '//[maxvar]
+  call write([lun1],[string],' ',' ')
+  string = '     '//'parameter ('//[maxvar]//'='//[max]//')'
+  call write([lun1],[string],' ',' ')
+  string1 = '     '//'call hbname(id,'//$quote([name])//','//[index]//','
+  string2 = ' '//[index]//'[0,'//[max]//']:I'
+  call write([lun2],[string1],[string2],'BEG')
+  
+  do i = 1,[[name]ncol]
+    type = $word([[name][i]],2,1,'%')
+    var  = $word([[name][i]],1,1,'%')
+    case [type] in
+      (I) string1 = '     '//'integer '//$quote([var][name])
+          imin = $unquote($word([[name][i]],3,1,'%'))
+          imax = $unquote($word([[name][i]],4,1,'%'))
+          string2 = '    '//'&,'//[var][name]//'('//[index]//')'
+          string3 = ' '//'['//[imin]//','//[imax]//']:I'
+      (*) string1 = '     '//'real '//$quote([var][name])
+          string2 = '    '//'1,'//[var][name]//':R'
+          string3 = ' '
+    endcase
+    call write([lun1],[string1],' ',' ')
+    if [i].eq.[[name]ncol] then
+      call write([lun2],[string2],[string3],'END')
+    else
+      call write([lun2],[string2],[string3],' ')
+    endif
+  enddo 
+  string = '     '//'common '//'/'//[name]//'nt/'//[index]
+  call write([lun1],[string],' ',' ')
+  do i = 1,[[name]ncol]
+    var  = $word([[name][i]],1,1,'%')
+    string = '    '//'&,'//[var][name]//'('//[maxvar]//')'
+    call write([lun1],[string],' ',' ')
+  enddo 
+
+  call write([lun2],'     ','end',' ')  
+  close [lun1]
+  close [lun2]  
+   
+return
+  

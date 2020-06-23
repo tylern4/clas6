@@ -1,0 +1,12 @@
+#! /bin/csh
+#cd $HOME/clas/offline
+cd /net/fs2/group/clasdev/clas/database
+if (-e Stopfile) then
+    echo Ending ProcessRun
+else
+    date
+    /net/fs2/group/clasdev/clas/src/packages/scripts/ProcessRun
+    echo 'mProcessRun' | at now + 3 hours
+    echo resubmit ProcessRun at `date` on $HOST
+endif
+

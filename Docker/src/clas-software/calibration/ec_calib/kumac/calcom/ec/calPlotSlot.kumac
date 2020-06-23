@@ -1,0 +1,39 @@
+macro ecPlotSlot type=norm ylab=rms ymin=0 ymax=6 vec1 vec2 sec title comment=pedestals
+
+  next
+
+  if $vexist(y).eq.0 then
+    sigma x=array(64,1#64)
+    vec/cre y(216,6)
+  endif 
+  
+  case [type] in
+    (norun) vec/copy [vec1] y; line = 0
+    (norm)  vec/copy [vec1] y; line = -1000
+    (ratio) vdivide [vec1] [vec2] y; line = 1.0
+  endcase
+  
+  title_gl $quote([title])
+  
+  zone 2 2
+  
+  do slot = 1,4
+  
+    case [slot] in
+      (1) islot=7;min=1;max=64
+      (2) islot=6;min=65;max=128
+      (3) islot=5;min=129;max=192
+      (4) islot=4;min=193;max=216
+    endcase
+    
+    null 0 65 [ymin] [ymax]
+    hplot/symbols x y([min]:[max],[sec]) 64 20 0.1
+    line 0 [line] 65 [line]    
+    atitle 'ADC SLOT '//[islot] [ylab]
+            
+  enddo
+  
+  title_gl ' '
+  zone 1 1
+  
+return 

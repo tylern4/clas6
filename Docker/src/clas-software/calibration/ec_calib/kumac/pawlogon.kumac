@@ -1,0 +1,66 @@
+filecase keep
+
+global/create pawroot  .
+global/create calroot  [pawroot]/cal
+global/create bospath  [pawroot]/bos
+global/create ddlpath  [pawroot]/DDL/Ddl
+global/create attpath  [pawroot]/kumac/atten/vec
+global/create vecpath  [pawroot]/vec
+global/create kupath   [pawroot]/kumac
+global/create datapath [pawroot]/data
+global/create mcpath   [pawroot]/mc
+global/create utilvec  [kupath]/util/vec
+
+global/create adcpath  [calroot]/gain
+global/create gainpath [calroot]/gain
+global/create pedpath  [calroot]/ped
+global/create sparpath [calroot]/spar
+global/create tabpath  [calroot]/tables
+
+global/create mappath  $env(CLAS_PARMS)/Maps
+global/create dbpath   $env(CLON_PARMS)
+
+default  '.,kumac/atten,kumac/bos,kumac/seb,kumac/map,kumac/export,_
+kumac/ana,kumac/calcom/cal,kumac/calcom/ec1,kumac/calcom/ec,_
+kumac/calcom/cc,kumac/calcom/sc,kumac/server,kumac/util,_
+kumac/rawmon,kumac/figures,kumac/monitor,kumac/hv,_
+kumac/laser,kumac/gen,klgpaw' option=a
+
+cselect
+set htyp -3
+opt date
+opt file
+opt nzfl
+opt tic
+set file 2
+set_show/host_editor dtpad
+set_show/host_pager more
+set_show/prompt CLASPAW>
+
+* application COMIS quit
+*  !setopt '/work/clas/disk1/test/cal/tmp' path
+* quit
+
+*shell chmod -R a+w [tmppath]
+*shell rm -f [tmppath]/*
+
+global/cre pawopt 1
+global/cre compile 1
+
+read pawopt Enter 1 to setup CLASPAW:
+read compile Enter 2 to bypass dynamic loading
+
+if [pawopt].eq.1 then
+  exec utilGenColormap 
+  global/import nlevels
+  vec/cre nlev i [nlevels]
+  pawopt = abs([pawopt])
+else
+  vec/cre nlev i 8
+endif
+
+if [pawopt].ne.0 then; exec monSetup [compile] ; endif
+
+exec hvSetup
+
+message Type calman for calibration manager menu

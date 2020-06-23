@@ -1,0 +1,9 @@
+from build_system import environment
+
+TNT10ReaderEnv = environment.env(deps='clas6 root'.split())
+TNT10ReaderEnv.load_dependency('clas6 root'.split())
+
+source_files = ['TNT10Reader.cc']
+
+TNT10ReaderLib = TNT10ReaderEnv.library('NT10Reader', source=source_files)
+TNT10ReaderEnv.return_from_sconstruct(TNT10ReaderLib)

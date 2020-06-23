@@ -1,0 +1,25 @@
+F			/ F->fit,M-multipols 
+Y			/ Graphics output?
+15			/ 1,2,3(pi0,pi+,both)+4,8,12(sig,ltp,both)
+1.645		 	/ incident electron energy
+1.08,1.7,0.01	  	/ W -> min, max, step  
+0.4,0.4,0.5		/ Q2->min,max,step
+-1.1,1.1,0.2		/ cos(th*) -> min, max, step
+1.,359.,15.		/ phi* -> min, max, step
+0.05			/ integration accuracy
+junk.dat		/ output filename
+500.                    / max calls (approx) before ending
+0.1                     / tolerance on minimization 0.001*this(10)*UP
+1.0                     / MINUIT UP error parameter
+36		        / Number of fit parameters
+res-q0.4.inp		/ resonance parameters input filename
+par_e1b.in		/ parameter input  filename
+par_e1b.out		/ parameter output filename
+2			/ Input data file format (2=e1b)
+5,66,11			/ Input, output, featch for Minuit
+200000.			/ Max Chi2 for acceptable first iteration
+crs-eppi0-m98-q1.tab	/ Input data file 1 (hjanr panel plot 1)
+crs-eppip-e1c-q2.tab    / Input data file 2 (hjanr panel plot 2)
+asym-eppi0-piana-q1.tab / Input data file 3 (hjanr panel plot 3)
+asym-eppip-janr-q2.tab  / Input data file 4 (hjanr panel plot 4)
+

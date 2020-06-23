@@ -1,0 +1,48 @@
+macro ecPlotSummary  view=1 var=adc db=ADBmean
+  
+  global/import filename
+  global/import sector
+  exec ecSetupGraphics
+
+  case [view] in
+    (1) chview=UI
+    (2) chview=VI
+    (3) chview=WI
+    (4) chview=UO
+    (5) chview=VO
+    (6) chview=WO
+  endcase
+  
+  case [var] in
+    (adc) xline=37.;ymin1=0.;ymax1=300.;ymin2=0.;ymax2=350.;tity=ADC at PMT
+    (pe)  xline=0.;ymin1=0.5;ymax1=5.0;ymin2=0.5;ymax2=5.0;tity=P.E. / MeV at PMT
+  endcase
+  
+  title = File [filename]: Summary of Sector [sector] [chview] strips
+  title_gl [title]
+  zone 1 2 1
+  null 0. 37. 0. 500.
+  sigma x=array(36,1#36)
+  vec/cre ex(36)
+  hplot/errors x ecFit[var]_atten(1:,[view],1) ex ecFit[var]_atten(1:,[view],2) 36 20 0.18
+  hplot/symbols x att[db](:,[view],new[sector]) 36 24 0.18 
+  key 25 200 20 'MIP data'
+  key 25 150 24 [db]
+  atitle 'Strip Number' 'Atten. Length (cm)'
+  zone 1 2 2 s
+  if [view].le.3 then 
+    null 0. 37. [ymin1] [ymax1]
+    line 0 100 [xline] 100 
+  else
+    null 0. 37. [ymin2] [ymax2] 
+    line 0 160 [xline] 160
+  endif
+  hplot/errors x ecFit[var]_ymaxfit(1:,[view],1) ex ecFit[var]_ymaxfit(1:,[view],2) 36 20 0.18
+*  hplot/errors x ecFit[var]_ymaxdat(1:,[view],1) ex ecFit[var]_ymaxdat(1:,[view],2) 36 22 0.18
+  atitle 'Strip Number' [tity]
+  key 25 50 20 'Fit Estimate'
+*  key 25 120 22 'Data at First Pixel' 
+  
+  title_gl ' '
+  
+return

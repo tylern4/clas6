@@ -1,0 +1,10 @@
+from build_system import environment
+
+maidEnv = environment.env(deps='clas6 cern')
+maidEnv.load_dependency('clas6 cern')
+source_files = 'aao.F aaosig1.F cgln_amps.F daresbury.F dsigma.F helicity_amps.F interp.F legendre.F maid.F'.split()
+source_files += 'maid_lee.F maid_xsection.F multipole_amps.F read_sf_file.F'.split() 
+source_files += 'splie2.F splin2.F spline.F splint.F xsection.F'.split()
+source_files += 'maidinterface.cc'.split()
+maidEnv.library('maid_xsection', source=source_files)
+

@@ -1,0 +1,6 @@
+from build_system import environment
+
+sc_calib_env = environment.env(deps='clas6 root')
+
+prog_dirs = 'gamecock atten gmean p2p_delay_el sc_mon tdc_calib time_walk veff'.split()
+sc_calib_env.sconstruct(prog_dirs)

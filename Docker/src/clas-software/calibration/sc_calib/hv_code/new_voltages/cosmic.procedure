@@ -1,0 +1,30 @@
+Data Taking Procedure of Cosmic Run for TOF PMT calibration
+===========================================================
+
+
+RUN WITH A's ON
+===============
+
+1a) via EPICS GUI, select TOF HV. turn off all B's on the space frame, north, and south
+carriages by selecting the carriage in question on the main GUI then click disable on the 
+specific carriage GUI. 
+
+2a) bring up daq and select COSMIC configuration and configure a run.
+
+3a) begin run and take ~1,000,000 events (about 45min - an hour)
+
+NOTE THE RUN NUMBER!!!!!!! run number # a's on nominal
+
+
+RUN WITH B's ON
+===============
+
+1b) go to the EPICS GUI and disable the A's and enable the B's
+
+2b) repeat step (3a) and note the run # B's on nominal
+
+Please note which run #'s correspond to which settings and make sure 
+that mon is running on DAQTLC.
+
+THANKS,
+Joe

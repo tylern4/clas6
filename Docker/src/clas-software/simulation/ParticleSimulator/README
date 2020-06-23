@@ -1,0 +1,44 @@
+This program generates events with a photon beam on a proton target. It is good for detector acceptance study and other MC study.
+In this program one can select:
+1) type of photon energy distribution (fixed energy, uniform distribution or bremsstrahlung). 
+2) t-distribution of the reaction
+3) transverse polarization of the decaying particle. Here polarization can be setup for particle which decay via weak interation like hyperons.
+   So, the angular distribution of the decay products in the parent rest frame is asymmetric.
+
+   In progress:
+   ------------	
+   Only two-body decay is implemented and generalization to many-body decay is in progress.	
+   Also, implementation of longitudinal polarization is in progress.
+   Also implementation of different targets, and electron beam are in progress.
+
+
+Have "CMake" and "ROOT" ready on your system.
+
+This program uses "CMake" to compile, and also uses some libraries from the "ROOT". In each directory, including the top-directory, 
+there are "CMakeLists.txt" files. In the "CMakeLists.txt" file in the top-directory, you need to give the path of the BOS io library. 
+I have put the path as in jlab.
+
+In "example" folder, there is an example file "test.cxx" to generate events. It writes the output either in root format
+or in BOS format depending on the extension of the file, i. e. give "file.root" to write in root format
+and "file.bos" to write in bos format. The name of trees and variables are same as in CLAS bos file.
+The generated BOS file can be used further for detector simulation (GSIM + ... + RECSIS).
+
+There is a file "read.cxx" in the "example" folder which reads the generated root file. You can copy these files and modify them according to your need. 
+Also, copy the file "CMakeLists.txt" from the "example" directory to make executable. In this "CMakeLists.txt", you also need to
+give the full path of this "ParticleSimulator" installation, and path of the BOS io include files.
+
+---------------
+To build the library:
+cd ParticleSimulator
+cmake .
+make
+
+To make executable:
+cd example (or your code directory)
+cmake .
+make
+---------------
+
+It generates the library and executable in the local folder.
+
+If you any question, comment and suggestion, please send me an email at cnepali@odu.edu

@@ -1,0 +1,110 @@
+macro dsdcal
+
+message 'To use this macro put the old value of the peak (from the file tagdsdcal.dat)'
+message 'In the vector oldpos of lenght 10'
+message 'First the 8 PS peaks, then TAC peak, then PC peak'
+message 'Exemple:'
+message 'vec/cr oldpos(10) R 99.9 99.9 99.9 99.9 99.9 99.9 99.9 99.9 99.9 99.9 '
+wait
+
+message 'Output file (return = screen):'
+read filename
+message 'control file (return = screen):'
+read filenamecont
+
+* fit parameters
+
+vec/cr pard(3) R 50 0 .5  
+vec/cr stepd(3) R 10 .2 .05 
+vec/cr pmind(3) R 0 -200. .05  
+vec/cr pmaxd(3) R 100000 200. 3. 
+vec/cr par(3) R 
+
+vec/write pard [filenamecont] 'F8.2,F8.2,F8.2' 'O'
+vec/write stepd [filenamecont] 'F8.2,F8.2,F8.2' ' '
+vec/write pmind [filenamecont] 'F8.2,F8.2,F8.2' ' '
+vec/write pmaxd [filenamecont] 'F8.2,F8.2,F8.2' ' '
+
+* other vectors:
+
+vec/cr peak(100)
+vec/cr newpos(10)
+vec/cr fit(10)
+
+do i=1,10
+vec/write oldpos([i]) [filenamecont] 'f8.2' ' '
+enddo
+
+*wait
+
+* loop on the 8 PS paddles, then 9=TAC, 10=PC
+
+opt stat
+opt fit
+zone 1 2
+
+do i=1,10
+
+vec/cr num(1) I [i]
+vec/write num [filenamecont] 'I3' ' '
+vec/del num(1)
+
+h/cr/1d 1000 'Finding peak DSD '[i] 100 -50. 50.
+n/proj 1000 3.time id=[i]
+h/pl 1000
+
+h/get/cont 1000 peak
+sigma lmax=lvmax(peak)
+sigma chmax = -50. + lmax
+cmin=chmax-10.
+cmax=chmax+10.
+
+h/cr/1d 1001 'Fitting peak DSD '[i] 100 [cmin] [cmax]
+n/proj 1001 3.time id=[i]
+h/get/cont 1001 peak
+sigma lmax=lvmax(peak)
+sigma valmax=peak(lmax)
+vec/copy pard par
+vec/copy chmax par(2)
+vec/copy valmax par(1)
+vec/write chmax,valmax [filenamecont] 'F8.2,F8.2' ' '
+
+h/fit 1001 G B 3 par stepd pmind pmaxd
+
+vadd oldpos([i]) par(2) newpos([i])
+vec/copy par(2) fit([i])
+
+*wait
+
+h/del 1000
+h/del 1001
+enddo
+
+vec/cr results(4) R 1 0 0 0
+vec/copy oldpos(1) results(2)
+vec/copy fit(1) results(3)
+vec/copy newpos(1) results(4)
+vec/write results [filename] 'F8.2,F8.2,F8.2,F8.2' 'O'
+do i=2,9
+vec/input results(1) [i]
+vec/copy oldpos([i]) results(2)
+vec/copy fit([i]) results(3)
+vec/copy newpos([i]) results(4)
+vec/write results [filename] 'F8.2,F8.2,F8.2,F8.2' ' '
+enddo
+vec/input results(1) 10
+vec/copy oldpos(10) results(2)
+vec/copy fit(10) results(3)
+vec/copy newpos(10) results(4)
+vec/write results [filename] 'F8.2,F8.2,F8.2,F8.2' 'C'
+vec/del results
+
+vec/del peak
+vec/del newpos
+vec/del fit
+
+vec/del pard
+vec/del stepd
+vec/del pmind 
+vec/del pmaxd
+vec/del par

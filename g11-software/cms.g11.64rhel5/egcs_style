@@ -1,5 +1,0 @@
-#!/bin/bash
-
-if [ "`g++ --version | awk -F- '{if(match($$1,"egcs"))print("egcs")}'`" = "egcs" ]; then
-    echo egcs
-fi

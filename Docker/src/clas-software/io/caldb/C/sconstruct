@@ -1,0 +1,7 @@
+from build_system import environment
+
+caldbCEnv = environment.env(deps=['mysql'])
+caldbCEnv.load_dependency('mysql')
+
+caldbCLib = caldbCEnv.library('caldbC', ignore=['maintest.c'])
+caldbCEnv.return_from_sconstruct(caldbCLib)

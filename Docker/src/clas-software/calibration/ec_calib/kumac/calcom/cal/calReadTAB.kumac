@@ -1,0 +1,35 @@
+macro calReadTAB
+  
+  if $vexist(ecadcmap).eq.0 then
+    vec/cre ecadcmap(ecvecdim) i
+    vec/cre ectdcmap(ecvecdim) i
+    vec/cre scadcmap(scvecdim) i
+    vec/cre sctdcmap(scvecdim) i
+    vec/cre ccadcmap(ccvecdim) i
+    vec/cre cctdcmap(ccvecdim) i
+    vec/cre ec1adcmap(ec1vecdim) i
+    vec/cre ec1tdcmap(ec1vecdim) i
+    vec/cre tagttdcmap(tagtvecdim) i
+    vec/cre tageadcmap(tagevecdim) i
+    vec/cre rocmap(3,64,25) i
+    vec/cre croc(25) i
+    call kumac/calcom/cal/fun/callib.f77
+  endif
+  
+  global/imp tabpath
+  roc12=cc; roc13=sc; roc14=ec; roc15=ec; roc16=ec1
+  
+  do i = 1,[#]
+    roc = [%i]
+    file = [tabpath]/ROC[roc].tab
+    fort/file 1 [file]
+    message calReadTAB: Reading [file] 
+    vec/inp croc 25*0
+    vec/inp rocmap 4800*-1 
+    call calread[roc[roc]]map(1)
+    vec/copy rocmap rc[roc]map
+    vec/copy croc croc[roc]
+    close 1
+  enddo
+       
+return

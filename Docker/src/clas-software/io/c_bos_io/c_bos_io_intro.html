@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>BOS banks in C</TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (X11; I; HP-UX A.09.05 9000/735) [Netscape]">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000">
+
+<H3 ALIGN=CENTER>Working with BOS banks in C</H3>
+
+<P>During the past few months Maurik Holtrop and I have been developing
+(off and on) a library of C routines designed to provide a easy way of
+working with BOS banks in C. The package currently resides in cvs under
+packages/c_bos_io. I am writing this note because several people have asked
+me about it, asked for something like it, or have started writing something
+very much like it themselves. I hope to create a uniform C + BOS environment
+and to avoid duplication of effort, so people interested in this should
+provide comments or modify the code during the next few weeks while the
+code is still flexible - to help us create a package we all can use.</P>
+
+<P>The essential idea of the package is that each BOS bank has a C data
+structure associated with it. The C structures are obtained by parsing
+the .ddl files with an existing Perl script. Calls are then defined that
+instead of returning an index into the BOS common they return a pointer
+to a structure. This makes BOS banks extremely easy to work with directly,
+avoiding the common practice of copying the contents of the BOS bank to
+a temporary array, and makes the code extremely easy to read.</P>
+
+<P>The structure for each BOS bank is defined by a bank header followed
+by an array of structures containing the contents of the BOS bank. The
+bank header mirrors the information preceding the contents of each BOS
+bank. The bank header is the same for all banks and is defined below, the
+source is located in packages/include/bostypes.h:</P>
+
+<P>typedef struct {<BR>
+&nbsp;&nbsp;&nbsp;int ncol;<BR>
+&nbsp;&nbsp;&nbsp;int nrow;<BR>
+&nbsp;&nbsp;&nbsp;char name[4];<BR>
+&nbsp;&nbsp;&nbsp;int nr;<BR>
+&nbsp;&nbsp;&nbsp;int nextIndex;<BR>
+&nbsp;&nbsp;&nbsp;int nwords;<BR>
+} bankHeader_t;</P>
+
+<P>Structures are then defined for each of the BOS banks. This structure
+contains a bankHeader_t followed by an array of structures containing the
+contents of the BOS bank. The naming convention is clas(BANKNAME)_t for
+the main bank and (bankname)_t for the array of structures. An example
+of a simple bank (DC0) is shown below:</P>
+
+<P>typedef struct {<BR>
+&nbsp;&nbsp;&nbsp;bankHeader_t bank;<BR>
+&nbsp;&nbsp;&nbsp;dc0_t dc0[1];<BR>
+} clasDC0_t;</P>
+
+<P>Where dc0_t is shown below;</P>
+
+<P>typedef struct {<BR>
+&nbsp;&nbsp;&nbsp;uint16 id; /* the address of the hit detector element
+*/<BR>
+&nbsp;&nbsp;&nbsp;uint16 tdc; /* tdc information (channels) */<BR>
+} dc0_t;</P>
+
+<P>where uint16 is an unsigned short.</P>
+
+<P>Several utilities have been written in the c_bos_io library to use these
+structures, the most fundamental is the function call getBank which returns
+a pointer to a structure when one asks for a bank of a particular name.
+A short example of code which would print the entire contents of the first
+DC0 bank is shown below:</P>
+
+<P>int i;<BR>
+clasDC0_t *DCbank;</P>
+
+<P>if(DCbank = (clasDC0_t *)getBank(&amp;bcs_,&quot;DC0 &quot;)){<BR>
+&nbsp;&nbsp;&nbsp;printf(&quot;Bank Name:%s, Number of entries: %d\n&quote;,
+DCbank-&gt;bank.name, &nbsp;DCbank-&gt;bank.nrow);<BR>
+&nbsp;&nbsp;&nbsp;for(i=0; i &lt; DCbank-&gt;bank.nrow; i++)<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf(&quot;id: %d, tdc: %d\n&quot;,
+DCbank-&gt;dc0[i].id, DCbank-&gt;dc0[i].tdc);<BR>
+} else { <BR>
+&nbsp;&nbsp;&nbsp;printf(&quot;No DC0 bank found\n&quot;);<BR>
+}</P>
+
+<P>That's it! A few comments: &amp;bcs_ is a pointer to the BOS common,
+the return value getBank is a pointer to void which must be cast to the
+appropriate type, and if getBank fails to find a bank it returns NULL.</P>
+
+<P>Routines also exist to make banks, drop banks, initialize BOS, open/close
+files and sequentially read a file. The prototypes for these routines exist
+in packages/include/bostypes.h. A simple program called bosdump prints
+to stdout the contents of BOS banks using these utilities, and provides
+a nice template for using this library. bosdump is located in packages/utilities/bosdump
+a web page also exists for c_bos_io under software libraries in the clas
+Off-Line pages:</P>
+
+<CENTER><P>http://www.cebaf.gov/~manak/packages/c_bos_io/c_bos_io.html</P></CENTER>
+
+<P>I believe the benefits of utilities like these are obvious, I also strongly
+feel that we should agree on one library of C routines to interface with
+BOS - this will make everyone's code easier to read, easier to maintain,
+it will avoid duplication of effort and will allow us all to build on each
+other's work. The exact implementation of these routines is still somewhat
+up for grabs as not a lot of code has been written using them - however
+this will quickly change as more code is written, and it will become more
+and more costly to change the package - so I would urge people interested
+in this library to provide comments.</P>
+
+<CENTER><P>-Joe</P></CENTER>
+
+</BODY>
+</HTML>

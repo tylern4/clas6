@@ -1,0 +1,45 @@
+macro ecCompareRuns
+
+  exec ecCompareRuns#init
+  message 'Usage: ecCompareRuns#loop lay str'
+  
+return
+  
+macro init  
+
+  exec anaFindNtup ntup/
+  read run1 'Enter run1: '
+  read run2 'Enter run2: '
+  read sec  'Enter sector: '
+  
+  2d 100 '' 100 0. 2000. 216 1. 217.; 2d 101 '' 100 0. 2000. 216 1. 217.
+  alias/cre pmt (layerec-1)*36+stripec
+  message Processing [run1]
+  nt/plot //[run1]/2000.pmt%adcec secec=[sec] idh=100
+  message Processing [run2]
+  nt/plot //[run2]/2000.pmt%adcec secec=[sec] idh=101
+  slix 100 216; slix 101 216; hi/proj 100; hi/proj 101
+  
+  global/cre ecCompareRuns.run1 [run1] 
+  global/cre ecCompareRuns.run2 [run2] 
+  global/cre ecCompareRuns.sec  [sec] 
+  
+return
+
+macro loop lay str 
+
+  global/import ecCompareRuns*
+  run1 = [ecCompareRuns.run1]; run2 = [ecCompareRuns.run2]
+  sec = [ecCompareRuns.sec] 
+
+  title = [run1] (top) [run2] (bot) Sector [sec] Layer [lay] Strip [str]
+  title_gl [title]
+    
+  zone 1 2;opt stat; opt fit 
+  
+  pmt = ([lay]-1)*36+[str]
+  
+  hi/copy 100.slix.[pmt] 200; hi/copy 101.slix.[pmt] 201
+  hi/fit 200 g; hi/fit 201 g 
+
+return  

@@ -1,0 +1,17 @@
+macro calGetVec det item
+
+  global/imp [item]path
+  
+  do i = 3,[#]
+    run = [%i]    
+    file1 = [[item]path]/[det][item]mean[run].vec
+    file2 = [[item]path]/[det][item]rms[run].vec
+    vec/cre  [det]mean[run]([det]vecdim)
+    vec/cre  [det]rms[run]([det]vecdim)
+    vec/read [det]mean[run]  [file1]
+    vec/read [det]rms[run]   [file2]
+    message calGetVec: Reading [item] file [file1]
+    message calGetVec: Reading [item] file [file2]
+  enddo
+  
+return  

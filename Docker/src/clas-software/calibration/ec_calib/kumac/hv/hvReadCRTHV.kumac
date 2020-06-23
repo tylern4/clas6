@@ -1,0 +1,31 @@
+macro hvReadCRTHV sec vec
+
+  global/imp HVmap*
+
+  file = kumac/hv/crt/EcSec[sec]HV.vec
+
+  message hvReadCRTHV: Opening [file]
+  
+  tag = '$'
+  command	= 'cat '//[file]
+  filecontents = $shell([command],[tag])
+  nlines       = $words([filecontents],[tag])
+  
+  n = 0
+  string = ' '
+  vec/cre dum(216) r
+  vec/cre [vec](ecvecdim) r
+  
+  while [n].lt.[nlines] do 
+    n = [n] + 1
+    string  = $word([filecontents],[n],1,[tag])
+    string2 = $word([string],2,1,'/')
+    vec/inp dum([n]) -[string2] 
+  endwhile
+  
+  vec/copy dum [vec](:,:,[sec])
+  vec/del dum
+     
+return
+  
+  

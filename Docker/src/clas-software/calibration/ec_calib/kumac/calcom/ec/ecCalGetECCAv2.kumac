@@ -1,0 +1,14 @@
+macro ecCalGetECCav2 run sec
+
+  message ecCalGetECCav2: Getting vector for run [run] sector [sec]
+
+  vectorname = ecmean[run]
+
+  if ($vexist([vectorname]).eq.0) then
+    exec calGetVec ec ped [run]
+  endif
+
+  vec/copy ecmean[run](:,:,[sec]) ECCav2(:,[sec])
+  
+return
+  

@@ -1,0 +1,218 @@
+*  width value of the T - DSD histogram in ns
+maxdsd = 24
+*  number of bin (resolution) for DSD 
+bindsd = 150
+*  number of bin (resolution) for RF
+binrf = 50
+*  statistic we accept for determining the position of the peaks
+stat = 3
+* DSD choosen as refenrence (10 = PC, 9 = TAC, 11 = USLG)
+dsdid = 9
+
+message 'Old Ci file :'
+read filenameold
+
+*READ old values of position of the peak:
+
+vec/cr oldci(121) R
+vec/cr data(2) R
+vec/read data [filenameold] 'F4.0,F8.2' 'O'
+vec/copy data(2) oldci(1)
+do i=2,120
+vec/read data [filenameold] 'F4.0,F8.2' ' '
+vec/copy data(2) oldci([i])
+enddo
+vec/read data [filenameold] 'F4.0,F8.2' 'C'
+vec/copy data(2) oldci(121)
+
+message 'Output file :'
+read filename
+message 'Control output file (Return = screen) : '
+read filenamecont
+
+vec/cr pardsd(3) R 50 0 .5  
+vec/cr stepdsd(3) R 10 1 .05 
+vec/cr pmindsd(3) R 0 -[maxdsd] .05  
+vec/cr pmaxdsd(3) R 1000 [maxdsd] 1.5 
+
+vec/cr parrf(3) R 50 0 .5  
+vec/cr steprf(3) R 10 .2 .02 
+vec/cr pminrf(3) R 0 -2. .07 
+vec/cr pmaxrf(3) R 1000 2. .13
+
+vec/cr par(3) R 
+vec/cr vecrf([binrf]) R
+vec/cr vecdsd([bindsd]) R
+vec/cr cirf(121) R
+vec/cr cidsd(121) R
+vec/cr ci(121) R
+vec/cr statistic(121) I
+vec/cr meanval(2) R 0 0
+vec/cr meanvalci(2) R 0 0
+vec/cr num(1) I
+
+opt stat
+opt fit
+
+do i=1,121
+
+h/cr/1d 1000 'TRF  for Tbin'[i] [binrf] -2.004 2.004
+n/proj 1000 1.modrf.f(time_l/2.+time_r/2-grf) t_id=[i]
+h/get/cont 1000 vecrf
+sigma lmax=lvmax(vecrf)
+sigma valmax= vecrf(lmax)
+if lmax>[binrf]*3/4 then 
+* if the right peak is too close from the edge we fit with the left one 
+sigma lmax=lmax-[binrf]/2
+endif
+sigma chmax=2.004*(-1 + 2*lmax/[binrf])
+cmin=chmax-.51
+cmax=chmax+.51
+vec/copy parrf par
+vec/copy chmax par(2)
+vec/copy valmax par(1)
+
+vec/input num(1) [i]
+vec/write num [filenamecont] 'I3' ' '
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' ' '
+message [cmin] [cmax]
+
+n/proj 1000 1.(modrf.f(time_l/2.+time_r/2.-grf)-2.004) t_id=[i]
+h/fit 1000([cmin]:[cmax]) G B 3 par steprf pminrf pmaxrf
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' ' '
+
+*  if we fitted with the left peak, we extrapolate the result for the right one.
+if par(2)<0 then
+vbias par(2) 2.004 par(2)
+endif
+vec/copy par(2) cirf([i])
+
+vec/write cirf([i]) [filenamecont] 'F8.2' ' '
+
+*wait
+h/del 1000
+enddo
+
+* NEXT : fit relative to DSD:
+
+do i=1,121
+zone 1 2
+
+h/cr/1d 1000 'Ci for T bin= '[i] [bindsd] -[maxdsd] [maxdsd]
+cirfc = cirf([i])
+oldcic = oldci([i])
+n/proj 1000 3.((t_time+[oldcic])-time-[cirfc]) id=[dsdid].and.t_id=[i]
+h/pl 1000
+
+h/get/cont 1000 vecdsd
+sigma lmax=lvmax(vecdsd)
+sigma valmax= vecdsd(lmax)
+
+* if we have enough statistic
+if valmax>[stat] then
+vec/input statistic([i]) 1
+sigma chmax=[maxdsd]*(-1. + 2.*lmax/[bindsd])
+cmin=chmax-2.01
+cmax=chmax+2.01
+vec/copy pardsd par
+vec/copy chmax par(2)
+vec/copy valmax par(1)
+vec/input num(1) [i]
+vec/write num [filenamecont] 'I3' ' '
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' ' '
+h/fit 1000([cmin]:[cmax]) G B 3 par stepdsd pmindsd pmaxdsd
+vec/copy par(2) cidsd([i])
+vbias meanval(1) par(2) meanval(1)
+vbias meanval(2) 1 meanval(2)
+vec/write par [filenamecont] 'F8.2,F8.2,F8.2' ' '
+vec/write cidsd([i]) [filenamecont] 'F8.2' ' '
+endif
+
+if valmax<=[stat] then
+vec/input statistic([i]) 0
+endif
+
+*wait
+h/del 1000
+enddo
+
+* 
+vec/write meanval [filenamecont] 'F8.2,F8.2' ' '
+
+* to obtain the mean value, we divide the sum by the number of entries:
+vdiv meanval(1) meanval(2) meanval(1)
+
+* first we deal with good channels
+* at the same time find the mean value 
+do i=1,121
+if statistic([i])=1 then
+sigma deltaci = (cidsd([i]) - meanval(1))/2.004
+if deltaci<0 then
+sigma deltaci = deltaci - 1
+endif
+sigma k = int(deltaci+.5)
+sigma corr = 2.004*k
+vec/input ci([i]) cirf([i])
+correc = corr
+vbias ci([i]) [correc] ci([i])
+vec/input num(1) [i]
+vec/write num [filenamecont] 'I3' ' '
+vec/write deltaci,k,corr [filenamecont] 'F8.2,F8.2,F8.2' ' '
+vbias meanvalci(1) ci([i]) meanvalci(1)
+vbias meanvalci(2) 1 meanvalci(2)
+endif
+enddo
+
+* take the mean value for bad channels:
+vec/write meanvalci [filenamecont] 'F8.2,F8.2' ' '
+* 
+vdiv meanvalci(1) meanvalci(2) meanvalci(1)
+
+do i=1,121
+if statistic([i])=0 then
+message Not enough statistic for bin [i]
+vec/input ci([i]) meanvalci(1)
+endif
+
+enddo
+
+* close control file
+vec/write meanval [filenamecont] 'F8.2,F8.2' 'C'
+
+vec/input data(1) 1
+vec/copy ci(1) data(2)
+vec/write data [filename] 'f4.0,f8.2' 'O'
+do i=2,121
+vec/input data(1) [i]
+vec/copy ci([i]) data(2)
+vec/write data [filename] 'f4.0,f8.2' ' '
+enddo
+vec/input data(1) 999
+vec/copy meanvalci(1) data(2)
+vec/write data [filename] 'f4.0,f8.2' 'C' 
+
+vec/del pardsd
+vec/del stepdsd
+vec/del pmindsd
+vec/del pmaxdsd
+
+vec/del parrf
+vec/del steprf
+vec/del pminrf
+vec/del pmaxrf
+
+vec/del par
+vec/del vecrf
+vec/del vecdsd
+vec/del cirf
+vec/del cidsd
+vec/del ci
+vec/del oldci
+vec/del statistic
+vec/del meanval
+vec/del meanvalci
+vec/del num
+vec/del data
+
+
+
