@@ -54,19 +54,6 @@ gpp() {
 
 user_ana() {
     echoerr "============ user_ana ============"
-
-    if [ -z "$CLAS_CALDB_RUNINDEX" ]
-    then
-        run-singularity-clas6 user_ana "$@"
-    else
-        echoerr "Cannot yet run with different CLAS_CALDB_RUNINDEX yet"
-        echoerr "Running with default CLAS_CALDB_RUNINDEX"
-    #!/bin/bash
-    #export CLAS_CALDB_RUNINDEX=""
-    #user_ana -t recsis.tcl
-        run-singularity-clas6 echo "$CLAS_CALDB_RUNINDEX"
-        run-singularity-clas6 user_ana "$@"
-    fi
-
+    run-singularity-clas6 user_ana "$@"
     echoerr "============ user_ana ============"
 }
