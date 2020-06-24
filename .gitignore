@@ -1,6 +1,6 @@
 *.o
 *.pyc
-clas-software/build_system/.svn*
+Docker/src/clas-software/build_system/.svn*
 *.svn-base
 *.svn
 *.db

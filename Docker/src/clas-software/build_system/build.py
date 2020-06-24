@@ -497,8 +497,7 @@ def install_scripts(env, nodes, recursive=True):
         elif os.path.isfile(f):
             files += [node]
         else:
-            #raise Exception(alertstr('can not install script: '+str(node)))
-            print(alertstr('can not install script: '+str(node)))
+            raise Exception(alertstr('can not install script: '+str(node)))
     env.Install(env['buildScrDir'], files)
     env.Install(env['scrDir'], files)
 
