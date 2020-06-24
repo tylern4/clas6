@@ -1,5 +1,9 @@
 ## To be sourced on the farm
 source /etc/profile.d/modules.sh
+
+# Clean out all old modules
+module purge
+# Load singularity
 module load singularity
 
 echoerr() { printf "%s\n" "$*" >&1; printf "%s\n" "$*" >&2; }

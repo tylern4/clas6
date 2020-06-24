@@ -24,94 +24,53 @@
 #SBATCH --error=logfiles/sim_%A_%a.err
 
 # To run multiple jobs I use an array
-# This will run 1000 jobs
-#SBATCH --array=1-1000
+# This will run 2 jobs
+#SBATCH --array=1-2
+
+# Make a few environment varialbes for directories
+export JOB_DIR=${PWD}
+export SCRATCH=/scratch/${USER}/${SLURM_JOB_ID}/${SLURM_ARRAY_TASK_ID}
 
 ########=========== Load Singularity to Farm Node ===========########
-source /etc/profile.d/modules.sh
-module load singularity/3.4.0
+source clas6_function_singularity.sh
 
 ########=========== Setup Scartch Folders ===========########
-mkdir -p $HOME/.recsis
-touch $HOME/.recsis/recseq.ini
-mkdir -p /scratch/${USER}/${SLURM_JOB_ID}/${SLURM_ARRAY_TASK_ID}
-cd /scratch/${USER}/${SLURM_JOB_ID}/${SLURM_ARRAY_TASK_ID}
+cd ${SCRATCH}
 
+#######============ Copy in configuration files =====#######
 #************************* Modify this to get your input files in ****************************
-cp ${HOME}/${CODE}/aao_rad.inp .
-cp ${HOME}/${CODE}/gsim.inp .
-cp ${HOME}/${CODE}/user_ana.tcl .
+cp-to-job ${JOB_DIR}/aao_rad.inp
+cp-to-job ${JOB_DIR}/gsim.inp
+cp-to-job ${JOB_DIR}/user_ana.tcl
 #************************* Modify this to get your input files in ****************************
 
-
+# starttime to time job
 STARTTIME=$(date +%s)
 
-#************************* Modify this for the generator you want ****************************
-
 ########=========== Run Generator ===========########
-echo "============ aao_rad ============"
-singularity exec \
--B /u/group:/group \
--B /lustre:/lustre \
--B /w/work:/work \
--B /lustre/expphy/volatile:/volatile \
--B /u/home:/home \
---pwd /scratch/${USER}/${SLURM_JOB_ID}/${SLURM_ARRAY_TASK_ID} \
-/work/clas/clase1/tylern/clas6.img aao_rad < aao_rad.inp
-echo "============ aao_rad ============"
-
+#************************* Modify this for the generator you want ****************************
+run-singularity-clas6 aao_rad < aao_rad.inp
 #************************* Modify this for the generator you want ****************************
 
 ########=========== Run gsim ===========########
-echo "============ gsim_bat ============"
-singularity exec \
--B /u/group:/group \
--B /lustre:/lustre \
--B /w/work:/work \
--B /lustre/expphy/volatile:/volatile \
--B /u/home:/home \
---pwd /scratch/${USER}/${SLURM_JOB_ID}/${SLURM_ARRAY_TASK_ID} \
-/work/clas/clase1/tylern/clas6.img gsim_bat -nomcdata -ffread gsim.inp -mcin aao_rad.evt -bosout gsim.bos
-cp gsim.bos gsim_no_gpp.bos
-echo "============ gsim_bat ============"
+gsim_bat -nomcdata -ffread gsim.inp -mcin aao_rad.evt -bosout gsim.bos
 
 ########=========== Run gpp ===========########
-echo "============ gpp ============"
-singularity exec \
--B /u/group:/group \
--B /lustre:/lustre \
--B /w/work:/work \
--B /lustre/expphy/volatile:/volatile \
--B /u/home:/home \
---pwd /scratch/${USER}/${SLURM_JOB_ID}/${SLURM_ARRAY_TASK_ID} \
-/work/clas/clase1/tylern/clas6.img gpp -ouncooked.bos -a2.35 -b2.35 -c2.35 -f0.97 -P0x1b -R23500 gsim.bos
-echo "============ gpp ============"
+#************************* Modify this for gpp configuration ****************************
+gpp -ouncooked.bos -a2.35 -b2.35 -c2.35 -f0.97 -P0x1b -R23500 gsim.bos
+#************************* Modify this for gpp configurtaion ****************************
 
 ########=========== Run user_ana ===========########
-echo "============ user_ana ============"
-singularity exec \
--B /u/group:/group \
--B /lustre:/lustre \
--B /w/work:/work \
--B /lustre/expphy/volatile:/volatile \
--B /u/home:/home \
--B $HOME/.recsis:/recsis \
---pwd /scratch/${USER}/${SLURM_JOB_ID}/${SLURM_ARRAY_TASK_ID} \
-/work/clas/clase1/tylern/clas6.img user_ana -t user_ana.tcl
-echo "============ user_ana ============"
+user_ana -t user_ana.tcl
 
 #************************* Modify this for your output file preferences ****************************
-
 ########=========== Run h10maker ===========########
-echo "============ h10maker ============"
-singularity exec --pwd /scratch/${USER}/${SLURM_JOB_ID}/${SLURM_ARRAY_TASK_ID} \
-/work/clas/clase1/tylern/clas6.img h10maker -rpm cooked.bos all.root
-echo "============ h10maker ============"
-
+run-singularity-clas6 h10maker -rpm cooked.bos all.root
 ########=========== Copy all the files to Work for output ===========########
-cp -r /scratch/${USER}/${SLURM_JOB_ID}/${SLURM_ARRAY_TASK_ID}/all.root /work/clas/clase1/${USER}/simulations/sim_${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}.root
-
+cp -r ${SCRATCH}/all.root ${JOB_DIR}/outputs/sim_${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}.root
 #************************* Modify this for your output file preferences ****************************
 
+# endtime to time job
 ENDTIME=$(date +%s)
+# Print time for host in seconds
 echo "Time for $HOSTNAME: $(($ENDTIME-$STARTTIME))"
