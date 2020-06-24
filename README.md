@@ -19,6 +19,10 @@ To run on the farm copy the script below and modify to load in the your input fi
 sbatch clas6_sim.sh
 ```
 
+## Demo
+
+[![asciicast](https://asciinema.org/a/ZMqJwxOmJ5PmIhiR6ISAvPaAM.png)](https://asciinema.org/a/ZMqJwxOmJ5PmIhiR6ISAvPaAM)
+
 ## clas6_sim.sh
 
 ```
