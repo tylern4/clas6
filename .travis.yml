@@ -5,6 +5,7 @@ services:
 script:
 - mkdir -p parms
 - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+- docker pull tylern4/rootv5
 - docker build -t tylern4/clas6 -f Docker/Dockerfile Docker
 - docker images -a
 - docker push tylern4/clas6
