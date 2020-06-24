@@ -1,4 +1,4 @@
-FROM tylern4/rootv5:centos
+FROM tylern4/rootv5
 LABEL maintainer "tylern@jlab.org"
 
 ENV MYSQLINC /usr/include/mysql
@@ -34,8 +34,9 @@ COPY src/clas-software /usr/local/clas-software
 ENV CLASTOOL /usr/local/clas-software/analysis/ClasTool
 ENV OS_NAME Linux
 
-#RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc)
-RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
+#RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
+WORKDIR /usr/local/clas-software
+RUN scons opt=3 -j$(nproc) \
     && scons install \
     && cp /usr/local/clas-software/simulation/generators/fsgen/lund_upd.dat /usr/local/clas-software/build/bin \
     && source /root/.bashrc \
