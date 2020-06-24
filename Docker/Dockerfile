@@ -36,7 +36,7 @@ ENV OS_NAME Linux
 
 #RUN cd /usr/local/clas-software && scons opt=3 -j$(nproc) 2> /dev/null \
 WORKDIR /usr/local/clas-software
-RUN mkdir -p build
+RUN mkdir -p /usr/local/clas-software/scripts/build
 RUN scons opt=3 -j$(nproc) \
     && scons install \
     && cp /usr/local/clas-software/simulation/generators/fsgen/lund_upd.dat /usr/local/clas-software/build/bin \
