@@ -6,4 +6,5 @@ Docker/src/clas-software/build_system/.svn*
 *.db
 nanocernlib/
 .vscode
-build
+Docker/src/Hybrid-Baryons/build
+Docker/src/Hybrid-Baryons/2pi_event_generator/build
