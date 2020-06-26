@@ -23,11 +23,6 @@ ENV LD_LIBRARY_PATH $ROOTSYS/lib
 ENV CLAS_PARMS=/group/clas/parms
 COPY parms /group/clas/parms
 
-
-COPY g11-software /usr/local/g11-software
-COPY bashrc-g11 /root/.bashrc
-COPY env-g11.sh /usr/local/g11/env.sh
-
 ENV TOP_DIR /usr/local/g11
 ENV CLAS_PACK /usr/local/g11-software
 ENV CLAS_SCRIPTS $CLAS_PACK/scripts
@@ -42,115 +37,119 @@ ENV CLAS_CALDB_RUNINDEX calib_user.RunIndexg11a
 
 ## Build g11 software
 
+COPY g11-software /usr/local/g11-software
+COPY bashrc-g11 /root/.bashrc
+COPY env-g11.sh /usr/local/g11/env.sh
+
 WORKDIR /usr/local/g11-software
 
 RUN cd ana \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd bankdefs \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd bos \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd caldb \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd c_bos_io \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd cc \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd c_cern \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd clasutil \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd c_sql \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd dc \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd ec \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd eloss \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd epics \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd fpack \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd fputil \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd gpp \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd gsim \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd Hv/src \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd icf \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd itape \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd lac \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd Map \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd online_dummy \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd patches \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd pid \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd recsis \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd recutl \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd sc \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd scaler \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd scat \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd seb \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd st \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd tag \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd trk \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd user \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd vertex \
-    && make lib 2> /dev/null
+    && make lib
 
 RUN cd user_ana \
     && make
