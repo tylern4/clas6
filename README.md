@@ -113,7 +113,7 @@ echo "Time for $HOSTNAME: $(($ENDTIME-$STARTTIME))"
 
 In order to run locally there are a few things you need to have ready.
 
-  1) Download [docker]()
+  1) Install docker for [MacOS](https://docs.docker.com/docker-for-mac/install), [Linux](https://docs.docker.com/engine/install/#server), [Windows](https://docs.docker.com/docker-for-windows/install)
   
   2) A local copy of the parms folder \[`/group/clas/parms`\] [a](#a-local-copy-of-the-parms-folder)
   
