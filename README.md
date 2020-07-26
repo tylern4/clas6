@@ -115,11 +115,17 @@ In order to run locally there are a few things you need to have ready.
 
   1) Install docker for [MacOS](https://docs.docker.com/docker-for-mac/install), [Linux](https://docs.docker.com/engine/install/#server), [Windows](https://docs.docker.com/docker-for-windows/install)
   
-  2) A local copy of the parms folder \[`/group/clas/parms`\] [a](#a-local-copy-of-the-parms-folder)
+  2) A local copy of the parms folder \[`/group/clas/parms`\] \[[2](#a-local-copy-of-the-parms-folder)\]
   
-  3) A local copy of the clasdb [b](#a-local-copy-of-the-clasdb)
+  3) A local copy of the clasdb \[[3](#a-local-copy-of-the-clasdb)\]
   
 ### A local copy of the parms folder
+
+The parms folder on the farm is ~30GB so it not advised to download the whole fodler onto a personal system. A minimal set of parameters needed for some analysis is availibe to download from the repository. Other files may be needed for different magnetic field or detector configurations.
+
+```
+wget https://github.com/tylern4/clas6/raw/master/parms.tar.gz
+```
 
 
 ### A local copy of the clasdb
