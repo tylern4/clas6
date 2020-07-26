@@ -115,14 +115,14 @@ In order to run locally there are a few things you need to have ready.
 
   1) Download [docker]()
   
-  2) A local copy of the parms folder \[`/group/clas/parms`\] [a](a-local-copy-of-the-parms-folder)
+  2) A local copy of the parms folder \[`/group/clas/parms`\] [a](#a-local-copy-of-the-parms-folder)
   
-  3) A local copy of the clasdb.jlab.org [b](a-local-copy-of-the-clasdb.jlab.org)
+  3) A local copy of the clasdb [b](#a-local-copy-of-the-clasdb)
   
 ### A local copy of the parms folder
 
 
-### A local copy of the clasdb.jlab.org
+### A local copy of the clasdb
 
 ```
 docker run --name clasdb -p 3306:3306 -e MYSQL_USER=root -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -d tylern4/clas6db:latest
