@@ -130,13 +130,27 @@ wget https://github.com/tylern4/clas6/raw/master/parms.tar.gz
 
 ### A local copy of the clasdb
 
+In order to run gsim and user_ana the clasdb must be accessilbe. Currently the clasdb is only accessible onsite at jeffereson lab. You can either make an ssh connection to forward the mysql database traffic through to your local computer or setup your own copy. There is a copy availible to run via docker with.
+
 ```
 docker run --name clasdb -p 3306:3306 -e MYSQL_USER=root -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -d tylern4/clas6db:latest
 ```
+To make sure the clas6 software connects to the database correcly in any scripts running your simulation inside the container use these environments.
+
+```
+export CLAS_CALDB_HOST=$CLASDB_PORT_3306_TCP_ADDR
+export CLAS_CALDB_USER=root
+```
+
 
 ### Running the clas6 container
+
+Once the database contatiner is running you can run the clas6 container with:
 
 ```
 docker run --link clasdb:clasdb -v/path/to/parms:/group/clas/parms -v$PWD:/work --rm -it tylern4/clas6:latest
 ```
+
+This will open a new shell with the clas6 software availbe to run and the contenets of your current directory mapped to the container for easy input and output of data.
+
 
