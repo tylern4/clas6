@@ -8,6 +8,8 @@ RUN mkdir -p /usr/local/cernlib
 COPY cernlib /usr/local/cernlib
 RUN ln -s /usr/local/root/lib/root/* /usr/local/root/lib 
 
+RUN mkdir -p /dev
+
 # This is using the cernlib copied from jlab ifarm
 ENV RECSIS_RUNTIME=/recsis
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/root/lib/root
@@ -57,5 +59,6 @@ RUN make -f Makefile.docker bos 2> /dev/null \
     && cp twopeg_bos.exe /usr/local/bin
 
 WORKDIR /work
+
 
 ENTRYPOINT ["/bin/bash"]
