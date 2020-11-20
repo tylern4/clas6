@@ -1,6 +1,11 @@
 
 [![Build Status](https://travis-ci.com/tylern4/clas6.svg?token=Hour3TGGb984zn33pgvC&branch=master)](https://travis-ci.com/tylern4/clas6)
 
+  * [Running Locally](#running-locally)
+
+  * [Running at JLab](#using-the-container-on-the-farm)
+  
+  
 
 ## Using the container on the farm
 
@@ -104,39 +109,48 @@ ENDTIME=$(date +%s)
 echo "Time for $HOSTNAME: $(($ENDTIME-$STARTTIME))"
 ```
 
-## Basic docker commands:
-Change name:tag with what you would like to call your container and tag it. If
-you don't include the tag it will automatically be called latest.
+## Running Locally
 
-### Building:
-```
-docker build -t name:tag /path/to/Dockerfile
-```
-### Running:
-```
-docker run -v`pwd`:/root/data -it name:tag
-```
-The `-i` means interactive terminal.
-The `-t` means tty.
-Combined this will give you and interactive terminal you can run any of the CLAS6 software from.
-The `-v` will add a volume to the docker container.
-I usually add the current working directory to the container but you can add more paths by adding additional `-v /local/path:/container/path` to the existing command line.
+In order to run locally there are a few things you need to have ready.
 
-### Looking at containers
+  1) Install docker for [MacOS](https://docs.docker.com/docker-for-mac/install), [Linux](https://docs.docker.com/engine/install/#server), [Windows](https://docs.docker.com/docker-for-windows/install)
+  
+  2) A local copy of the parms folder \[`/group/clas/parms`\] \[[2](#a-local-copy-of-the-parms-folder)\]
+  
+  3) A local copy of the clasdb \[[3](#a-local-copy-of-the-clasdb)\]
+  
+### A local copy of the parms folder
 
-To see the containers that are downloaded or built on your system use `docker images` or `docker images -a`.
-To see the currently running containers you can run `docker ps -a`.
-
-### Helpful functions
-You can add these helpful functions to your `.bashrc`/`.zshrc` in order to manage docker container space.
+The parms folder on the farm is ~30GB so it not advised to download the whole fodler onto a personal system. A minimal set of parameters needed for some analysis is availibe to download from the repository. Other files may be needed for different magnetic field or detector configurations.
 
 ```
-# docker shortcuts
-docker-rm() { docker rm $(docker ps -aq); }
-docker-rmi() { docker rmi $(docker images -f "dangling=true" -q); }
+wget https://github.com/tylern4/clas6/raw/master/parms.tar.gz
 ```
 
-### Run a single command
 
-You can also modify the ENTRYPOINT at the end of the container in order to just run a single command.
+### A local copy of the clasdb
+
+In order to run gsim and user_ana the clasdb must be accessilbe. Currently the clasdb is only accessible onsite at jeffereson lab. You can either make an ssh connection to forward the mysql database traffic through to your local computer or setup your own copy. There is a copy availible to run via docker with.
+
+```
+docker run --name clasdb -p 3306:3306 -e MYSQL_USER=root -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -d tylern4/clas6db:latest
+```
+To make sure the clas6 software connects to the database correcly in any scripts running your simulation inside the container use these environments.
+
+```
+export CLAS_CALDB_HOST=$CLASDB_PORT_3306_TCP_ADDR
+export CLAS_CALDB_USER=root
+```
+
+
+### Running the clas6 container
+
+Once the database contatiner is running you can run the clas6 container with:
+
+```
+docker run --link clasdb:clasdb -v/path/to/parms:/group/clas/parms -v$PWD:/work --rm -it tylern4/clas6:latest
+```
+
+This will open a new shell with the clas6 software availbe to run and the contenets of your current directory mapped to the container for easy input and output of data.
+
 
