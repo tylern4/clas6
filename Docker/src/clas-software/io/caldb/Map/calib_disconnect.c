@@ -12,7 +12,8 @@ MYSQL mysql;
 
 int calib_disconnect() {
   int status;  
-  /*mysql_close(&mysql);*/
+  // Uncommenting mysql_close to fix database staying open Nov/20/2020 @tylern
+  mysql_close(&mysql);
   status = 1;
   return(status);
 }
