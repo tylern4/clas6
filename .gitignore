@@ -8,3 +8,4 @@ nanocernlib/
 .vscode
 Docker/src/Hybrid-Baryons/build
 Docker/src/Hybrid-Baryons/2pi_event_generator/build
+.dccache

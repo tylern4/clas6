@@ -58,6 +58,11 @@ COPY src/Makefile.docker .
 RUN make -f Makefile.docker bos 2> /dev/null \
     && cp twopeg_bos.exe /usr/local/bin
 
+RUN git clone https://github.com/tylern4/TWOPEG_Merger.git \
+    && cd TWOPEG_Merger \
+    && make \
+    && cp twopeg_merge /usr/local/bin
+
 WORKDIR /work
 
 
