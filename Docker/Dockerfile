@@ -1,5 +1,6 @@
 FROM tylern4/rootv5
 LABEL maintainer "tylern@jlab.org"
+LABEL org.opencontainers.image.source https://github.com/tylern4/clas6
 
 ENV MYSQLINC /usr/include/mysql
 ENV MYSQLLIB /usr/lib64/mysql

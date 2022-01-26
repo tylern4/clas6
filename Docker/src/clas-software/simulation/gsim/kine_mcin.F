@@ -150,9 +150,10 @@ c  close file and end run upon eof
 
       noevent=.true.
       do while(noevent)
-         call frbos(jw,mcin_unit,'T',ierr)
+        ierr=0
+        call frbos(jw,mcin_unit,'T',ierr)
 c	call examinedata()
-	call makehead(1,1,1)
+        call makehead(1,1,1)
          if(ierr.eq.-1)then
             call recmes(crname,'I',
      1 'eof reached on MCIN file...run stopped...mcin file closed')

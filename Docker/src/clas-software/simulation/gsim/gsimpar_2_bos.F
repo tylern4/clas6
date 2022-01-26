@@ -262,9 +262,14 @@ c
       ctime_crea = '                    '
       ctime_acc  = '                    '
       istat = STATF(pgm_name(1:str_len),info_arr)
+
+c Rewrite of cernlibs ctimef function
+c With singularity >~ 3.5 ctime caused a segfault
+c This should fix that segfault.
+c Nick Tyler Jan 26th 2022 (lbl, NERSC)
       if (istat.EQ.0) then
-         call ctimef(info_arr(8),ctime_acc)
-         call ctimef(info_arr(10),ctime_crea)
+         call nicksctimef(info_arr(8),ctime_acc)
+         call nicksctimef(info_arr(10),ctime_crea)
       endif
 
       RW(ind+1)=CODE_ASCII_KEY

@@ -458,12 +458,13 @@ FParm(char *string, int *dsc)
 void
 frbos_(int *jw, int *unit, char *list, int *error, int len)
 {
-  char *li;
-
-  li = (char *) MALLOC(len+1);
+  // Fixed warning in malloc when debugging a different isssue 
+  // Nick Tyler Jan 26th 2022 (lbl, NERSC) 
+  char *li = malloc( sizeof(*li) * ( len + 1 ) );
   strncpy(li,list,len);
   li[len] = '\0';
-
+  // printf("fwbos: jw=%d unit=%d desc=%d list ->%s<-\n", *jw, *unit, bosold[*unit]->descriptor,li);
+  
   *error = bosRead(bosold[*unit]->descriptor, jw, li);
 
   FREE(li);
@@ -474,9 +475,10 @@ frbos_(int *jw, int *unit, char *list, int *error, int len)
 void
 fwbos_(int *jw, int *unit, char *list, int *error, int len)
 {
-  char *li;
 
-  li = (char *) MALLOC(len+1);
+  // Fixed warning in malloc when debugging a different isssue 
+  // Nick Tyler Jan 26th 2022 (lbl, NERSC) 
+  char *li = malloc( sizeof(*li) * ( len + 1 ) );
   strncpy(li,list,len);
   li[len] = '\0';
   //  printf("fwbos: unit=%d desc=%d list ->%s<-\n",*unit,bosold[*unit]->descriptor,li);
