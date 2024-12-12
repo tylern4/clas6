@@ -1,4 +1,4 @@
-FROM mysql:latest
+FROM mysql:8.0.26
 LABEL maintainer "tylern@jlab.org"
 
 ADD calib.sql.gz /docker-entrypoint-initdb.d/
