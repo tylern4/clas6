@@ -1,4 +1,4 @@
-FROM mysql:latest
+FROM mysql:9.5.0-oraclelinux9
 LABEL maintainer "tylern@jlab.org"
 
 ADD calib.sql.gz /docker-entrypoint-initdb.d/
